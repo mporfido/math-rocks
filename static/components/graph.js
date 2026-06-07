@@ -110,9 +110,21 @@ class XGraph extends HTMLElement {
     }
   }
 
+  // Aggiunge un testo con le coordinate live accanto al punto
+  addCoordsDisplay(point, label = '') {
+    const prefix = label ? `${label} = ` : '';
+    this.board.create('text', [
+      () => point.X() + 0.3,
+      () => point.Y() + 0.3,
+      () => `${prefix}(${point.X().toFixed(1)}, ${point.Y().toFixed(1)})`
+    ], { fontSize: 11, strokeColor: '#1f2937', highlight: false });
+  }
+
   initPoint() {
     const targetStr = this.dataset.target || '';
     const hasTarget = Boolean(targetStr);
+    const showCoords = this.dataset.coords === 'true';
+    const showTargets = this.dataset.targets === 'true';
 
     const [tx, ty] = hasTarget ? targetStr.split(',').map(Number) : [0, 0];
 
@@ -134,15 +146,19 @@ class XGraph extends HTMLElement {
       label: { offset: [10, 10] }
     });
 
+    if (showCoords) this.addCoordsDisplay(point);
+
     if (hasTarget) {
-      this.board.create('point', [tx, ty], {
-        name: '✓',
-        color: '#2ecc71',
-        size: 6,
-        fixed: true,
-        opacity: 0.35,
-        label: { offset: [10, 10] }
-      });
+      if (showTargets) {
+        this.board.create('point', [tx, ty], {
+          name: '✓',
+          color: '#2ecc71',
+          size: 6,
+          fixed: true,
+          opacity: 0.35,
+          label: { offset: [10, 10] }
+        });
+      }
 
       let completed = false;
       point.on('drag', () => {
@@ -160,6 +176,8 @@ class XGraph extends HTMLElement {
   initPoints() {
     const pointsData = JSON.parse(this.dataset.points || '[]');
     const globalSnap = this.dataset.snap ? parseFloat(this.dataset.snap) : null;
+    const showCoords = this.dataset.coords === 'true';
+    const showTargets = this.dataset.targets === 'true';
     const totalTargets = pointsData.filter(p => p.target).length;
     const completedSet = new Set();
 
@@ -184,15 +202,19 @@ class XGraph extends HTMLElement {
         label: { offset: [10, 10] }
       });
 
+      if (showCoords) this.addCoordsDisplay(point, label);
+
       if (hasTarget) {
-        this.board.create('point', [tx, ty], {
-          name: label + '?',
-          color: '#2ecc71',
-          size: 6,
-          fixed: true,
-          opacity: 0.35,
-          label: { offset: [10, 10] }
-        });
+        if (showTargets) {
+          this.board.create('point', [tx, ty], {
+            name: label + '?',
+            color: '#2ecc71',
+            size: 6,
+            fixed: true,
+            opacity: 0.35,
+            label: { offset: [10, 10] }
+          });
+        }
 
         const check = () => {
           if (completedSet.has(index)) return;

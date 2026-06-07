@@ -56,7 +56,10 @@ def process_graphs(content, graph_counter):
         for key, value in config.items():
             if key == 'type':
                 continue
-            if key == 'bind' and isinstance(value, list):
+            if isinstance(value, bool):
+                # bool Python → "true"/"false" minuscolo per JS
+                value = str(value).lower()
+            elif key == 'bind' and isinstance(value, list):
                 value = ','.join(str(v) for v in value)
             elif key == 'points' and isinstance(value, list):
                 # Serializza la lista come JSON e HTML-escapa le virgolette
