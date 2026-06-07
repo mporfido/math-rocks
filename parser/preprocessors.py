@@ -35,7 +35,9 @@ def process_graphs(content, graph_counter):
 
     def replace_graph(match):
         nonlocal graph_counter
-        yaml_content = match.group(1)
+        # Sostituisce tab con spazi prima del parsing: YAML non accetta tab
+        # come indentazione, ma alcuni editor li inseriscono automaticamente
+        yaml_content = match.group(1).expandtabs(4)
 
         try:
             config = yaml.safe_load(yaml_content) or {}
