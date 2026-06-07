@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Piattaforma Corsi{% endblock %}
+
+{% block content %}
+<div class="home-container">
+    <h1>Benvenuto alla Piattaforma Corsi Interattivi</h1>
+    <p class="subtitle">Impara matematica in modo interattivo e coinvolgente</p>
+
+    <div class="courses-grid">
+        {% if courses %}
+            {% for course in courses %}
+            <div class="course-card">
+                <h2>{{ course.title }}</h2>
+                <p>{{ course.description }}</p>
+                <a href="{{ url_for('courses.course_index', course_id=course.id) }}" class="btn btn-primary">
+                    Inizia il corso
+                </a>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <p>Nessun corso disponibile al momento.</p>
+                <p class="hint">Esegui <code>python build_courses.py</code> per generare i corsi.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

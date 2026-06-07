@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Piattaforma Corsi{% endblock %}</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='components.css') }}">
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <header class="main-header">
+        <nav class="navbar">
+            <a href="{{ url_for('home') }}" class="logo">📚 Corsi Interattivi</a>
+            <div class="nav-links">
+                <a href="{{ url_for('home') }}">Home</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="main-footer">
+        <p>Piattaforma Corsi Interattivi &copy; 2025</p>
+    </footer>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

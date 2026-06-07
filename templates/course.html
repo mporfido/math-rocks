@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}{{ step.metadata.get('title', step.id) }} - {{ course_id }}{% endblock %}
+
+{% block extra_css %}
+<!-- MathJax per rendering formule matematiche -->
+<script>
+  MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$', '$$'], ['\\[', '\\]']],
+      processEscapes: true,
+      processEnvironments: true
+    },
+    options: {
+      skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+      ignoreHtmlClass: 'no-math'
+    },
+    startup: {
+      pageReady: () => {
+        return MathJax.startup.defaultPageReady().then(() => {
+          console.log('MathJax loaded and ready');
+        });
+      }
+    }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="course-container">
+    <!-- Sidebar navigazione -->
+    <aside class="course-sidebar">
+        <h3>{{ course_id|replace('-', ' ')|title }}</h3>
+        <nav class="steps-nav">
+            {% for s in course.steps %}
+            <a href="{{ url_for('courses.course_step', course_id=course_id, step_id=s.id) }}"
+               class="step-link {% if s.id == step.id %}active{% endif %}">
+                {{ loop.index }}. {{ s.metadata.get('title', s.id) }}
+            </a>
+            {% endfor %}
+        </nav>
+    </aside>
+
+    <!-- Contenuto step -->
+    <article class="course-content">
+        <x-step data-course-id="{{ course_id }}"
+                data-step-id="{{ step.id }}"
+                {% if step.metadata.get('use-mathjs') %}data-use-mathjs="true"{% endif %}>
+
+            {{ step.html|safe }}
+
+        </x-step>
+
+        <!-- Navigazione step -->
+        <div class="step-navigation">
+            {% if step_index > 0 %}
+            <a href="{{ url_for('courses.course_step', course_id=course_id, step_id=course.steps[step_index - 1].id) }}"
+               class="btn btn-secondary">← Precedente</a>
+            {% endif %}
+
+            {% if step_index < total_steps - 1 %}
+            <a href="{{ url_for('courses.course_step', course_id=course_id, step_id=course.steps[step_index + 1].id) }}"
+               class="btn btn-primary">Successivo →</a>
+            {% endif %}
+        </div>
+    </article>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Carica Web Components -->
+<script src="{{ url_for('static', filename='components/formula-simplifier.js') }}"></script>
+<script src="{{ url_for('static', filename='components/blank.js') }}"></script>
+<script src="{{ url_for('static', filename='components/variable.js') }}"></script>
+<script src="{{ url_for('static', filename='components/step.js') }}"></script>
+
+<!-- Re-render MathJax dopo caricamento componenti -->
+<script>
+  // Aspetta che la pagina sia completamente caricata
+  window.addEventListener('load', () => {
+    // Singolo typeset dopo il caricamento completo
+    setTimeout(() => {
+      if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+        MathJax.typesetPromise()
+          .then(() => console.log('MathJax rendering completato'))
+          .catch((err) => console.error('MathJax typeset error:', err));
+      }
+    }, 200);
+  });
+
+  // Re-render quando cambiano le variabili dinamiche
+  document.addEventListener('variable-change', () => {
+    setTimeout(() => {
+      if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+        MathJax.typesetPromise().catch((err) => console.error('MathJax typeset error:', err));
+      }
+    }, 50);
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir:*)",
+      "Bash(python -m venv:*)",
+      "Bash(./venv/Scripts/pip:*)"
+    ]
+  }
+}
