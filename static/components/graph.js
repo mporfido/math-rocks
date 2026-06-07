@@ -101,10 +101,15 @@ class XGraph extends HTMLElement {
 
   initPoint() {
     const targetStr = this.dataset.target || '';
-    const tolerance = parseFloat(this.dataset.tolerance || '0.5');
     const hasTarget = Boolean(targetStr);
 
     const [tx, ty] = hasTarget ? targetStr.split(',').map(Number) : [0, 0];
+
+    // Tolleranza esplicita nel markdown, oppure 1% della somma dei valori assoluti:
+    // es. target (3,2) → (3+2)*0.01 = 0.05
+    const tolerance = this.dataset.tolerance !== undefined
+      ? parseFloat(this.dataset.tolerance)
+      : (Math.abs(tx) + Math.abs(ty)) * 0.01;
 
     const point = this.board.create('point', [0, 0], {
       name: 'P',

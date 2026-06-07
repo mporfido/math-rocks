@@ -170,7 +170,6 @@ Trascina il punto blu fino alla posizione **(3, 2)** sul piano cartesiano:
 :::graph
 type: point
 target: "3,2"
-tolerance: 0.6
 xrange: "-5,5"
 yrange: "-5,5"
 :::
