@@ -110,6 +110,16 @@ class XGraph extends HTMLElement {
     }
   }
 
+  // Aggiunge un pulsante "Verifica" sotto il grafico; chiama checkFn(btn) al click
+  addVerifyButton(checkFn) {
+    const btn = document.createElement('button');
+    btn.textContent = 'Verifica';
+    btn.className = 'graph-verify-btn';
+    btn.addEventListener('click', () => checkFn(btn));
+    this.appendChild(btn);
+    return btn;
+  }
+
   // Aggiunge un testo con le coordinate live accanto al punto
   addCoordsDisplay(point, label = '') {
     const prefix = label ? `${label} = ` : '';
@@ -125,6 +135,7 @@ class XGraph extends HTMLElement {
     const hasTarget = Boolean(targetStr);
     const showCoords = this.dataset.coords === 'true';
     const showTargets = this.dataset.targets === 'true';
+    const verify = this.dataset.verify === 'true';
 
     const [tx, ty] = hasTarget ? targetStr.split(',').map(Number) : [0, 0];
 
@@ -161,15 +172,41 @@ class XGraph extends HTMLElement {
       }
 
       let completed = false;
-      point.on('drag', () => {
+
+      const check = () => {
+        if (completed) return;
         const dist = Math.sqrt((point.X() - tx) ** 2 + (point.Y() - ty) ** 2);
-        if (!completed && dist <= tolerance) {
-          completed = true;
-          point.setAttribute({ color: '#2ecc71' });
-          this.board.update();
-          this.markComplete();
-        }
-      });
+        return dist <= tolerance;
+      };
+
+      if (verify) {
+        this.addVerifyButton((btn) => {
+          if (check()) {
+            point.setAttribute({ color: '#2ecc71' });
+            btn.disabled = true;
+            this.board.update();
+            this.markComplete();
+          } else {
+            point.setAttribute({ color: '#ef4444' });
+            this.board.update();
+            setTimeout(() => {
+              point.setAttribute({ color: '#3498db' });
+              this.board.update();
+            }, 900);
+          }
+        });
+      } else {
+        const autoCheck = () => {
+          if (check()) {
+            completed = true;
+            point.setAttribute({ color: '#2ecc71' });
+            this.board.update();
+            this.markComplete();
+          }
+        };
+        point.on('drag', autoCheck);
+        point.on('up', autoCheck);
+      }
     }
   }
 
@@ -178,8 +215,12 @@ class XGraph extends HTMLElement {
     const globalSnap = this.dataset.snap ? parseFloat(this.dataset.snap) : null;
     const showCoords = this.dataset.coords === 'true';
     const showTargets = this.dataset.targets === 'true';
+    const verify = this.dataset.verify === 'true';
     const totalTargets = pointsData.filter(p => p.target).length;
     const completedSet = new Set();
+
+    // In verify mode: raccoglie {point, tx, ty, tolerance, index} per il check globale
+    const verifyItems = [];
 
     pointsData.forEach((cfg, index) => {
       const label = String.fromCharCode(65 + index); // A, B, C, ...
@@ -216,23 +257,51 @@ class XGraph extends HTMLElement {
           });
         }
 
-        const check = () => {
-          if (completedSet.has(index)) return;
-          const dist = Math.sqrt((point.X() - tx) ** 2 + (point.Y() - ty) ** 2);
-          if (dist <= tolerance) {
-            completedSet.add(index);
-            point.setAttribute({ color: '#2ecc71' });
-            this.board.update();
-            if (completedSet.size === totalTargets) {
-              this.markComplete();
+        if (verify) {
+          verifyItems.push({ point, tx, ty, tolerance, index });
+        } else {
+          const check = () => {
+            if (completedSet.has(index)) return;
+            const dist = Math.sqrt((point.X() - tx) ** 2 + (point.Y() - ty) ** 2);
+            if (dist <= tolerance) {
+              completedSet.add(index);
+              point.setAttribute({ color: '#2ecc71' });
+              this.board.update();
+              if (completedSet.size === totalTargets) {
+                this.markComplete();
+              }
             }
-          }
-        };
-
-        point.on('drag', check);
-        point.on('up', check);
+          };
+          point.on('drag', check);
+          point.on('up', check);
+        }
       }
     });
+
+    if (verify && verifyItems.length > 0) {
+      this.addVerifyButton((btn) => {
+        // Tutti i punti devono essere corretti simultaneamente
+        const allCorrect = verifyItems.every(({ point, tx, ty, tolerance }) => {
+          const dist = Math.sqrt((point.X() - tx) ** 2 + (point.Y() - ty) ** 2);
+          return dist <= tolerance;
+        });
+
+        if (allCorrect) {
+          verifyItems.forEach(({ point }) => point.setAttribute({ color: '#2ecc71' }));
+          this.board.update();
+          btn.disabled = true;
+          this.markComplete();
+        } else {
+          // Tutti lampeggiano rosso: nessuna info su quali sono giusti o sbagliati
+          verifyItems.forEach(({ point }) => point.setAttribute({ color: '#ef4444' }));
+          this.board.update();
+          setTimeout(() => {
+            verifyItems.forEach(({ point }) => point.setAttribute({ color: '#3498db' }));
+            this.board.update();
+          }, 900);
+        }
+      });
+    }
   }
 
   markComplete() {

@@ -174,12 +174,15 @@ Trascina i tre punti **A**, **B**, **C** nelle posizioni indicate (i pallini ver
 :::graph
 type: points
 snap: 1
+verify: true
+coords: false
 xrange: "-6,6"
 yrange: "-6,6"
 points:
   - target: "3,2"
   - target: "-2,4"
   - target: "1,-3"
+    snap: 0.5
 :::
 
 :::div.reveal
