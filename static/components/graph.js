@@ -31,24 +31,29 @@ class XGraph extends HTMLElement {
     container.className = 'jxgbox graph-container';
     this.appendChild(container);
 
-    this.board = JXG.JSXGraph.initBoard(containerId, {
-      boundingbox: [xmin, ymax, xmax, ymin],
-      axis: true,
-      showNavigation: true,
-      showCopyright: false,
-      keepaspectratio: false,
-      pan: { enabled: true },
-      zoom: { enabled: true }
+    // Differisce l'inizializzazione al frame successivo: garantisce che step.js
+    // sia già eseguito (e x-step inizializzato con il suo model) prima che
+    // JSXGraph chiami la funzione per disegnare la curva.
+    requestAnimationFrame(() => {
+      this.board = JXG.JSXGraph.initBoard(containerId, {
+        boundingbox: [xmin, ymax, xmax, ymin],
+        axis: true,
+        showNavigation: true,
+        showCopyright: false,
+        keepaspectratio: false,
+        pan: { enabled: true },
+        zoom: { enabled: true }
+      });
+
+      const step = this.closest('x-step');
+      this.model = step?.model ?? {};
+
+      if (type === 'function') {
+        this.initFunction(step);
+      } else if (type === 'point') {
+        this.initPoint();
+      }
     });
-
-    const step = this.closest('x-step');
-    this.model = step ? step.model : {};
-
-    if (type === 'function') {
-      this.initFunction(step);
-    } else if (type === 'point') {
-      this.initPoint();
-    }
   }
 
   // Valuta un'espressione matematica con le variabili correnti del modello.
