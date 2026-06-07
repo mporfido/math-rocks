@@ -1,18 +1,27 @@
 /**
  * <x-graph> - Grafico interattivo basato su JSXGraph
  *
- * Attributi:
- *   data-type: "function" | "point"
- *   data-expr: espressione matematica (es: "sin(a*x)")  [type=function]
- *   data-bind: variabili collegate allo slider, separate da virgola (es: "a,b")
+ * Attributi comuni:
+ *   data-type: "function" | "point" | "points"
  *   data-xrange: "min,max" (default "-10,10")
  *   data-yrange: "min,max" (default "-7,7")
- *   data-target: "x,y" coordinata obiettivo  [type=point]
- *   data-tolerance: tolleranza per il goal (default "0.5")  [type=point]
- *   id: identificativo per goal tracking  [type=point]
+ *
+ * type=function:
+ *   data-expr: espressione matematica (es: "sin(a*x)")
+ *   data-bind: variabili collegate allo slider, separate da virgola
+ *
+ * type=point:
+ *   data-target: "x,y" coordinata obiettivo
+ *   data-snap: step griglia (opzionale)
+ *   id: identificativo per goal tracking
+ *
+ * type=points:
+ *   data-points: JSON array di oggetti {target, snap, tolerance}
+ *   data-snap: snap globale (sovrascritto dal valore per-punto)
+ *   id: identificativo per goal tracking
  *
  * Eventi:
- *   goal-complete: quando il punto è posizionato correttamente  [type=point]
+ *   goal-complete: quando il/i punto/i sono posizionati correttamente
  */
 class XGraph extends HTMLElement {
   connectedCallback() {
@@ -52,6 +61,8 @@ class XGraph extends HTMLElement {
         this.initFunction(step);
       } else if (type === 'point') {
         this.initPoint();
+      } else if (type === 'points') {
+        this.initPoints();
       }
     });
   }
@@ -144,6 +155,62 @@ class XGraph extends HTMLElement {
         }
       });
     }
+  }
+
+  initPoints() {
+    const pointsData = JSON.parse(this.dataset.points || '[]');
+    const globalSnap = this.dataset.snap ? parseFloat(this.dataset.snap) : null;
+    const totalTargets = pointsData.filter(p => p.target).length;
+    const completedSet = new Set();
+
+    pointsData.forEach((cfg, index) => {
+      const label = String.fromCharCode(65 + index); // A, B, C, ...
+      const targetStr = cfg.target || '';
+      const hasTarget = Boolean(targetStr);
+      const [tx, ty] = hasTarget ? targetStr.split(',').map(Number) : [0, 0];
+
+      const snapStep = cfg.snap !== undefined ? parseFloat(cfg.snap) : globalSnap;
+      const tolerance = cfg.tolerance !== undefined
+        ? parseFloat(cfg.tolerance)
+        : hasTarget ? (Math.abs(tx) + Math.abs(ty)) * 0.01 : 0;
+
+      const point = this.board.create('point', [0, 0], {
+        name: label,
+        color: '#3498db',
+        size: 5,
+        snapToGrid: snapStep !== null,
+        snapSizeX: snapStep ?? 1,
+        snapSizeY: snapStep ?? 1,
+        label: { offset: [10, 10] }
+      });
+
+      if (hasTarget) {
+        this.board.create('point', [tx, ty], {
+          name: label + '?',
+          color: '#2ecc71',
+          size: 6,
+          fixed: true,
+          opacity: 0.35,
+          label: { offset: [10, 10] }
+        });
+
+        const check = () => {
+          if (completedSet.has(index)) return;
+          const dist = Math.sqrt((point.X() - tx) ** 2 + (point.Y() - ty) ** 2);
+          if (dist <= tolerance) {
+            completedSet.add(index);
+            point.setAttribute({ color: '#2ecc71' });
+            this.board.update();
+            if (completedSet.size === totalTargets) {
+              this.markComplete();
+            }
+          }
+        };
+
+        point.on('drag', check);
+        point.on('up', check);
+      }
+    });
   }
 
   markComplete() {

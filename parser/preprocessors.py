@@ -1,5 +1,7 @@
 """Pre-processori per sintassi markdown custom"""
 import re
+import json
+import html as html_lib
 import yaml
 
 
@@ -45,8 +47,8 @@ def process_graphs(content, graph_counter):
 
         attrs = [f'data-type="{gtype}"']
 
-        # Solo i grafici di tipo point sono goal tracciabili
-        if gtype == 'point':
+        # point e points sono goal tracciabili
+        if gtype in ('point', 'points'):
             attrs.insert(0, f'id="graph-{graph_counter - 1}"')
 
         for key, value in config.items():
@@ -54,6 +56,10 @@ def process_graphs(content, graph_counter):
                 continue
             if key == 'bind' and isinstance(value, list):
                 value = ','.join(str(v) for v in value)
+            elif key == 'points' and isinstance(value, list):
+                # Serializza la lista come JSON e HTML-escapa le virgolette
+                attrs.append(f'data-points="{html_lib.escape(json.dumps(value))}"')
+                continue
             attrs.append(f'data-{key}="{value}"')
 
         return f'<x-graph {" ".join(attrs)}></x-graph>'

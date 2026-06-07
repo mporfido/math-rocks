@@ -160,21 +160,28 @@ yrange: "-2,2"
 
 ---
 
-> id: posiziona-punto
-> title: Posiziona il Punto
+> id: posiziona-punti
+> title: Posiziona i Punti
 
 # Trova le Coordinate
 
-Trascina il punto blu fino alla posizione **(3, 2)** sul piano cartesiano:
+Trascina i tre punti **A**, **B**, **C** nelle posizioni indicate (i pallini verdi semitrasparenti):
+
+- **A** = (3, 2)
+- **B** = (−2, 4)
+- **C** = (1, −3)
 
 :::graph
-type: point
-target: "3,2"
+type: points
 snap: 1
-xrange: "-5,5"
-yrange: "-5,5"
+xrange: "-6,6"
+yrange: "-6,6"
+points:
+  - target: "3,2"
+  - target: "-2,4"
+  - target: "1,-3"
 :::
 
 :::div.reveal
-Ottimo! Hai trovato il punto $(3, 2)$. Le coordinate indicano che ci si sposta di 3 unità sull'asse $x$ e di 2 unità sull'asse $y$.
+Ottimo! Hai posizionato tutti e tre i punti correttamente.
 :::
