@@ -111,11 +111,15 @@ class XGraph extends HTMLElement {
       ? parseFloat(this.dataset.tolerance)
       : (Math.abs(tx) + Math.abs(ty)) * 0.01;
 
+    const snapStep = this.dataset.snap ? parseFloat(this.dataset.snap) : null;
+
     const point = this.board.create('point', [0, 0], {
       name: 'P',
       color: '#3498db',
       size: 5,
-      snapToGrid: false,
+      snapToGrid: snapStep !== null,
+      snapSizeX: snapStep ?? 1,
+      snapSizeY: snapStep ?? 1,
       label: { offset: [10, 10] }
     });
 
