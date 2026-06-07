@@ -1,5 +1,65 @@
 """Pre-processori per sintassi markdown custom"""
 import re
+import yaml
+
+
+def process_graphs(content, graph_counter):
+    """
+    Converte blocchi :::graph YAML ::: in <x-graph> web component
+
+    Sintassi:
+        :::graph
+        type: function
+        expr: "sin(a * x)"
+        bind: a
+        xrange: "-6.28,6.28"
+        yrange: "-2,2"
+        :::
+
+    Per type=point aggiunge id per il goal tracking. Per type=function
+    non assegna id (il grafico è solo esplorativo).
+
+    Args:
+        content: Contenuto markdown
+        graph_counter: Contatore per ID univoci
+
+    Returns:
+        Tuple (contenuto processato, nuovo valore counter)
+    """
+    graph_block_pattern = re.compile(
+        r':::graph[ \t]*\n(.*?)\n:::',
+        re.DOTALL
+    )
+
+    def replace_graph(match):
+        nonlocal graph_counter
+        yaml_content = match.group(1)
+
+        try:
+            config = yaml.safe_load(yaml_content) or {}
+        except yaml.YAMLError:
+            config = {}
+
+        gtype = str(config.get('type', 'function'))
+        graph_counter += 1
+
+        attrs = [f'data-type="{gtype}"']
+
+        # Solo i grafici di tipo point sono goal tracciabili
+        if gtype == 'point':
+            attrs.insert(0, f'id="graph-{graph_counter - 1}"')
+
+        for key, value in config.items():
+            if key == 'type':
+                continue
+            if key == 'bind' and isinstance(value, list):
+                value = ','.join(str(v) for v in value)
+            attrs.append(f'data-{key}="{value}"')
+
+        return f'<x-graph {" ".join(attrs)}></x-graph>'
+
+    processed = graph_block_pattern.sub(replace_graph, content)
+    return processed, graph_counter
 
 
 def process_math(content):

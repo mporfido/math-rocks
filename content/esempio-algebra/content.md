@@ -134,3 +134,47 @@ Denominatore: ${d}{d|8|1,20,1}
 Frazione: ${n}/${d}
 
 Frazione con latex: $\frac{${n}}{${d}}$
+
+---
+
+> id: grafico-funzione
+> title: Grafico Interattivo
+
+# Il Grafico di una Funzione
+
+Muovi lo slider per cambiare il valore di `a` e osserva come cambia la forma del grafico di $\sin(a \cdot x)$ in tempo reale:
+
+Valore di `a`: ${a}{a|1|0.5,4,0.5}
+
+:::graph
+type: function
+expr: "sin(a*x)"
+bind: a
+xrange: "-7,7"
+yrange: "-2,2"
+:::
+
+:::div.highlight
+💡 Quando `a` cresce, la funzione oscilla più velocemente: il **periodo** della sinusoide diminuisce.
+:::
+
+---
+
+> id: posiziona-punto
+> title: Posiziona il Punto
+
+# Trova le Coordinate
+
+Trascina il punto blu fino alla posizione **(3, 2)** sul piano cartesiano:
+
+:::graph
+type: point
+target: "3,2"
+tolerance: 0.6
+xrange: "-5,5"
+yrange: "-5,5"
+:::
+
+:::div.reveal
+Ottimo! Hai trovato il punto $(3, 2)$. Le coordinate indicano che ci si sposta di 3 unità sull'asse $x$ e di 2 unità sull'asse $y$.
+:::

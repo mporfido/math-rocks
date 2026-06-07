@@ -3,7 +3,7 @@ import re
 import mistune
 import yaml
 from pathlib import Path
-from parser.preprocessors import process_blanks, process_variables, process_blocks, process_math
+from parser.preprocessors import process_blanks, process_variables, process_blocks, process_math, process_graphs
 
 
 class CourseParser:
@@ -43,6 +43,7 @@ class CourseParser:
         # Reset counters
         self.blank_counter = 0
         self.variable_counter = 0
+        self.graph_counter = 0
 
         # Split in steps (separati da ---)
         steps_raw = re.split(r'\n---\n', content)
@@ -150,6 +151,9 @@ class CourseParser:
         # ${var}{config} → <x-variable>
         content, self.variable_counter = process_variables(content, self.variable_counter)
 
+        # :::graph YAML ::: → <x-graph> (deve precedere process_blocks)
+        content, self.graph_counter = process_graphs(content, self.graph_counter)
+
         # :::div.class → <div class="class">
         content = process_blocks(content)
 
@@ -187,6 +191,9 @@ class CourseParser:
 
         # Trova tutti <x-variable id="...">
         goals.extend(re.findall(r'<x-variable id="([^"]+)"', html))
+
+        # Trova tutti <x-graph id="..."> (solo type=point ha id)
+        goals.extend(re.findall(r'<x-graph id="([^"]+)"', html))
 
         return goals
 

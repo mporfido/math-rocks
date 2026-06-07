@@ -3,6 +3,10 @@
 {% block title %}{{ step.metadata.get('title', step.id) }} - {{ course_id }}{% endblock %}
 
 {% block extra_css %}
+<!-- JSXGraph per grafici interattivi -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph@1.9.2/distrib/jsxgraph.css">
+<script src="https://cdn.jsdelivr.net/npm/jsxgraph@1.9.2/distrib/jsxgraphcore.min.js"></script>
+
 <!-- MathJax per rendering formule matematiche -->
 <script>
   MathJax = {
@@ -74,6 +78,7 @@
 <script src="{{ url_for('static', filename='components/formula-simplifier.js') }}"></script>
 <script src="{{ url_for('static', filename='components/blank.js') }}"></script>
 <script src="{{ url_for('static', filename='components/variable.js') }}"></script>
+<script src="{{ url_for('static', filename='components/graph.js') }}"></script>
 <script src="{{ url_for('static', filename='components/step.js') }}"></script>
 
 <!-- Re-render MathJax dopo caricamento componenti -->
