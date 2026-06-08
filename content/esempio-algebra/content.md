@@ -188,3 +188,29 @@ points:
 :::div.reveal
 Ottimo! Hai posizionato tutti e tre i punti correttamente.
 :::
+
+---
+
+> id: prevedi-continuazione
+> title: Prevedi come continua la funzione
+
+Inserisci correttamente i punti di ordinata 3, 4 e 5
+
+:::graph
+type: points
+expr: "x^2"
+xclip: "-5,3"
+xrange: "-6,8"
+yrange: "-2,25"
+snap: 1
+verify: true
+points:
+- target: "3,9"
+- target: "4,16"
+- target: "5,25"
+:::
+
+
+:::div.reveal
+Ottimo!
+:::

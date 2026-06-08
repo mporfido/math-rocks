@@ -59,9 +59,13 @@ class XGraph extends HTMLElement {
 
       if (type === 'function') {
         this.initFunction(step);
-      } else if (type === 'point') {
-        this.initPoint();
-      } else if (type === 'points') {
+      } else if (type === 'point' || type === 'points') {
+        if (type === 'point') {
+          const entry = {};
+          if (this.dataset.target) entry.target = this.dataset.target;
+          if (this.dataset.tolerance !== undefined) entry.tolerance = parseFloat(this.dataset.tolerance);
+          this.dataset.points = JSON.stringify([entry]);
+        }
         this.initPoints();
       }
     });
@@ -85,6 +89,37 @@ class XGraph extends HTMLElement {
       return Function(`"use strict"; return (${code});`)();
     } catch {
       return NaN;
+    }
+  }
+
+  // Disegna una curva di sfondo se data-expr è presente.
+  // data-xclip="min,max" limita il dominio visualizzato.
+  // data-bind collega la curva agli slider, esattamente come in type=function.
+  drawBackgroundCurve(step) {
+    const expr = this.dataset.expr;
+    if (!expr) return;
+
+    const xclip = this.dataset.xclip ? this.dataset.xclip.split(',').map(Number) : null;
+    const bind = (this.dataset.bind || '').split(',').map(s => s.trim()).filter(Boolean);
+
+    this.curve = this.board.create('functiongraph', [
+      (x) => {
+        if (xclip && (x < xclip[0] || x > xclip[1])) return NaN;
+        return this.evalExpr(expr, x);
+      }
+    ], {
+      strokeColor: '#e74c3c',
+      strokeWidth: 2.5,
+      highlight: false
+    });
+
+    if (bind.length > 0 && step) {
+      step.addEventListener('variable-change', (e) => {
+        if (bind.includes(e.detail.name)) {
+          this.model[e.detail.name] = e.detail.value;
+          this.board.update();
+        }
+      });
     }
   }
 
@@ -130,87 +165,10 @@ class XGraph extends HTMLElement {
     ], { fontSize: 11, strokeColor: '#1f2937', highlight: false });
   }
 
-  initPoint() {
-    const targetStr = this.dataset.target || '';
-    const hasTarget = Boolean(targetStr);
-    const showCoords = this.dataset.coords === 'true';
-    const showTargets = this.dataset.targets === 'true';
-    const verify = this.dataset.verify === 'true';
-
-    const [tx, ty] = hasTarget ? targetStr.split(',').map(Number) : [0, 0];
-
-    // Tolleranza esplicita nel markdown, oppure 1% della somma dei valori assoluti:
-    // es. target (3,2) → (3+2)*0.01 = 0.05
-    const tolerance = this.dataset.tolerance !== undefined
-      ? parseFloat(this.dataset.tolerance)
-      : (Math.abs(tx) + Math.abs(ty)) * 0.01;
-
-    const snapStep = this.dataset.snap ? parseFloat(this.dataset.snap) : null;
-
-    const point = this.board.create('point', [0, 0], {
-      name: 'P',
-      color: '#3498db',
-      size: 5,
-      snapToGrid: snapStep !== null,
-      snapSizeX: snapStep ?? 1,
-      snapSizeY: snapStep ?? 1,
-      label: { offset: [10, 10] }
-    });
-
-    if (showCoords) this.addCoordsDisplay(point);
-
-    if (hasTarget) {
-      if (showTargets) {
-        this.board.create('point', [tx, ty], {
-          name: '✓',
-          color: '#2ecc71',
-          size: 6,
-          fixed: true,
-          opacity: 0.35,
-          label: { offset: [10, 10] }
-        });
-      }
-
-      let completed = false;
-
-      const check = () => {
-        if (completed) return;
-        const dist = Math.sqrt((point.X() - tx) ** 2 + (point.Y() - ty) ** 2);
-        return dist <= tolerance;
-      };
-
-      if (verify) {
-        this.addVerifyButton((btn) => {
-          if (check()) {
-            point.setAttribute({ color: '#2ecc71' });
-            btn.disabled = true;
-            this.board.update();
-            this.markComplete();
-          } else {
-            point.setAttribute({ color: '#ef4444' });
-            this.board.update();
-            setTimeout(() => {
-              point.setAttribute({ color: '#3498db' });
-              this.board.update();
-            }, 900);
-          }
-        });
-      } else {
-        const autoCheck = () => {
-          if (check()) {
-            completed = true;
-            point.setAttribute({ color: '#2ecc71' });
-            this.board.update();
-            this.markComplete();
-          }
-        };
-        point.on('drag', autoCheck);
-        point.on('up', autoCheck);
-      }
-    }
-  }
-
   initPoints() {
+    const step = this.closest('x-step');
+    this.drawBackgroundCurve(step);
+
     const pointsData = JSON.parse(this.dataset.points || '[]');
     const globalSnap = this.dataset.snap ? parseFloat(this.dataset.snap) : null;
     const showCoords = this.dataset.coords === 'true';
