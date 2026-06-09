@@ -182,7 +182,10 @@ def process_variables(content, variable_counter):
 
 def process_blocks(content):
     """
-    Converte :::div.class in <div class="class">
+    Converte :::div.class in placeholder marker unici.
+
+    I marker vengono sostituiti con i tag HTML reali DOPO il rendering markdown,
+    così il contenuto interno (bold, heading, ecc.) viene processato da mistune.
 
     Sintassi:
         :::div.class1.class2
@@ -193,11 +196,13 @@ def process_blocks(content):
         content: Contenuto markdown
 
     Returns:
-        Contenuto processato
+        Tuple (contenuto processato, dict marker→tag HTML)
     """
     lines = content.split('\n')
     output = []
     stack = []
+    replacements = {}
+    counter = 0
 
     for line in lines:
         if line.strip().startswith(':::'):
@@ -205,20 +210,23 @@ def process_blocks(content):
                 # Chiusura
                 if stack:
                     tag = stack.pop()
-                    output.append(f'</{tag}>')
+                    marker = f'XBLOCK{counter}X'
+                    replacements[marker] = f'</{tag}>'
+                    counter += 1
+                    output.append(marker)
             else:
                 # Apertura: :::div.class1.class2
                 spec = line.strip()[3:].strip()
                 tag, attrs = parse_tag_spec(spec)
                 stack.append(tag)
-                if attrs:
-                    output.append(f'<{tag} {attrs}>')
-                else:
-                    output.append(f'<{tag}>')
+                marker = f'XBLOCK{counter}X'
+                replacements[marker] = f'<{tag} {attrs}>' if attrs else f'<{tag}>'
+                counter += 1
+                output.append(marker)
         else:
             output.append(line)
 
-    return '\n'.join(output)
+    return '\n'.join(output), replacements
 
 
 def process_images(content):

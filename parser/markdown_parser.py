@@ -56,13 +56,16 @@ class CourseParser:
             metadata, md_content = self._extract_metadata(step_content)
 
             # Pre-processing: converti sintassi custom
-            md_content = self._preprocess(md_content)
+            md_content, block_replacements = self._preprocess(md_content)
 
             # Rendering markdown → HTML
             html = self.markdown(md_content)
 
             # Post-processing: de-escape span con data-var dentro tag <code>
             html = self._unescape_variable_spans(html)
+
+            # Sostituisce marker placeholder con tag div reali
+            html = self._apply_block_replacements(html, block_replacements)
 
             # Estrai goals (elementi interattivi)
             goals = self._extract_goals(html)
@@ -153,10 +156,10 @@ class CourseParser:
         # ${var}{config} → <x-variable>
         content, self.variable_counter = process_variables(content, self.variable_counter)
 
-        # :::div.class → <div class="class">
-        content = process_blocks(content)
+        # :::div.class → placeholder marker (sostituiti dopo il markdown rendering)
+        content, block_replacements = process_blocks(content)
 
-        return content
+        return content, block_replacements
 
     def _unescape_variable_spans(self, html):
         """
@@ -172,6 +175,17 @@ class CourseParser:
         pattern = r'&lt;span data-var=&quot;([^&]+)&quot;&gt;([^&]+)&lt;/span&gt;'
         replacement = r'<span data-var="\1">\2</span>'
         return re.sub(pattern, replacement, html)
+
+    def _apply_block_replacements(self, html, replacements):
+        """
+        Sostituisce i marker placeholder con i tag HTML dei blocchi div.
+
+        Gestisce sia i marker nudi sia quelli avvolti in <p>...</p> da mistune.
+        """
+        for marker, tag in replacements.items():
+            html = re.sub(r'<p>\s*' + re.escape(marker) + r'\s*</p>', tag, html)
+            html = html.replace(marker, tag)
+        return html
 
     def _extract_goals(self, html):
         """
