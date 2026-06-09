@@ -3,7 +3,7 @@ import re
 import mistune
 import yaml
 from pathlib import Path
-from parser.preprocessors import process_blanks, process_variables, process_blocks, process_math, process_images
+from parser.preprocessors import process_blanks, process_variables, process_blocks, process_math, process_images, process_checks
 
 
 class CourseParser:
@@ -16,6 +16,7 @@ class CourseParser:
         )
         self.blank_counter = 0
         self.variable_counter = 0
+        self.check_counter = 0
 
     def parse_file(self, filepath):
         """
@@ -43,6 +44,7 @@ class CourseParser:
         # Reset counters
         self.blank_counter = 0
         self.variable_counter = 0
+        self.check_counter = 0
 
         # Split in steps (separati da ---)
         steps_raw = re.split(r'\n---\n', content)
@@ -150,6 +152,9 @@ class CourseParser:
         # `x = 5` → $x = 5$ (converte formule matematiche in backtick)
         content = process_math(content)
 
+        # [Testo]{check: condizione} → <x-check>
+        content, self.check_counter = process_checks(content, self.check_counter)
+
         # [[answer]] → <x-blank>
         content, self.blank_counter = process_blanks(content, self.blank_counter)
 
@@ -204,6 +209,9 @@ class CourseParser:
 
         # Trova tutti <x-variable id="...">
         goals.extend(re.findall(r'<x-variable id="([^"]+)"', html))
+
+        # Trova tutti <x-check id="...">
+        goals.extend(re.findall(r'<x-check id="([^"]+)"', html))
 
         return goals
 

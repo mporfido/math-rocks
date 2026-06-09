@@ -180,6 +180,33 @@ def process_variables(content, variable_counter):
     return processed, variable_counter
 
 
+def process_checks(content, check_counter):
+    """
+    Converte [Testo]{check: condizione} in <x-check> web component
+
+    Esempi:
+        [Verifica]{check: m == 4} -> <x-check id="check-0" data-condition="m == 4">Verifica</x-check>
+
+    Args:
+        content: Contenuto markdown
+        check_counter: Contatore per ID univoci
+
+    Returns:
+        Tuple (contenuto processato, nuovo valore counter)
+    """
+    def replace_check(match):
+        nonlocal check_counter
+        label = match.group(1)
+        condition = match.group(2).strip()
+        check_id = f'check-{check_counter}'
+        check_counter += 1
+        return f'<x-check id="{check_id}" data-condition="{condition}">{label}</x-check>'
+
+    pattern = r'\[([^\]]+)\]\{check:\s*([^}]+)\}'
+    processed = re.sub(pattern, replace_check, content)
+    return processed, check_counter
+
+
 def process_blocks(content):
     """
     Converte :::div.class in placeholder marker unici.
