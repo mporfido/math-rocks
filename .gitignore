@@ -47,3 +47,11 @@ Thumbs.db
 
 # Windows reserved names
 nul
+
+# Input e asset locali
+input/
+static/images/
+
+# Lezioni: tracciate solo quelle che iniziano con "esempio-"
+content/*/
+!content/esempio-*/
