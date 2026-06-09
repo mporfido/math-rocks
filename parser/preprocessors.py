@@ -221,6 +221,27 @@ def process_blocks(content):
     return '\n'.join(output)
 
 
+def process_images(content):
+    """
+    Converte sintassi Obsidian per il resize delle immagini.
+
+    Esempi:
+        ![Alt|400](img.png)      → <img src="img.png" alt="Alt" style="width:400px; height:auto;">
+        ![Alt|400x300](img.png)  → <img src="img.png" alt="Alt" style="width:400px; height:300px;">
+    """
+    pattern = r'!\[([^\]|]*)\|(\d+)(?:x(\d+))?\]\(([^)]+)\)'
+
+    def replace_img(match):
+        alt, width, height, src = match.groups()
+        if height:
+            style = f'width:{width}px; height:{height}px'
+        else:
+            style = f'width:{width}px; height:auto'
+        return f'<img src="{src}" alt="{alt}" style="{style}">'
+
+    return re.sub(pattern, replace_img, content)
+
+
 def parse_tag_spec(spec):
     """
     Parse tag specification: div.class1.class2(attr="val")

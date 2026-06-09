@@ -3,7 +3,7 @@ import re
 import mistune
 import yaml
 from pathlib import Path
-from parser.preprocessors import process_blanks, process_variables, process_blocks, process_math
+from parser.preprocessors import process_blanks, process_variables, process_blocks, process_math, process_images
 
 
 class CourseParser:
@@ -141,6 +141,9 @@ class CourseParser:
         Returns:
             Contenuto processato
         """
+        # ![alt|400](src) → <img style="width:400px">
+        content = process_images(content)
+
         # `x = 5` → $x = 5$ (converte formule matematiche in backtick)
         content = process_math(content)
 
