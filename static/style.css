@@ -219,6 +219,13 @@ body {
     line-height: 1.8;
 }
 
+.course-content img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 1rem auto;
+}
+
 .step-navigation {
     display: flex;
     justify-content: space-between;

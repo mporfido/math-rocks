@@ -3,7 +3,7 @@ import re
 import mistune
 import yaml
 from pathlib import Path
-from parser.preprocessors import process_blanks, process_variables, process_blocks, process_math, process_graphs
+from parser.preprocessors import process_blanks, process_variables, process_blocks, process_math, process_images, process_checks, process_graphs
 
 
 class CourseParser:
@@ -16,6 +16,7 @@ class CourseParser:
         )
         self.blank_counter = 0
         self.variable_counter = 0
+        self.check_counter = 0
 
     def parse_file(self, filepath):
         """
@@ -43,6 +44,7 @@ class CourseParser:
         # Reset counters
         self.blank_counter = 0
         self.variable_counter = 0
+        self.check_counter = 0
         self.graph_counter = 0
 
         # Split in steps (separati da ---)
@@ -57,13 +59,16 @@ class CourseParser:
             metadata, md_content = self._extract_metadata(step_content)
 
             # Pre-processing: converti sintassi custom
-            md_content = self._preprocess(md_content)
+            md_content, block_replacements = self._preprocess(md_content)
 
             # Rendering markdown → HTML
             html = self.markdown(md_content)
 
             # Post-processing: de-escape span con data-var dentro tag <code>
             html = self._unescape_variable_spans(html)
+
+            # Sostituisce marker placeholder con tag div reali
+            html = self._apply_block_replacements(html, block_replacements)
 
             # Estrai goals (elementi interattivi)
             goals = self._extract_goals(html)
@@ -142,8 +147,14 @@ class CourseParser:
         Returns:
             Contenuto processato
         """
+        # ![alt|400](src) → <img style="width:400px">
+        content = process_images(content)
+
         # `x = 5` → $x = 5$ (converte formule matematiche in backtick)
         content = process_math(content)
+
+        # [Testo]{check: condizione} → <x-check>
+        content, self.check_counter = process_checks(content, self.check_counter)
 
         # [[answer]] → <x-blank>
         content, self.blank_counter = process_blanks(content, self.blank_counter)
@@ -154,10 +165,10 @@ class CourseParser:
         # :::graph YAML ::: → <x-graph> (deve precedere process_blocks)
         content, self.graph_counter = process_graphs(content, self.graph_counter)
 
-        # :::div.class → <div class="class">
-        content = process_blocks(content)
+        # :::div.class → placeholder marker (sostituiti dopo il markdown rendering)
+        content, block_replacements = process_blocks(content)
 
-        return content
+        return content, block_replacements
 
     def _unescape_variable_spans(self, html):
         """
@@ -173,6 +184,17 @@ class CourseParser:
         pattern = r'&lt;span data-var=&quot;([^&]+)&quot;&gt;([^&]+)&lt;/span&gt;'
         replacement = r'<span data-var="\1">\2</span>'
         return re.sub(pattern, replacement, html)
+
+    def _apply_block_replacements(self, html, replacements):
+        """
+        Sostituisce i marker placeholder con i tag HTML dei blocchi div.
+
+        Gestisce sia i marker nudi sia quelli avvolti in <p>...</p> da mistune.
+        """
+        for marker, tag in replacements.items():
+            html = re.sub(r'<p>\s*' + re.escape(marker) + r'\s*</p>', tag, html)
+            html = html.replace(marker, tag)
+        return html
 
     def _extract_goals(self, html):
         """
@@ -191,6 +213,9 @@ class CourseParser:
 
         # Trova tutti <x-variable id="...">
         goals.extend(re.findall(r'<x-variable id="([^"]+)"', html))
+
+        # Trova tutti <x-check id="...">
+        goals.extend(re.findall(r'<x-check id="([^"]+)"', html))
 
         # Trova tutti <x-graph id="..."> (solo type=point ha id)
         goals.extend(re.findall(r'<x-graph id="([^"]+)"', html))

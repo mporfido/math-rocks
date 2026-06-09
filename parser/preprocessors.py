@@ -251,9 +251,39 @@ def process_variables(content, variable_counter):
     return processed, variable_counter
 
 
+def process_checks(content, check_counter):
+    """
+    Converte [Testo]{check: condizione} in <x-check> web component
+
+    Esempi:
+        [Verifica]{check: m == 4} -> <x-check id="check-0" data-condition="m == 4">Verifica</x-check>
+
+    Args:
+        content: Contenuto markdown
+        check_counter: Contatore per ID univoci
+
+    Returns:
+        Tuple (contenuto processato, nuovo valore counter)
+    """
+    def replace_check(match):
+        nonlocal check_counter
+        label = match.group(1)
+        condition = match.group(2).strip()
+        check_id = f'check-{check_counter}'
+        check_counter += 1
+        return f'<x-check id="{check_id}" data-condition="{condition}">{label}</x-check>'
+
+    pattern = r'\[([^\]]+)\]\{check:\s*([^}]+)\}'
+    processed = re.sub(pattern, replace_check, content)
+    return processed, check_counter
+
+
 def process_blocks(content):
     """
-    Converte :::div.class in <div class="class">
+    Converte :::div.class in placeholder marker unici.
+
+    I marker vengono sostituiti con i tag HTML reali DOPO il rendering markdown,
+    così il contenuto interno (bold, heading, ecc.) viene processato da mistune.
 
     Sintassi:
         :::div.class1.class2
@@ -264,11 +294,13 @@ def process_blocks(content):
         content: Contenuto markdown
 
     Returns:
-        Contenuto processato
+        Tuple (contenuto processato, dict marker→tag HTML)
     """
     lines = content.split('\n')
     output = []
     stack = []
+    replacements = {}
+    counter = 0
 
     for line in lines:
         if line.strip().startswith(':::'):
@@ -276,20 +308,44 @@ def process_blocks(content):
                 # Chiusura
                 if stack:
                     tag = stack.pop()
-                    output.append(f'</{tag}>')
+                    marker = f'XBLOCK{counter}X'
+                    replacements[marker] = f'</{tag}>'
+                    counter += 1
+                    output.append(marker)
             else:
                 # Apertura: :::div.class1.class2
                 spec = line.strip()[3:].strip()
                 tag, attrs = parse_tag_spec(spec)
                 stack.append(tag)
-                if attrs:
-                    output.append(f'<{tag} {attrs}>')
-                else:
-                    output.append(f'<{tag}>')
+                marker = f'XBLOCK{counter}X'
+                replacements[marker] = f'<{tag} {attrs}>' if attrs else f'<{tag}>'
+                counter += 1
+                output.append(marker)
         else:
             output.append(line)
 
-    return '\n'.join(output)
+    return '\n'.join(output), replacements
+
+
+def process_images(content):
+    """
+    Converte sintassi Obsidian per il resize delle immagini.
+
+    Esempi:
+        ![Alt|400](img.png)      → <img src="img.png" alt="Alt" style="width:400px; height:auto;">
+        ![Alt|400x300](img.png)  → <img src="img.png" alt="Alt" style="width:400px; height:300px;">
+    """
+    pattern = r'!\[([^\]|]*)\|(\d+)(?:x(\d+))?\]\(([^)]+)\)'
+
+    def replace_img(match):
+        alt, width, height, src = match.groups()
+        if height:
+            style = f'width:{width}px; height:{height}px'
+        else:
+            style = f'width:{width}px; height:auto'
+        return f'<img src="{src}" alt="{alt}" style="{style}">'
+
+    return re.sub(pattern, replace_img, content)
 
 
 def parse_tag_spec(spec):

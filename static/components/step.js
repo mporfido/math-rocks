@@ -86,6 +86,11 @@ class XStep extends HTMLElement {
       goals.push(variable.id);
     });
 
+    // Goals da x-check
+    this.querySelectorAll('x-check[id]').forEach(check => {
+      goals.push(check.id);
+    });
+
     // Goals da grafici interattivi (solo type=point hanno id)
     this.querySelectorAll('x-graph[id]').forEach(graph => {
       goals.push(graph.id);

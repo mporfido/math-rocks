@@ -99,6 +99,65 @@ x-blank.incorrect .blank-input {
     color: #dc2626;
 }
 
+/* ========== Check Component ========== */
+
+x-check {
+    display: inline-block;
+    margin: 8px 0;
+}
+
+.check-wrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.check-btn {
+    padding: 8px 20px;
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.95em;
+    font-weight: 600;
+    font-family: inherit;
+    transition: all 0.2s ease;
+}
+
+.check-btn:hover:not(:disabled) {
+    background: #1d4ed8;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
+}
+
+.check-btn:active:not(:disabled) {
+    transform: scale(0.97);
+}
+
+.check-btn:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.check-btn.correct {
+    background: #16a34a;
+}
+
+.check-feedback {
+    font-weight: bold;
+    font-size: 1em;
+    min-width: 80px;
+    transition: opacity 0.3s ease;
+}
+
+.check-feedback.correct {
+    color: #15803d;
+}
+
+.check-feedback.incorrect {
+    color: #dc2626;
+}
+
 /* ========== Variable Component ========== */
 
 x-variable {
