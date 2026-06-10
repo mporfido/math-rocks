@@ -133,7 +133,51 @@ Modifica `a`: ${a}{a|2|-5,5,1}
 L'equazione diventa: `x^2 + ${a}x + 1 = 0`
 ```
 
-### 3. Blocchi Custom
+### 3. Check (Verifica Condizioni)
+
+Sintassi: `[Etichetta]{check: condizione}`
+
+Crea un bottone che verifica una condizione sulle variabili del modello (slider). Conta come goal per il tracking.
+
+**Parametri:**
+- `Etichetta`: Testo del bottone (es. "Verifica")
+- `condizione`: Espressione booleana sulle variabili (es. `m == 4`, `a + b == 6`)
+
+```markdown
+Porta lo slider su 4: ${m}{m|1|0,10,1}
+
+[Verifica]{check: m == 4}
+```
+
+**Caratteristiche:**
+- Feedback immediato ("Esatto! ✓" / "Riprova!")
+- Emette `goal-complete` quando la condizione è verificata
+- Supporta espressioni con più variabili: `[Controlla]{check: a + b == 6}`
+
+### 4. Grafici Interattivi
+
+Sintassi: blocco `:::graph` con configurazione YAML.
+
+```markdown
+:::graph
+type: function
+expr: "sin(a * x)"
+bind: a
+xrange: "-7,7"
+yrange: "-2,2"
+:::
+```
+
+**Tipi disponibili:**
+- `type: function` - Curva `y = f(x)`, opzionalmente collegata a slider con `bind`
+- `type: point` - Punto singolo trascinabile con coordinata obiettivo (`target`)
+- `type: points` - Punti multipli trascinabili, con snap, verifica esplicita e curva di sfondo
+
+I grafici con `target` generano automaticamente un goal per il tracking.
+
+📖 **Documentazione completa**: vedi [GRAFICI.md](GRAFICI.md) per tutti gli attributi ed esempi.
+
+### 5. Blocchi Custom
 
 Sintassi: `:::tag.class1.class2`
 
@@ -168,7 +212,7 @@ Questo è un blocco evidenziato
 :::
 ```
 
-### 4. Reveal Content
+### 6. Reveal Content
 
 Il contenuto con classe `.reveal` appare solo quando tutti i goals dello step sono completati.
 
@@ -294,6 +338,13 @@ Tutti gli elementi markdown standard sono supportati:
 
 ```markdown
 ![Alt text](path/to/image.png)
+```
+
+**Resize (sintassi Obsidian):**
+
+```markdown
+![Alt|400](image.png)        <!-- larghezza 400px, altezza proporzionale -->
+![Alt|400x300](image.png)    <!-- larghezza 400px, altezza 300px -->
 ```
 
 ### Citazioni
