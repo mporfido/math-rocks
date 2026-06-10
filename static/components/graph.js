@@ -44,21 +44,30 @@ class XGraph extends HTMLElement {
     // sia già eseguito (e x-step inizializzato con il suo model) prima che
     // JSXGraph chiami la funzione per disegnare la curva.
     requestAnimationFrame(() => {
+      const tickStep = parseFloat(this.dataset.ticks || 1);
       this.board = JXG.JSXGraph.initBoard(containerId, {
         boundingbox: [xmin, ymax, xmax, ymin],
         axis: true,
         showNavigation: true,
         showCopyright: false,
-        keepaspectratio: false,
+        keepaspectratio: true,
         pan: { enabled: true },
-        zoom: { enabled: true }
+        zoom: { enabled: true },
+        defaultAxes: {
+          x: { ticks: { ticksDistance: tickStep, insertTicks: false, minorTicks: 0 } },
+          y: { ticks: { ticksDistance: tickStep, insertTicks: false, minorTicks: 0 } }
+        }
       });
 
       const step = this.closest('x-step');
       this.model = step?.model ?? {};
 
-      if (type === 'function') {
-        this.initFunction(step);
+      if (type === 'function' || type === 'functions') {
+        if (type === 'function') {
+          const entry = { expr: this.dataset.expr || 'x' };
+          this.dataset.functions = JSON.stringify([entry]);
+        }
+        this.initFunctions(step);
       } else if (type === 'point' || type === 'points') {
         if (type === 'point') {
           const entry = {};
@@ -123,16 +132,21 @@ class XGraph extends HTMLElement {
     }
   }
 
-  initFunction(step) {
-    const expr = this.dataset.expr || 'x';
+  initFunctions(step) {
+    const functionsData = JSON.parse(this.dataset.functions || '[]');
     const bind = (this.dataset.bind || '').split(',').map(s => s.trim()).filter(Boolean);
+    const defaultColors = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12'];
 
-    this.curve = this.board.create('functiongraph', [
-      (x) => this.evalExpr(expr, x)
-    ], {
-      strokeColor: '#e74c3c',
-      strokeWidth: 2.5,
-      highlight: false
+    this.curves = functionsData.map((cfg, i) => {
+      const expr = cfg.expr || 'x';
+      const color = cfg.color || defaultColors[i % defaultColors.length];
+      return this.board.create('functiongraph', [
+        (x) => this.evalExpr(expr, x)
+      ], {
+        strokeColor: color,
+        strokeWidth: 2.5,
+        highlight: false
+      });
     });
 
     if (bind.length > 0 && step) {

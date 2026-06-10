@@ -65,6 +65,9 @@ def process_graphs(content, graph_counter):
                 # Serializza la lista come JSON e HTML-escapa le virgolette
                 attrs.append(f'data-points="{html_lib.escape(json.dumps(value))}"')
                 continue
+            elif key == 'functions' and isinstance(value, list):
+                attrs.append(f'data-functions="{html_lib.escape(json.dumps(value))}"')
+                continue
             attrs.append(f'data-{key}="{value}"')
 
         return f'<x-graph {" ".join(attrs)}></x-graph>'
