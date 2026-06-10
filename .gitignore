@@ -52,6 +52,9 @@ nul
 input/
 static/images/
 
+# Piani di lavoro locali
+claude-plans/
+
 # Lezioni: tracciate solo quelle che iniziano con "esempio-"
 content/*/
 !content/esempio-*/
