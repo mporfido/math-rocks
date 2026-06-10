@@ -194,6 +194,24 @@ body {
     color: #fff;
 }
 
+.step-link.completed::after {
+    content: ' ✓';
+    color: #2ecc71;
+    font-weight: 700;
+}
+
+/* Lo step attivo è su sfondo blu: rende il checkmark leggibile */
+.step-link.active.completed::after {
+    color: #fff;
+}
+
+.reset-progress-btn {
+    margin-top: 1.5rem;
+    width: 100%;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
 .course-content {
     background: #fff;
     border-radius: 8px;

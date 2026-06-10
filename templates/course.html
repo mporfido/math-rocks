@@ -40,11 +40,13 @@
         <nav class="steps-nav">
             {% for s in course.steps %}
             <a href="{{ url_for('courses.course_step', course_id=course_id, step_id=s.id) }}"
-               class="step-link {% if s.id == step.id %}active{% endif %}">
+               class="step-link {% if s.id == step.id %}active{% endif %}"
+               data-step-id="{{ s.id }}">
                 {{ loop.index }}. {{ s.metadata.get('title', s.id) }}
             </a>
             {% endfor %}
         </nav>
+        <button class="btn btn-secondary reset-progress-btn" type="button">Azzera progressi</button>
     </aside>
 
     <!-- Contenuto step -->
@@ -75,6 +77,7 @@
 
 {% block scripts %}
 <!-- Carica Web Components -->
+<script src="{{ url_for('static', filename='components/progress.js') }}"></script>
 <script src="{{ url_for('static', filename='components/formula-simplifier.js') }}"></script>
 <script src="{{ url_for('static', filename='components/blank.js') }}"></script>
 <script src="{{ url_for('static', filename='components/check.js') }}"></script>
@@ -104,5 +107,41 @@
       }
     }, 50);
   });
+</script>
+
+<!-- Sidebar: checkmark sugli step completati e reset progressi -->
+<script>
+  (function () {
+    const courseId = {{ course_id|tojson }};
+
+    // Marca gli step completati al caricamento
+    if (window.courseProgress) {
+      const completed = window.courseProgress.getCompletedSteps(courseId);
+      completed.forEach(stepId => {
+        const link = document.querySelector(`.step-link[data-step-id="${stepId}"]`);
+        if (link) link.classList.add('completed');
+      });
+    }
+
+    // Marca live lo step corrente quando viene completato
+    document.addEventListener('step-complete', (e) => {
+      const stepId = e.detail && e.detail.stepId;
+      if (!stepId) return;
+      const link = document.querySelector(`.step-link[data-step-id="${stepId}"]`);
+      if (link) link.classList.add('completed');
+    });
+
+    // Bottone "Azzera progressi"
+    const resetBtn = document.querySelector('.reset-progress-btn');
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        if (!window.courseProgress) return;
+        if (confirm('Azzerare tutti i progressi di questo corso?')) {
+          window.courseProgress.clearCourse(courseId);
+          window.location.reload();
+        }
+      });
+    }
+  })();
 </script>
 {% endblock %}

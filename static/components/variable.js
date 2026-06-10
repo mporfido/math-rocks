@@ -15,10 +15,22 @@
 class XVariable extends HTMLElement {
   connectedCallback() {
     const bind = this.dataset.bind;
-    const initial = parseFloat(this.dataset.initial || 0);
+    let initial = parseFloat(this.dataset.initial || 0);
     const min = parseFloat(this.dataset.min || -10);
     const max = parseFloat(this.dataset.max || 10);
     const step = parseFloat(this.dataset.step || 1);
+
+    // Stato salvato: ripristina la posizione dello slider e lo stato di goal.
+    const saved = window.courseProgress
+      ? window.courseProgress.getStepForElement(this)
+      : null;
+    if (saved && saved.model && saved.model[bind] !== undefined) {
+      const savedValue = parseFloat(saved.model[bind]);
+      if (!isNaN(savedValue)) {
+        initial = savedValue;
+      }
+    }
+    const savedDone = Boolean(saved && Array.isArray(saved.goals) && saved.goals.includes(this.id));
 
     this.innerHTML = `
       <span class="variable-control">
@@ -34,6 +46,12 @@ class XVariable extends HTMLElement {
 
     const slider = this.querySelector('input');
     const display = this.querySelector('.variable-value');
+
+    // Se questo slider era già stato mosso, marcalo completato senza evento
+    // (la contabilità dei goal la ricostruisce x-step da storage).
+    if (savedDone) {
+      this.setAttribute('data-completed', 'true');
+    }
 
     // Update display e model
     slider.addEventListener('input', () => {

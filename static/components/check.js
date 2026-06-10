@@ -25,6 +25,19 @@ class XCheck extends HTMLElement {
     const feedback = this.querySelector('.check-feedback');
     let completed = false;
 
+    // Stato salvato: se la condizione era già stata verificata, ripristina la UI
+    // senza dispatchare goal-complete (la contabilità la fa x-step da storage).
+    const saved = window.courseProgress
+      ? window.courseProgress.getStepForElement(this)
+      : null;
+    if (saved && Array.isArray(saved.goals) && saved.goals.includes(this.id)) {
+      completed = true;
+      btn.disabled = true;
+      btn.classList.add('correct');
+      feedback.textContent = 'Esatto! ✓';
+      feedback.className = 'check-feedback correct';
+    }
+
     btn.addEventListener('click', () => {
       if (completed) return;
 

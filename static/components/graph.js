@@ -191,6 +191,13 @@ class XGraph extends HTMLElement {
     const totalTargets = pointsData.filter(p => p.target).length;
     const completedSet = new Set();
 
+    // Stato salvato: se questo grafico era già stato completato, ripristiniamo
+    // i punti sui rispettivi target (le posizioni esatte coincidono coi target).
+    const saved = window.courseProgress
+      ? window.courseProgress.getStepForElement(this)
+      : null;
+    const savedDone = Boolean(saved && Array.isArray(saved.goals) && saved.goals.includes(this.id));
+
     // In verify mode: raccoglie {point, tx, ty, tolerance, index} per il check globale
     const verifyItems = [];
 
@@ -218,6 +225,13 @@ class XGraph extends HTMLElement {
       if (showCoords) this.addCoordsDisplay(point, label);
 
       if (hasTarget) {
+        // Ripristino: posiziona il punto sul target e marcalo completato.
+        if (savedDone) {
+          point.setPosition(JXG.COORDS_BY_USER, [tx, ty]);
+          point.setAttribute({ color: '#2ecc71' });
+          completedSet.add(index);
+        }
+
         if (showTargets) {
           this.board.create('point', [tx, ty], {
             name: label + '?',
@@ -250,8 +264,15 @@ class XGraph extends HTMLElement {
       }
     });
 
+    // Applica il ripristino dei punti completati e segna il goal come completato
+    // senza dispatchare l'evento (x-step ricostruisce la contabilità da storage).
+    if (savedDone) {
+      this.setAttribute('data-completed', 'true');
+      this.board.update();
+    }
+
     if (verify && verifyItems.length > 0) {
-      this.addVerifyButton((btn) => {
+      const verifyBtn = this.addVerifyButton((btn) => {
         // Tutti i punti devono essere corretti simultaneamente
         const allCorrect = verifyItems.every(({ point, tx, ty, tolerance }) => {
           const dist = Math.sqrt((point.X() - tx) ** 2 + (point.Y() - ty) ** 2);
@@ -273,6 +294,11 @@ class XGraph extends HTMLElement {
           }, 900);
         }
       });
+
+      // In ripristino, il check è già superato: disabilita il bottone.
+      if (savedDone) {
+        verifyBtn.disabled = true;
+      }
     }
   }
 

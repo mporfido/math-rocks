@@ -20,6 +20,13 @@ class XStep extends HTMLElement {
 
     console.log('Step connected. needsMathjs:', this.needsMathjs);
 
+    // Stato persistito (risposte, goal, modello) — null se assente/non disponibile
+    this.courseId = this.dataset.courseId;
+    this.stepId = this.dataset.stepId;
+    this.savedState = window.courseProgress
+      ? window.courseProgress.getStep(this.courseId, this.stepId)
+      : null;
+
     // Inizializza il modello con i valori iniziali delle variabili
     this.initializeModel();
 
@@ -45,9 +52,22 @@ class XStep extends HTMLElement {
 
     console.log(`Step initialized with ${this.allGoals.length} goals:`, this.allGoals);
 
+    // Ripristina i goal salvati (filtrando quelli non più esistenti): i singoli
+    // componenti hanno già ripristinato la propria UI nei loro connectedCallback,
+    // qui si ricostruisce la contabilità centrale senza dispatchare eventi.
+    if (this.savedState && Array.isArray(this.savedState.goals)) {
+      this.savedState.goals
+        .filter(g => this.allGoals.includes(g))
+        .forEach(g => this.completedGoals.add(g));
+
+      if (this.completedGoals.size === this.allGoals.length && this.allGoals.length > 0) {
+        this.onAllGoalsComplete();
+      }
+    }
+
     // Listener per goal completions
     this.addEventListener('goal-complete', (e) => {
-      this.handleGoalComplete(e.detail.goalId);
+      this.handleGoalComplete(e.detail.goalId, e.detail.value);
     });
 
     // Listener per cambiamenti variabili
@@ -57,6 +77,11 @@ class XStep extends HTMLElement {
 
       // Aggiorna le visualizzazioni
       this.updateVariableDisplays(e.detail.name, e.detail.value);
+
+      // Persisti i valori degli slider (pochi numeri: nessun throttling)
+      if (window.courseProgress) {
+        window.courseProgress.saveModel(this.courseId, this.stepId, this.model);
+      }
     });
   }
 
@@ -69,6 +94,16 @@ class XStep extends HTMLElement {
         this.model[bind] = initial;
       }
     });
+
+    // Sovrascrivi con i valori salvati: le formule dinamiche ripartono dai
+    // valori ripristinati senza altre modifiche.
+    if (this.savedState && this.savedState.model) {
+      Object.entries(this.savedState.model).forEach(([name, value]) => {
+        if (this.model[name] !== undefined) {
+          this.model[name] = value;
+        }
+      });
+    }
 
     console.log('Model initialized:', this.model);
   }
@@ -99,12 +134,17 @@ class XStep extends HTMLElement {
     return goals;
   }
 
-  handleGoalComplete(goalId) {
+  handleGoalComplete(goalId, value) {
     if (this.completedGoals.has(goalId)) {
       return;  // Già completato
     }
 
     this.completedGoals.add(goalId);
+
+    // Persisti il goal (e l'eventuale risposta) appena completato
+    if (window.courseProgress) {
+      window.courseProgress.saveGoal(this.courseId, this.stepId, goalId, value);
+    }
 
     console.log(`Goal completed: ${goalId} (${this.completedGoals.size}/${this.allGoals.length})`);
 
@@ -121,6 +161,11 @@ class XStep extends HTMLElement {
     this.querySelectorAll('.reveal').forEach(el => {
       el.classList.add('active');
     });
+
+    // Persisti il completamento dello step (checkmark in sidebar)
+    if (window.courseProgress) {
+      window.courseProgress.markStepCompleted(this.courseId, this.stepId);
+    }
 
     // Emetti evento
     this.dispatchEvent(new CustomEvent('step-complete', {

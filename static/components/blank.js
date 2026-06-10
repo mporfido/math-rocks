@@ -14,6 +14,13 @@ class XBlank extends HTMLElement {
     const solution = this.dataset.solution;
     const choices = this.dataset.choices;
 
+    // Stato salvato: se questo goal è già stato completato, lo ripristiniamo.
+    const saved = window.courseProgress
+      ? window.courseProgress.getStepForElement(this)
+      : null;
+    this.savedDone = Boolean(saved && Array.isArray(saved.goals) && saved.goals.includes(this.id));
+    this.savedAnswer = saved && saved.answers ? saved.answers[this.id] : undefined;
+
     if (choices) {
       this.renderMultipleChoice(choices.split('|'), solution);
     } else {
@@ -32,6 +39,16 @@ class XBlank extends HTMLElement {
     const input = this.querySelector('input');
     const feedback = this.querySelector('.blank-feedback');
 
+    // Ripristino: riempi l'input e mostra il feedback senza dispatchare
+    // goal-complete (la contabilità la fa x-step leggendo da storage).
+    if (this.savedDone) {
+      input.value = this.savedAnswer !== undefined ? this.savedAnswer : (solution || '');
+      this.classList.add('correct');
+      feedback.textContent = '✓';
+      feedback.className = 'blank-feedback success';
+      this.setAttribute('data-completed', 'true');
+    }
+
     input.addEventListener('input', () => {
       const value = input.value.trim().toLowerCase();
       const correctAnswer = solution ? solution.trim().toLowerCase() : '';
@@ -43,7 +60,7 @@ class XBlank extends HTMLElement {
         feedback.className = 'blank-feedback success';
 
         // Emetti evento per goal tracking
-        this.markComplete();
+        this.markComplete(input.value.trim());
       } else if (value.length > 0) {
         this.classList.add('incorrect');
         this.classList.remove('correct');
@@ -69,6 +86,17 @@ class XBlank extends HTMLElement {
 
     const correctAnswer = solution ? solution.trim() : choices[0].trim();
 
+    // Ripristino: marca il bottone corretto come selezionato senza eventi.
+    if (this.savedDone) {
+      const correctBtn = Array.from(this.querySelectorAll('button'))
+        .find(b => b.dataset.value === correctAnswer);
+      if (correctBtn) {
+        correctBtn.classList.add('selected', 'correct');
+      }
+      this.classList.add('correct');
+      this.setAttribute('data-completed', 'true');
+    }
+
     this.querySelectorAll('button').forEach(btn => {
       btn.addEventListener('click', () => {
         const value = btn.dataset.value;
@@ -85,7 +113,7 @@ class XBlank extends HTMLElement {
         if (isCorrect) {
           btn.classList.add('correct');
           this.classList.add('correct');
-          this.markComplete();
+          this.markComplete(value);
         } else {
           btn.classList.add('incorrect');
           this.classList.add('incorrect');
@@ -94,7 +122,7 @@ class XBlank extends HTMLElement {
     });
   }
 
-  markComplete() {
+  markComplete(value) {
     // Emetti evento una volta sola
     if (this.hasAttribute('data-completed')) {
       return;
@@ -105,7 +133,7 @@ class XBlank extends HTMLElement {
     this.dispatchEvent(new CustomEvent('goal-complete', {
       bubbles: true,
       composed: true,
-      detail: { goalId: this.id }
+      detail: { goalId: this.id, value }
     }));
   }
 }
