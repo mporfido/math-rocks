@@ -1,29 +1,34 @@
 /**
  * <x-graph> - Grafico interattivo basato su JSXGraph
  *
+ * Le capacità del grafico sono layer componibili, attivi in base alla
+ * presenza degli attributi (il parser normalizza la sintassi legacy `type:`
+ * in questo formato a build time):
+ *
  * Attributi comuni:
- *   data-type: "function" | "point" | "points"
  *   data-xrange: "min,max" (default "-10,10")
  *   data-yrange: "min,max" (default "-7,7")
+ *   data-ticks: passo delle tacche sugli assi
+ *   data-bind: variabili che ridisegnano le curve, separate da virgola
  *
- * type=function:
- *   data-expr: espressione matematica (es: "sin(a*x)")
- *   data-bind: variabili collegate allo slider, separate da virgola
+ * Layer curve:
+ *   data-functions: JSON array di oggetti {expr, color?, xclip?}
+ *     expr: espressione matematica (es: "sin(a*x)")
+ *     xclip: "min,max" limita il dominio visualizzato della curva
  *
- * type=point:
- *   data-target: "x,y" coordinata obiettivo
- *   data-snap: step griglia (opzionale)
- *   id: identificativo per goal tracking
- *
- * type=points:
- *   data-points: JSON array di oggetti {target, snap, tolerance}
+ * Layer punti obiettivo (trascinabili, goal tracking):
+ *   data-points: JSON array di oggetti {target, snap?, tolerance?}
  *   data-snap: snap globale (sovrascritto dal valore per-punto)
- *   id: identificativo per goal tracking
+ *   data-verify: "true" per il bottone Verifica (check esplicito)
+ *   data-coords: "true" mostra le coordinate live accanto ai punti
+ *   data-targets: "true" mostra i target in trasparenza
+ *   id: identificativo per goal tracking (assegnato dal parser se c'è
+ *     almeno un target)
  *
- * type=boundpoints:
- *   data-points: JSON array di oggetti {x, y, label} dove x/y sono nomi di
- *     variabili del modello (es. da input editabili in una tabella). I punti si
- *     ridisegnano live quando le variabili cambiano. Non trascinabili.
+ * Layer punti bound al modello:
+ *   data-boundpoints: JSON array di oggetti {x, y, label} dove x/y sono nomi
+ *     di variabili del modello (es. da input editabili in una tabella). I
+ *     punti si ridisegnano live quando le variabili cambiano. Non trascinabili.
  *   data-connect: "true" per unire i punti con una spezzata
  *
  * Eventi:
@@ -31,7 +36,6 @@
  */
 class XGraph extends HTMLElement {
   connectedCallback() {
-    const type = this.dataset.type || 'function';
     const [xmin, xmax] = (this.dataset.xrange || '-10,10').split(',').map(Number);
     const [ymin, ymax] = (this.dataset.yrange || '-7,7').split(',').map(Number);
 
@@ -66,26 +70,39 @@ class XGraph extends HTMLElement {
       });
 
       const step = this.closest('x-step');
+      this.step = step;
       this.model = step?.model ?? {};
 
-      if (type === 'function' || type === 'functions') {
-        if (type === 'function') {
-          const entry = { expr: this.dataset.expr || 'x' };
-          this.dataset.functions = JSON.stringify([entry]);
-        }
-        this.initFunctions(step);
-      } else if (type === 'point' || type === 'points') {
-        if (type === 'point') {
-          const entry = {};
-          if (this.dataset.target) entry.target = this.dataset.target;
-          if (this.dataset.tolerance !== undefined) entry.tolerance = parseFloat(this.dataset.tolerance);
-          this.dataset.points = JSON.stringify([entry]);
-        }
-        this.initPoints();
-      } else if (type === 'boundpoints') {
-        this.initBoundPoints(step);
+      // Ogni layer è indipendente e disegna sulla stessa board: possono
+      // coesistere in qualsiasi combinazione.
+      if (this.dataset.functions) this.initFunctions();
+      if (this.dataset.points) this.initPoints();
+      if (this.dataset.boundpoints) this.initBoundPoints();
+
+      // Listener unico per i cambi di variabile: le curve si ridisegnano solo
+      // per le variabili in bind, i punti bound per qualsiasi variabile.
+      const bind = (this.dataset.bind || '').split(',').map(s => s.trim()).filter(Boolean);
+      const hasBoundPoints = Boolean(this.dataset.boundpoints);
+      if (step && (bind.length > 0 || hasBoundPoints)) {
+        step.addEventListener('variable-change', (e) => {
+          const isBound = bind.includes(e.detail.name);
+          if (isBound) this.liveModel()[e.detail.name] = e.detail.value;
+          if (isBound || hasBoundPoints) this.board.update();
+        });
       }
+
+      // Ridisegno differito: se al primo disegno il modello dello step non era
+      // ancora pronto (race di upgrade dei custom element), qui i valori —
+      // anche quelli ripristinati da storage — sono certamente disponibili.
+      requestAnimationFrame(() => this.board.update());
     });
+  }
+
+  // Modello live dello step: l'upgrade dei custom element può non essere
+  // ancora completato quando il grafico cattura `step.model`, quindi lo
+  // risolviamo a ogni accesso (con fallback sul modello locale).
+  liveModel() {
+    return this.step?.model ?? this.model ?? {};
   }
 
   // Valuta un'espressione matematica con le variabili correnti del modello.
@@ -93,7 +110,7 @@ class XGraph extends HTMLElement {
   evalExpr(expr, x) {
     let code = expr;
 
-    for (const [name, value] of Object.entries(this.model)) {
+    for (const [name, value] of Object.entries(this.liveModel())) {
       code = code.replace(new RegExp(`\\b${name}\\b`, 'g'), `(${value})`);
     }
     code = code.replace(/\bx\b/g, `(${x})`);
@@ -109,77 +126,40 @@ class XGraph extends HTMLElement {
     }
   }
 
-  // Disegna una curva di sfondo se data-expr è presente.
-  // data-xclip="min,max" limita il dominio visualizzato.
-  // data-bind collega la curva agli slider, esattamente come in type=function.
-  drawBackgroundCurve(step) {
-    const expr = this.dataset.expr;
-    if (!expr) return;
-
-    const xclip = this.dataset.xclip ? this.dataset.xclip.split(',').map(Number) : null;
-    const bind = (this.dataset.bind || '').split(',').map(s => s.trim()).filter(Boolean);
-
-    this.curve = this.board.create('functiongraph', [
-      (x) => {
-        if (xclip && (x < xclip[0] || x > xclip[1])) return NaN;
-        return this.evalExpr(expr, x);
-      }
-    ], {
-      strokeColor: '#e74c3c',
-      strokeWidth: 2.5,
-      highlight: false
-    });
-
-    if (bind.length > 0 && step) {
-      step.addEventListener('variable-change', (e) => {
-        if (bind.includes(e.detail.name)) {
-          this.model[e.detail.name] = e.detail.value;
-          this.board.update();
-        }
-      });
-    }
-  }
-
-  initFunctions(step) {
+  // Disegna le curve di data-functions. Ogni voce supporta:
+  //   expr: espressione matematica
+  //   xclip: "min,max" limita il dominio visualizzato della curva
+  //   color: colore della curva (default a rotazione)
+  initFunctions() {
     const functionsData = JSON.parse(this.dataset.functions || '[]');
-    const bind = (this.dataset.bind || '').split(',').map(s => s.trim()).filter(Boolean);
     const defaultColors = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12'];
 
     this.curves = functionsData.map((cfg, i) => {
       const expr = cfg.expr || 'x';
       const color = cfg.color || defaultColors[i % defaultColors.length];
+      const xclip = cfg.xclip ? String(cfg.xclip).split(',').map(Number) : null;
       return this.board.create('functiongraph', [
-        (x) => this.evalExpr(expr, x)
+        (x) => {
+          if (xclip && (x < xclip[0] || x > xclip[1])) return NaN;
+          return this.evalExpr(expr, x);
+        }
       ], {
         strokeColor: color,
         strokeWidth: 2.5,
         highlight: false
       });
     });
-
-    if (bind.length > 0 && step) {
-      step.addEventListener('variable-change', (e) => {
-        if (bind.includes(e.detail.name)) {
-          this.model[e.detail.name] = e.detail.value;
-          this.board.update();
-        }
-      });
-    }
   }
 
   // Disegna punti le cui coordinate provengono da variabili del modello (es. input
   // editabili in una tabella x-y). Le coordinate sono funzioni: JSXGraph le rivaluta
   // a ogni board.update(), che invochiamo quando una variabile cambia.
-  initBoundPoints(step) {
-    const pointsData = JSON.parse(this.dataset.points || '[]');
+  initBoundPoints() {
+    const pointsData = JSON.parse(this.dataset.boundpoints || '[]');
     const connect = this.dataset.connect === 'true';
 
-    // Legge sempre il modello live dello step: l'upgrade dei custom element può
-    // non essere ancora completato quando il grafico cattura `this.model`, quindi
-    // risolviamo `step.model` a ogni valutazione (anche al ripristino da storage).
     const readVar = (name) => {
-      const model = (step && step.model) || this.model || {};
-      const v = parseFloat(model[name]);
+      const v = parseFloat(this.liveModel()[name]);
       return isNaN(v) ? NaN : v;
     };
 
@@ -208,14 +188,6 @@ class XGraph extends HTMLElement {
       }
     }
 
-    if (step) {
-      step.addEventListener('variable-change', () => this.board.update());
-    }
-
-    // Ridisegno differito: se al primo disegno il modello dello step non era
-    // ancora pronto (race di upgrade), qui i valori — anche quelli ripristinati
-    // da storage — sono certamente disponibili.
-    requestAnimationFrame(() => this.board.update());
   }
 
   // Aggiunge un pulsante "Verifica" sotto il grafico; chiama checkFn(btn) al click
@@ -239,9 +211,6 @@ class XGraph extends HTMLElement {
   }
 
   initPoints() {
-    const step = this.closest('x-step');
-    this.drawBackgroundCurve(step);
-
     const pointsData = JSON.parse(this.dataset.points || '[]');
     const globalSnap = this.dataset.snap ? parseFloat(this.dataset.snap) : null;
     const showCoords = this.dataset.coords === 'true';

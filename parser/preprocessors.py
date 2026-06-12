@@ -5,21 +5,79 @@ import html as html_lib
 import yaml
 
 
+def normalize_graph_config(config):
+    """
+    Normalizza la configurazione di un grafico nello schema unificato a layer.
+
+    Schema unificato: le capacità del grafico sono layer componibili decisi
+    dalla presenza delle chiavi, non da `type`:
+        functions:   lista di curve {expr, color?, xclip?}
+        points:      lista di punti trascinabili con obiettivo {target, snap?, tolerance?}
+        boundpoints: lista di punti legati a variabili del modello {x, y, label?}
+
+    La sintassi legacy con `type:` viene riscritta nello schema unificato:
+        type: function    expr/xclip top-level → functions: [{expr, xclip}]
+        type: functions   già lista functions (expr top-level eventuale → in coda)
+        type: point       target/tolerance top-level → points: [{target, tolerance}]
+        type: points      points invariata; expr/xclip di sfondo → functions
+        type: boundpoints points → rinominata in boundpoints
+
+    Senza `type`, le chiavi vengono usate così come sono (expr top-level
+    resta una scorciatoia per una singola curva).
+
+    Args:
+        config: Dict dalla configurazione YAML del blocco
+
+    Returns:
+        Dict normalizzato (senza chiave `type`)
+    """
+    config = dict(config)
+    gtype = str(config.pop('type', '')) or None
+
+    if gtype == 'boundpoints':
+        # Legacy: i punti bound usavano la chiave `points`
+        if 'points' in config and 'boundpoints' not in config:
+            config['boundpoints'] = config.pop('points')
+    elif gtype in ('point',):
+        entry = {}
+        for key in ('target', 'tolerance', 'snap'):
+            if key in config:
+                entry[key] = config.pop(key)
+        config.setdefault('points', [entry])
+
+    # expr top-level → voce di functions (vale per function/functions/points
+    # con curva di sfondo e per lo schema unificato senza type)
+    if 'expr' in config:
+        entry = {'expr': config.pop('expr')}
+        if 'xclip' in config:
+            entry['xclip'] = config.pop('xclip')
+        config.setdefault('functions', [])
+        config['functions'].append(entry)
+
+    return config
+
+
 def process_graphs(content, graph_counter):
     """
     Converte blocchi :::graph YAML ::: in <x-graph> web component
 
-    Sintassi:
+    Sintassi (layer componibili, tutti opzionali e combinabili):
         :::graph
-        type: function
-        expr: "sin(a * x)"
+        xrange: "-6,6"
         bind: a
-        xrange: "-6.28,6.28"
-        yrange: "-2,2"
+        functions:
+          - expr: "sin(a * x)"
+        points:
+          - target: "3,2"
+        boundpoints:
+          - {x: ax, y: ay, label: A}
         :::
 
-    Per type=point aggiunge id per il goal tracking. Per type=function
-    non assegna id (il grafico è solo esplorativo).
+    La sintassi legacy con `type:` resta accettata e viene normalizzata
+    (vedi normalize_graph_config).
+
+    Il grafico riceve un id per il goal tracking solo se almeno un punto
+    di `points` ha un `target` (gli altri layer sono solo esplorativi).
 
     Args:
         content: Contenuto markdown
@@ -44,29 +102,28 @@ def process_graphs(content, graph_counter):
         except yaml.YAMLError:
             config = {}
 
-        gtype = str(config.get('type', 'function'))
+        config = normalize_graph_config(config)
         graph_counter += 1
 
-        attrs = [f'data-type="{gtype}"']
+        attrs = []
 
-        # point e points sono goal tracciabili
-        if gtype in ('point', 'points'):
-            attrs.insert(0, f'id="graph-{graph_counter - 1}"')
+        # Goal tracciabile solo se c'è almeno un punto con obiettivo
+        points = config.get('points') or []
+        has_target = isinstance(points, list) and any(
+            isinstance(p, dict) and p.get('target') for p in points
+        )
+        if has_target:
+            attrs.append(f'id="graph-{graph_counter - 1}"')
 
         for key, value in config.items():
-            if key == 'type':
-                continue
             if isinstance(value, bool):
                 # bool Python → "true"/"false" minuscolo per JS
                 value = str(value).lower()
             elif key == 'bind' and isinstance(value, list):
                 value = ','.join(str(v) for v in value)
-            elif key == 'points' and isinstance(value, list):
+            elif key in ('points', 'functions', 'boundpoints') and isinstance(value, list):
                 # Serializza la lista come JSON e HTML-escapa le virgolette
-                attrs.append(f'data-points="{html_lib.escape(json.dumps(value))}"')
-                continue
-            elif key == 'functions' and isinstance(value, list):
-                attrs.append(f'data-functions="{html_lib.escape(json.dumps(value))}"')
+                attrs.append(f'data-{key}="{html_lib.escape(json.dumps(value))}"')
                 continue
             attrs.append(f'data-{key}="{value}"')
 

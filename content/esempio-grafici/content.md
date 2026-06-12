@@ -134,3 +134,38 @@ points:
 :::div.highlight
 💡 Prova a cambiare i valori: cambiando le coordinate cambi la posizione dei punti e la forma della spezzata che li collega.
 :::
+
+---
+
+> id: punti-su-retta
+> title: Punti su una retta
+
+# Porta i punti sulla retta
+
+I layer dei grafici si possono combinare: qui una retta $y = mx$ animata dallo slider e due punti legati alla tabella convivono nello stesso piano.
+
+Pendenza $m$: ${m}{m|1|-3,3,0.5}
+
+| Punto | x | y |
+| ----- | - | - |
+| **P** | ${px}{px|2|input} | ${py}{py|1|input} |
+| **Q** | ${qx}{qx|-3|input} | ${qy}{qy|2|input} |
+
+:::graph
+xrange: "-6,6"
+yrange: "-6,6"
+bind: m
+functions:
+  - expr: "m*x"
+boundpoints:
+  - {x: px, y: py, label: P}
+  - {x: qx, y: qy, label: Q}
+:::
+
+Scegli le coordinate di **P** e **Q** in modo che entrambi i punti stiano sulla retta con $m = 2$.
+
+[Verifica]{check: m == 2 && py == 2 * px && qy == 2 * qx}
+
+:::div.reveal
+Perfetto! Un punto $(x, y)$ appartiene alla retta $y = 2x$ proprio quando $y = 2x$: la verifica algebrica e quella grafica coincidono.
+:::
