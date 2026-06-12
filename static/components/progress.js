@@ -21,6 +21,21 @@ class CourseProgress {
   constructor() {
     this.VERSION = 1;
     this.PREFIX = 'mathrocks:progress:';
+    // Se localStorage non è utilizzabile, il gating sequenziale va disattivato
+    // (altrimenti nessuno step risulterebbe completato e l'utente resterebbe
+    // intrappolato sul primo step).
+    this.enabled = this._testStorage();
+  }
+
+  _testStorage() {
+    try {
+      const k = this.PREFIX + '__test__';
+      localStorage.setItem(k, '1');
+      localStorage.removeItem(k);
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   _key(courseId) {

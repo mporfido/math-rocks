@@ -30,6 +30,30 @@
   };
 </script>
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<!-- Progressi + guard sequenziale: caricato nel <head> ed eseguito in modo
+     sincrono PRIMA del rendering del body, così l'eventuale redirect avviene
+     senza che il contenuto di uno step bloccato (che può contenere la risposta
+     al precedente) venga mostrato. -->
+<script src="{{ url_for('static', filename='components/progress.js') }}"></script>
+<script>
+  (function () {
+    const cp = window.courseProgress;
+    if (!cp || !cp.enabled) return;  // storage non disponibile → nessun blocco
+    const courseId = {{ course_id|tojson }};
+    const orderedIds = {{ course.steps|map(attribute='id')|list|tojson }};
+    const currentId = {{ step.id|tojson }};
+    const completed = new Set(cp.getCompletedSteps(courseId));
+    // Frontiera = primo step non completato; tutto ciò che viene dopo è bloccato.
+    let frontier = orderedIds.findIndex(id => !completed.has(id));
+    if (frontier === -1) frontier = orderedIds.length - 1;
+    if (orderedIds.indexOf(currentId) > frontier) {
+      window.location.replace(
+        '/course/' + encodeURIComponent(courseId) + '/' + encodeURIComponent(orderedIds[frontier])
+      );
+    }
+  })();
+</script>
 {% endblock %}
 
 {% block content %}
@@ -76,8 +100,7 @@
 {% endblock %}
 
 {% block scripts %}
-<!-- Carica Web Components -->
-<script src="{{ url_for('static', filename='components/progress.js') }}"></script>
+<!-- Carica Web Components (progress.js è già caricato nel <head>) -->
 <script src="{{ url_for('static', filename='components/formula-simplifier.js') }}"></script>
 <script src="{{ url_for('static', filename='components/blank.js') }}"></script>
 <script src="{{ url_for('static', filename='components/check.js') }}"></script>
@@ -113,6 +136,11 @@
 <script>
   (function () {
     const courseId = {{ course_id|tojson }};
+    const currentId = document.querySelector('.step-link.active')
+      ? document.querySelector('.step-link.active').dataset.stepId
+      : null;
+    const nextBtn = document.querySelector('.step-navigation .btn-primary');
+    const gatingEnabled = !!(window.courseProgress && window.courseProgress.enabled);
 
     // Marca gli step completati al caricamento
     if (window.courseProgress) {
@@ -123,12 +151,42 @@
       });
     }
 
-    // Marca live lo step corrente quando viene completato
+    // Blocca gli step successivi alla "frontiera" (primo step non completato).
+    function applyLocks() {
+      if (!gatingEnabled) return;
+      const links = Array.from(document.querySelectorAll('.step-link'));
+      const orderedIds = links.map(a => a.dataset.stepId);
+      const completed = new Set(window.courseProgress.getCompletedSteps(courseId));
+      let frontier = orderedIds.findIndex(id => !completed.has(id));
+      if (frontier === -1) frontier = orderedIds.length - 1;
+      links.forEach((link, i) => {
+        const locked = i > frontier;
+        link.classList.toggle('locked', locked);
+        if (locked) link.setAttribute('aria-disabled', 'true');
+        else link.removeAttribute('aria-disabled');
+      });
+    }
+
+    // Disabilita "Successivo" finché lo step corrente non è completato.
+    function refreshNext() {
+      if (!gatingEnabled || !nextBtn || !currentId) return;
+      const completed = new Set(window.courseProgress.getCompletedSteps(courseId));
+      const currentDone = completed.has(currentId);
+      nextBtn.classList.toggle('disabled', !currentDone);
+      nextBtn.setAttribute('aria-disabled', String(!currentDone));
+    }
+
+    applyLocks();
+    refreshNext();
+
+    // Marca live lo step corrente quando viene completato e aggiorna i blocchi
     document.addEventListener('step-complete', (e) => {
       const stepId = e.detail && e.detail.stepId;
       if (!stepId) return;
       const link = document.querySelector(`.step-link[data-step-id="${stepId}"]`);
       if (link) link.classList.add('completed');
+      applyLocks();
+      refreshNext();
     });
 
     // Bottone "Azzera progressi"

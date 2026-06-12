@@ -205,6 +205,25 @@ body {
     color: #fff;
 }
 
+/* Step bloccati: visibili ma non accessibili finché i precedenti non sono completi */
+.step-link.locked {
+    color: #c0c4cc;
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.step-link.locked::after {
+    content: ' 🔒';
+    font-size: 0.85em;
+}
+
+/* Pulsante "Successivo" disabilitato finché lo step corrente non è completato */
+.btn-primary.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+    cursor: not-allowed;
+}
+
 .reset-progress-btn {
     margin-top: 1.5rem;
     width: 100%;
