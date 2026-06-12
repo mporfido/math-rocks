@@ -335,11 +335,65 @@ x-graph {
     font-size: 0.9em;
 }
 
+/* ========== Tables ========== */
+
+.course-content table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 1.5rem 0;
+    font-size: 0.95em;
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.course-content th {
+    background: #f3f4f6;
+    color: #1f2937;
+    font-weight: 600;
+    text-align: left;
+    padding: 10px 14px;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.course-content td {
+    padding: 10px 14px;
+    border: 1px solid #e5e7eb;
+    vertical-align: middle;
+}
+
+.course-content tbody tr:nth-child(even) {
+    background: #fafafa;
+}
+
+/* Blank compatti dentro le celle: non gonfiano la colonna */
+.course-content td x-blank {
+    display: inline-flex;
+    align-items: center;
+}
+
+.course-content td .blank-wrapper {
+    margin: 0;
+    gap: 4px;
+}
+
+.course-content td .blank-input {
+    min-width: 60px;
+    padding: 4px 8px;
+}
+
 /* ========== Responsive ========== */
 
 @media (max-width: 768px) {
     .blank-choices {
         flex-direction: column;
+    }
+
+    .course-content table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
     }
 
     .choice-btn {
