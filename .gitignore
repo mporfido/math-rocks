@@ -37,6 +37,9 @@ courses_data/
 *.swo
 *~
 
+# Claude Code: impostazioni personali (le config condivise restano tracciabili)
+.claude/settings.local.json
+
 # OS
 .DS_Store
 Thumbs.db
