@@ -9,17 +9,23 @@ def process_graphs(content, graph_counter):
     """
     Converte blocchi :::graph YAML ::: in <x-graph> web component
 
-    Sintassi:
+    Sintassi (layer componibili, tutti opzionali e combinabili):
         :::graph
-        type: function
-        expr: "sin(a * x)"
+        xrange: "-6,6"
         bind: a
-        xrange: "-6.28,6.28"
-        yrange: "-2,2"
+        functions:
+          - expr: "sin(a * x)"
+        points:
+          - target: "3,2"
+        boundpoints:
+          - {x: ax, y: ay, label: A}
         :::
 
-    Per type=point aggiunge id per il goal tracking. Per type=function
-    non assegna id (il grafico è solo esplorativo).
+    `expr` top-level è una scorciatoia per una singola curva (con eventuale
+    `xclip`); equivale a functions: [{expr, xclip}].
+
+    Il grafico riceve un id per il goal tracking solo se almeno un punto
+    di `points` ha un `target` (gli altri layer sono solo esplorativi).
 
     Args:
         content: Contenuto markdown
@@ -44,29 +50,43 @@ def process_graphs(content, graph_counter):
         except yaml.YAMLError:
             config = {}
 
-        gtype = str(config.get('type', 'function'))
+        if 'type' in config:
+            # La sintassi legacy `type:` non è più supportata: meglio fallire
+            # rumorosamente in build che produrre un grafico sbagliato in pagina.
+            raise ValueError(
+                f"Blocco :::graph con 'type: {config['type']}' non supportato: "
+                "usa le chiavi componibili functions/points/boundpoints "
+                "(vedi GRAFICI.md)"
+            )
+
+        # Scorciatoia: expr top-level = singola curva (con eventuale xclip)
+        if 'expr' in config:
+            entry = {'expr': config.pop('expr')}
+            if 'xclip' in config:
+                entry['xclip'] = config.pop('xclip')
+            config.setdefault('functions', []).append(entry)
+
         graph_counter += 1
 
-        attrs = [f'data-type="{gtype}"']
+        attrs = []
 
-        # point e points sono goal tracciabili
-        if gtype in ('point', 'points'):
-            attrs.insert(0, f'id="graph-{graph_counter - 1}"')
+        # Goal tracciabile solo se c'è almeno un punto con obiettivo
+        points = config.get('points') or []
+        has_target = isinstance(points, list) and any(
+            isinstance(p, dict) and p.get('target') for p in points
+        )
+        if has_target:
+            attrs.append(f'id="graph-{graph_counter - 1}"')
 
         for key, value in config.items():
-            if key == 'type':
-                continue
             if isinstance(value, bool):
                 # bool Python → "true"/"false" minuscolo per JS
                 value = str(value).lower()
             elif key == 'bind' and isinstance(value, list):
                 value = ','.join(str(v) for v in value)
-            elif key == 'points' and isinstance(value, list):
+            elif key in ('points', 'functions', 'boundpoints') and isinstance(value, list):
                 # Serializza la lista come JSON e HTML-escapa le virgolette
-                attrs.append(f'data-points="{html_lib.escape(json.dumps(value))}"')
-                continue
-            elif key == 'functions' and isinstance(value, list):
-                attrs.append(f'data-functions="{html_lib.escape(json.dumps(value))}"')
+                attrs.append(f'data-{key}="{html_lib.escape(json.dumps(value))}"')
                 continue
             attrs.append(f'data-{key}="{value}"')
 

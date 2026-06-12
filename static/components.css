@@ -305,6 +305,50 @@ pre code {
     overflow-x: auto;
 }
 
+/* ========== Syntax Doc (documentazione vivente) ========== */
+
+details.syntax-doc {
+    margin: 1rem 0 1.5rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #fafafa;
+}
+
+details.syntax-doc summary {
+    cursor: pointer;
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+    color: #6b7280;
+    user-select: none;
+}
+
+details.syntax-doc summary:hover {
+    color: #374151;
+}
+
+details.syntax-doc[open] summary {
+    border-bottom: 1px solid #e5e7eb;
+}
+
+details.syntax-doc pre {
+    margin: 0;
+}
+
+details.syntax-doc pre code {
+    background: #1f2937;
+    color: #e5e7eb;
+    border-radius: 0;
+    line-height: 1.6;
+}
+
+details.syntax-doc > p {
+    padding: 0.6rem 1rem;
+    margin: 0;
+    font-size: 0.85rem;
+    color: #6b7280;
+    border-top: 1px solid #e5e7eb;
+}
+
 /* ========== Graph Component ========== */
 
 x-graph {

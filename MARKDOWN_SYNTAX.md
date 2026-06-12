@@ -171,29 +171,31 @@ Porta lo slider su 4: ${m}{m|1|0,10,1}
 
 ### 4. Grafici Interattivi
 
-Sintassi: blocco `:::graph` con configurazione YAML.
+Sintassi: blocco `:::graph` con configurazione YAML. Le capacità del grafico
+sono **layer componibili**, attivati dalla presenza delle rispettive chiavi
+(non serve dichiarare un tipo):
+
+- `functions:` - Curve `y = f(x)`, opzionalmente collegate a slider con `bind`
+- `points:` - Punti trascinabili con coordinata obiettivo (`target`), snap e
+  verifica esplicita
+- `boundpoints:` - Punti le cui coordinate provengono da variabili del modello
+  (es. input editabili in una tabella). Si ridisegnano live; `connect: true`
+  li unisce con una spezzata. Non trascinabili.
+
+I layer possono coesistere nello stesso grafico. I grafici con almeno un
+`target` generano automaticamente un goal per il tracking.
 
 ```markdown
 :::graph
-type: function
-expr: "sin(a * x)"
-bind: a
 xrange: "-7,7"
 yrange: "-2,2"
+bind: a
+functions:
+  - expr: "sin(a * x)"
 :::
 ```
 
-**Tipi disponibili:**
-- `type: function` - Curva `y = f(x)`, opzionalmente collegata a slider con `bind`
-- `type: point` - Punto singolo trascinabile con coordinata obiettivo (`target`)
-- `type: points` - Punti multipli trascinabili, con snap, verifica esplicita e curva di sfondo
-- `type: boundpoints` - Punti le cui coordinate provengono da variabili del modello
-  (es. input editabili in una tabella). Si ridisegnano live; `connect: true` li unisce
-  con una spezzata. Non trascinabili.
-
-I grafici con `target` generano automaticamente un goal per il tracking.
-
-**Esempio `boundpoints` (tabella x-y → piano cartesiano):**
+**Esempio combinato (curva animata + punti da tabella x-y):**
 
 ```markdown
 | Punto | x | y |
@@ -202,15 +204,18 @@ I grafici con `target` generano automaticamente un goal per il tracking.
 | B | ${bx}{bx|3|input} | ${by}{by|4|input} |
 
 :::graph
-type: boundpoints
 xrange: "-6,6"
 yrange: "-6,6"
+bind: m
 connect: true
-points:
+functions:
+  - expr: "m*x"
+boundpoints:
   - {x: ax, y: ay, label: A}
   - {x: bx, y: by, label: B}
 :::
 ```
+
 
 📖 **Documentazione completa**: vedi [GRAFICI.md](GRAFICI.md) per tutti gli attributi ed esempi.
 
@@ -399,6 +404,29 @@ def hello():
     print("Hello World!")
 ```
 ````
+
+I blocchi di codice (e il codice inline non matematico) sono **letterali**: la sintassi custom al loro interno (`[[5]]`, `${a}{...}`, `:::graph`, ...) non viene convertita in componenti, quindi puoi usarli per documentare la sintassi stessa.
+
+**Nota**: non inserire una riga `---` isolata dentro un blocco di codice — verrebbe interpretata come separatore di step.
+
+#### Esempi di sintassi collassabili (documentazione vivente)
+
+Per mostrare la sintassi di un componente subito sotto al componente stesso, usa un blocco `details`:
+
+`````markdown
+:::details.syntax-doc
+<summary>📝 Mostra la sintassi</summary>
+
+```md
+Risposta: `x =` [[5]]
+```
+
+Eventuale spiegazione aggiuntiva.
+
+:::
+`````
+
+I corsi `esempio-algebra` ed `esempio-grafici` usano questo pattern dopo ogni componente interattivo.
 
 ### Tabelle
 
