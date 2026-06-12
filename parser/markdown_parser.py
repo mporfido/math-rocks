@@ -58,8 +58,17 @@ class CourseParser:
             # Parsing metadata YAML (righe che iniziano con >)
             metadata, md_content = self._extract_metadata(step_content)
 
+            # Estrai i code fence ``` così i preprocessori non toccano
+            # la sintassi custom mostrata come esempio letterale
+            md_content, code_fences = self._extract_code_fences(md_content)
+
             # Pre-processing: converti sintassi custom
             md_content, block_replacements = self._preprocess(md_content)
+
+            # Ripristina i code fence: mistune li renderizza come blocchi
+            # di codice facendo l'escape dell'HTML al loro interno
+            for marker, fence in code_fences.items():
+                md_content = md_content.replace(marker, fence)
 
             # Rendering markdown → HTML
             html = self.markdown(md_content)
@@ -137,6 +146,61 @@ class CourseParser:
 
         return metadata, '\n'.join(content_lines)
 
+    def _extract_code_fences(self, content):
+        """
+        Sostituisce i fenced code block (```...```) con marker univoci.
+
+        Permette di mostrare la sintassi custom ([[...]], ${...}, :::graph)
+        come testo letterale dentro i blocchi di codice: i preprocessori non
+        vedono il contenuto dei fence, che viene ripristinato prima del
+        rendering markdown.
+
+        Args:
+            content: Contenuto markdown
+
+        Returns:
+            Tuple (contenuto con marker, dict marker → fence originale)
+        """
+        fences = {}
+        counter = 0
+
+        def replace_fence(match):
+            nonlocal counter
+            marker = f'XCODEFENCE{counter}X'
+            fences[marker] = match.group(0)
+            counter += 1
+            return marker
+
+        pattern = re.compile(r'^```[^\n]*\n.*?^```[ \t]*$', re.MULTILINE | re.DOTALL)
+        return pattern.sub(replace_fence, content), fences
+
+    def _extract_inline_code(self, content):
+        """
+        Sostituisce gli span di codice inline (`...`) con marker univoci.
+
+        Da chiamare dopo process_math: i backtick matematici sono già stati
+        convertiti in $...$, quelli rimasti sono codice letterale da
+        proteggere dai preprocessori successivi.
+
+        Args:
+            content: Contenuto markdown
+
+        Returns:
+            Tuple (contenuto con marker, dict marker → codice originale)
+        """
+        codes = {}
+        counter = 0
+
+        def replace_code(match):
+            nonlocal counter
+            marker = f'XINLINECODE{counter}X'
+            codes[marker] = match.group(0)
+            counter += 1
+            return marker
+
+        pattern = re.compile(r'(?<!`)`([^`\n]+)`(?!`)')
+        return pattern.sub(replace_code, content), codes
+
     def _preprocess(self, content):
         """
         Pre-processa sintassi custom prima del markdown rendering
@@ -153,6 +217,11 @@ class CourseParser:
         # `x = 5` → $x = 5$ (converte formule matematiche in backtick)
         content = process_math(content)
 
+        # I backtick rimasti dopo process_math sono codice inline letterale:
+        # proteggili così la sintassi custom al loro interno (es. `[[5]]`)
+        # non viene convertita in componenti
+        content, inline_codes = self._extract_inline_code(content)
+
         # [Testo]{check: condizione} → <x-check>
         content, self.check_counter = process_checks(content, self.check_counter)
 
@@ -167,6 +236,11 @@ class CourseParser:
 
         # :::div.class → placeholder marker (sostituiti dopo il markdown rendering)
         content, block_replacements = process_blocks(content)
+
+        # Ripristina il codice inline: mistune lo renderizza come <code>
+        # facendo l'escape dell'HTML al suo interno
+        for marker, code in inline_codes.items():
+            content = content.replace(marker, code)
 
         return content, block_replacements
 

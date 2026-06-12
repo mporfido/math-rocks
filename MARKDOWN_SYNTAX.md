@@ -405,6 +405,29 @@ def hello():
 ```
 ````
 
+I blocchi di codice (e il codice inline non matematico) sono **letterali**: la sintassi custom al loro interno (`[[5]]`, `${a}{...}`, `:::graph`, ...) non viene convertita in componenti, quindi puoi usarli per documentare la sintassi stessa.
+
+**Nota**: non inserire una riga `---` isolata dentro un blocco di codice — verrebbe interpretata come separatore di step.
+
+#### Esempi di sintassi collassabili (documentazione vivente)
+
+Per mostrare la sintassi di un componente subito sotto al componente stesso, usa un blocco `details`:
+
+`````markdown
+:::details.syntax-doc
+<summary>📝 Mostra la sintassi</summary>
+
+```md
+Risposta: `x =` [[5]]
+```
+
+Eventuale spiegazione aggiuntiva.
+
+:::
+`````
+
+I corsi `esempio-algebra` ed `esempio-grafici` usano questo pattern dopo ogni componente interattivo.
+
 ### Tabelle
 
 ```markdown
