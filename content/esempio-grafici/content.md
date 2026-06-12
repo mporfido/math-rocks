@@ -8,7 +8,6 @@ Muovi lo slider per cambiare il valore di `a` e osserva come cambia la forma del
 Valore di `a`: ${a}{a|1|0.5,4,0.5}
 
 :::graph
-type: function
 expr: "sin(a*x)"
 bind: a
 xrange: "-7,7"
@@ -33,7 +32,6 @@ Trascina i tre punti **A**, **B**, **C** nelle posizioni indicate (i pallini ver
 - **C** = (1, −3)
 
 :::graph
-type: points
 snap: 1
 verify: true
 coords: false
@@ -58,7 +56,6 @@ Ottimo! Hai posizionato tutti e tre i punti correttamente.
 Inserisci correttamente i punti di ordinata 3, 4 e 5
 
 :::graph
-type: points
 expr: "x^2"
 xclip: "-5,3"
 xrange: "-6,8"
@@ -90,7 +87,6 @@ Retta 1 — $a$: ${a}{a|1|-4,4,0.5} &nbsp; $b$: ${b}{b|0|-4,4,0.5}
 Retta 2 — $c$: ${c}{c|-1|-4,4,0.5} &nbsp; $d$: ${d}{d|2|-4,4,0.5}
 
 :::graph
-type: functions
 bind: a,b,c,d
 xrange: "-10,10"
 yrange: "-6,6"
@@ -121,11 +117,10 @@ Inserisci le coordinate dei tre punti nella tabella: vedrai ciascun punto compar
 | **C** | ${cx}{cx|-2|input} | ${cy}{cy|2|input} |
 
 :::graph
-type: boundpoints
 xrange: "-6,6"
 yrange: "-6,6"
 connect: true
-points:
+boundpoints:
   - {x: ax, y: ay, label: A}
   - {x: bx, y: by, label: B}
   - {x: cx, y: cy, label: C}

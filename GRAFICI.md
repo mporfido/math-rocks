@@ -265,22 +265,6 @@ Tutti i grafici supportano:
 
 ---
 
-## Sintassi legacy con `type:`
-
-La sintassi precedente, con un `type` esclusivo per blocco, resta accettata e viene convertita automaticamente nello schema a layer in fase di build:
-
-| Legacy | Equivalente unificato |
-|--------|-----------------------|
-| `type: function` + `expr` | `functions: [{expr}]` |
-| `type: functions` | `functions:` invariato |
-| `type: point` + `target` | `points: [{target}]` |
-| `type: points` | `points:` invariato (l'eventuale `expr` di sfondo diventa una voce di `functions`) |
-| `type: boundpoints` + `points:` | `boundpoints:` |
-
-Per i nuovi contenuti usa direttamente lo schema a layer, senza `type`.
-
----
-
 ## Esempi completi per scenari comuni
 
 ### Funzione con slider — esplorare l'effetto di un parametro

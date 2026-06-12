@@ -5,58 +5,6 @@ import html as html_lib
 import yaml
 
 
-def normalize_graph_config(config):
-    """
-    Normalizza la configurazione di un grafico nello schema unificato a layer.
-
-    Schema unificato: le capacità del grafico sono layer componibili decisi
-    dalla presenza delle chiavi, non da `type`:
-        functions:   lista di curve {expr, color?, xclip?}
-        points:      lista di punti trascinabili con obiettivo {target, snap?, tolerance?}
-        boundpoints: lista di punti legati a variabili del modello {x, y, label?}
-
-    La sintassi legacy con `type:` viene riscritta nello schema unificato:
-        type: function    expr/xclip top-level → functions: [{expr, xclip}]
-        type: functions   già lista functions (expr top-level eventuale → in coda)
-        type: point       target/tolerance top-level → points: [{target, tolerance}]
-        type: points      points invariata; expr/xclip di sfondo → functions
-        type: boundpoints points → rinominata in boundpoints
-
-    Senza `type`, le chiavi vengono usate così come sono (expr top-level
-    resta una scorciatoia per una singola curva).
-
-    Args:
-        config: Dict dalla configurazione YAML del blocco
-
-    Returns:
-        Dict normalizzato (senza chiave `type`)
-    """
-    config = dict(config)
-    gtype = str(config.pop('type', '')) or None
-
-    if gtype == 'boundpoints':
-        # Legacy: i punti bound usavano la chiave `points`
-        if 'points' in config and 'boundpoints' not in config:
-            config['boundpoints'] = config.pop('points')
-    elif gtype in ('point',):
-        entry = {}
-        for key in ('target', 'tolerance', 'snap'):
-            if key in config:
-                entry[key] = config.pop(key)
-        config.setdefault('points', [entry])
-
-    # expr top-level → voce di functions (vale per function/functions/points
-    # con curva di sfondo e per lo schema unificato senza type)
-    if 'expr' in config:
-        entry = {'expr': config.pop('expr')}
-        if 'xclip' in config:
-            entry['xclip'] = config.pop('xclip')
-        config.setdefault('functions', [])
-        config['functions'].append(entry)
-
-    return config
-
-
 def process_graphs(content, graph_counter):
     """
     Converte blocchi :::graph YAML ::: in <x-graph> web component
@@ -73,8 +21,8 @@ def process_graphs(content, graph_counter):
           - {x: ax, y: ay, label: A}
         :::
 
-    La sintassi legacy con `type:` resta accettata e viene normalizzata
-    (vedi normalize_graph_config).
+    `expr` top-level è una scorciatoia per una singola curva (con eventuale
+    `xclip`); equivale a functions: [{expr, xclip}].
 
     Il grafico riceve un id per il goal tracking solo se almeno un punto
     di `points` ha un `target` (gli altri layer sono solo esplorativi).
@@ -102,7 +50,22 @@ def process_graphs(content, graph_counter):
         except yaml.YAMLError:
             config = {}
 
-        config = normalize_graph_config(config)
+        if 'type' in config:
+            # La sintassi legacy `type:` non è più supportata: meglio fallire
+            # rumorosamente in build che produrre un grafico sbagliato in pagina.
+            raise ValueError(
+                f"Blocco :::graph con 'type: {config['type']}' non supportato: "
+                "usa le chiavi componibili functions/points/boundpoints "
+                "(vedi GRAFICI.md)"
+            )
+
+        # Scorciatoia: expr top-level = singola curva (con eventuale xclip)
+        if 'expr' in config:
+            entry = {'expr': config.pop('expr')}
+            if 'xclip' in config:
+                entry['xclip'] = config.pop('xclip')
+            config.setdefault('functions', []).append(entry)
+
         graph_counter += 1
 
         attrs = []

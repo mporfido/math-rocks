@@ -2,8 +2,7 @@
  * <x-graph> - Grafico interattivo basato su JSXGraph
  *
  * Le capacità del grafico sono layer componibili, attivi in base alla
- * presenza degli attributi (il parser normalizza la sintassi legacy `type:`
- * in questo formato a build time):
+ * presenza degli attributi:
  *
  * Attributi comuni:
  *   data-xrange: "min,max" (default "-10,10")

@@ -216,8 +216,6 @@ boundpoints:
 :::
 ```
 
-La vecchia sintassi con `type: function|point|points|boundpoints` resta
-accettata come alias e viene convertita automaticamente in fase di build.
 
 📖 **Documentazione completa**: vedi [GRAFICI.md](GRAFICI.md) per tutti gli attributi ed esempi.
 
