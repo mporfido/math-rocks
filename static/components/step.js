@@ -65,6 +65,13 @@ class XStep extends HTMLElement {
       }
     }
 
+    // Step informativi (nessun elemento interattivo): completati alla
+    // visualizzazione. Con un solo step per pagina, aprire la pagina equivale
+    // a "vedere" lo step, quindi riceve subito la spunta nella navigazione.
+    if (this.allGoals.length === 0) {
+      this.onAllGoalsComplete();
+    }
+
     // Listener per goal completions
     this.addEventListener('goal-complete', (e) => {
       this.handleGoalComplete(e.detail.goalId, e.detail.value);
@@ -111,30 +118,37 @@ class XStep extends HTMLElement {
   extractGoals() {
     const goals = [];
 
-    // Goals da blanks
+    // Goals di verifica: blanks, check, grafici interattivi (solo questi hanno id)
     this.querySelectorAll('x-blank[id]').forEach(blank => {
       goals.push(blank.id);
     });
 
-    // Goals da variables
-    this.querySelectorAll('x-variable[id]').forEach(variable => {
-      goals.push(variable.id);
-    });
-
-    // Goals da x-check
     this.querySelectorAll('x-check[id]').forEach(check => {
       goals.push(check.id);
     });
 
-    // Goals da grafici interattivi (solo type=point hanno id)
     this.querySelectorAll('x-graph[id]').forEach(graph => {
       goals.push(graph.id);
     });
+
+    // Gli slider contano come goal SOLO se non c'è verifica esplicita:
+    // negli step di sola esplorazione muovere lo slider È il criterio di
+    // completamento; quando un check/blank/grafico verifica la risposta,
+    // gli slider sono solo strumenti e non devono bloccare la spunta.
+    if (goals.length === 0) {
+      this.querySelectorAll('x-variable[id]').forEach(variable => {
+        goals.push(variable.id);
+      });
+    }
 
     return goals;
   }
 
   handleGoalComplete(goalId, value) {
+    if (!this.allGoals.includes(goalId)) {
+      return;  // Goal non tracciato (es. slider in uno step con verifica)
+    }
+
     if (this.completedGoals.has(goalId)) {
       return;  // Già completato
     }
