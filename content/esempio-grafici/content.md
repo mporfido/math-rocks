@@ -104,3 +104,33 @@ functions:
 :::div.reveal
 Esatto! Entrambe le rette passano per il punto $(1, 3)$: sostituendo $x = 1$ ottieni $a + b = 3$ e $c + d = 3$.
 :::
+
+---
+
+> id: tabella-xy
+> title: Tabella di punti x-y
+
+# Dalla tabella al piano cartesiano
+
+Inserisci le coordinate dei tre punti nella tabella: vedrai ciascun punto comparire e spostarsi in tempo reale sul piano. La spezzata blu li unisce nell'ordine A → B → C.
+
+| Punto | x | y |
+| ----- | - | - |
+| **A** | ${ax}{ax|1|input} | ${ay}{ay|1|input} |
+| **B** | ${bx}{bx|3|input} | ${by}{by|4|input} |
+| **C** | ${cx}{cx|-2|input} | ${cy}{cy|2|input} |
+
+:::graph
+type: boundpoints
+xrange: "-6,6"
+yrange: "-6,6"
+connect: true
+points:
+  - {x: ax, y: ay, label: A}
+  - {x: bx, y: by, label: B}
+  - {x: cx, y: cy, label: C}
+:::
+
+:::div.highlight
+💡 Prova a cambiare i valori: cambiando le coordinate cambi la posizione dei punti e la forma della spezzata che li collega.
+:::

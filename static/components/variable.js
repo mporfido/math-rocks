@@ -1,16 +1,17 @@
 /**
- * <x-variable> - Slider interattivo per variabili
+ * <x-variable> - Controllo interattivo per variabili
  *
  * Attributi:
  *   data-bind: nome variabile da modificare
  *   data-initial: valore iniziale
- *   data-min: valore minimo
- *   data-max: valore massimo
- *   data-step: incremento
+ *   data-display: "input" per un campo numerico editabile a mano (default: slider)
+ *   data-min: valore minimo (solo slider)
+ *   data-max: valore massimo (solo slider)
+ *   data-step: incremento (solo slider)
  *
  * Eventi:
- *   variable-change: quando l'utente muove lo slider
- *   goal-complete: al primo movimento (segna come completato)
+ *   variable-change: quando l'utente cambia il valore
+ *   goal-complete: al primo cambiamento (segna come completato)
  */
 class XVariable extends HTMLElement {
   connectedCallback() {
@@ -20,7 +21,7 @@ class XVariable extends HTMLElement {
     const max = parseFloat(this.dataset.max || 10);
     const step = parseFloat(this.dataset.step || 1);
 
-    // Stato salvato: ripristina la posizione dello slider e lo stato di goal.
+    // Stato salvato: ripristina il valore corrente e lo stato di goal.
     const saved = window.courseProgress
       ? window.courseProgress.getStepForElement(this)
       : null;
@@ -31,6 +32,12 @@ class XVariable extends HTMLElement {
       }
     }
     const savedDone = Boolean(saved && Array.isArray(saved.goals) && saved.goals.includes(this.id));
+
+    // Modalità campo numerico editabile a mano (senza slider)
+    if (this.dataset.display === 'input') {
+      this.renderNumberInput(bind, initial, savedDone);
+      return;
+    }
 
     this.innerHTML = `
       <span class="variable-control">
@@ -74,6 +81,48 @@ class XVariable extends HTMLElement {
     // Marca come completato al primo movimento
     let firstChange = true;
     slider.addEventListener('change', () => {
+      if (firstChange && !this.hasAttribute('data-completed')) {
+        firstChange = false;
+        this.setAttribute('data-completed', 'true');
+        this.dispatchEvent(new CustomEvent('goal-complete', {
+          bubbles: true,
+          detail: { goalId: this.id }
+        }));
+      }
+    });
+  }
+
+  // Campo numerico editabile a mano: stessa logica di model/evento/persistenza
+  // dello slider, cambia solo il markup (utile nelle celle di tabella x-y).
+  renderNumberInput(bind, initial, savedDone) {
+    this.innerHTML = `
+      <input type="number" class="variable-input" value="${initial}" step="any">
+    `;
+
+    const input = this.querySelector('input');
+
+    if (savedDone) {
+      this.setAttribute('data-completed', 'true');
+    }
+
+    // Aggiorna model dello step ed emetti variable-change a ogni digitazione
+    input.addEventListener('input', () => {
+      const value = parseFloat(input.value);
+
+      const step = this.closest('x-step');
+      if (step && step.model) {
+        step.model[bind] = value;
+      }
+
+      this.dispatchEvent(new CustomEvent('variable-change', {
+        bubbles: true,
+        detail: { name: bind, value }
+      }));
+    });
+
+    // Marca come completato al primo valore inserito (commit del campo)
+    let firstChange = true;
+    input.addEventListener('change', () => {
       if (firstChange && !this.hasAttribute('data-completed')) {
         firstChange = false;
         this.setAttribute('data-completed', 'true');

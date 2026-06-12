@@ -20,6 +20,12 @@
  *   data-snap: snap globale (sovrascritto dal valore per-punto)
  *   id: identificativo per goal tracking
  *
+ * type=boundpoints:
+ *   data-points: JSON array di oggetti {x, y, label} dove x/y sono nomi di
+ *     variabili del modello (es. da input editabili in una tabella). I punti si
+ *     ridisegnano live quando le variabili cambiano. Non trascinabili.
+ *   data-connect: "true" per unire i punti con una spezzata
+ *
  * Eventi:
  *   goal-complete: quando il/i punto/i sono posizionati correttamente
  */
@@ -76,6 +82,8 @@ class XGraph extends HTMLElement {
           this.dataset.points = JSON.stringify([entry]);
         }
         this.initPoints();
+      } else if (type === 'boundpoints') {
+        this.initBoundPoints(step);
       }
     });
   }
@@ -157,6 +165,57 @@ class XGraph extends HTMLElement {
         }
       });
     }
+  }
+
+  // Disegna punti le cui coordinate provengono da variabili del modello (es. input
+  // editabili in una tabella x-y). Le coordinate sono funzioni: JSXGraph le rivaluta
+  // a ogni board.update(), che invochiamo quando una variabile cambia.
+  initBoundPoints(step) {
+    const pointsData = JSON.parse(this.dataset.points || '[]');
+    const connect = this.dataset.connect === 'true';
+
+    // Legge sempre il modello live dello step: l'upgrade dei custom element può
+    // non essere ancora completato quando il grafico cattura `this.model`, quindi
+    // risolviamo `step.model` a ogni valutazione (anche al ripristino da storage).
+    const readVar = (name) => {
+      const model = (step && step.model) || this.model || {};
+      const v = parseFloat(model[name]);
+      return isNaN(v) ? NaN : v;
+    };
+
+    const jxgPoints = pointsData.map((cfg, index) => {
+      const label = cfg.label || String.fromCharCode(65 + index); // A, B, C, ...
+      return this.board.create('point', [
+        () => readVar(cfg.x),
+        () => readVar(cfg.y)
+      ], {
+        name: label,
+        color: '#3498db',
+        size: 5,
+        fixed: true,         // guidati dagli input, non trascinabili
+        label: { offset: [10, 10] }
+      });
+    });
+
+    // Spezzata che unisce i punti consecutivi (segue i punti perché vi è ancorata)
+    if (connect && jxgPoints.length > 1) {
+      for (let i = 0; i < jxgPoints.length - 1; i++) {
+        this.board.create('segment', [jxgPoints[i], jxgPoints[i + 1]], {
+          strokeColor: '#3498db',
+          strokeWidth: 2,
+          highlight: false
+        });
+      }
+    }
+
+    if (step) {
+      step.addEventListener('variable-change', () => this.board.update());
+    }
+
+    // Ridisegno differito: se al primo disegno il modello dello step non era
+    // ancora pronto (race di upgrade), qui i valori — anche quelli ripristinati
+    // da storage — sono certamente disponibili.
+    requestAnimationFrame(() => this.board.update());
   }
 
   // Aggiunge un pulsante "Verifica" sotto il grafico; chiama checkFn(btn) al click

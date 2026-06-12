@@ -219,6 +219,17 @@ def process_variables(content, variable_counter):
         # Salva il valore iniziale per questa variabile
         variables[bind] = initial
 
+        # Modalità input: ${display}{bind|initial|input} → campo numerico editabile
+        # a mano (niente slider, niente range).
+        if range_str.strip() == 'input':
+            return (
+                f'<x-variable id="{var_id}" '
+                f'data-display="input" '
+                f'data-bind="{bind}" '
+                f'data-initial="{initial}">'
+                f'</x-variable>'
+            )
+
         try:
             min_val, max_val, step = range_str.split(',')
         except ValueError:

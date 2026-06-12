@@ -228,6 +228,24 @@ x-variable {
     box-shadow: 0 3px 10px rgba(37, 99, 235, 0.6);
 }
 
+/* Campo numerico editabile a mano (data-display="input") */
+.variable-input {
+    width: 64px;
+    padding: 4px 8px;
+    border: 2px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 1em;
+    font-family: inherit;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.variable-input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
 /* ========== Reveal Content ========== */
 
 .reveal {
@@ -381,6 +399,10 @@ x-graph {
 .course-content td .blank-input {
     min-width: 60px;
     padding: 4px 8px;
+}
+
+.course-content td .variable-input {
+    width: 56px;
 }
 
 /* ========== Responsive ========== */

@@ -133,6 +133,21 @@ Modifica `a`: ${a}{a|2|-5,5,1}
 L'equazione diventa: `x^2 + ${a}x + 1 = 0`
 ```
 
+**Input editabile a mano (senza slider):**
+
+Usa la parola chiave `input` al posto del range per ottenere un campo numerico
+digitabile invece dello slider. Utile nelle celle di tabella (es. coordinate x-y).
+
+```markdown
+Sintassi: ${display}{bind|initial|input}
+
+| Punto | x | y |
+| ----- | - | - |
+| A | ${ax}{ax|1|input} | ${ay}{ay|1|input} |
+```
+
+L'input scrive nel modello e aggiorna i grafici collegati esattamente come lo slider.
+
 ### 3. Check (Verifica Condizioni)
 
 Sintassi: `[Etichetta]{check: condizione}`
@@ -172,8 +187,30 @@ yrange: "-2,2"
 - `type: function` - Curva `y = f(x)`, opzionalmente collegata a slider con `bind`
 - `type: point` - Punto singolo trascinabile con coordinata obiettivo (`target`)
 - `type: points` - Punti multipli trascinabili, con snap, verifica esplicita e curva di sfondo
+- `type: boundpoints` - Punti le cui coordinate provengono da variabili del modello
+  (es. input editabili in una tabella). Si ridisegnano live; `connect: true` li unisce
+  con una spezzata. Non trascinabili.
 
 I grafici con `target` generano automaticamente un goal per il tracking.
+
+**Esempio `boundpoints` (tabella x-y → piano cartesiano):**
+
+```markdown
+| Punto | x | y |
+| ----- | - | - |
+| A | ${ax}{ax|1|input} | ${ay}{ay|1|input} |
+| B | ${bx}{bx|3|input} | ${by}{by|4|input} |
+
+:::graph
+type: boundpoints
+xrange: "-6,6"
+yrange: "-6,6"
+connect: true
+points:
+  - {x: ax, y: ay, label: A}
+  - {x: bx, y: by, label: B}
+:::
+```
 
 📖 **Documentazione completa**: vedi [GRAFICI.md](GRAFICI.md) per tutti gli attributi ed esempi.
 
