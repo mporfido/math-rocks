@@ -154,10 +154,14 @@ def process_blanks(content, blank_counter):
 
     Esempi:
         [[5]] -> <x-blank id="blank-0" data-solution="5"></x-blank>
-        [[a|*b|c]] -> <x-blank id="blank-1" data-choices="a|b|c" data-solution="b"></x-blank>
+        [[a|*b|c]] -> <x-blank id="blank-1" data-choices='["a", "b", "c"]' data-solution="b"></x-blank>
+        [[select: a|*b|c]] -> <x-blank id="blank-2" data-choices='[...]' data-solution="b" data-display="dropdown"></x-blank>
+        [[2/16 || 1/8]] -> <x-blank id="blank-3" data-solution="2/16" data-accept='["2/16", "1/8"]'></x-blank>
 
     La soluzione corretta nelle scelte multiple è indicata con *
     Se nessuna scelta ha *, la prima opzione è considerata corretta
+    Il prefisso "select:" rende la scelta multipla come menu a tendina inline
+    La doppia pipe || crea un input testuale che accetta più risposte corrette
 
     Args:
         content: Contenuto markdown
@@ -166,33 +170,47 @@ def process_blanks(content, blank_counter):
     Returns:
         Tuple (contenuto processato, nuovo valore counter)
     """
+    def parse_choices(raw):
+        """Parsa "a|*b|c" -> (clean_choices, solution). La corretta è marcata con *."""
+        solution = None
+        clean_choices = []
+        for choice in raw.split('|'):
+            choice = choice.strip()
+            if choice.startswith('*'):
+                solution = choice[1:].strip()
+                clean_choices.append(solution)
+            else:
+                clean_choices.append(choice)
+        if solution is None:
+            solution = clean_choices[0]
+        return clean_choices, solution
+
     def replace_blank(match):
         nonlocal blank_counter
         answer = match.group(1)
         blank_id = f'blank-{blank_counter}'
         blank_counter += 1
 
-        if '|' in answer:
-            # Multiple choice
-            choices = answer.split('|')
-            solution = None
-            clean_choices = []
-
-            for choice in choices:
-                choice = choice.strip()
-                if choice.startswith('*'):
-                    # Questa è la risposta corretta
-                    solution = choice[1:].strip()
-                    clean_choices.append(solution)
-                else:
-                    clean_choices.append(choice)
-
-            # Se nessuna soluzione specificata, usa la prima opzione
-            if solution is None:
-                solution = clean_choices[0]
-
-            choices_str = '|'.join(clean_choices)
-            return f'<x-blank id="{blank_id}" data-choices="{choices_str}" data-solution="{solution}"></x-blank>'
+        if answer.strip().lower().startswith('select:'):
+            # Scelta multipla resa come menu a tendina inline
+            raw = answer.strip()[len('select:'):]
+            clean_choices, solution = parse_choices(raw)
+            choices_attr = html_lib.escape(json.dumps(clean_choices))
+            return f'<x-blank id="{blank_id}" data-choices="{choices_attr}" data-solution="{solution}" data-display="dropdown"></x-blank>'
+        elif '||' in answer:
+            # Input testuale con più risposte accettate (es. "2/16 || 1/8")
+            # Serializza come JSON HTML-escaped: niente '|' nell'attributo, così
+            # il blank può stare dentro una cella di tabella markdown senza romperla.
+            accepted = [a.strip() for a in answer.split('||') if a.strip()]
+            solution = accepted[0]
+            accept_attr = html_lib.escape(json.dumps(accepted))
+            return f'<x-blank id="{blank_id}" data-solution="{solution}" data-accept="{accept_attr}"></x-blank>'
+        elif '|' in answer:
+            # Scelta multipla a bottoni. Le opzioni sono serializzate in JSON
+            # HTML-escaped (come il dropdown) così il blank è sicuro anche in tabella.
+            clean_choices, solution = parse_choices(answer)
+            choices_attr = html_lib.escape(json.dumps(clean_choices))
+            return f'<x-blank id="{blank_id}" data-choices="{choices_attr}" data-solution="{solution}"></x-blank>'
         else:
             # Single answer
             return f'<x-blank id="{blank_id}" data-solution="{answer}"></x-blank>'

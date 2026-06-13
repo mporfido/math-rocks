@@ -99,6 +99,41 @@ x-blank.incorrect .blank-input {
     color: #dc2626;
 }
 
+/* Dropdown inline (cloze "select:") */
+.blank-select-wrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 4px;
+}
+
+.blank-select {
+    padding: 6px 12px;
+    border: 2px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 1em;
+    font-family: inherit;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+.blank-select:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+x-blank.correct .blank-select {
+    border-color: #22c55e;
+    background-color: #f0fdf4;
+}
+
+x-blank.incorrect .blank-select {
+    border-color: #ef4444;
+    background-color: #fef2f2;
+}
+
 /* ========== Check Component ========== */
 
 x-check {
@@ -442,6 +477,15 @@ x-graph {
 
 .course-content td .blank-input {
     min-width: 60px;
+    padding: 4px 8px;
+}
+
+.course-content td .blank-select-wrapper {
+    margin: 0;
+    gap: 4px;
+}
+
+.course-content td .blank-select {
     padding: 4px 8px;
 }
 

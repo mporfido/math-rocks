@@ -3,7 +3,9 @@
  *
  * Attributi:
  *   data-solution: risposta corretta (singola)
- *   data-choices: scelte multiple separate da | (es: "a|b|c")
+ *   data-choices: scelte multiple come array JSON (es: '["a","b","c"]')
+ *   data-display: "dropdown" per il menu a tendina inline (altrimenti bottoni)
+ *   data-accept: array JSON di risposte accettate per l'input testuale
  *   id: identificativo univoco per goal tracking
  *
  * Eventi:
@@ -12,7 +14,7 @@
 class XBlank extends HTMLElement {
   connectedCallback() {
     const solution = this.dataset.solution;
-    const choices = this.dataset.choices;
+    const choicesAttr = this.dataset.choices;
 
     // Stato salvato: se questo goal è già stato completato, lo ripristiniamo.
     const saved = window.courseProgress
@@ -21,11 +23,29 @@ class XBlank extends HTMLElement {
     this.savedDone = Boolean(saved && Array.isArray(saved.goals) && saved.goals.includes(this.id));
     this.savedAnswer = saved && saved.answers ? saved.answers[this.id] : undefined;
 
-    if (choices) {
-      this.renderMultipleChoice(choices.split('|'), solution);
+    if (choicesAttr) {
+      // data-choices è un array JSON; fallback su split('|') per robustezza.
+      let choices;
+      try {
+        choices = JSON.parse(choicesAttr);
+      } catch (e) {
+        choices = choicesAttr.split('|');
+      }
+      if (this.dataset.display === 'dropdown') {
+        this.renderDropdown(choices, solution);
+      } else {
+        this.renderMultipleChoice(choices, solution);
+      }
     } else {
       this.renderTextInput(solution);
     }
+  }
+
+  escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
   }
 
   renderTextInput(solution) {
@@ -39,6 +59,20 @@ class XBlank extends HTMLElement {
     const input = this.querySelector('input');
     const feedback = this.querySelector('.blank-feedback');
 
+    // Risposte accettate: lista JSON da data-accept, oppure la singola solution.
+    // Normalizzate (trim + lowercase) per il confronto.
+    let acceptList = [solution || ''];
+    if (this.dataset.accept) {
+      try {
+        acceptList = JSON.parse(this.dataset.accept);
+      } catch (e) {
+        console.warn('x-blank: data-accept non valido', this.dataset.accept);
+      }
+    }
+    const accepted = acceptList
+      .map(s => String(s).trim().toLowerCase())
+      .filter(Boolean);
+
     // Ripristino: riempi l'input e mostra il feedback senza dispatchare
     // goal-complete (la contabilità la fa x-step leggendo da storage).
     if (this.savedDone) {
@@ -51,9 +85,8 @@ class XBlank extends HTMLElement {
 
     input.addEventListener('input', () => {
       const value = input.value.trim().toLowerCase();
-      const correctAnswer = solution ? solution.trim().toLowerCase() : '';
 
-      if (value === correctAnswer) {
+      if (accepted.includes(value)) {
         this.classList.add('correct');
         this.classList.remove('incorrect');
         feedback.textContent = '✓';
@@ -119,6 +152,52 @@ class XBlank extends HTMLElement {
           this.classList.add('incorrect');
         }
       });
+    });
+  }
+
+  renderDropdown(choices, solution) {
+    const correctAnswer = solution ? solution.trim() : String(choices[0] || '').trim();
+
+    const options = ['<option value="" disabled selected>— scegli —</option>']
+      .concat(choices.map(choice => {
+        const text = String(choice).trim();
+        return `<option>${this.escapeHtml(text)}</option>`;
+      }));
+
+    this.innerHTML = `
+      <span class="blank-select-wrapper">
+        <select class="blank-select">${options.join('')}</select>
+        <span class="blank-feedback"></span>
+      </span>
+    `;
+
+    const select = this.querySelector('select');
+    const feedback = this.querySelector('.blank-feedback');
+
+    // Ripristino: imposta la selezione salvata (o la corretta) e marca ✓ senza eventi.
+    if (this.savedDone) {
+      select.value = this.savedAnswer !== undefined ? this.savedAnswer : correctAnswer;
+      this.classList.add('correct');
+      feedback.textContent = '✓';
+      feedback.className = 'blank-feedback success';
+      this.setAttribute('data-completed', 'true');
+    }
+
+    select.addEventListener('change', () => {
+      const value = select.value;
+
+      if (value === correctAnswer) {
+        this.classList.add('correct');
+        this.classList.remove('incorrect');
+        feedback.textContent = '✓';
+        feedback.className = 'blank-feedback success';
+        this.markComplete(value);
+      } else {
+        this.classList.add('incorrect');
+        this.classList.remove('correct');
+        feedback.textContent = '✗';
+        feedback.className = 'blank-feedback error';
+      }
     });
   }
 

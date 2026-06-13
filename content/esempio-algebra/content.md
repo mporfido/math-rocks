@@ -75,6 +75,21 @@ La risposta corretta è indicata con `*`; senza asterisco vale la prima opzione.
 
 :::
 
+## Esercizio 4: Completamento inline (menu a tendina)
+
+Completa la frase scegliendo dal menu: per isolare `x` in `x + 3 = 10` devi [[select: sommare|*sottrarre|moltiplicare]] 3 a entrambi i membri.
+
+:::details.syntax-doc
+<summary>📝 Mostra la sintassi</summary>
+
+```md
+... devi [[select: sommare|*sottrarre|moltiplicare]] 3 ...
+```
+
+Il prefisso `select:` rende la scelta multipla come **menu a tendina inline** nel testo, invece dei bottoni. La corretta si marca con `*` come al solito. Le opzioni sono testo semplice (niente formule LaTeX dentro il menu).
+
+:::
+
 :::div.reveal
 Eccellente! Hai completato tutti gli esercizi di base. Ora sei pronto per qualcosa di più interattivo!
 :::

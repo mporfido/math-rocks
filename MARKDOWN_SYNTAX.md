@@ -55,6 +55,19 @@ Quanto fa 2 + 2? [[4]]
 - Feedback visivo (verde/rosso)
 - Conta come goal per il tracking
 
+#### Input Testuale con più risposte accettate
+
+Sintassi: `[[risposta1 || risposta2]]` (doppia pipe `||`)
+
+```markdown
+Frazione semplificata: [[2/16 || 1/8]]
+```
+
+Resta un input testuale (non bottoni) ma accetta come corretta **qualsiasi** delle
+risposte elencate. Da non confondere con la scelta multipla, che usa la pipe singola
+`|` e mostra dei bottoni. Vengono accettati solo i valori elencati (nessuna
+equivalenza numerica automatica). Funziona anche dentro le tabelle markdown.
+
 #### Scelta Multipla
 
 Sintassi: `[[opzione1|*opzione_corretta|opzione3]]`
@@ -78,6 +91,22 @@ Quale operazione? [[Addizione|*Moltiplicazione|Divisione]]
 <!-- Senza asterisco (prima opzione corretta) -->
 Vero o falso? [[Vero|Falso]]
 ```
+
+#### Menu a Tendina inline (cloze)
+
+Sintassi: `[[select: opzione1|*corretta|opzione3]]`
+
+```markdown
+Per isolare `x` devi [[select: sommare|*sottrarre|moltiplicare]] 3 a entrambi i membri.
+```
+
+Il prefisso `select:` rende la scelta multipla come **menu a tendina inline** nel testo
+invece dei bottoni — ideale per i completamenti in mezzo a una frase. La risposta corretta
+si marca con `*` come nella scelta multipla normale, e il menu funziona anche dentro le
+tabelle.
+
+> ⚠️ Le opzioni di un menu a tendina sono **testo semplice**: il LaTeX/MathJax non viene
+> reso dentro il `<select>`. Per le frazioni usa la forma piana (es. `1/2`, non `$\frac12$`).
 
 **Esempio completo:**
 
