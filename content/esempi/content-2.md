@@ -1,3 +1,9 @@
+> id: grafici
+> title: Componenti grafici
+> description: Esempi di integrazione di grafici interattivi nelle pagine.
+
+---
+
 > id: grafico-funzione
 > title: Grafico Interattivo
 

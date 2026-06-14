@@ -10,11 +10,12 @@
     <div class="courses-grid">
         {% if courses %}
             {% for course in courses %}
-            <div class="course-card">
+            <div class="course-card"{% if course.color %} style="--course-color: {{ course.color }};"{% endif %}>
                 <h2>{{ course.title }}</h2>
                 <p>{{ course.description }}</p>
+                <p class="course-card-meta">{{ course.lessons }} lezion{{ 'e' if course.lessons == 1 else 'i' }}</p>
                 <a href="{{ url_for('courses.course_index', course_id=course.id) }}" class="btn btn-primary">
-                    Inizia il corso
+                    Apri il corso
                 </a>
             </div>
             {% endfor %}

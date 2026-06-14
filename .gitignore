@@ -58,6 +58,7 @@ static/images/
 # Piani di lavoro locali
 claude-plans/
 
-# Lezioni: tracciate solo quelle che iniziano con "esempio-"
+# Corsi: tracciati solo i corsi dimostrativi ("esempio-*" e "esempi")
 content/*/
 !content/esempio-*/
+!content/esempi/

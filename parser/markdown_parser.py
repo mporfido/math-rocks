@@ -36,7 +36,8 @@ class CourseParser:
                         'metadata': {'title': '...', ...}
                     }
                 ],
-                'total_steps': 3
+                'total_steps': 3,
+                'lesson_metadata': {'title': '...', ...}  # front-matter lezione (può essere vuoto)
             }
         """
         content = Path(filepath).read_text(encoding='utf-8')
@@ -50,6 +51,7 @@ class CourseParser:
         # Split in steps (separati da ---)
         steps_raw = re.split(r'\n---\n', content)
         steps = []
+        lesson_metadata = {}
 
         for idx, step_content in enumerate(steps_raw):
             if not step_content.strip():
@@ -57,6 +59,12 @@ class CourseParser:
 
             # Parsing metadata YAML (righe che iniziano con >)
             metadata, md_content = self._extract_metadata(step_content)
+
+            # Front-matter di lezione: il PRIMO blocco metadata-only (metadata
+            # presente ma senza corpo markdown) descrive la lezione, non uno step.
+            if not steps and not lesson_metadata and metadata and not md_content.strip():
+                lesson_metadata = metadata
+                continue
 
             # Estrai i code fence ``` così i preprocessori non toccano
             # la sintassi custom mostrata come esempio letterale
@@ -92,7 +100,8 @@ class CourseParser:
 
         return {
             'steps': steps,
-            'total_steps': len(steps)
+            'total_steps': len(steps),
+            'lesson_metadata': lesson_metadata
         }
 
     def _extract_metadata(self, content):

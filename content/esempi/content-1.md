@@ -1,3 +1,9 @@
+> id: algebra
+> title: Introduzione all'Algebra
+> description: Le basi dell'algebra attraverso esercizi pratici e visualizzazioni.
+
+---
+
 > id: intro
 > title: Benvenuto all'Algebra
 

@@ -302,6 +302,179 @@ body {
     background-color: #4b5563;
 }
 
+/* Meta nella card del corso (home) */
+.course-card-meta {
+    font-size: 0.85rem;
+    color: #9ca3af;
+    margin-bottom: 1.5rem !important;
+}
+
+/* Accento colorato opzionale per le card corso (da metadata.color) */
+.course-card {
+    border-top: 4px solid var(--course-color, #2563eb);
+}
+
+/* ========== Panoramica corso (elenco lezioni) ========== */
+.breadcrumb {
+    display: inline-block;
+    margin-bottom: 1.5rem;
+    color: #6b7280;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.breadcrumb:hover {
+    color: #2563eb;
+}
+
+.course-hero {
+    background: #fff;
+    border-radius: 8px;
+    padding: 2.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-left: 6px solid var(--course-color, #2563eb);
+    margin-bottom: 2rem;
+}
+
+.course-hero h1 {
+    font-size: 2rem;
+    color: #1f2937;
+    margin-bottom: 0.75rem;
+}
+
+.course-hero .subtitle {
+    margin-bottom: 1rem;
+}
+
+.course-meta {
+    color: #9ca3af;
+    font-size: 0.95rem;
+}
+
+.badge-progression {
+    background: #eef2ff;
+    color: #4338ca;
+    padding: 0.15rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.lessons-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 0;
+    margin: 0;
+}
+
+.lesson-card {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    background: #fff;
+    border-radius: 8px;
+    padding: 1.25rem 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border-left: 4px solid var(--course-color, #2563eb);
+}
+
+.lesson-card:hover {
+    transform: translateX(4px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.lesson-index {
+    flex: 0 0 auto;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: #eef2ff;
+    color: #4338ca;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+}
+
+.lesson-body {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.lesson-title {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.lesson-desc {
+    color: #6b7280;
+    font-size: 0.9rem;
+}
+
+.lesson-progress {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: 0.25rem;
+}
+
+.lesson-progress-bar {
+    flex: 1 1 auto;
+    max-width: 240px;
+    height: 6px;
+    background: #e5e7eb;
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.lesson-progress-fill {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: var(--course-color, #2563eb);
+    transition: width 0.3s;
+}
+
+.lesson-progress-label {
+    font-size: 0.8rem;
+    color: #9ca3af;
+    white-space: nowrap;
+}
+
+.lesson-status {
+    flex: 0 0 auto;
+    font-size: 1.25rem;
+    width: 1.5rem;
+    text-align: center;
+}
+
+.lesson-card.complete .lesson-index {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.lesson-card.complete .lesson-status {
+    color: #16a34a;
+}
+
+.lesson-card.locked {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.lesson-card.locked:hover {
+    transform: none;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .course-container {

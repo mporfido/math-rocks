@@ -1,205 +1,106 @@
 {% extends "base.html" %}
 
-{% block title %}{{ step.metadata.get('title', step.id) }} - {{ course_id }}{% endblock %}
+{% block title %}{{ course.metadata.get('title', course_id) }}{% endblock %}
 
 {% block extra_css %}
-<!-- JSXGraph per grafici interattivi -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph@1.9.2/distrib/jsxgraph.css">
-<script src="https://cdn.jsdelivr.net/npm/jsxgraph@1.9.2/distrib/jsxgraphcore.min.js"></script>
-
-<!-- MathJax per rendering formule matematiche -->
-<script>
-  MathJax = {
-    tex: {
-      inlineMath: [['$', '$'], ['\\(', '\\)']],
-      displayMath: [['$$', '$$'], ['\\[', '\\]']],
-      processEscapes: true,
-      processEnvironments: true
-    },
-    options: {
-      skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
-      ignoreHtmlClass: 'no-math'
-    },
-    startup: {
-      pageReady: () => {
-        return MathJax.startup.defaultPageReady().then(() => {
-          console.log('MathJax loaded and ready');
-        });
-      }
-    }
-  };
-</script>
-<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-
-<!-- Progressi + guard sequenziale: caricato nel <head> ed eseguito in modo
-     sincrono PRIMA del rendering del body, così l'eventuale redirect avviene
-     senza che il contenuto di uno step bloccato (che può contenere la risposta
-     al precedente) venga mostrato. -->
+<!-- progress.js serve per leggere lo stato delle lezioni (X/Y, lock) -->
 <script src="{{ url_for('static', filename='components/progress.js') }}"></script>
-<script>
-  (function () {
-    const cp = window.courseProgress;
-    if (!cp || !cp.enabled) return;  // storage non disponibile → nessun blocco
-    const courseId = {{ course_id|tojson }};
-    const orderedIds = {{ course.steps|map(attribute='id')|list|tojson }};
-    const currentId = {{ step.id|tojson }};
-    const completed = new Set(cp.getCompletedSteps(courseId));
-    // Frontiera = primo step non completato; tutto ciò che viene dopo è bloccato.
-    let frontier = orderedIds.findIndex(id => !completed.has(id));
-    if (frontier === -1) frontier = orderedIds.length - 1;
-    if (orderedIds.indexOf(currentId) > frontier) {
-      window.location.replace(
-        '/course/' + encodeURIComponent(courseId) + '/' + encodeURIComponent(orderedIds[frontier])
-      );
-    }
-  })();
-</script>
 {% endblock %}
 
 {% block content %}
-<div class="course-container">
-    <!-- Sidebar navigazione -->
-    <aside class="course-sidebar">
-        <h3>{{ course_id|replace('-', ' ')|title }}</h3>
-        <nav class="steps-nav">
-            {% for s in course.steps %}
-            <a href="{{ url_for('courses.course_step', course_id=course_id, step_id=s.id) }}"
-               class="step-link {% if s.id == step.id %}active{% endif %}"
-               data-step-id="{{ s.id }}">
-                {{ loop.index }}. {{ s.metadata.get('title', s.id) }}
+<div class="course-overview">
+    <a href="{{ url_for('home') }}" class="breadcrumb">← Tutti i corsi</a>
+
+    <header class="course-hero"
+            {% if course.metadata.get('color') %}style="--course-color: {{ course.metadata.color }};"{% endif %}>
+        <h1>{{ course.metadata.get('title', course_id|replace('-', ' ')|title) }}</h1>
+        {% if course.metadata.get('description') %}
+        <p class="subtitle">{{ course.metadata.description }}</p>
+        {% endif %}
+        <p class="course-meta">
+            {{ course.lessons|length }} lezion{{ 'e' if course.lessons|length == 1 else 'i' }}
+            {% if course.metadata.get('progression') == 'sequential' %}
+            · <span class="badge-progression">sblocco in sequenza</span>
+            {% endif %}
+        </p>
+    </header>
+
+    <ol class="lessons-list">
+        {% for lesson in course.lessons %}
+        <li>
+            <a class="lesson-card"
+               data-lesson-id="{{ lesson.id }}"
+               data-step-ids='{{ lesson.steps|map(attribute="id")|list|tojson }}'
+               href="{{ url_for('courses.lesson_index', course_id=course_id, lesson_id=lesson.id) }}">
+                <span class="lesson-index">{{ loop.index }}</span>
+                <span class="lesson-body">
+                    <span class="lesson-title">{{ lesson.title }}</span>
+                    {% if lesson.metadata.get('description') %}
+                    <span class="lesson-desc">{{ lesson.metadata.description }}</span>
+                    {% endif %}
+                    <span class="lesson-progress">
+                        <span class="lesson-progress-bar"><span class="lesson-progress-fill"></span></span>
+                        <span class="lesson-progress-label">0 / {{ lesson.total_steps }}</span>
+                    </span>
+                </span>
+                <span class="lesson-status" aria-hidden="true"></span>
             </a>
-            {% endfor %}
-        </nav>
-        <button class="btn btn-secondary reset-progress-btn" type="button">Azzera progressi</button>
-    </aside>
-
-    <!-- Contenuto step -->
-    <article class="course-content">
-        <x-step data-course-id="{{ course_id }}"
-                data-step-id="{{ step.id }}"
-                {% if step.metadata.get('use-mathjs') %}data-use-mathjs="true"{% endif %}>
-
-            {{ step.html|safe }}
-
-        </x-step>
-
-        <!-- Navigazione step -->
-        <div class="step-navigation">
-            {% if step_index > 0 %}
-            <a href="{{ url_for('courses.course_step', course_id=course_id, step_id=course.steps[step_index - 1].id) }}"
-               class="btn btn-secondary">← Precedente</a>
-            {% endif %}
-
-            {% if step_index < total_steps - 1 %}
-            <a href="{{ url_for('courses.course_step', course_id=course_id, step_id=course.steps[step_index + 1].id) }}"
-               class="btn btn-primary">Successivo →</a>
-            {% endif %}
-        </div>
-    </article>
+        </li>
+        {% endfor %}
+    </ol>
 </div>
 {% endblock %}
 
 {% block scripts %}
-<!-- Carica Web Components (progress.js è già caricato nel <head>) -->
-<script src="{{ url_for('static', filename='components/formula-simplifier.js') }}"></script>
-<script src="{{ url_for('static', filename='components/blank.js') }}"></script>
-<script src="{{ url_for('static', filename='components/check.js') }}"></script>
-<script src="{{ url_for('static', filename='components/variable.js') }}"></script>
-<script src="{{ url_for('static', filename='components/graph.js') }}"></script>
-<script src="{{ url_for('static', filename='components/step.js') }}"></script>
-
-<!-- Re-render MathJax dopo caricamento componenti -->
-<script>
-  // Aspetta che la pagina sia completamente caricata
-  window.addEventListener('load', () => {
-    // Singolo typeset dopo il caricamento completo
-    setTimeout(() => {
-      if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
-        MathJax.typesetPromise()
-          .then(() => console.log('MathJax rendering completato'))
-          .catch((err) => console.error('MathJax typeset error:', err));
-      }
-    }, 200);
-  });
-
-  // Re-render quando cambiano le variabili dinamiche
-  document.addEventListener('variable-change', () => {
-    setTimeout(() => {
-      if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
-        MathJax.typesetPromise().catch((err) => console.error('MathJax typeset error:', err));
-      }
-    }, 50);
-  });
-</script>
-
-<!-- Sidebar: checkmark sugli step completati e reset progressi -->
 <script>
   (function () {
+    const cp = window.courseProgress;
     const courseId = {{ course_id|tojson }};
-    const currentId = document.querySelector('.step-link.active')
-      ? document.querySelector('.step-link.active').dataset.stepId
-      : null;
-    const nextBtn = document.querySelector('.step-navigation .btn-primary');
-    const gatingEnabled = !!(window.courseProgress && window.courseProgress.enabled);
+    const progression = {{ course.metadata.get('progression', 'free')|tojson }};
+    const sequential = progression === 'sequential';
+    const cards = Array.from(document.querySelectorAll('.lesson-card'));
 
-    // Marca gli step completati al caricamento
-    if (window.courseProgress) {
-      const completed = window.courseProgress.getCompletedSteps(courseId);
-      completed.forEach(stepId => {
-        const link = document.querySelector(`.step-link[data-step-id="${stepId}"]`);
-        if (link) link.classList.add('completed');
-      });
-    }
+    let prevComplete = true;  // la prima lezione è sempre accessibile
 
-    // Blocca gli step successivi alla "frontiera" (primo step non completato).
-    function applyLocks() {
-      if (!gatingEnabled) return;
-      const links = Array.from(document.querySelectorAll('.step-link'));
-      const orderedIds = links.map(a => a.dataset.stepId);
-      const completed = new Set(window.courseProgress.getCompletedSteps(courseId));
-      let frontier = orderedIds.findIndex(id => !completed.has(id));
-      if (frontier === -1) frontier = orderedIds.length - 1;
-      links.forEach((link, i) => {
-        const locked = i > frontier;
-        link.classList.toggle('locked', locked);
-        if (locked) link.setAttribute('aria-disabled', 'true');
-        else link.removeAttribute('aria-disabled');
-      });
-    }
+    cards.forEach(card => {
+      const lessonId = card.dataset.lessonId;
+      let stepIds = [];
+      try { stepIds = JSON.parse(card.dataset.stepIds); } catch (e) { stepIds = []; }
+      const total = stepIds.length;
 
-    // Disabilita "Successivo" finché lo step corrente non è completato.
-    function refreshNext() {
-      if (!gatingEnabled || !nextBtn || !currentId) return;
-      const completed = new Set(window.courseProgress.getCompletedSteps(courseId));
-      const currentDone = completed.has(currentId);
-      nextBtn.classList.toggle('disabled', !currentDone);
-      nextBtn.setAttribute('aria-disabled', String(!currentDone));
-    }
+      // Step completati di questa lezione (chiave scoped "courseId/lessonId").
+      let doneCount = 0;
+      if (cp) {
+        const completed = new Set(cp.getCompletedSteps(courseId + '/' + lessonId));
+        doneCount = stepIds.filter(id => completed.has(id)).length;
+      }
+      const complete = total > 0 && doneCount === total;
 
-    applyLocks();
-    refreshNext();
+      // Aggiorna progresso
+      const fill = card.querySelector('.lesson-progress-fill');
+      const label = card.querySelector('.lesson-progress-label');
+      if (fill) fill.style.width = total ? (100 * doneCount / total) + '%' : '0%';
+      if (label) label.textContent = doneCount + ' / ' + total;
 
-    // Marca live lo step corrente quando viene completato e aggiorna i blocchi
-    document.addEventListener('step-complete', (e) => {
-      const stepId = e.detail && e.detail.stepId;
-      if (!stepId) return;
-      const link = document.querySelector(`.step-link[data-step-id="${stepId}"]`);
-      if (link) link.classList.add('completed');
-      applyLocks();
-      refreshNext();
+      const status = card.querySelector('.lesson-status');
+
+      // Gating fra lezioni (solo se progression: sequential e storage attivo)
+      const locked = sequential && cp && cp.enabled && !prevComplete;
+      if (locked) {
+        card.classList.add('locked');
+        card.setAttribute('aria-disabled', 'true');
+        // Impedisci la navigazione verso una lezione bloccata
+        card.addEventListener('click', (e) => e.preventDefault());
+        if (status) status.textContent = '🔒';
+      } else if (complete) {
+        card.classList.add('complete');
+        if (status) status.textContent = '✓';
+      } else if (doneCount > 0) {
+        card.classList.add('in-progress');
+      }
+
+      prevComplete = complete;
     });
-
-    // Bottone "Azzera progressi"
-    const resetBtn = document.querySelector('.reset-progress-btn');
-    if (resetBtn) {
-      resetBtn.addEventListener('click', () => {
-        if (!window.courseProgress) return;
-        if (confirm('Azzerare tutti i progressi di questo corso?')) {
-          window.courseProgress.clearCourse(courseId);
-          window.location.reload();
-        }
-      });
-    }
   })();
 </script>
 {% endblock %}

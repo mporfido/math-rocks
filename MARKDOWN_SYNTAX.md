@@ -4,6 +4,44 @@ Guida completa alla sintassi markdown estesa per creare corsi interattivi.
 
 ## Struttura Base
 
+### Corsi e Lezioni
+
+Ogni cartella in `content/` è un **corso**. Dentro la cartella, ogni file
+`content-1.md`, `content-2.md`, … è una **lezione** (l'ordine segue il numero nel
+nome). Ogni lezione è una sequenza di step separati da `---`.
+
+```
+content/
+├── esempi/
+│   ├── metadata.yaml      # metadati del CORSO
+│   ├── content-1.md       # lezione 1
+│   └── content-2.md       # lezione 2
+```
+
+**`metadata.yaml` del corso** (campi principali):
+- `title`, `description`, `level`, `duration`, `color` (opzionale, accento grafico)
+- `progression`: `free` (lezioni in qualsiasi ordine) oppure `sequential` (ogni
+  lezione si sblocca completando la precedente). Default: `free`.
+
+**Front-matter di lezione**: in cima a ogni `content-N.md`, un blocco di righe `>`
+*senza corpo*, seguito da `---`, descrive la lezione (non è uno step):
+
+```markdown
+> id: algebra                       # opzionale; default = nome file (es. "content-1")
+> title: Introduzione all'Algebra
+> description: Le basi dell'algebra.
+
+---
+
+> id: intro
+> title: Benvenuto
+
+# Primo step della lezione...
+```
+
+> ℹ️ Solo i corsi dimostrativi (`content/esempi/` e `content/esempio-*/`) sono
+> tracciati da git; gli altri corsi in `content/` restano locali (vedi `.gitignore`).
+
 ### Metadata Step
 
 Ogni step inizia con metadata YAML (righe con `>`):

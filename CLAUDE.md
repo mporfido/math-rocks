@@ -42,12 +42,13 @@ math-rocks/
 │       └── variable.js         # <x-variable>: slider interattivo
 │
 ├── content/                    # Contenuti dei corsi (sorgente)
-│   └── esempio-algebra/
-│       ├── content.md          # Contenuto markdown con sintassi custom
-│       └── metadata.yaml       # Metadati corso (titolo, descrizione, colore)
+│   └── esempi/                 # Un CORSO = una cartella
+│       ├── metadata.yaml       # Metadati corso (titolo, descrizione, colore, progression)
+│       ├── content-1.md        # Una LEZIONE = un file content-N.md (step separati da ---)
+│       └── content-2.md
 │
 ├── courses_data/               # Corsi compilati (generati da build_courses.py)
-│   └── esempio-algebra.json    # JSON con steps HTML processati
+│   └── esempi.json             # JSON: { id, metadata, lessons: [ { steps... } ] }
 │
 └── docs/                       # Documentazione
     ├── README.md               # Introduzione e setup
@@ -64,7 +65,10 @@ math-rocks/
 - **app.py**: Server Flask principale, registra blueprint e serve l'app
 - **config.py**: Configurazione (cartelle content, courses_data, ecc.)
 - **build_courses.py**: Script CLI per compilare corsi da markdown
-- **routes/courses.py**: Blueprint con route `/` (home) e `/course/<id>` (viewer)
+- **routes/courses.py**: Blueprint con le route a 3 livelli:
+  - `/course/<id>` → panoramica corso (elenco lezioni, template `course.html`)
+  - `/course/<id>/<lesson_id>` → redirect al primo step della lezione
+  - `/course/<id>/<lesson_id>/<step_id>` → viewer step (template `lesson.html`)
 
 ### Parser
 
@@ -91,13 +95,17 @@ math-rocks/
 
 ### Contenuti
 
-- **content/[corso-id]/content.md**: Markdown sorgente con sintassi custom
-- **content/[corso-id]/metadata.yaml**: Metadati corso (title, description, color, etc.)
-- **courses_data/[corso-id].json**: Corso compilato (HTML processato + metadata)
+- **content/[corso-id]/content-N.md**: Lezione N (markdown sorgente). In cima un
+  front-matter di lezione (righe `>` senza corpo + `---`) ne definisce titolo/id.
+- **content/[corso-id]/metadata.yaml**: Metadati corso (title, description, color,
+  `progression: free|sequential`).
+- **courses_data/[corso-id].json**: Corso compilato (`{ id, metadata, lessons: [...] }`).
+
+Vedi `MARKDOWN_SYNTAX.md` per la struttura completa corso → lezioni → step.
 
 ## Workflow
 
-1. **Creazione contenuto**: Scrivi `content/[corso-id]/content.md` usando la sintassi custom
+1. **Creazione contenuto**: Scrivi `content/[corso-id]/content-N.md` (una lezione per file) usando la sintassi custom
 2. **Build**: Esegui `python build_courses.py` per compilare markdown → JSON
 3. **Sviluppo**: `python app.py` avvia server Flask su http://localhost:5000
 4. **Produzione**: Deploy su Heroku/Render/altro con gunicorn
