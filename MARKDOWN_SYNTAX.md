@@ -286,7 +286,55 @@ boundpoints:
 
 📖 **Documentazione completa**: vedi [GRAFICI.md](GRAFICI.md) per tutti gli attributi ed esempi.
 
-### 5. Blocchi Custom
+### 5. Sketch p5.js (simulazioni e visualizzazioni)
+
+Sintassi: blocco `:::p5` con le opzioni sulla riga di apertura e il **codice
+JavaScript dello sketch** nel corpo. Permette di inserire simulazioni, mini-app
+e visualizzazioni interattive scritte in [p5.js](https://p5js.org/).
+
+```markdown
+Posizione: ${a}{a|0|0,10,1}
+
+:::p5 goal height=240 bind=a
+const target = 7;
+p.setup = () => { p.createCanvas(ctx.width, ctx.height); };
+p.draw = () => {
+  const a = ctx.model.a ?? 0;       // legge slider e campi numerici della pagina
+  // ...disegno con p5...
+  if (Math.abs(a - target) < 0.001) ctx.complete();  // criterio del goal
+};
+:::
+```
+
+**Opzioni** (sulla riga di apertura):
+
+| Opzione | Significato |
+| ------- | ----------- |
+| `goal` | Flag: rende lo sketch un **goal** (gli assegna un `id`). Senza, è pura visualizzazione e non blocca lo step. |
+| `height=400` | Altezza suggerita del canvas (default 400). |
+| `width=600` | Larghezza suggerita del canvas (opzionale). |
+| `bind=a,b` | Variabili da osservare per `ctx.onChange` e per il redraw degli sketch con `noLoop`. |
+
+**Lo sketch riceve due argomenti**, `p` (l'istanza p5, in *instance mode*) e
+`ctx` (il ponte con la piattaforma):
+
+| `ctx` | Cosa fa |
+| ----- | ------- |
+| `ctx.complete()` | Segnala il completamento del goal (idempotente; no-op se lo sketch non è un goal). |
+| `ctx.completed` | `true` se il goal è già stato completato (anche ripristinato da storage). |
+| `ctx.model` | Valori **live** di slider e campi numerici della pagina (`ctx.model.a`, `ctx.model.ax`, …). |
+| `ctx.onChange(cb)` | Registra `cb(nome, valore)`, chiamata a ogni cambio di variabile. |
+| `ctx.width` / `ctx.height` | Dimensioni suggerite, da usare in `p.createCanvas(...)`. |
+
+In *instance mode* tutte le funzioni p5 si chiamano sull'oggetto `p`
+(`p.createCanvas`, `p.background`, `p.circle`, `p.mouseX`, …), non come globali.
+
+> Il criterio di completamento lo decidi tu nello sketch: chiama `ctx.complete()`
+> quando la condizione che vuoi (una distanza, un punteggio, un click, una
+> sequenza di azioni) è soddisfatta. p5.js viene caricato dal CDN solo nelle
+> pagine che contengono almeno uno sketch.
+
+### 6. Blocchi Custom
 
 Sintassi: `:::tag.class1.class2`
 
@@ -321,7 +369,7 @@ Questo è un blocco evidenziato
 :::
 ```
 
-### 6. Reveal Content
+### 7. Reveal Content
 
 Il contenuto con classe `.reveal` appare solo quando tutti i goals dello step sono completati.
 

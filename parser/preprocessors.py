@@ -96,6 +96,92 @@ def process_graphs(content, graph_counter):
     return processed, graph_counter
 
 
+def process_p5(content, p5_counter):
+    """
+    Converte blocchi :::p5 ... ::: in <x-p5> web component (sketch p5.js).
+
+    Le opzioni vanno sulla riga di apertura (il corpo è codice JS al 100%, così
+    non collide con il separatore di step `---`):
+        :::p5 goal height=400 bind=a
+        p.setup = () => { p.createCanvas(400, 400); };
+        p.draw = () => {
+          const a = ctx.model.a;       // valore live di slider/campi della pagina
+          // ...disegno...
+          if (a === 5) ctx.complete(); // criterio deciso dall'autore
+        };
+        :::
+
+    Opzioni riconosciute sulla riga di apertura:
+        goal           flag: rende lo sketch un goal (gli assegna un id)
+        height=400     altezza del canvas (default 400)
+        width=600      larghezza del canvas (opzionale)
+        bind=a,b       variabili da osservare per ctx.onChange / redraw
+
+    Lo sketch riceve `p` (istanza p5 in instance mode) e `ctx`:
+        ctx.complete()    segnala il completamento del goal (idempotente)
+        ctx.model         valori live di slider e campi numerici (${a}, ${ax}, …)
+        ctx.onChange(cb)  registra una callback chiamata a ogni cambio di variabile
+
+    Lo sketch conta come goal (riceve un id) SOLO con il flag `goal`; altrimenti
+    è pura visualizzazione e non blocca lo step.
+
+    Il corpo JS può contenere qualsiasi carattere (incluso `` ` ``, `${`, `[[`),
+    quindi il blocco viene estratto in un marker e l'HTML finale (con il codice
+    dentro uno <script type="application/x-p5-sketch"> non eseguibile) viene
+    restituito come replacement da applicare DOPO il rendering markdown: così né
+    mistune né gli altri preprocessori toccano lo sketch.
+
+    Args:
+        content: Contenuto markdown
+        p5_counter: Contatore per ID univoci
+
+    Returns:
+        Tuple (contenuto con marker, dict marker→HTML, nuovo valore counter)
+    """
+    # `^` ancora l'apertura a inizio riga: un eventuale `:::p5` citato a metà
+    # frase (es. `` `:::p5` `` nel testo) non viene catturato. La chiusura è un
+    # `:::` su riga propria.
+    pattern = re.compile(r'^:::p5[ \t]*([^\n]*)\n(.*?)\n:::[ \t]*$', re.DOTALL | re.MULTILINE)
+    replacements = {}
+
+    def replace_p5(match):
+        nonlocal p5_counter
+        options_str = match.group(1).strip()
+        code = match.group(2)
+
+        # Parsing opzioni: token separati da spazi; `goal` è un flag,
+        # gli altri sono coppie chiave=valore.
+        opts = {}
+        for token in options_str.split():
+            if '=' in token:
+                key, _, value = token.partition('=')
+                opts[key.strip()] = value.strip()
+            else:
+                opts[token] = True
+
+        marker = f'XP5BLOCK{p5_counter}X'
+
+        attrs = []
+        # Id (quindi goal tracking) solo se richiesto col flag `goal`
+        if opts.get('goal'):
+            attrs.append(f'id="p5-{p5_counter}"')
+
+        attrs.append(f'data-height="{opts.get("height", 400)}"')
+        if opts.get('width'):
+            attrs.append(f'data-width="{opts["width"]}"')
+        if opts.get('bind'):
+            attrs.append(f'data-bind="{opts["bind"]}"')
+
+        p5_counter += 1
+
+        script = f'<script type="application/x-p5-sketch">\n{code}\n</script>'
+        replacements[marker] = f'<x-p5 {" ".join(attrs)}>{script}</x-p5>'
+        return marker
+
+    processed = pattern.sub(replace_p5, content)
+    return processed, replacements, p5_counter
+
+
 def process_math(content):
     """
     Converte backtick contenenti espressioni matematiche in delimitatori LaTeX

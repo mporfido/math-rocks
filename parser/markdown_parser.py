@@ -3,7 +3,7 @@ import re
 import mistune
 import yaml
 from pathlib import Path
-from parser.preprocessors import process_blanks, process_variables, process_blocks, process_math, process_images, process_checks, process_graphs
+from parser.preprocessors import process_blanks, process_variables, process_blocks, process_math, process_images, process_checks, process_graphs, process_p5
 
 
 class CourseParser:
@@ -17,6 +17,8 @@ class CourseParser:
         self.blank_counter = 0
         self.variable_counter = 0
         self.check_counter = 0
+        self.graph_counter = 0
+        self.p5_counter = 0
 
     def parse_file(self, filepath):
         """
@@ -47,6 +49,7 @@ class CourseParser:
         self.variable_counter = 0
         self.check_counter = 0
         self.graph_counter = 0
+        self.p5_counter = 0
 
         # Split in steps (separati da ---)
         steps_raw = re.split(r'\n---\n', content)
@@ -220,6 +223,11 @@ class CourseParser:
         Returns:
             Contenuto processato
         """
+        # :::p5 ... ::: → marker (ripristinato a fine render). Va per PRIMO:
+        # il corpo è codice JS e non deve essere toccato dagli altri
+        # preprocessori né da mistune.
+        content, p5_replacements, self.p5_counter = process_p5(content, self.p5_counter)
+
         # ![alt|400](src) → <img style="width:400px">
         content = process_images(content)
 
@@ -251,6 +259,10 @@ class CourseParser:
         for marker, code in inline_codes.items():
             content = content.replace(marker, code)
 
+        # I blocchi p5 sono ripristinati dopo il rendering markdown, come i
+        # blocchi div: i marker (alfanumerici) sopravvivono a mistune intatti.
+        block_replacements.update(p5_replacements)
+
         return content, block_replacements
 
     def _unescape_variable_spans(self, html):
@@ -275,7 +287,10 @@ class CourseParser:
         Gestisce sia i marker nudi sia quelli avvolti in <p>...</p> da mistune.
         """
         for marker, tag in replacements.items():
-            html = re.sub(r'<p>\s*' + re.escape(marker) + r'\s*</p>', tag, html)
+            # Replacement passato via lambda: il tag può contenere backslash
+            # (es. il codice JS di uno sketch :::p5 con `\n`, `\d`) che re.sub
+            # interpreterebbe come backreference se passato come stringa.
+            html = re.sub(r'<p>\s*' + re.escape(marker) + r'\s*</p>', lambda _m: tag, html)
             html = html.replace(marker, tag)
         return html
 
@@ -300,8 +315,11 @@ class CourseParser:
         # Trova tutti <x-check id="...">
         goals.extend(re.findall(r'<x-check id="([^"]+)"', html))
 
-        # Trova tutti <x-graph id="..."> (solo type=point ha id)
+        # Trova tutti <x-graph id="..."> (solo con almeno un target ha id)
         goals.extend(re.findall(r'<x-graph id="([^"]+)"', html))
+
+        # Trova tutti <x-p5 id="..."> (solo con flag `goal` ha id)
+        goals.extend(re.findall(r'<x-p5 id="([^"]+)"', html))
 
         return goals
 

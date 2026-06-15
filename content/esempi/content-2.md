@@ -309,3 +309,65 @@ Tutti i layer convivono nello stesso piano: `functions` animato dallo slider, `b
 :::div.reveal
 Perfetto! Un punto $(x, y)$ appartiene alla retta $y = 2x$ proprio quando $y = 2x$: la verifica algebrica e quella grafica coincidono.
 :::
+
+---
+
+> id: sketch-p5
+> title: Sketch interattivo (p5.js)
+
+# Centra il bersaglio
+
+Con un blocco `:::p5` puoi inserire una simulazione o visualizzazione scritta in **p5.js**. Lo sketch può leggere gli slider e i campi della pagina (`ctx.model`) e segnalare il completamento del goal quando vuole, chiamando `ctx.complete()`.
+
+Muovi lo slider per portare la pallina **dentro** il bersaglio verde:
+
+Posizione: ${a}{a|0|0,10,1}
+
+:::p5 goal height=240 bind=a
+const target = 7;
+p.setup = () => { p.createCanvas(ctx.width, ctx.height); };
+p.draw = () => {
+  p.background(245);
+  const a = ctx.model.a ?? 0;
+  const cy = p.height / 2;
+  const tx = p.map(target, 0, 10, 40, p.width - 40);
+  const x = p.map(a, 0, 10, 40, p.width - 40);
+  const hit = Math.abs(a - target) < 0.001;
+
+  // bersaglio
+  p.noStroke();
+  p.fill(46, 204, 113, 60);
+  p.circle(tx, cy, 80);
+
+  // pallina
+  p.fill(hit ? '#2ecc71' : '#3498db');
+  p.circle(x, cy, 38);
+
+  if (hit) ctx.complete();
+};
+:::
+
+:::details.syntax-doc
+<summary>📝 Mostra la sintassi</summary>
+
+```md
+Posizione: ${a}{a|0|0,10,1}
+
+:::p5 goal height=240 bind=a
+const target = 7;
+p.setup = () => { p.createCanvas(ctx.width, ctx.height); };
+p.draw = () => {
+  const a = ctx.model.a ?? 0;       // legge lo slider della pagina
+  // ...disegno con p5...
+  if (Math.abs(a - target) < 0.001) ctx.complete();  // criterio del goal
+};
+:::
+```
+
+Le opzioni vanno sulla riga di apertura: `goal` rende lo sketch un goal, `height`/`width` dimensionano il canvas, `bind` elenca le variabili da osservare. Lo sketch riceve `p` (istanza p5) e `ctx` (`ctx.model`, `ctx.complete()`, `ctx.onChange()`).
+
+:::
+
+:::div.reveal
+Ottimo! Lo sketch ha verificato da solo il criterio (`a == 7`) ed emesso il completamento del goal: esattamente come blank, slider e grafici, anche una mini-app p5 può sbloccare lo step.
+:::

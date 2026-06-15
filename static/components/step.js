@@ -131,6 +131,10 @@ class XStep extends HTMLElement {
       goals.push(graph.id);
     });
 
+    this.querySelectorAll('x-p5[id]').forEach(p5 => {
+      goals.push(p5.id);
+    });
+
     // Gli slider contano come goal SOLO se non c'è verifica esplicita:
     // negli step di sola esplorazione muovere lo slider È il criterio di
     // completamento; quando un check/blank/grafico verifica la risposta,

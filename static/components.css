@@ -432,6 +432,31 @@ x-graph {
     font-size: 0.9em;
 }
 
+/* ========== p5.js sketch (<x-p5>) ========== */
+.p5-container {
+    display: inline-block;
+    max-width: 100%;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+    line-height: 0; /* elimina il gap sotto il canvas inline */
+}
+
+.p5-container canvas {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+.p5-error {
+    padding: 1rem;
+    color: #ef4444;
+    background: #fef2f2;
+    border-radius: 6px;
+    font-size: 0.9em;
+}
+
 /* ========== Tables ========== */
 
 .course-content table {
