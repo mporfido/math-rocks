@@ -529,10 +529,13 @@ x-graph {
         display: block;
         overflow-x: auto;
         white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
     }
 
     .choice-btn {
         width: 100%;
+        /* Area di tocco comoda */
+        min-height: 44px;
     }
 
     .variable-control {
@@ -542,6 +545,17 @@ x-graph {
 
     .variable-slider {
         width: 100%;
-        min-width: 200px;
+        min-width: 0;
+    }
+
+    /* Grafici interattivi più bassi su mobile (JSXGraph si ridisegna da solo) */
+    .graph-container {
+        height: 300px;
+    }
+}
+
+@media (max-width: 480px) {
+    .graph-container {
+        height: 260px;
     }
 }

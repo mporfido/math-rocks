@@ -5,11 +5,23 @@
     box-sizing: border-box;
 }
 
+html, body {
+    /* Nessuno scroll orizzontale accidentale su mobile (canvas, tabelle, ecc.) */
+    overflow-x: hidden;
+}
+
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     line-height: 1.6;
     color: #333;
     background-color: #f8f9fa;
+    /* Evita l'evidenziazione blu al tap su mobile */
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Gli elementi media non devono mai sforare il loro contenitore */
+img, canvas, svg, video {
+    max-width: 100%;
 }
 
 /* Header */
@@ -77,13 +89,13 @@ body {
 }
 
 .home-container h1 {
-    font-size: 2.5rem;
+    font-size: clamp(1.75rem, 5vw, 2.5rem);
     color: #1f2937;
     margin-bottom: 1rem;
 }
 
 .subtitle {
-    font-size: 1.25rem;
+    font-size: clamp(1rem, 3vw, 1.25rem);
     color: #6b7280;
     margin-bottom: 3rem;
 }
@@ -239,13 +251,13 @@ body {
 }
 
 .course-content h1 {
-    font-size: 2rem;
+    font-size: clamp(1.5rem, 4.5vw, 2rem);
     color: #1f2937;
     margin-bottom: 1.5rem;
 }
 
 .course-content h2 {
-    font-size: 1.5rem;
+    font-size: clamp(1.25rem, 3.5vw, 1.5rem);
     color: #1f2937;
     margin-top: 2rem;
     margin-bottom: 1rem;
@@ -338,7 +350,7 @@ body {
 }
 
 .course-hero h1 {
-    font-size: 2rem;
+    font-size: clamp(1.5rem, 4.5vw, 2rem);
     color: #1f2937;
     margin-bottom: 0.75rem;
 }
@@ -475,25 +487,155 @@ body {
     transform: none;
 }
 
-/* Responsive */
+/* ========== Drawer indice passi (mobile) ========== */
+/* Su desktop il toggle e l'overlay non esistono: la sidebar è sempre visibile. */
+.sidebar-toggle {
+    display: none;
+    align-items: center;
+    gap: 0.6rem;
+    width: 100%;
+    margin-bottom: 1rem;
+    padding: 0.75rem 1rem;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1f2937;
+    cursor: pointer;
+}
+
+.sidebar-toggle .sidebar-toggle-icon {
+    font-size: 1.25rem;
+    line-height: 1;
+}
+
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 1100;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* ========== Responsive ========== */
 @media (max-width: 768px) {
-    .course-container {
-        grid-template-columns: 1fr;
-    }
-
-    .course-sidebar {
-        position: static;
-    }
-
     .navbar {
         padding: 1rem;
     }
 
+    .logo {
+        font-size: 1.2rem;
+    }
+
     .main-content {
         padding: 0 1rem;
+        margin: 1rem auto;
     }
 
     .courses-grid {
         grid-template-columns: 1fr;
+        gap: 1.25rem;
+    }
+
+    .course-card {
+        padding: 1.5rem;
+    }
+
+    /* Layout a colonna unica; la sidebar diventa un drawer a comparsa */
+    .course-container {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    .sidebar-toggle {
+        display: flex;
+    }
+
+    .course-sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 82%;
+        max-width: 320px;
+        border-radius: 0;
+        z-index: 1200;
+        overflow-y: auto;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        box-shadow: 2px 0 16px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Container con drawer aperto: la sidebar entra e l'overlay copre la pagina */
+    .course-container.sidebar-open .course-sidebar {
+        transform: translateX(0);
+    }
+
+    .course-container.sidebar-open .sidebar-overlay {
+        display: block;
+        opacity: 1;
+    }
+
+    .course-content {
+        padding: 1.5rem 1.25rem;
+    }
+
+    /* Step navigation: i bottoni possono andare a capo e riempire la riga */
+    .step-navigation {
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin-top: 2rem;
+    }
+
+    .step-navigation .btn {
+        flex: 1 1 auto;
+        text-align: center;
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Panoramica corso */
+    .course-hero {
+        padding: 1.5rem 1.25rem;
+    }
+
+    .lesson-card {
+        padding: 1rem 1.25rem;
+        gap: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .course-content {
+        padding: 1.25rem 1rem;
+    }
+
+    .course-hero {
+        padding: 1.25rem 1rem;
+    }
+
+    .empty-state {
+        padding: 1.5rem;
+    }
+
+    .empty-state .hint {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    /* Card lezione: il blocco progresso va sotto, l'indice resta in alto */
+    .lesson-card {
+        flex-wrap: wrap;
+    }
+
+    .lesson-progress-bar {
+        max-width: none;
     }
 }
