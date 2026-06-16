@@ -525,11 +525,35 @@ x-graph {
         flex-direction: column;
     }
 
+    /* Tabella adattiva: le celle vanno a capo così la tabella sta nello
+       schermo; overflow-x resta come rete di sicurezza per tabelle larghe. */
     .course-content table {
         display: block;
         overflow-x: auto;
-        white-space: nowrap;
         -webkit-overflow-scrolling: touch;
+        font-size: 0.85em;
+    }
+
+    .course-content th,
+    .course-content td {
+        padding: 8px 10px;
+        white-space: normal;
+        word-break: break-word;
+    }
+
+    /* Input/select nelle celle: si restringono invece di gonfiare la colonna */
+    .course-content td .blank-input,
+    .course-content td .blank-select {
+        min-width: 0;
+        width: 64px;
+    }
+
+    .course-content td .blank-wrapper {
+        flex-wrap: wrap;
+    }
+
+    .course-content td .variable-input {
+        width: 48px;
     }
 
     .choice-btn {

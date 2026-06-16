@@ -248,6 +248,9 @@ img, canvas, svg, video {
     border-radius: 8px;
     padding: 2.5rem;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    /* Cella di grid: senza questo si allarga per contenere elementi non
+       comprimibili (tabelle nowrap, immagini larghe) sforando lo schermo. */
+    min-width: 0;
 }
 
 .course-content h1 {
