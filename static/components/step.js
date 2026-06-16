@@ -199,7 +199,7 @@ class XStep extends HTMLElement {
 
     const varPattern = /\{\{VAR:([^:]+):([^}]+)\}\}/;
 
-    this.querySelectorAll('p, div, span, li').forEach((el, index) => {
+    this.querySelectorAll('p, div, span, li, td, th').forEach((el, index) => {
       const html = el.innerHTML;
       if (varPattern.test(html)) {
         const templateId = `template-${index}`;
@@ -246,7 +246,11 @@ class XStep extends HTMLElement {
     const numValue = parseFloat(value);
 
     if (isNaN(numValue)) {
-      return value.toString();
+      // Campo svuotato (parseFloat('') → NaN) o valore non numerico: invece di
+      // stampare "NaN" nella formula, mostra un segnaposto a casella (\square).
+      // Una stringa non numerica reale (rara) viene comunque restituita com'è.
+      const str = (value === null || value === undefined) ? '' : String(value).trim();
+      return (str === '' || str.toLowerCase() === 'nan') ? '\\square' : str;
     }
 
     // Restituisci il valore raw (positivo o negativo)
