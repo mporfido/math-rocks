@@ -3,8 +3,14 @@ from flask import Flask, render_template
 from config import config
 import os
 
-def create_app(config_name='default'):
-    """Factory per creare l'applicazione Flask"""
+def create_app(config_name=None):
+    """Factory per creare l'applicazione Flask.
+
+    config_name: 'development' | 'production'. Se omesso, usa la variabile
+    d'ambiente FLASK_CONFIG e in mancanza ricade su 'production' (default
+    sicuro: debugger disattivato). Per gunicorn basta `app:create_app()`.
+    """
+    config_name = config_name or os.environ.get('FLASK_CONFIG', 'production')
     app = Flask(__name__)
     app.config.from_object(config[config_name])
 
@@ -54,5 +60,12 @@ def create_app(config_name='default'):
     return app
 
 if __name__ == '__main__':
+    # Avvio locale: usa la config di sviluppo (auto-reload + debugger).
+    # debug deriva dalla config; host/porta sono sovrascrivibili via ambiente.
+    # Default host 127.0.0.1: il server di sviluppo NON va esposto sulla rete.
     app = create_app('development')
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(
+        host=os.environ.get('HOST', '127.0.0.1'),
+        port=int(os.environ.get('PORT', 5000)),
+        debug=app.config['DEBUG'],
+    )

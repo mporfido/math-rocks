@@ -223,6 +223,9 @@ python build_courses.py nome-corso
 python app.py
 
 # Production (con gunicorn)
+# Imposta SECRET_KEY prima di avviare; create_app() usa di default la
+# config di produzione (debugger disattivato).
+export SECRET_KEY="una-chiave-lunga-e-casuale"
 gunicorn -w 4 -b 0.0.0.0:5000 'app:create_app()'
 ```
 

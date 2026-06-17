@@ -1,14 +1,8 @@
 # CLAUDE.md
 
-Piattaforma per creare corsi interattivi online. Clone di Mathigon ma scritto in python.
-
-Leggi i file se necessario:
-- PYTHON_PORT_PROPOSAL.md contiene una proposta per ricostruire la piattaforma in python
-- GUIDA_PRATICA_PYTHON.md contiene una proposta semplificata usando Flask e javascript vanilla e lasciando l'uso di Node.js solo se il numero di componenti dovesse crescere.
+Piattaforma per creare corsi interattivi online scritto in python.
 
 Segui queste ultime indicazioni preferibilmente (guida pratica), per ora il progetto è in fase embrionale.
-
-Nel codice e nel resto dei file non menzionare mai Mathigon.
 
 ## Struttura del Progetto
 
@@ -50,12 +44,11 @@ math-rocks/
 ├── courses_data/               # Corsi compilati (generati da build_courses.py)
 │   └── esempi.json             # JSON: { id, metadata, lessons: [ { steps... } ] }
 │
-└── docs/                       # Documentazione
-    ├── README.md               # Introduzione e setup
-    ├── GETTING_STARTED.md      # Guida rapida per iniziare
-    ├── MARKDOWN_SYNTAX.md      # Sintassi markdown estesa
-    ├── GUIDA_PRATICA_PYTHON.md # Proposta architettura Flask
-    └── PYTHON_PORT_PROPOSAL.md # Proposta originale port Python
+├── README.md                   # Introduzione e setup
+├── GETTING_STARTED.md          # Guida rapida per iniziare
+├── MARKDOWN_SYNTAX.md          # Sintassi markdown estesa
+└── LICENSE                     # Licenza MIT
+
 ```
 
 ## File Principali
