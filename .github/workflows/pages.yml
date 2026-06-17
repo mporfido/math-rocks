@@ -1,0 +1,52 @@
+name: pages
+
+# Build dell'export statico (Frozen-Flask) e deploy su GitHub Pages
+# ad ogni push su master.
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+# Permessi minimi richiesti dalle action ufficiali di Pages.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Un solo deploy alla volta; non annulla un deploy già in corso.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Build courses (markdown → JSON)
+        run: python build_courses.py
+
+      - name: Freeze app (→ build/)
+        run: python freeze.py
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: build
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

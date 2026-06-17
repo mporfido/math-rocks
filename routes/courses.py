@@ -23,7 +23,7 @@ def find_step(lesson, step_id):
     """Trova uno step della lezione per id (None se assente)"""
     return next((s for s in lesson.get('steps', []) if s['id'] == step_id), None)
 
-@courses_bp.route('/course/<course_id>')
+@courses_bp.route('/course/<course_id>/')
 def course_index(course_id):
     """Panoramica del corso con l'elenco delle lezioni"""
     course = load_course(course_id)
@@ -35,7 +35,7 @@ def course_index(course_id):
                          course_id=course_id,
                          course=course)
 
-@courses_bp.route('/course/<course_id>/<lesson_id>')
+@courses_bp.route('/course/<course_id>/<lesson_id>/')
 def lesson_index(course_id, lesson_id):
     """Redirect al primo step della lezione"""
     course = load_course(course_id)
@@ -52,7 +52,7 @@ def lesson_index(course_id, lesson_id):
                             lesson_id=lesson_id,
                             step_id=first_step_id))
 
-@courses_bp.route('/course/<course_id>/<lesson_id>/<step_id>')
+@courses_bp.route('/course/<course_id>/<lesson_id>/<step_id>/')
 def course_step(course_id, lesson_id, step_id):
     """Renderizza uno step specifico di una lezione"""
     course = load_course(course_id)
