@@ -51,14 +51,10 @@ Thumbs.db
 # Windows reserved names
 nul
 
-# Input e asset locali
+# Materiali sorgente di lavoro (PDF, bozze): non servono al sito pubblicato
 input/
-static/images/
 
 # Piani di lavoro locali
 claude-plans/
 
-# Corsi: tracciati solo i corsi dimostrativi ("esempio-*" e "esempi")
-content/*/
-!content/esempio-*/
-!content/esempi/
+# Corsi: tutti i corsi in content/ vengono tracciati e pubblicati su Pages
