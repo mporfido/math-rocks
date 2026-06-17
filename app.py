@@ -32,13 +32,19 @@ def create_app(config_name=None):
 
     @app.route('/')
     def home():
-        """Homepage con lista corsi"""
+        """Homepage con i corsi raggruppati in sezioni.
+
+        L'ordine delle sezioni e dei corsi è definito in content/sections.yaml.
+        I corsi non elencati nel manifest finiscono in "Altri corsi"; se il
+        manifest manca, si ricade su un'unica lista piatta (senza titolo).
+        """
         from pathlib import Path
         import yaml
 
-        courses = []
         content_dir = Path(app.config['CONTENT_DIR'])
 
+        # Scansione cartelle corso → mappa id → dict (ordine alfabetico stabile)
+        courses_by_id = {}
         if content_dir.exists():
             for course_dir in sorted(content_dir.iterdir()):
                 if not course_dir.is_dir():
@@ -59,15 +65,50 @@ def create_app(config_name=None):
                 else:
                     metadata = {}
 
-                courses.append({
+                courses_by_id[course_dir.name] = {
                     'id': course_dir.name,
                     'title': metadata.get('title', course_dir.name.replace('-', ' ').title()),
                     'description': metadata.get('description', ''),
                     'lessons': len(lesson_files),
                     'color': metadata.get('color')
+                }
+
+        # Carica il manifest delle sezioni (se presente)
+        sections_file = content_dir / 'sections.yaml'
+        manifest = {}
+        if sections_file.exists():
+            with open(sections_file, 'r', encoding='utf-8') as f:
+                manifest = yaml.safe_load(f) or {}
+
+        sections = []
+        grouped_ids = set()
+        for section in manifest.get('sections', []):
+            # Risolve gli id in dict-corso, preservando l'ordine e saltando
+            # quelli inesistenti su disco.
+            section_courses = []
+            for course_id in section.get('courses', []):
+                course = courses_by_id.get(course_id)
+                if course is not None:
+                    section_courses.append(course)
+                    grouped_ids.add(course_id)
+            if section_courses:  # niente intestazioni vuote
+                sections.append({
+                    'id': section.get('id'),
+                    'title': section.get('title'),
+                    'courses': section_courses,
                 })
 
-        return render_template('home.html', title='Piattaforma Corsi Interattivi', courses=courses)
+        # Corsi non citati nel manifest → "Altri corsi" (ordine alfabetico)
+        ungrouped = [c for cid, c in courses_by_id.items() if cid not in grouped_ids]
+        if manifest and sections and ungrouped:
+            sections.append({'id': 'altri', 'title': 'Altri corsi', 'courses': ungrouped})
+
+        # Fallback: nessun manifest (o nessuna sezione valida) → lista piatta
+        # in un'unica sezione senza titolo, comportamento identico a prima.
+        if not sections and courses_by_id:
+            sections = [{'id': None, 'title': None, 'courses': list(courses_by_id.values())}]
+
+        return render_template('home.html', title='Piattaforma Corsi Interattivi', sections=sections)
 
     return app
 

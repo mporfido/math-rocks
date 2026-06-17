@@ -7,24 +7,31 @@
     <h1>{{ site_title }}</h1>
     <p class="subtitle">{{ site_subtitle }}</p>
 
-    <div class="courses-grid">
-        {% if courses %}
-            {% for course in courses %}
-            <div class="course-card"{% if course.color %} style="--course-color: {{ course.color }};"{% endif %}>
-                <h2>{{ course.title }}</h2>
-                <p>{{ course.description }}</p>
-                <p class="course-card-meta">{{ course.lessons }} lezion{{ 'e' if course.lessons == 1 else 'i' }}</p>
-                <a href="{{ url_for('courses.course_index', course_id=course.id) }}" class="btn btn-primary">
-                    Apri il corso
-                </a>
+    {% if sections %}
+        {% for section in sections %}
+        <section class="course-section">
+            {% if section.title %}<h2 class="course-section-title">{{ section.title }}</h2>{% endif %}
+            <div class="courses-grid">
+                {% for course in section.courses %}
+                <div class="course-card"{% if course.color %} style="--course-color: {{ course.color }};"{% endif %}>
+                    <h3>{{ course.title }}</h3>
+                    <p>{{ course.description }}</p>
+                    <p class="course-card-meta">{{ course.lessons }} lezion{{ 'e' if course.lessons == 1 else 'i' }}</p>
+                    <a href="{{ url_for('courses.course_index', course_id=course.id) }}" class="btn btn-primary">
+                        Apri il corso
+                    </a>
+                </div>
+                {% endfor %}
             </div>
-            {% endfor %}
-        {% else %}
+        </section>
+        {% endfor %}
+    {% else %}
+        <div class="courses-grid">
             <div class="empty-state">
                 <p>Nessun corso disponibile al momento.</p>
                 <p class="hint">Esegui <code>python build_courses.py</code> per generare i corsi.</p>
             </div>
-        {% endif %}
-    </div>
+        </div>
+    {% endif %}
 </div>
 {% endblock %}

@@ -11,10 +11,10 @@ class Config:
 
     # Testi configurabili del sito (override via variabili d'ambiente).
     # Il footer aggiunge "© <anno>" nel template, con anno dinamico.
-    SITE_NAME = os.environ.get('SITE_NAME') or 'Corsi Interattivi'
-    SITE_TITLE = os.environ.get('SITE_TITLE') or 'Benvenuto alla Piattaforma Corsi Interattivi'
-    SITE_SUBTITLE = os.environ.get('SITE_SUBTITLE') or 'Impara matematica in modo interattivo e coinvolgente'
-    FOOTER_TEXT = os.environ.get('FOOTER_TEXT') or 'Piattaforma Corsi Interattivi'
+    SITE_NAME = os.environ.get('SITE_NAME') or 'Math Rocks'
+    SITE_TITLE = os.environ.get('SITE_TITLE') or 'Benvenuti ai Corsi Interattivi di Matematica'
+    SITE_SUBTITLE = os.environ.get('SITE_SUBTITLE') or 'Lezioni di matematica interattive e coinvolgenti'
+    FOOTER_TEXT = os.environ.get('FOOTER_TEXT') or 'Prof. Michele Porfido'
 
 class DevelopmentConfig(Config):
     """Configurazione per ambiente di sviluppo"""
