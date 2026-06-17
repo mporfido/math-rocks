@@ -334,7 +334,61 @@ In *instance mode* tutte le funzioni p5 si chiamano sull'oggetto `p`
 > sequenza di azioni) è soddisfatta. p5.js viene caricato dal CDN solo nelle
 > pagine che contengono almeno uno sketch.
 
-### 6. Blocchi Custom
+### 6. Espressioni "Sciogliamo i nodi"
+
+Sintassi: blocco `:::expr` con **una sola espressione aritmetica**. Lo studente la
+risolve graficamente, un'operazione per volta: clicca l'operatore di un'operazione
+*riducibile* (entrambi gli operandi già numerici, rispettando parentesi e precedenza),
+inserisce il risultato e questo "scende" di un livello generando un nodo dell'albero.
+A espressione risolta lo step riceve la spunta (è sempre un goal).
+
+```markdown
+:::expr
+(4 + 5*4) - (8:2 + 6)
+:::
+```
+
+**Linguaggio dell'espressione** (la scrive l'autore, è input fidato):
+
+| Simbolo | Significato |
+|---|---|
+| `+` `-` | addizione, sottrazione |
+| `*` | moltiplicazione (anche `×`) |
+| `:` | **divisione** (anche `÷`) |
+| `^` | potenza a esponente intero, es. `2^3`, `(-2)^3` |
+| `a/b` | **letterale frazione** tra interi (es. `4/3`): è un numero atomico, non una divisione |
+| `( )` `[ ]` `{ }` | parentesi equivalenti, annidabili |
+| `-x` | meno unario / numeri negativi |
+
+> La distinzione tra `:` (divisione) e `a/b` (frazione) è voluta e fedele al metodo:
+> la barra è un valore razionale, i `÷`/`:` sono operazioni-nodo. L'aritmetica è
+> **esatta** (razionale): le frazioni non vengono mai convertite in decimali. Lo
+> studente inserisce il risultato come intero (`12`) o come frazione (`7/4`).
+
+> **Esponenti.** Un esponente *numerico* è mostrato in apice ed è cliccabile (`2³`).
+> Se invece l'esponente è un'**espressione** (es. `2^(3-2)`), si risolve come nodo a
+> sé — prima si scioglie l'esponente, poi si clicca l'operatore `^` per la potenza.
+
+**Esempi:**
+
+```markdown
+# Solo parentesi tonde
+:::expr
+(4 + 5) * 4 - 8 : (2 + 6)
+:::
+
+# Con potenze e parentesi annidate
+:::expr
+{(-2)^3 + [2^2 + (5 + 4*3) - 4:2]} + (-2)
+:::
+
+# Con le frazioni
+:::expr
+4/3 + 5/2 * (4/3 - (8/3 : 2/3) + 6/5)
+:::
+```
+
+### 7. Blocchi Custom
 
 Sintassi: `:::tag.class1.class2`
 
@@ -369,7 +423,7 @@ Questo è un blocco evidenziato
 :::
 ```
 
-### 7. Reveal Content
+### 8. Reveal Content
 
 Il contenuto con classe `.reveal` appare solo quando tutti i goals dello step sono completati.
 

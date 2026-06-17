@@ -3,7 +3,7 @@ import re
 import mistune
 import yaml
 from pathlib import Path
-from parser.preprocessors import process_blanks, process_variables, process_blocks, process_math, process_images, process_checks, process_graphs, process_p5
+from parser.preprocessors import process_blanks, process_variables, process_blocks, process_math, process_images, process_checks, process_graphs, process_p5, process_expr
 
 
 class CourseParser:
@@ -19,6 +19,7 @@ class CourseParser:
         self.check_counter = 0
         self.graph_counter = 0
         self.p5_counter = 0
+        self.expr_counter = 0
 
     def parse_file(self, filepath):
         """
@@ -50,6 +51,7 @@ class CourseParser:
         self.check_counter = 0
         self.graph_counter = 0
         self.p5_counter = 0
+        self.expr_counter = 0
 
         # Split in steps (separati da ---)
         steps_raw = re.split(r'\n---\n', content)
@@ -228,6 +230,11 @@ class CourseParser:
         # preprocessori né da mistune.
         content, p5_replacements, self.p5_counter = process_p5(content, self.p5_counter)
 
+        # :::expr ... ::: → marker (ripristinato a fine render). Come :::p5, il
+        # corpo (un'espressione con `*`, `[`, `]`, `{`, `}`) non deve essere
+        # toccato dagli altri preprocessori né da mistune.
+        content, expr_replacements, self.expr_counter = process_expr(content, self.expr_counter)
+
         # ![alt|400](src) → <img style="width:400px">
         content = process_images(content)
 
@@ -259,9 +266,10 @@ class CourseParser:
         for marker, code in inline_codes.items():
             content = content.replace(marker, code)
 
-        # I blocchi p5 sono ripristinati dopo il rendering markdown, come i
-        # blocchi div: i marker (alfanumerici) sopravvivono a mistune intatti.
+        # I blocchi p5 ed expr sono ripristinati dopo il rendering markdown, come
+        # i blocchi div: i marker (alfanumerici) sopravvivono a mistune intatti.
         block_replacements.update(p5_replacements)
+        block_replacements.update(expr_replacements)
 
         return content, block_replacements
 
@@ -320,6 +328,9 @@ class CourseParser:
 
         # Trova tutti <x-p5 id="..."> (solo con flag `goal` ha id)
         goals.extend(re.findall(r'<x-p5 id="([^"]+)"', html))
+
+        # Trova tutti <x-expr id="..."> (sempre un goal)
+        goals.extend(re.findall(r'<x-expr id="([^"]+)"', html))
 
         return goals
 

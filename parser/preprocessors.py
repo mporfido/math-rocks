@@ -182,6 +182,52 @@ def process_p5(content, p5_counter):
     return processed, replacements, p5_counter
 
 
+def process_expr(content, expr_counter):
+    """
+    Converte blocchi :::expr ... ::: in <x-expr> web component
+    (risoluzione grafica di un'espressione, metodo "Sciogliamo i nodi").
+
+    Sintassi (una sola espressione per blocco):
+        :::expr
+        (4 + 5*4) - (8:2 + 6)
+        :::
+
+    Linguaggio dell'espressione (input fidato dell'autore):
+        operatori: + - * (moltiplicazione) : (divisione) ^ (potenza)
+        frazioni:  a/b tra interi è un letterale razionale atomico
+        parentesi: ( ) [ ] { } (equivalenti, annidabili)
+
+    Come :::p5, il corpo può contenere caratteri che mistune o gli altri
+    preprocessori interpreterebbero (`*`, `[`, `]`, `{`, `}`): viene quindi
+    estratto in un marker e l'HTML finale (con l'espressione in un attributo
+    HTML-escaped) è restituito come replacement da applicare DOPO il rendering
+    markdown. Il componente riceve sempre un id (è sempre un goal).
+
+    Args:
+        content: Contenuto markdown
+        expr_counter: Contatore per ID univoci
+
+    Returns:
+        Tuple (contenuto con marker, dict marker→HTML, nuovo valore counter)
+    """
+    pattern = re.compile(r'^:::expr[ \t]*\n(.*?)\n:::[ \t]*$', re.DOTALL | re.MULTILINE)
+    replacements = {}
+
+    def replace_expr(match):
+        nonlocal expr_counter
+        expr = match.group(1).strip()
+        marker = f'XEXPRBLOCK{expr_counter}X'
+        expr_attr = html_lib.escape(expr, quote=True)
+        replacements[marker] = (
+            f'<x-expr id="expr-{expr_counter}" data-expr="{expr_attr}"></x-expr>'
+        )
+        expr_counter += 1
+        return marker
+
+    processed = pattern.sub(replace_expr, content)
+    return processed, replacements, expr_counter
+
+
 def process_math(content):
     """
     Converte backtick contenenti espressioni matematiche in delimitatori LaTeX
