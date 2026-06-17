@@ -2,6 +2,47 @@
 
 Una piattaforma web per creare e pubblicare corsi interattivi di matematica (e altre materie) con esercizi, visualizzazioni dinamiche e validazione automatica.
 
+## Direzione e Filosofia
+
+> Questa sezione è il riferimento per ogni decisione di struttura o di
+> filosofia di implementazione. In caso di dubbio su "dove va una cosa" o "che
+> approccio scegliere", la risposta si deriva da qui.
+
+**Cos'è il progetto.** Concettualmente è un **generatore di siti statici (SSG)
+per corsi interattivi**: i contenuti in markdown vengono compilati
+(`build_courses.py` → JSON) e l'app Flask viene congelata in HTML statico
+(`freeze.py`, Frozen-Flask) e pubblicata su GitHub Pages. Stesso modello mentale
+di Hugo / Jekyll / MkDocs.
+
+**Il confine che tiene tutto in ordine: engine vs istanza.**
+- **Engine / framework** (ciò che un domani diventerà open source): `parser/`,
+  `routes/`, `templates/`, `static/components/`, `build_courses.py`,
+  `freeze.py`. Codice che *non* sa nulla di un sito specifico.
+- **Istanza / il "tuo" sito**: `content/` (i contenuti) + la configurazione del
+  sito (nome, titolo, footer… oggi i default in `config.py`) + eventuale tema.
+  Sono i dati che *tu* fornisci all'engine.
+- **Output**: sito statico pubblicato.
+
+La regola pratica: il codice engine non deve mai contenere stringhe o scelte
+specifiche di *questo* sito; quelle vivono nell'istanza.
+
+**Principi.**
+1. **Static-first, backend additivo.** Restare statici non chiude porte: un
+   eventuale backend (vedi *Future Enhancements*) è un *livello opzionale
+   futuro*, non una riscrittura.
+2. **Progressi lato client.** Oggi i progressi possono stare nel `localStorage`
+   del browser (vedi `progress.js`): tracciamento con zero backend e compatibile
+   con GitHub Pages. Il backend serve solo quando si vorranno progressi
+   condivisi multi-dispositivo / multi-utente.
+3. **Decisioni reversibili e a basso costo.** Si preferisce la soluzione più
+   semplice che non pregiudica l'evoluzione, rimandando complessità e dipendenze
+   a quando servono davvero.
+
+**Fase attuale.** Priorità su **creazione di contenuti** e piccole migliorie
+della piattaforma; i contenuti sono committati e pubblicati su GitHub Pages.
+L'apertura open source come framework e l'eventuale backend (auth, salvataggio
+progressi, analytics) sono obiettivi *futuri*, non vincoli di oggi.
+
 ## Caratteristiche
 
 - ✅ **Markdown esteso** con sintassi custom per elementi interattivi

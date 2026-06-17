@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{{ course.metadata.get('title', course_id) }}{% endblock %}
+{% block title %}{{ course.metadata.get('title', course_id) }} - {{ site_name }}{% endblock %}
 
 {% block extra_css %}
 <!-- progress.js serve per leggere lo stato delle lezioni (X/Y, lock) -->

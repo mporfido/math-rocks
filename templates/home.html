@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 
-{% block title %}Home - Piattaforma Corsi{% endblock %}
+{% block title %}Home - {{ site_name }}{% endblock %}
 
 {% block content %}
 <div class="home-container">
-    <h1>Benvenuto alla Piattaforma Corsi Interattivi</h1>
-    <p class="subtitle">Impara matematica in modo interattivo e coinvolgente</p>
+    <h1>{{ site_title }}</h1>
+    <p class="subtitle">{{ site_subtitle }}</p>
 
     <div class="courses-grid">
         {% if courses %}

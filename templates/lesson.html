@@ -2,7 +2,7 @@
 
 {% set progress_key = course_id ~ '/' ~ lesson.id %}
 
-{% block title %}{{ step.metadata.get('title', step.id) }} - {{ lesson.title }}{% endblock %}
+{% block title %}{{ step.metadata.get('title', step.id) }} - {{ lesson.title }} - {{ site_name }}{% endblock %}
 
 {% block extra_css %}
 <!-- JSXGraph per grafici interattivi -->

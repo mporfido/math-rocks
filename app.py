@@ -18,6 +18,18 @@ def create_app(config_name=None):
     from routes.courses import courses_bp
     app.register_blueprint(courses_bp)
 
+    @app.context_processor
+    def inject_site_config():
+        """Espone i testi configurabili del sito a tutti i template."""
+        from datetime import date
+        return {
+            'site_name': app.config['SITE_NAME'],
+            'site_title': app.config['SITE_TITLE'],
+            'site_subtitle': app.config['SITE_SUBTITLE'],
+            'footer_text': app.config['FOOTER_TEXT'],
+            'current_year': date.today().year,
+        }
+
     @app.route('/')
     def home():
         """Homepage con lista corsi"""
