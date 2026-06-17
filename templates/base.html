@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Piattaforma Corsi{% endblock %}</title>
+    <title>{% block title %}{{ site_name }}{% endblock %}</title>
 
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='components.css') }}">
@@ -13,7 +13,7 @@
 <body>
     <header class="main-header">
         <nav class="navbar">
-            <a href="{{ url_for('home') }}" class="logo">📚 Corsi Interattivi</a>
+            <a href="{{ url_for('home') }}" class="logo">📚 {{ site_name }}</a>
             <div class="nav-links">
                 <a href="{{ url_for('home') }}">Home</a>
             </div>
@@ -25,7 +25,7 @@
     </main>
 
     <footer class="main-footer">
-        <p>Piattaforma Corsi Interattivi &copy; 2025</p>
+        <p>{{ footer_text }} &copy; {{ current_year }}</p>
     </footer>
 
     {% block scripts %}{% endblock %}

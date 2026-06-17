@@ -1,0 +1,15 @@
+# Sezioni della home: ordine delle sezioni e ordine dei corsi dentro ciascuna.
+# Ogni sezione ha un id, un titolo mostrato in home e la lista ordinata degli
+# id dei corsi (= nome della cartella in content/).
+# I corsi presenti in content/ ma non elencati qui finiscono automaticamente
+# nella sezione "Altri corsi". Gli id che non corrispondono a un corso esistente
+# vengono ignorati.
+sections:
+  - id: aritmetica
+    title: Aritmetica
+    courses:
+      - le-frazioni
+  - id: esempi
+    title: Corsi di esempio
+    courses:
+      - esempi

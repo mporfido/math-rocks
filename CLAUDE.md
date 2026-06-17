@@ -4,6 +4,16 @@ Piattaforma per creare corsi interattivi online scritto in python.
 
 Segui queste ultime indicazioni preferibilmente (guida pratica), per ora il progetto è in fase embrionale.
 
+## Direzione del progetto (leggere prima di decidere)
+
+Qualsiasi decisione di **struttura** o di **filosofia di implementazione** deve
+tenere conto della direzione del progetto: vedi la sezione **"Direzione e
+Filosofia"** nel [README.md](README.md). In sintesi: è un SSG static-first per
+corsi interattivi, con un confine netto tra *engine* (framework riutilizzabile)
+e *istanza* (contenuti + config del sito); il backend è un livello futuro
+opzionale. In caso di dubbio su dove collocare qualcosa o quale approccio
+scegliere, fai riferimento a quella sezione del README.
+
 ## Struttura del Progetto
 
 ```
