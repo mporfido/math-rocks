@@ -51,11 +51,13 @@
     let frontier = orderedIds.findIndex(id => !completed.has(id));
     if (frontier === -1) frontier = orderedIds.length - 1;
     if (orderedIds.indexOf(currentId) > frontier) {
-      window.location.replace(
-        '/course/' + encodeURIComponent({{ course_id|tojson }}) +
-        '/' + encodeURIComponent({{ lesson.id|tojson }}) +
-        '/' + encodeURIComponent(orderedIds[frontier])
-      );
+      // Redirect relativo alla pagina corrente: sostituisce l'ultimo segmento
+      // (lo step) con lo step di frontiera. Funziona identico col server Flask
+      // e col sito statico (Frozen-Flask), con o senza subpath di GitHub Pages.
+      const here = window.location.pathname
+        .replace(/\/index\.html$/, '').replace(/\/$/, '');
+      const lessonDir = here.slice(0, here.lastIndexOf('/') + 1);
+      window.location.replace(lessonDir + encodeURIComponent(orderedIds[frontier]) + '/');
     }
   })();
 </script>

@@ -31,7 +31,7 @@
             <a class="lesson-card"
                data-lesson-id="{{ lesson.id }}"
                data-step-ids='{{ lesson.steps|map(attribute="id")|list|tojson }}'
-               href="{{ url_for('courses.lesson_index', course_id=course_id, lesson_id=lesson.id) }}">
+               href="{{ url_for('courses.course_step', course_id=course_id, lesson_id=lesson.id, step_id=lesson.steps[0].id) }}">
                 <span class="lesson-index">{{ loop.index }}</span>
                 <span class="lesson-body">
                     <span class="lesson-title">{{ lesson.title }}</span>

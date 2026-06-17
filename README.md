@@ -236,6 +236,30 @@ gunicorn -w 4 -b 0.0.0.0:5000 'app:create_app()'
 python parser/markdown_parser.py content/corso/content.md
 ```
 
+## Pubblicazione su GitHub Pages
+
+L'app è read-only (tutta l'interattività gira nel browser), quindi può essere
+esportata come sito statico e pubblicata gratis su GitHub Pages.
+
+Il deploy è **automatico**: ad ogni push su `master`, il workflow
+`.github/workflows/pages.yml` compila i corsi, congela l'app con
+[Frozen-Flask](https://pypi.org/project/Frozen-Flask/) e pubblica il risultato.
+
+**Passo manuale una-tantum** (nelle impostazioni del repo su GitHub):
+*Settings → Pages → Build and deployment → Source = "GitHub Actions"*.
+Senza questo, il deploy del workflow fallisce.
+
+**Anteprima locale** (opzionale, prima di pubblicare):
+
+```bash
+python build_courses.py && python freeze.py
+python -m http.server 8000 --directory build
+# apri http://localhost:8000/
+```
+
+L'output statico finisce in `build/` (gitignorato: lo rigenera la CI, non va
+committato). Vengono pubblicati solo i corsi tracciati dal repo.
+
 ## Sviluppo
 
 ### Modificare corsi
