@@ -525,14 +525,41 @@ x-graph {
         flex-direction: column;
     }
 
+    /* Tabella adattiva: le celle vanno a capo così la tabella sta nello
+       schermo; overflow-x resta come rete di sicurezza per tabelle larghe. */
     .course-content table {
         display: block;
         overflow-x: auto;
-        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+        font-size: 0.85em;
+    }
+
+    .course-content th,
+    .course-content td {
+        padding: 8px 10px;
+        white-space: normal;
+        word-break: break-word;
+    }
+
+    /* Input/select nelle celle: si restringono invece di gonfiare la colonna */
+    .course-content td .blank-input,
+    .course-content td .blank-select {
+        min-width: 0;
+        width: 64px;
+    }
+
+    .course-content td .blank-wrapper {
+        flex-wrap: wrap;
+    }
+
+    .course-content td .variable-input {
+        width: 48px;
     }
 
     .choice-btn {
         width: 100%;
+        /* Area di tocco comoda */
+        min-height: 44px;
     }
 
     .variable-control {
@@ -542,6 +569,17 @@ x-graph {
 
     .variable-slider {
         width: 100%;
-        min-width: 200px;
+        min-width: 0;
+    }
+
+    /* Grafici interattivi più bassi su mobile (JSXGraph si ridisegna da solo) */
+    .graph-container {
+        height: 300px;
+    }
+}
+
+@media (max-width: 480px) {
+    .graph-container {
+        height: 260px;
     }
 }

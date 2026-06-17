@@ -63,8 +63,17 @@
 
 {% block content %}
 <div class="course-container">
+    <!-- Toggle indice passi (solo mobile): apre la sidebar a comparsa -->
+    <button class="sidebar-toggle" type="button" aria-expanded="false" aria-controls="course-sidebar">
+        <span class="sidebar-toggle-icon" aria-hidden="true">☰</span>
+        <span>Indice passi</span>
+    </button>
+
+    <!-- Overlay di sfondo: chiude il drawer al click (solo mobile) -->
+    <div class="sidebar-overlay"></div>
+
     <!-- Sidebar navigazione -->
-    <aside class="course-sidebar">
+    <aside class="course-sidebar" id="course-sidebar">
         <nav class="breadcrumb">
             <a href="{{ url_for('courses.course_index', course_id=course_id) }}">
                 ← {{ course.metadata.get('title', course_id|replace('-', ' ')|title) }}
@@ -216,6 +225,36 @@
         }
       });
     }
+  })();
+</script>
+
+<!-- Drawer indice passi (mobile): apertura/chiusura della sidebar a comparsa -->
+<script>
+  (function () {
+    const container = document.querySelector('.course-container');
+    const toggle = document.querySelector('.sidebar-toggle');
+    const overlay = document.querySelector('.sidebar-overlay');
+    if (!container || !toggle) return;
+
+    function setOpen(open) {
+      container.classList.toggle('sidebar-open', open);
+      toggle.setAttribute('aria-expanded', String(open));
+      // Blocca lo scroll del body mentre il drawer è aperto
+      document.body.style.overflow = open ? 'hidden' : '';
+    }
+
+    toggle.addEventListener('click', () => setOpen(!container.classList.contains('sidebar-open')));
+    if (overlay) overlay.addEventListener('click', () => setOpen(false));
+
+    // Selezionare uno step chiude il drawer (navigazione verso la nuova pagina)
+    container.querySelectorAll('.steps-nav .step-link').forEach((link) => {
+      link.addEventListener('click', () => setOpen(false));
+    });
+
+    // Esc chiude il drawer
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') setOpen(false);
+    });
   })();
 </script>
 {% endblock %}

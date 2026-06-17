@@ -60,6 +60,9 @@ class XGraph extends HTMLElement {
         showNavigation: true,
         showCopyright: false,
         keepaspectratio: true,
+        // Ridisegna la board quando il contenitore cambia dimensione
+        // (resize della finestra, rotazione del dispositivo su mobile).
+        resize: { enabled: true, throttle: 200 },
         pan: { enabled: true },
         zoom: { enabled: true },
         defaultAxes: {
