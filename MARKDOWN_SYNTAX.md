@@ -369,6 +369,18 @@ A espressione risolta lo step riceve la spunta (è sempre un goal).
 > Se invece l'esponente è un'**espressione** (es. `2^(3-2)`), si risolve come nodo a
 > sé — prima si scioglie l'esponente, poi si clicca l'operatore `^` per la potenza.
 
+**Opzione `show-steps`** (flag sulla riga di apertura del fence). Mostra sotto
+l'albero anche lo **svolgimento classico** passo-passo: si parte dall'espressione
+intera e, a ogni nodo sciolto, la riga si semplifica evidenziando brevemente la zona
+risolta; quando si scende di un livello nell'albero si aggiunge una nuova riga (con il
+`=` incolonnato, come sul quaderno).
+
+```markdown
+:::expr show-steps
+(4 + 5) * 4 - 8 : (2 + 6)
+:::
+```
+
 **Esempi:**
 
 ```markdown

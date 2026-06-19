@@ -12,7 +12,13 @@
 <!-- MathJax per rendering formule matematiche -->
 <script>
   MathJax = {
+    // Carica l'estensione `html` (\class{...}{...}), usata da <x-expr show-steps>
+    // per evidenziare la zona appena semplificata nello svolgimento. Va caricata
+    // esplicitamente: il build combinato non la include e marcarla solo tra i
+    // packages disattiverebbe l'autoload lasciando \class indefinito.
+    loader: {load: ['[tex]/html']},
     tex: {
+      packages: {'[+]': ['html']},
       inlineMath: [['$', '$'], ['\\(', '\\)']],
       displayMath: [['$$', '$$'], ['\\[', '\\]']],
       processEscapes: true,
