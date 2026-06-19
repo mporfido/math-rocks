@@ -192,6 +192,12 @@ def process_expr(content, expr_counter):
         (4 + 5*4) - (8:2 + 6)
         :::
 
+    Flag opzionali sulla riga di apertura del fence (separati da spazi):
+        :::expr show-steps
+        (4 + 5*4) - (8:2 + 6)
+        :::
+    `show-steps` mostra sotto l'albero lo svolgimento classico passo-passo.
+
     Linguaggio dell'espressione (input fidato dell'autore):
         operatori: + - * (moltiplicazione) : (divisione) ^ (potenza)
         frazioni:  a/b tra interi è un letterale razionale atomico
@@ -210,16 +216,21 @@ def process_expr(content, expr_counter):
     Returns:
         Tuple (contenuto con marker, dict marker→HTML, nuovo valore counter)
     """
-    pattern = re.compile(r'^:::expr[ \t]*\n(.*?)\n:::[ \t]*$', re.DOTALL | re.MULTILINE)
+    pattern = re.compile(
+        r'^:::expr[ \t]*(?P<opts>[^\n]*)\n(?P<body>.*?)\n:::[ \t]*$',
+        re.DOTALL | re.MULTILINE,
+    )
     replacements = {}
 
     def replace_expr(match):
         nonlocal expr_counter
-        expr = match.group(1).strip()
+        expr = match.group('body').strip()
+        opts = match.group('opts').split()
+        show_steps_attr = ' data-show-steps="true"' if 'show-steps' in opts else ''
         marker = f'XEXPRBLOCK{expr_counter}X'
         expr_attr = html_lib.escape(expr, quote=True)
         replacements[marker] = (
-            f'<x-expr id="expr-{expr_counter}" data-expr="{expr_attr}"></x-expr>'
+            f'<x-expr id="expr-{expr_counter}" data-expr="{expr_attr}"{show_steps_attr}></x-expr>'
         )
         expr_counter += 1
         return marker

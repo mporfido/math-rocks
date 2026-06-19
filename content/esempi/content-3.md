@@ -35,9 +35,10 @@ svolgere e **inserisci il risultato**.
 # Primo esercizio
 
 Comincia da un'espressione con sole parentesi tonde. Ricorda: clicca un operatore solo
-quando entrambi i suoi numeri sono pronti.
+quando entrambi i suoi numeri sono pronti. Sotto l'albero compare anche lo svolgimento
+classico passo-passo.
 
-:::expr
+:::expr show-steps
 (4 + 5) * 4 - 8 : (2 + 6)
 :::
 

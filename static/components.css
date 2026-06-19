@@ -681,6 +681,41 @@ x-graph {
     40%, 80% { transform: translate(-50%, -2px) translateX(4px); }
 }
 
+/* Svolgimento classico passo-passo (flag show-steps), sotto l'albero */
+.expr-steps {
+    margin-top: 1rem;
+    padding-top: 0.75rem;
+    border-top: 1px dashed #e5e7eb;
+    font-size: 1.25em;
+    line-height: 1.7;
+}
+
+.expr-step-line {
+    display: flex;
+    align-items: baseline;
+    gap: 0.4em;
+    white-space: nowrap;
+    overflow-x: auto;
+}
+
+/* Il "=" incolonnato a sinistra (vuoto sulla prima riga) */
+.expr-step-eq {
+    flex: 0 0 1em;
+    text-align: right;
+    color: #334155;
+}
+
+/* Evidenziazione one-shot della zona appena semplificata */
+.expr-step-flash {
+    border-radius: 4px;
+    animation: exprStepFlash 0.7s ease-out;
+}
+
+@keyframes exprStepFlash {
+    0% { background: #fde68a; box-shadow: 0 0 0 3px #fde68a; }
+    100% { background: transparent; box-shadow: 0 0 0 3px transparent; }
+}
+
 /* ========== Tables ========== */
 
 .course-content table {

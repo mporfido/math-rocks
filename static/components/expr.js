@@ -246,6 +246,12 @@ function applyOp(op, a, b) {
 
 const OP_GLYPH = { '+': '+', '-': '−', '*': '·', ':': ':', '^': '^' };
 
+// Operatori in LaTeX, per lo svolgimento classico (show-steps) reso da MathJax.
+const OP_LATEX = { '+': '+', '-': '-', '*': '\\cdot', ':': ':', '^': '^' };
+
+// Delimitatori LaTeX per le parentesi del sorgente ( ) [ ] { }.
+const BRACKET_LATEX = { '(': ['(', ')'], '[': ['[', ']'], '{': ['\\{', '\\}'] };
+
 // ---------------------------------------------------------------------------
 // Web Component
 // ---------------------------------------------------------------------------
@@ -253,6 +259,7 @@ const OP_GLYPH = { '+': '+', '-': '−', '*': '·', ':': ':', '^': '^' };
 class XExpr extends HTMLElement {
   connectedCallback() {
     const exprStr = this.dataset.expr || '';
+    this.showSteps = this.dataset.showSteps === 'true';
 
     try {
       this.ast = parse(tokenize(exprStr));
@@ -358,9 +365,106 @@ class XExpr extends HTMLElement {
     // sono span cliccabili. Memorizziamo il riferimento DOM su ogni nodo.
     this.renderTokens(this.ast);
 
+    // Area opzionale dello svolgimento classico (show-steps), sotto l'albero.
+    if (this.showSteps) this.buildSteps();
+
     if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
       MathJax.typesetPromise([this.tokensRow]).catch(() => {});
     }
+  }
+
+  // -- Svolgimento classico (show-steps) ------------------------------------
+
+  /** Crea l'area dello svolgimento con la prima riga = espressione di partenza. */
+  buildSteps() {
+    this.stepsWrap = document.createElement('div');
+    this.stepsWrap.className = 'expr-steps';
+    this.appendChild(this.stepsWrap);
+
+    // Le righe sono indicizzate per livello: stepsLines[0] = espressione di
+    // partenza, stepsLines[L] = stato dopo aver risolto tutti i nodi fino al
+    // livello L. stepsMaxLevel è la riga più profonda creata finora.
+    this.stepsMaxLevel = 0;
+    const first = this.makeStepLine(false);
+    first.querySelector('.expr-step-math').innerHTML = `\\(${this.renderState(this.ast, null, 0)}\\)`;
+    this.stepsLines = [first];
+
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      MathJax.typesetPromise([this.stepsWrap]).catch(() => {});
+    }
+  }
+
+  /** Una riga dello svolgimento: prefisso "=" opzionale + corpo MathJax. */
+  makeStepLine(withEquals) {
+    const line = document.createElement('div');
+    line.className = 'expr-step-line';
+    const eq = document.createElement('span');
+    eq.className = 'expr-step-eq';
+    eq.textContent = withEquals ? '=' : '';
+    const math = document.createElement('span');
+    math.className = 'expr-step-math';
+    line.appendChild(eq);
+    line.appendChild(math);
+    this.stepsWrap.appendChild(line);
+    return line;
+  }
+
+  /**
+   * Aggiorna lo svolgimento dopo aver risolto `node` (livello `k`). Ogni riga di
+   * livello L rappresenta lo stato con tutti i nodi fino a L risolti, quindi il
+   * nodo appena sciolto compare in TUTTE le righe con L ≥ k: vanno aggiornate
+   * tutte (così la riga di 1° livello mostra tutte le operazioni di 1° livello,
+   * anche se sciolte dopo essere scesi più in basso). Il lampeggio resta solo
+   * sulla riga del livello proprio del nodo.
+   */
+  pushStep(node) {
+    if (!this.showSteps) return;
+    const k = node.level;
+    if (k > this.stepsMaxLevel) {
+      // Apri la riga del nuovo livello (le righe nascono in ordine: per sciogliere
+      // un nodo di livello k serve già un figlio di livello k-1 risolto).
+      this.stepsLines[k] = this.makeStepLine(true);
+      this.stepsMaxLevel = k;
+    }
+    const toTypeset = [];
+    for (let L = k; L <= this.stepsMaxLevel; L++) {
+      const line = this.stepsLines[L];
+      const flash = L === k ? node : null;
+      line.querySelector('.expr-step-math').innerHTML = `\\(${this.renderState(this.ast, flash, L)}\\)`;
+      toTypeset.push(line);
+    }
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      MathJax.typesetPromise(toTypeset).catch(() => {});
+    }
+  }
+
+  /**
+   * LaTeX dell'espressione nello stato corrente (nodi risolti → valore, nodi
+   * aperti → operandi + operatore). Se `flashNode` è dato, il suo valore è
+   * avvolto in \class{expr-step-flash}{…} per l'evidenziazione one-shot.
+   */
+  renderState(node, flashNode, cutoff) {
+    // Un nodo si mostra come valore se è una foglia o un operatore risolto; con
+    // `cutoff` (restore) solo se il suo livello non supera quello richiesto.
+    const shown = node.type === 'num'
+      || (node.resolved && (cutoff === undefined || node.level <= cutoff));
+    if (shown) {
+      const tex = this.operandLatex(node.value);
+      return node === flashNode ? `\\class{expr-step-flash}{${tex}}` : tex;
+    }
+    // Potenza: esponente sempre in apice tra braces (numerico → toLatex come in
+    // renderTokens; espressione → reso ricorsivamente).
+    let body;
+    if (node.op === '^') {
+      const exp = node.right.type === 'num'
+        ? node.right.value.toLatex()
+        : this.renderState(node.right, flashNode, cutoff);
+      body = `${this.renderState(node.left, flashNode, cutoff)}^{${exp}}`;
+    } else {
+      body = `${this.renderState(node.left, flashNode, cutoff)} ${OP_LATEX[node.op]} ${this.renderState(node.right, flashNode, cutoff)}`;
+    }
+    const br = BRACKET_LATEX[node.bracket];
+    return br ? `\\left${br[0]}${body}\\right${br[1]}` : body;
   }
 
   /**
@@ -546,6 +650,9 @@ class XExpr extends HTMLElement {
       MathJax.typesetPromise([label]).catch(() => {});
     }
 
+    // Svolgimento classico: aggiorna/aggiunge la riga corrispondente.
+    this.pushStep(node);
+
     if (this.ast.resolved) {
       this.flash(`Risolto! Risultato: ${this.ast.value.toString()}`, true);
       this.markComplete();
@@ -581,6 +688,20 @@ class XExpr extends HTMLElement {
     if (this.ast.resolved) {
       this.setAttribute('data-completed', 'true');
       this.flash(`Risultato: ${this.ast.value.toString()}`, true);
+    }
+
+    // Svolgimento classico (restore): tutte le righe già complete, senza flash.
+    // La riga 0 (espressione di partenza) è già in this.stepsLines.
+    if (this.showSteps && this.stepsWrap) {
+      for (let lvl = 1; lvl <= this.maxLevel; lvl++) {
+        const line = this.makeStepLine(true);
+        line.querySelector('.expr-step-math').innerHTML = `\\(${this.renderState(this.ast, null, lvl)}\\)`;
+        this.stepsLines[lvl] = line;
+      }
+      this.stepsMaxLevel = this.maxLevel;
+      if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+        MathJax.typesetPromise([this.stepsWrap]).catch(() => {});
+      }
     }
   }
 
