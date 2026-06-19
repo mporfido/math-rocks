@@ -8,6 +8,7 @@ sections:
   - id: aritmetica
     title: Aritmetica
     courses:
+      - numeri-naturali
       - le-frazioni
   - id: esempi
     title: Corsi di esempio
