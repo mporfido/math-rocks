@@ -295,7 +295,7 @@ Quindi $2 + 3 \times 4 = 14$ è il risultato corretto.
 :::
 
 Ora prova tu con il metodo "a nodi": **clicca l'operazione** che si può svolgere
-(quella con la precedenza più alta) e inserisci il risultato. Il nodo "scende" e
+(quella con la precedenza più alta) e inserisci il risultato. Il nodo "scende" di un livello e
 diventa un nuovo operando.
 
 :::div.highlight
@@ -304,7 +304,7 @@ vuol dire $3 \times 4$) e la divisione con i due punti `:` (quindi `6 : 2` vuol
 dire $6 \div 2$).
 :::
 
-Comincia: la moltiplicazione va sciolta **prima** della somma.
+Comincia: la moltiplicazione va risolta **prima** della somma.
 
 :::expr
 2 + 3 * 4
@@ -322,7 +322,7 @@ E la divisione viene prima dell'addizione:
 4 + 6 : 2
 :::
 
-Adesso ce ne sono due ad alta precedenza: sciogli prima `5 · 2` e `8 : 4`, poi la
+Adesso ce ne sono due ad alta precedenza: svolgi prima `5 · 2` e `8 : 4`, poi la
 somma.
 
 :::expr
@@ -360,7 +360,7 @@ verso destra.
 Quindi $9 - 4 - 2 = 3$ è il risultato corretto.
 :::
 
-Prova: nel riquadro puoi sciogliere solo l'operazione **più a sinistra**.
+Prova: nel riquadro puoi svolgere solo l'operazione **più a sinistra**.
 
 :::expr
 9 - 4 - 2
@@ -378,10 +378,10 @@ Vale lo stesso per le divisioni in fila:
 24 : 4 : 2
 :::
 
-Un altro con le divisioni: sciogli `20 : 5` e poi il resto.
+Un altro con divisione e moltiplicazione: risolvi `20 : 5` e poi il resto.
 
 :::expr
-20 : 5 : 2
+20 : 5 * 2
 :::
 
 :::div.reveal
@@ -411,7 +411,7 @@ differenza:
 tra parentesi, poi si applicano le regole di precedenza e da sinistra a destra.
 :::
 
-Nel riquadro l'unica operazione "pronta" è quella dentro le parentesi: sciogli
+Nel riquadro l'unica operazione "pronta" è quella dentro le parentesi: risolvi
 prima `2 + 3`.
 
 :::expr
@@ -441,4 +441,96 @@ collega.
 🎉 **Ottimo lavoro!** Ora conosci le tre regole per calcolare un'espressione:
 **prima le parentesi**, poi **moltiplicazioni e divisioni**, infine **addizioni e
 sottrazioni** — e a parità di precedenza si va **da sinistra a destra**.
+:::
+
+---
+
+> id: sfide
+> title: Le sfide
+
+# Mettiti alla prova
+
+Hai imparato tutte le regole: ora qualche **sfida**, con espressioni un po' più
+lunghe. Fin qui hai risolto le espressioni "a nodi", ma esiste anche il modo
+**classico**, quello che userai sul quaderno: si svolge **un'operazione alla
+volta** e si **riscrive l'espressione più corta** dopo ogni passo, finché resta
+un solo numero.
+
+I due metodi vanno **di pari passo**: ogni nodo che risolvi è esattamente
+un'operazione del calcolo scritto in colonna.
+
+:::div.highlight
+👇 In queste sfide, **sotto** ogni albero compare lo **svolgimento classico**:
+risolvi le operazioni sui nodi e guarda l'espressione che si **semplifica riga
+per riga**, con il segno `=` incolonnato come sul quaderno.
+:::
+
+Comincia con un ripasso: prima la moltiplicazione, poi somma e sottrazione da
+sinistra a destra.
+
+:::expr show-steps
+8 + 4 * 3 - 5
+:::
+
+Qui la parentesi viene prima di tutto, poi la moltiplicazione e infine la
+sottrazione.
+
+:::expr show-steps
+2 * (3 + 5) - 9
+:::
+
+# Le parentesi quadre
+
+A volte un'espressione ha **più livelli** di raggruppamento. Dopo le parentesi
+tonde si usano le **parentesi quadre** `[ ]`, che racchiudono gruppi in cui ci
+sono già delle tonde.
+
+:::div.highlight
+🔑 **Da dentro verso fuori**: si svolge prima ciò che è tra le **tonde**, poi ciò
+che è tra le **quadre**. Le quadre, insomma, "aspettano" che le tonde al loro
+interno siano già risolte.
+:::
+
+Risolvi prima la tonda, poi quello che resta dentro le quadre, e infine la
+divisione finale.
+
+:::expr show-steps
+[ (8 - 3) * 2 + 4 ] : 7
+:::
+
+Anche qui: svuota prima le quadre (partendo dalla tonda dentro di esse), poi fai
+la sottrazione esterna.
+
+:::expr show-steps
+20 - [ (2 + 3) * 2 + 6 ]
+:::
+
+# Le parentesi graffe
+
+Quando i livelli sono **tre**, il più esterno usa le **parentesi graffe** `{ }`.
+L'ordine di annidamento, dal di dentro al di fuori, è sempre lo stesso:
+
+:::div.highlight
+🔑 **Tonde → quadre → graffe**, cioè $\{\,[\,(\ \dots\ )\,]\,\}$: si svolgono prima
+le **tonde**, poi le **quadre**, infine le **graffe**, e solo alla fine le
+operazioni rimaste fuori da tutto.
+:::
+
+Procedi un livello alla volta, dal più interno al più esterno.
+
+:::expr show-steps
+{ [ (3 + 2) * 4 - 5 ] : 3 + 1 } * 2
+:::
+
+Ultima sfida: tonde, quadre e graffe tutte insieme. Vai con calma, da dentro
+verso fuori.
+
+:::expr show-steps
+{ 10 + [ (6 - 2) * 3 - 4 ] } : 2
+:::
+
+:::div.reveal
+🎉 **Sfida superata!** Ora sai svolgere anche le espressioni a più livelli con
+tonde, quadre e graffe — sia con il metodo a nodi, sia con lo svolgimento
+classico passo dopo passo. Sono lo stesso ragionamento, scritto in due modi.
 :::
