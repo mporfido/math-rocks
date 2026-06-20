@@ -449,6 +449,9 @@ x-graph {
     display: block;
     max-width: 100%;
     height: auto;
+    /* Lo swipe verticale scrolla la pagina; i gesti orizzontali e i tap
+       restano allo sketch (es. esplorazione della semiretta). */
+    touch-action: pan-y;
 }
 
 .p5-error {

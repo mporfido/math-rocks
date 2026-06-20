@@ -198,15 +198,15 @@ p.draw = () => {
   }
 };
 
-// Touch: aggiorna la posizione attiva e impedisce lo scroll sul canvas
+// Touch: aggiorna la posizione attiva. Niente `return false`: lasciamo che il
+// browser gestisca lo swipe verticale come scroll della pagina (vedi
+// `touch-action: pan-y` sul canvas); i gesti orizzontali e i tap restano qui.
 p.touchStarted = () => {
   if (p.touches && p.touches.length) touchPos = { x: p.touches[0].x, y: p.touches[0].y };
   else touchPos = { x: p.mouseX, y: p.mouseY };
-  return false;
 };
 p.touchMoved = () => {
   if (p.touches && p.touches.length) touchPos = { x: p.touches[0].x, y: p.touches[0].y };
-  return false;
 };
 // Tornato il mouse in uso: abbandona la posizione "bloccata" dal tocco così
 // l'hover col mouse torna a funzionare dopo aver toccato lo schermo.
