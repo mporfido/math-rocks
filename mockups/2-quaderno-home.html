@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quaderno · Home — mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Serif:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --carta:#FBFBF6; --grid:#D7E0EC; --grid-strong:#C3D2E6;
+  --ink:#1B2A4A; --ink-soft:#5A6275; --rossa:#D7263D; --rossa-deep:#A81628;
+  --grafite:#5A5E66; --spunta:#1F9D55; --line:#DDE2D9;
+  --disp:'Space Grotesk',sans-serif; --body:'IBM Plex Serif',Georgia,serif; --mono:'IBM Plex Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--body);color:var(--ink);line-height:1.65;-webkit-font-smoothing:antialiased;
+  background-color:var(--carta);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:26px 26px}
+.wrap{max-width:1120px;margin:0 auto;padding:0 clamp(1.1rem,4vw,2.2rem)}
+/* red margin line, like a notebook */
+body::before{content:"";position:fixed;top:0;bottom:0;left:max(14px,env(safe-area-inset-left));width:2px;background:rgba(215,38,61,.32);z-index:1;pointer-events:none}
+@media(max-width:700px){body::before{display:none}}
+
+header{position:sticky;top:0;z-index:50;background:rgba(251,251,246,.9);backdrop-filter:blur(8px);border-bottom:2px solid var(--ink)}
+.nav{display:flex;align-items:center;justify-content:space-between;height:66px}
+.brand{font-family:var(--disp);font-weight:700;font-size:1.3rem;letter-spacing:-.02em;color:var(--ink);text-decoration:none;display:flex;align-items:center;gap:.5rem}
+.brand .mk{font-family:var(--mono);color:var(--rossa);font-weight:600}
+.nav-links{display:flex;gap:1.5rem;align-items:center;font-family:var(--disp);font-weight:500;font-size:.95rem}
+.nav-links a{color:var(--ink-soft);text-decoration:none}
+.nav-links a:hover{color:var(--ink)}
+.nav-links .pill{background:var(--ink);color:var(--carta);padding:.5rem 1.05rem;border-radius:6px}
+.nav-links .pill:hover{background:var(--rossa)}
+
+.hero{padding:clamp(2.8rem,8vw,5.5rem) 0 clamp(2rem,5vw,3.4rem)}
+.eyebrow{font-family:var(--mono);font-size:.8rem;letter-spacing:.18em;text-transform:uppercase;color:var(--rossa);margin-bottom:1.1rem}
+.hero h1{font-family:var(--disp);font-weight:700;font-size:clamp(2.6rem,8vw,5rem);line-height:1;letter-spacing:-.03em}
+.hero h1 u{text-decoration:none;position:relative;white-space:nowrap}
+.hero h1 u::after{content:"";position:absolute;left:-2%;right:-2%;bottom:.06em;height:.42em;background:rgba(215,38,61,.22);border-radius:2px;z-index:-1;transform:rotate(-1deg)}
+.lead{font-size:clamp(1.05rem,2.3vw,1.35rem);max-width:40ch;margin:1.5rem 0 2rem;color:var(--ink-soft)}
+.cta-row{display:flex;flex-wrap:wrap;gap:.8rem}
+.btn{font-family:var(--disp);font-weight:600;font-size:1rem;text-decoration:none;border-radius:8px;padding:.8rem 1.4rem;display:inline-flex;align-items:center;gap:.5rem;min-height:48px;cursor:pointer;border:2px solid var(--ink);transition:transform .12s,background .15s,color .15s}
+.btn-primary{background:var(--ink);color:var(--carta)}
+.btn-primary:hover{background:var(--rossa);border-color:var(--rossa);transform:translateY(-2px)}
+.btn-ghost{background:transparent;color:var(--ink)}
+.btn-ghost:hover{background:rgba(27,42,74,.06)}
+
+/* worked-line strip: like a line of math working */
+.working{margin-top:2.6rem;border-top:2px solid var(--ink);padding-top:1.4rem;font-family:var(--mono);font-size:clamp(.95rem,2.4vw,1.2rem);color:var(--ink);display:flex;flex-wrap:wrap;gap:.4rem 1.2rem}
+.working .eq{white-space:nowrap}
+.working .res{color:var(--rossa);font-weight:600}
+
+.section{padding:clamp(2.4rem,6vw,4rem) 0}
+.section-head{display:flex;align-items:center;gap:.8rem;margin-bottom:1.8rem}
+.section-head .no{font-family:var(--mono);color:var(--rossa);font-weight:600}
+.section-head h2{font-family:var(--disp);font-weight:600;font-size:clamp(1.4rem,4vw,2rem);letter-spacing:-.02em}
+.section-head .rule{flex:1;height:2px;background:var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.2rem}
+.card{background:var(--carta);border:2px solid var(--ink);border-radius:10px;text-decoration:none;color:inherit;display:flex;flex-direction:column;overflow:hidden;transition:transform .15s,box-shadow .15s}
+.card:hover{transform:translate(-3px,-3px);box-shadow:6px 6px 0 var(--ink)}
+.card-head{display:flex;align-items:center;justify-content:space-between;padding:.85rem 1.1rem;border-bottom:2px solid var(--ink);background:rgba(27,42,74,.04)}
+.card-head .idx{font-family:var(--mono);font-weight:600;color:var(--ink)}
+.card-head .lev{font-family:var(--mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft)}
+.card-body{padding:1.1rem 1.2rem 1.3rem}
+.card h3{font-family:var(--disp);font-weight:600;font-size:1.3rem;letter-spacing:-.02em;margin-bottom:.4rem}
+.card p{color:var(--ink-soft);font-size:.95rem;margin-bottom:1rem}
+.card-foot{display:flex;align-items:center;gap:.8rem;font-family:var(--mono);font-size:.78rem;color:var(--ink-soft)}
+.prog{height:8px;flex:1;border:1.5px solid var(--ink);border-radius:99px;overflow:hidden;background:#fff}
+.prog i{display:block;height:100%;background:var(--rossa)}
+.go{font-family:var(--disp);font-weight:600;color:var(--ink)}
+.card:hover .go{color:var(--rossa)}
+
+footer{border-top:2px solid var(--ink);padding:2rem 0;margin-top:1.5rem;font-family:var(--mono);font-size:.8rem;color:var(--ink-soft)}
+footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+a:focus-visible,button:focus-visible{outline:3px solid var(--rossa);outline-offset:3px}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header><div class="wrap nav">
+  <a class="brand" href="#">math<span class="mk">·</span>rocks</a>
+  <nav class="nav-links"><a href="#">Corsi</a><a href="#">Come funziona</a><a class="pill" href="#">Inizia</a></nav>
+</div></header>
+
+<main>
+<section class="hero"><div class="wrap">
+  <p class="eyebrow">porfido.rocks · il quaderno interattivo</p>
+  <h1>Apri il quaderno.<br>La matematica si <u>fa</u>, non si guarda.</h1>
+  <p class="lead">Ogni lezione è un foglio a quadretti: scrivi, provi, correggi. Il segno verde arriva quando il passo torna.</p>
+  <div class="cta-row">
+    <a class="btn btn-primary" href="#">Esplora i corsi →</a>
+    <a class="btn btn-ghost" href="#">Guarda una lezione</a>
+  </div>
+  <div class="working">
+    <span class="eq">3 × (4 + 2)</span>
+    <span class="eq">= 3 × 6</span>
+    <span class="eq res">= 18 ✓</span>
+  </div>
+</div></section>
+
+<section class="section"><div class="wrap">
+  <div class="section-head"><span class="no">01</span><h2>Algebra &amp; Aritmetica</h2><span class="rule"></span></div>
+  <div class="grid">
+    <a class="card" href="#">
+      <div class="card-head"><span class="idx">№ 01</span><span class="lev">Base</span></div>
+      <div class="card-body">
+        <h3>I numeri naturali</h3>
+        <p>Conta, ordina, raggruppa. Dalla retta numerica alle sfide con le parentesi.</p>
+        <div class="card-foot"><div class="prog"><i style="width:60%"></i></div><span>4/7</span><span class="go">Continua →</span></div>
+      </div>
+    </a>
+    <a class="card" href="#">
+      <div class="card-head"><span class="idx">№ 02</span><span class="lev">Base</span></div>
+      <div class="card-body">
+        <h3>Frazioni &amp; decimali</h3>
+        <p>Spezzare l'intero senza perdersi: torte, metri e percentuali.</p>
+        <div class="card-foot"><div class="prog"><i style="width:0%"></i></div><span>0/9</span><span class="go">Inizia →</span></div>
+      </div>
+    </a>
+    <a class="card" href="#">
+      <div class="card-head"><span class="idx">№ 03</span><span class="lev">Intermedio</span></div>
+      <div class="card-body">
+        <h3>Equazioni di 1° grado</h3>
+        <p>La bilancia in equilibrio: isola l'incognita un passo alla volta.</p>
+        <div class="card-foot"><div class="prog"><i style="width:0%"></i></div><span>0/8</span><span class="go">Inizia →</span></div>
+      </div>
+    </a>
+  </div>
+</div></section>
+</main>
+
+<footer><div class="wrap">
+  <span>© 2026 porfido.rocks — un quaderno che ti risponde.</span>
+  <span>math·rocks // mockup direzione 2</span>
+</div></footer>
+</body>
+</html>

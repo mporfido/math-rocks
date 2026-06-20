@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brutalist · Lezione — mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=Archivo+Expanded:wght@700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F2EFE9; --ink:#15110F; --oxblood:#7A2233; --citrino:#E4C234; --paper:#FFFFFF;
+  --line:#15110F; --muted:#5A534E; --ok:#1E7A4D;
+  --disp:'Archivo Expanded',sans-serif; --body:'Archivo',sans-serif; --mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--body);color:var(--ink);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:0 clamp(1rem,4vw,2.2rem)}
+header{position:sticky;top:0;z-index:50;background:var(--bg);border-bottom:3px solid var(--ink)}
+.nav{display:flex;align-items:center;justify-content:space-between;height:64px}
+.brand{font-family:var(--disp);font-weight:900;font-size:1.15rem;text-transform:uppercase;color:var(--ink);text-decoration:none}
+.brand em{font-style:normal;color:var(--oxblood)}
+.crumb{font-family:var(--mono);font-weight:700;font-size:.76rem;text-transform:uppercase}
+.crumb a{color:var(--ink);text-decoration:none;border-bottom:3px solid var(--citrino)}
+
+.layout{display:grid;grid-template-columns:264px 1fr;gap:1.8rem;padding:1.6rem 0 4rem;align-items:start}
+.side{position:sticky;top:80px;background:var(--paper);border:3px solid var(--ink);box-shadow:6px 6px 0 var(--ink);padding:1.1rem}
+.side .lk{font-family:var(--mono);font-weight:700;font-size:.72rem;text-transform:uppercase;color:var(--oxblood)}
+.side h3{font-family:var(--disp);font-weight:800;font-size:1.1rem;text-transform:uppercase;margin:.3rem 0 .8rem;letter-spacing:-.02em}
+.side .pct{font-family:var(--mono);font-weight:700;font-size:.74rem;color:var(--muted);margin-bottom:.4rem}
+.sprog{height:12px;border:3px solid var(--ink);overflow:hidden;margin-bottom:1rem;background:#fff}
+.sprog i{display:block;height:100%;width:43%;background:repeating-linear-gradient(45deg,var(--oxblood) 0 7px,#5d1826 7px 14px)}
+.steps{list-style:none;display:flex;flex-direction:column}
+.steps a{display:flex;align-items:center;gap:.55rem;padding:.55rem .5rem;text-decoration:none;color:var(--ink);font-family:var(--mono);font-size:.82rem;font-weight:700;text-transform:uppercase;min-height:44px;border-bottom:2px solid rgba(21,17,15,.12)}
+.steps a:hover{background:var(--bg)}
+.steps .mk{width:18px;text-align:center;flex:none}
+.steps a.done .mk{color:var(--ok)}
+.steps a.active{background:var(--ink);color:var(--citrino)}
+.steps a.locked{color:#A39C96}
+.reset{margin-top:1rem;width:100%;font-family:var(--mono);font-weight:700;font-size:.74rem;text-transform:uppercase;color:var(--ink);background:none;border:2px solid var(--ink);padding:.5rem;cursor:pointer}
+.reset:hover{background:var(--oxblood);color:#fff;border-color:var(--oxblood)}
+
+.content{background:var(--paper);border:3px solid var(--ink);box-shadow:8px 8px 0 var(--ink);padding:clamp(1.3rem,4vw,2.6rem)}
+.step-k{font-family:var(--mono);font-weight:700;font-size:.76rem;letter-spacing:.06em;text-transform:uppercase;color:var(--oxblood)}
+.content h1{font-family:var(--disp);font-weight:900;font-size:clamp(1.7rem,5vw,2.6rem);text-transform:uppercase;letter-spacing:-.03em;line-height:1.02;margin:.4rem 0 1.2rem}
+.content p{margin:0 0 1.05rem;font-size:1.04rem;font-weight:500}
+.content h2{font-family:var(--disp);font-weight:800;font-size:1.25rem;text-transform:uppercase;margin:1.8rem 0 .7rem;letter-spacing:-.02em}
+.kbd{font-family:var(--mono);font-weight:700;background:var(--ink);color:var(--bg);padding:.1rem .4rem}
+mark{background:var(--citrino);padding:0 .2em}
+
+.lab{border:3px solid var(--ink);padding:1.3rem;margin:1.4rem 0;background:var(--bg)}
+.lab .lab-k{font-family:var(--mono);font-weight:700;font-size:.74rem;text-transform:uppercase;color:var(--oxblood);margin-bottom:.7rem}
+.lab .q{font-size:1.1rem;font-weight:700;margin-bottom:.9rem}
+.blank{display:inline-flex;align-items:center;border:3px solid var(--ink);padding:.25rem .6rem;font-family:var(--mono);font-weight:700;min-width:58px;background:#fff}
+.blank.ok{background:var(--citrino)}
+.slider-row{display:flex;align-items:center;gap:1rem;margin:1rem 0}
+.slider-row label{font-family:var(--mono);font-weight:700;font-size:.85rem}
+input[type=range]{-webkit-appearance:none;appearance:none;height:10px;flex:1;max-width:280px;background:#fff;border:3px solid var(--ink)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;background:var(--oxblood);border:3px solid var(--ink);cursor:pointer}
+.val{font-family:var(--mono);font-weight:700;color:var(--oxblood)}
+.btn{font-family:var(--mono);font-weight:700;font-size:.85rem;text-transform:uppercase;border:3px solid var(--ink);padding:.65rem 1.2rem;cursor:pointer;min-height:48px;display:inline-flex;align-items:center;gap:.5rem;box-shadow:4px 4px 0 var(--ink);transition:transform .1s,box-shadow .1s,background .12s;text-decoration:none}
+.btn:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--ink)}
+.btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+.btn-check{background:var(--oxblood);color:#fff}
+.btn-check.done{background:var(--ok)}
+.feedback{font-family:var(--mono);font-weight:700;text-transform:uppercase;margin-left:.7rem;color:var(--ok)}
+
+.reveal{margin-top:1.4rem;padding:1.2rem 1.3rem;border:3px solid var(--ink);background:var(--citrino);box-shadow:6px 6px 0 var(--ink);animation:pop .35s cubic-bezier(.2,1.4,.4,1) both}
+@keyframes pop{from{opacity:0;transform:translate(6px,6px) scale(.97)}to{opacity:1;transform:none}}
+.reveal .r-k{font-family:var(--mono);font-weight:700;font-size:.74rem;text-transform:uppercase;margin-bottom:.3rem}
+.reveal p{margin:0;font-weight:600}
+
+.stepnav{display:flex;justify-content:space-between;gap:.8rem;margin-top:2rem;flex-wrap:wrap}
+.btn-sec{background:var(--paper);color:var(--ink)}
+.btn-next{background:var(--ink);color:var(--citrino)}
+.btn-next.disabled{opacity:.4;pointer-events:none;box-shadow:none}
+
+a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid var(--oxblood);outline-offset:3px}
+@media(max-width:860px){.layout{grid-template-columns:1fr}.side{position:static;order:2}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<header><div class="wrap nav">
+  <a class="brand" href="3-brutalist-home.html">MATH<em>·</em>ROCKS</a>
+  <span class="crumb"><a href="3-brutalist-home.html">← Numeri naturali</a></span>
+</div></header>
+
+<main class="wrap"><div class="layout">
+  <aside class="side">
+    <div class="lk">Lezione 03</div>
+    <h3>Le sfide</h3>
+    <div class="pct">3 / 7 · 43%</div>
+    <div class="sprog"><i></i></div>
+    <ol class="steps">
+      <li><a class="done" href="#"><span class="mk">✓</span>Segno della retta</a></li>
+      <li><a class="done" href="#"><span class="mk">✓</span>Ordinare</a></li>
+      <li><a class="done" href="#"><span class="mk">✓</span>Raggruppare</a></li>
+      <li><a class="active" href="#"><span class="mk">4</span>Tonde</a></li>
+      <li><a class="locked" href="#"><span class="mk">5</span>Quadre</a></li>
+      <li><a class="locked" href="#"><span class="mk">6</span>Graffe</a></li>
+      <li><a class="locked" href="#"><span class="mk">7</span>Sfida</a></li>
+    </ol>
+    <button class="reset">Azzera</button>
+  </aside>
+
+  <article class="content">
+    <div class="step-k">Passo 04 — parentesi tonde</div>
+    <h1>Prima spacca la parentesi</h1>
+    <p>Si lavora <strong>da dentro verso fuori</strong>. Le parentesi tonde <span class="kbd">( )</span> si risolvono per prime, poi vengono moltiplicazioni e divisioni.</p>
+    <p>Calcola prima ciò che sta <mark>dentro</mark> la parentesi.</p>
+
+    <div class="lab">
+      <div class="lab-k">▚ Mettiti alla prova</div>
+      <div class="q">Quanto vale 3 × (4 + 2) ?</div>
+      <div>4 + 2 = <span class="blank ok">6</span> &nbsp;→&nbsp; 3 × 6 = <span class="blank ok">18</span></div>
+    </div>
+
+    <h2>Esplora</h2>
+    <p>Muovi il cursore: la regola non cambia, cambia solo il risultato.</p>
+    <div class="lab">
+      <div class="lab-k">▚ Laboratorio</div>
+      <div class="slider-row"><label for="n">n =</label><input id="n" type="range" min="0" max="10" value="6"><span class="val" id="nv">6</span></div>
+      <div class="q">3 × (4 + <span class="val" id="nv2">6</span>) = <span class="val" id="res">30</span></div>
+      <button class="btn btn-check" id="chk">Verifica →</button>
+      <span class="feedback" id="fb" style="display:none">Esatto ✓</span>
+      <div class="reveal" id="rev" style="display:none">
+        <div class="r-k">▚ Spaccato</div>
+        <p><strong>Prima la parentesi, poi la moltiplicazione.</strong> Sfida 1 risolta — al prossimo passo arrivano le quadre.</p>
+      </div>
+    </div>
+
+    <div class="stepnav">
+      <a class="btn btn-sec" href="#">← Precedente</a>
+      <a class="btn btn-next disabled" id="next" href="#">Successivo →</a>
+    </div>
+  </article>
+</div></main>
+
+<script>
+const n=document.getElementById('n'),nv=document.getElementById('nv'),nv2=document.getElementById('nv2'),res=document.getElementById('res');
+function upd(){const v=+n.value;nv.textContent=v;nv2.textContent=v;res.textContent=3*(4+v)}
+n.addEventListener('input',upd);upd();
+document.getElementById('chk').addEventListener('click',e=>{e.target.classList.add('done');e.target.textContent='Risolto ✓';document.getElementById('fb').style.display='inline';document.getElementById('rev').style.display='block';document.getElementById('next').classList.remove('disabled');});
+</script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>math·rocks — mockup restyling</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Space Grotesk',sans-serif;background:#15110F;color:#ECE9EE;line-height:1.55;padding:clamp(1.5rem,5vw,4rem)}
+.wrap{max-width:1000px;margin:0 auto}
+h1{font-size:clamp(1.8rem,5vw,2.8rem);letter-spacing:-.03em;margin-bottom:.5rem}
+.sub{font-family:'Space Mono',monospace;color:#9C90A6;font-size:.9rem;margin-bottom:2.5rem}
+.dir{border:1px solid #3a3340;border-radius:14px;padding:1.4rem;margin-bottom:1.3rem;background:#1d1822}
+.dir h2{font-size:1.3rem;margin-bottom:.3rem}
+.dir .tag{font-family:'Space Mono',monospace;font-size:.72rem;color:#C0436B;text-transform:uppercase;letter-spacing:.1em}
+.dir p{color:#B6ACBE;font-size:.95rem;margin:.5rem 0 1rem;max-width:60ch}
+.links{display:flex;gap:.7rem;flex-wrap:wrap}
+.links a{font-family:'Space Mono',monospace;font-size:.85rem;text-decoration:none;color:#fff;border:1px solid #4a4350;padding:.6rem 1.1rem;border-radius:8px;transition:.15s}
+.links a:hover{background:#C0436B;border-color:#C0436B}
+.rec{display:inline-block;font-family:'Space Mono',monospace;font-size:.68rem;background:#2F7D5B;color:#fff;padding:.15rem .5rem;border-radius:4px;margin-left:.5rem;vertical-align:middle;letter-spacing:.05em}
+.note{font-family:'Space Mono',monospace;font-size:.78rem;color:#8a7f93;margin-top:2rem;border-top:1px solid #3a3340;padding-top:1.2rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>math·rocks — 3 direzioni di restyling</h1>
+  <p class="sub">// porfido.rocks · apri Home e Lezione di ciascuna e confronta (prova anche a stringere la finestra a misura smartphone)</p>
+
+  <div class="dir">
+    <span class="tag">Direzione 1 · minerale</span>
+    <h2>Porfido<span class="rec">consigliata</span></h2>
+    <p>Radicata nel tuo nome: la pietra. Viola-porfido + texture a cristalli, display Schibsted Grotesk, corpo serif. Uno step risolto "cristallizza". Sofisticata, adulta, distintiva.</p>
+    <div class="links"><a href="1-porfido-home.html">Home →</a><a href="1-porfido-lezione.html">Lezione →</a></div>
+  </div>
+
+  <div class="dir">
+    <span class="tag">Direzione 2 · studio</span>
+    <h2>Quaderno + inchiostro</h2>
+    <p>Il foglio a quadretti del banco: griglia, inchiostro blu, spunta a penna rossa del prof. Space Grotesk + IBM Plex. Concreta, "si fa con le mani".</p>
+    <div class="links"><a href="2-quaderno-home.html">Home →</a><a href="2-quaderno-lezione.html">Lezione →</a></div>
+  </div>
+
+  <div class="dir">
+    <span class="tag">Direzione 3 · audace</span>
+    <h2>Neo-brutalist STEM</h2>
+    <p>Bordi spessi, ombre solide, titoloni Archivo Expanded, accento citrino + oxblood. Energica, molto memorabile, "la matematica è dura come una roccia".</p>
+    <div class="links"><a href="3-brutalist-home.html">Home →</a><a href="3-brutalist-lezione.html">Lezione →</a></div>
+  </div>
+
+  <p class="note">Mockup statici di valutazione — non toccano l'app Flask. Font da Google Fonts CDN solo per l'anteprima; nel restyling vero si decide se self-hostarli. Dopo la tua scelta: estrazione token in CSS variables + applicazione a templates/ e web component.</p>
+</div>
+</body>
+</html>

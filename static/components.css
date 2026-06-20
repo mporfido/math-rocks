@@ -19,27 +19,30 @@ x-blank {
 .blank-input {
     min-width: 80px;
     padding: 6px 12px;
-    border: 2px solid #d1d5db;
+    border: 2px solid var(--ink);
     border-radius: 6px;
     font-size: 1em;
-    font-family: inherit;
-    transition: all 0.3s ease;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    background: var(--surface);
+    transition: border-color 0.2s ease, background-color 0.2s ease;
     outline: none;
 }
 
 .blank-input:focus {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    border-color: var(--rossa);
+    box-shadow: 0 0 0 3px rgba(215, 38, 61, 0.12);
 }
 
 x-blank.correct .blank-input {
-    border-color: #22c55e;
-    background-color: #f0fdf4;
+    border-color: var(--spunta);
+    background-color: var(--spunta-soft);
+    color: var(--spunta);
 }
 
 x-blank.incorrect .blank-input {
-    border-color: #ef4444;
-    background-color: #fef2f2;
+    border-color: var(--error);
+    background-color: var(--error-soft);
 }
 
 .blank-feedback {
@@ -50,11 +53,11 @@ x-blank.incorrect .blank-input {
 }
 
 .blank-feedback.success {
-    color: #22c55e;
+    color: var(--spunta);
 }
 
 .blank-feedback.error {
-    color: #ef4444;
+    color: var(--error);
 }
 
 /* Multiple Choice */
@@ -67,19 +70,19 @@ x-blank.incorrect .blank-input {
 
 .choice-btn {
     padding: 8px 16px;
-    border: 2px solid #d1d5db;
-    background: white;
+    border: 2px solid var(--ink);
+    background: var(--surface);
     border-radius: 6px;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.1s ease;
     font-size: 0.95em;
-    font-weight: 500;
-    font-family: inherit;
+    font-weight: 600;
+    font-family: var(--font-disp);
+    color: var(--ink);
 }
 
 .choice-btn:hover {
-    background: #f3f4f6;
-    border-color: #9ca3af;
+    background: rgba(27, 42, 74, 0.06);
 }
 
 .choice-btn:active {
@@ -87,16 +90,16 @@ x-blank.incorrect .blank-input {
 }
 
 .choice-btn.correct {
-    border-color: #22c55e;
-    background: #f0fdf4;
+    border-color: var(--spunta);
+    background: var(--spunta-soft);
     color: #15803d;
     font-weight: 600;
 }
 
 .choice-btn.incorrect {
-    border-color: #ef4444;
-    background: #fef2f2;
-    color: #dc2626;
+    border-color: var(--error);
+    background: var(--error-soft);
+    color: var(--rossa-deep);
 }
 
 /* Dropdown inline (cloze "select:") */
@@ -109,29 +112,29 @@ x-blank.incorrect .blank-input {
 
 .blank-select {
     padding: 6px 12px;
-    border: 2px solid #d1d5db;
+    border: 2px solid var(--ink);
     border-radius: 6px;
     font-size: 1em;
-    font-family: inherit;
-    background: white;
+    font-family: var(--font-mono);
+    background: var(--surface);
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
     outline: none;
 }
 
 .blank-select:focus {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    border-color: var(--rossa);
+    box-shadow: 0 0 0 3px rgba(215, 38, 61, 0.12);
 }
 
 x-blank.correct .blank-select {
-    border-color: #22c55e;
-    background-color: #f0fdf4;
+    border-color: var(--spunta);
+    background-color: var(--spunta-soft);
 }
 
 x-blank.incorrect .blank-select {
-    border-color: #ef4444;
-    background-color: #fef2f2;
+    border-color: var(--error);
+    background-color: var(--error-soft);
 }
 
 /* ========== Check Component ========== */
@@ -149,20 +152,20 @@ x-check {
 
 .check-btn {
     padding: 8px 20px;
-    background: #2563eb;
-    color: white;
-    border: none;
+    background: var(--ink);
+    color: var(--carta);
+    border: 2px solid var(--ink);
     border-radius: 6px;
     cursor: pointer;
     font-size: 0.95em;
     font-weight: 600;
-    font-family: inherit;
-    transition: all 0.2s ease;
+    font-family: var(--font-disp);
+    transition: background 0.15s ease, transform 0.1s ease;
 }
 
 .check-btn:hover:not(:disabled) {
-    background: #1d4ed8;
-    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
+    background: var(--rossa);
+    border-color: var(--rossa);
 }
 
 .check-btn:active:not(:disabled) {
@@ -175,10 +178,12 @@ x-check {
 }
 
 .check-btn.correct {
-    background: #16a34a;
+    background: var(--spunta);
+    border-color: var(--spunta);
 }
 
 .check-feedback {
+    font-family: var(--font-disp);
     font-weight: bold;
     font-size: 1em;
     min-width: 80px;
@@ -190,7 +195,7 @@ x-check {
 }
 
 .check-feedback.incorrect {
-    color: #dc2626;
+    color: var(--rossa-deep);
 }
 
 /* ========== Variable Component ========== */
@@ -205,27 +210,28 @@ x-variable {
     align-items: center;
     gap: 12px;
     padding: 8px 16px;
-    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+    background: var(--surface);
+    border: 2px solid var(--ink);
     border-radius: 8px;
     margin: 0 6px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .variable-value {
-    font-weight: bold;
+    font-weight: 700;
     min-width: 40px;
     text-align: center;
-    color: #2563eb;
+    color: var(--rossa);
     font-size: 1.1em;
-    font-family: 'Courier New', monospace;
+    font-family: var(--font-mono);
 }
 
 .variable-slider {
     min-width: 140px;
-    height: 6px;
-    border-radius: 3px;
+    height: 8px;
+    border: 1.5px solid var(--ink);
+    border-radius: 99px;
     outline: none;
-    background: linear-gradient(to right, #e5e7eb 0%, #3b82f6 100%);
+    background: var(--grid);
     cursor: pointer;
     -webkit-appearance: none;
     /* Il trascinamento orizzontale regola il valore senza scrollare la pagina */
@@ -235,52 +241,51 @@ x-variable {
 .variable-slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
-    background: #2563eb;
+    background: var(--ink);
+    border: 3px solid var(--carta);
+    box-shadow: 0 0 0 1.5px var(--ink);
     cursor: pointer;
-    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.4);
-    transition: all 0.3s ease;
+    transition: transform 0.2s ease;
 }
 
 .variable-slider::-webkit-slider-thumb:hover {
-    transform: scale(1.2);
-    box-shadow: 0 3px 10px rgba(37, 99, 235, 0.6);
+    transform: scale(1.15);
 }
 
 .variable-slider::-moz-range-thumb {
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
-    background: #2563eb;
+    background: var(--ink);
     cursor: pointer;
-    border: none;
-    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.4);
-    transition: all 0.3s ease;
+    border: 3px solid var(--carta);
+    box-shadow: 0 0 0 1.5px var(--ink);
+    transition: transform 0.2s ease;
 }
 
 .variable-slider::-moz-range-thumb:hover {
-    transform: scale(1.2);
-    box-shadow: 0 3px 10px rgba(37, 99, 235, 0.6);
+    transform: scale(1.15);
 }
 
 /* Campo numerico editabile a mano (data-display="input") */
 .variable-input {
     width: 64px;
     padding: 4px 8px;
-    border: 2px solid #d1d5db;
+    border: 2px solid var(--ink);
     border-radius: 6px;
     font-size: 1em;
-    font-family: inherit;
+    font-family: var(--font-mono);
     text-align: center;
     outline: none;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .variable-input:focus {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    border-color: var(--rossa);
+    box-shadow: 0 0 0 3px rgba(215, 38, 61, 0.12);
 }
 
 /* ========== Reveal Content ========== */
@@ -293,15 +298,37 @@ x-variable {
     margin-top: 1.5rem;
 }
 
+/* Completamento: firma "penna rossa" — il blocco appare segnato come dal prof */
 .reveal.active {
     opacity: 1;
     max-height: 3000px;
-    animation: revealSlide 0.6s ease;
+    position: relative;
+    padding: 1.2rem 1.4rem 1.2rem 3.1rem;
+    border: 2px dashed var(--rossa);
+    border-radius: var(--radius);
+    background: rgba(215, 38, 61, 0.04);
+    animation: revealSlide 0.5s ease;
+}
+
+.reveal.active::before {
+    content: "✓";
+    position: absolute;
+    left: 1rem;
+    top: 1.1rem;
+    color: var(--rossa);
+    font-family: var(--font-disp);
+    font-weight: 700;
+    font-size: 1.4rem;
+    line-height: 1;
+}
+
+.reveal.active > :last-child {
+    margin-bottom: 0;
 }
 
 @keyframes revealSlide {
     from {
-        transform: translateY(-10px);
+        transform: translateY(8px);
         opacity: 0;
     }
     to {
@@ -314,11 +341,11 @@ x-variable {
 
 .highlight {
     padding: 1.5rem;
-    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-    border-left: 4px solid #f59e0b;
-    border-radius: 8px;
+    background: var(--surface);
+    border: 2px solid var(--ink);
+    border-left: 6px solid var(--rossa);
+    border-radius: var(--radius);
     margin: 1.5rem 0;
-    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.1);
 }
 
 .highlight p:last-child {
@@ -328,12 +355,12 @@ x-variable {
 /* ========== Code blocks ========== */
 
 code {
-    background: #f3f4f6;
+    background: rgba(27, 42, 74, 0.07);
     padding: 2px 6px;
     border-radius: 4px;
-    font-family: 'Courier New', Consolas, Monaco, monospace;
+    font-family: var(--font-mono);
     font-size: 0.9em;
-    color: #1f2937;
+    color: var(--ink);
 }
 
 pre code {
@@ -346,25 +373,26 @@ pre code {
 
 details.syntax-doc {
     margin: 1rem 0 1.5rem;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    background: #fafafa;
+    border: 2px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
 }
 
 details.syntax-doc summary {
     cursor: pointer;
     padding: 0.6rem 1rem;
+    font-family: var(--font-disp);
     font-size: 0.9rem;
-    color: #6b7280;
+    color: var(--ink-soft);
     user-select: none;
 }
 
 details.syntax-doc summary:hover {
-    color: #374151;
+    color: var(--ink);
 }
 
 details.syntax-doc[open] summary {
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid var(--line);
 }
 
 details.syntax-doc pre {
@@ -372,8 +400,8 @@ details.syntax-doc pre {
 }
 
 details.syntax-doc pre code {
-    background: #1f2937;
-    color: #e5e7eb;
+    background: var(--ink);
+    color: var(--carta);
     border-radius: 0;
     line-height: 1.6;
 }
@@ -382,8 +410,8 @@ details.syntax-doc > p {
     padding: 0.6rem 1rem;
     margin: 0;
     font-size: 0.85rem;
-    color: #6b7280;
-    border-top: 1px solid #e5e7eb;
+    color: var(--ink-soft);
+    border-top: 1px solid var(--line);
 }
 
 /* ========== Graph Component ========== */
@@ -396,9 +424,8 @@ x-graph {
 .graph-container {
     width: 100%;
     height: 400px;
-    border-radius: 8px;
-    border: 1px solid #e5e7eb;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border-radius: var(--radius);
+    border: 2px solid var(--ink);
     overflow: hidden;
 }
 
@@ -406,30 +433,32 @@ x-graph {
     display: inline-block;
     margin-top: 0.75rem;
     padding: 8px 24px;
-    background: #2563eb;
-    color: white;
-    border: none;
+    background: var(--ink);
+    color: var(--carta);
+    border: 2px solid var(--ink);
     border-radius: 6px;
     font-size: 0.95em;
     font-weight: 600;
-    font-family: inherit;
+    font-family: var(--font-disp);
     cursor: pointer;
     transition: background 0.2s ease;
 }
 
 .graph-verify-btn:hover:not(:disabled) {
-    background: #1d4ed8;
+    background: var(--rossa);
+    border-color: var(--rossa);
 }
 
 .graph-verify-btn:disabled {
-    background: #22c55e;
+    background: var(--spunta);
+    border-color: var(--spunta);
     cursor: default;
 }
 
 .graph-error {
     padding: 1rem;
-    color: #ef4444;
-    background: #fef2f2;
+    color: var(--error);
+    background: var(--error-soft);
     border-radius: 6px;
     font-size: 0.9em;
 }
@@ -438,9 +467,8 @@ x-graph {
 .p5-container {
     display: inline-block;
     max-width: 100%;
-    border-radius: 8px;
-    border: 1px solid #e5e7eb;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border-radius: var(--radius);
+    border: 2px solid var(--ink);
     overflow: hidden;
     line-height: 0; /* elimina il gap sotto il canvas inline */
 }
@@ -456,8 +484,8 @@ x-graph {
 
 .p5-error {
     padding: 1rem;
-    color: #ef4444;
-    background: #fef2f2;
+    color: var(--error);
+    background: var(--error-soft);
     border-radius: 6px;
     font-size: 0.9em;
 }
@@ -467,15 +495,15 @@ x-graph {
     display: block;
     margin: 1.5rem 0;
     padding: 1rem;
-    background: #fff;
-    border: 1px solid #e5e7eb;
-    border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    background: var(--surface);
+    border: 2px solid var(--ink);
+    border-radius: var(--radius);
     overflow-x: auto;
 }
 
 /* Riga superiore con l'espressione (token cliccabili) */
 .expr-tokens {
+    font-family: var(--font-mono);
     font-size: 1.4em;
     line-height: 1.6;
     text-align: center;
@@ -492,7 +520,7 @@ x-graph {
 }
 
 .expr-paren {
-    color: #6b7280;
+    color: var(--ink-soft);
 }
 
 /* Operatori cliccabili = i "nodi" selezionabili dallo studente */
@@ -505,14 +533,14 @@ x-graph {
 }
 
 .expr-op:hover {
-    background: #eff6ff;
-    color: #2563eb;
+    background: rgba(27, 42, 74, 0.08);
+    color: var(--ink);
 }
 
 .expr-op.selected {
-    background: #dbeafe;
-    color: #1d4ed8;
-    box-shadow: 0 0 0 2px #93c5fd inset;
+    background: rgba(215, 38, 61, 0.12);
+    color: var(--rossa-deep);
+    box-shadow: 0 0 0 2px var(--rossa) inset;
 }
 
 /* Esponente di una potenza: in apice e cliccabile (sostituisce l'operatore ^) */
@@ -541,17 +569,17 @@ x-graph {
 }
 
 .expr-level-line {
-    stroke: #e5e7eb;
+    stroke: var(--line);
     stroke-width: 1;
 }
 
 .expr-edge {
-    stroke: #334155;
+    stroke: var(--ink);
     stroke-width: 2;
 }
 
 .expr-node-dot {
-    fill: #334155;
+    fill: var(--ink);
 }
 
 .expr-nodes {
@@ -566,10 +594,11 @@ x-graph {
 .expr-node-value {
     position: absolute;
     transform: translate(-50%, 0);
+    font-family: var(--font-mono);
     font-size: 1.15em;
     font-weight: 600;
-    color: #0f172a;
-    background: #fff;
+    color: var(--ink);
+    background: var(--carta);
     padding: 0 4px;
     white-space: nowrap;
 }
@@ -581,11 +610,11 @@ x-graph {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    background: #fff;
-    border: 1px solid #93c5fd;
+    background: var(--surface);
+    border: 2px solid var(--ink);
     border-radius: 8px;
     padding: 4px 8px;
-    box-shadow: 0 2px 10px rgba(37, 99, 235, 0.15);
+    box-shadow: var(--shadow-hard);
     white-space: nowrap;
     z-index: 2;
 }
@@ -598,37 +627,38 @@ x-graph {
 }
 
 .expr-op-inline {
-    color: #334155;
+    color: var(--ink);
 }
 
 .expr-input {
     width: 64px;
     padding: 4px 8px;
-    border: 2px solid #d1d5db;
+    border: 2px solid var(--ink);
     border-radius: 6px;
     font-size: 1em;
-    font-family: inherit;
+    font-family: var(--font-mono);
     text-align: center;
 }
 
 .expr-input:focus {
     outline: none;
-    border-color: #2563eb;
+    border-color: var(--rossa);
 }
 
 .expr-confirm {
     padding: 4px 10px;
-    border: none;
+    border: 2px solid var(--ink);
     border-radius: 6px;
-    background: #2563eb;
-    color: #fff;
+    background: var(--ink);
+    color: var(--carta);
     font-weight: 600;
     cursor: pointer;
-    font-family: inherit;
+    font-family: var(--font-disp);
 }
 
 .expr-confirm:hover {
-    background: #1d4ed8;
+    background: var(--rossa);
+    border-color: var(--rossa);
 }
 
 .expr-input-feedback {
@@ -637,18 +667,19 @@ x-graph {
 }
 
 .expr-input-feedback.error {
-    color: #ef4444;
+    color: var(--error);
 }
 
 .expr-feedback {
     min-height: 1.4em;
     margin: 0 0 0.5rem;
     text-align: center;
+    font-family: var(--font-disp);
     font-size: 0.95em;
 }
 
 .expr-feedback.info {
-    color: #2563eb;
+    color: var(--ink);
 }
 
 .expr-feedback.success {
@@ -658,8 +689,8 @@ x-graph {
 
 .expr-error {
     padding: 1rem;
-    color: #ef4444;
-    background: #fef2f2;
+    color: var(--error);
+    background: var(--error-soft);
     border-radius: 6px;
     font-size: 0.9em;
 }
@@ -690,7 +721,8 @@ x-graph {
 .expr-steps {
     margin-top: 1rem;
     padding-top: 0.75rem;
-    border-top: 1px dashed #e5e7eb;
+    border-top: 1px dashed var(--line);
+    font-family: var(--font-mono);
     font-size: 1.25em;
     line-height: 1.7;
 }
@@ -707,7 +739,7 @@ x-graph {
 .expr-step-eq {
     flex: 0 0 1em;
     text-align: right;
-    color: #334155;
+    color: var(--ink);
 }
 
 /* Evidenziazione one-shot della zona appena semplificata */
@@ -717,7 +749,7 @@ x-graph {
 }
 
 @keyframes exprStepFlash {
-    0% { background: #fde68a; box-shadow: 0 0 0 3px #fde68a; }
+    0% { background: rgba(215, 38, 61, 0.22); box-shadow: 0 0 0 3px rgba(215, 38, 61, 0.22); }
     100% { background: transparent; box-shadow: 0 0 0 3px transparent; }
 }
 
@@ -728,29 +760,29 @@ x-graph {
     width: 100%;
     margin: 1.5rem 0;
     font-size: 0.95em;
-    background: #fff;
-    border-radius: 8px;
+    background: var(--surface);
+    border: 2px solid var(--ink);
+    border-radius: var(--radius);
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .course-content th {
-    background: #f3f4f6;
-    color: #1f2937;
+    background: var(--ink);
+    color: var(--carta);
+    font-family: var(--font-disp);
     font-weight: 600;
     text-align: left;
     padding: 10px 14px;
-    border-bottom: 2px solid #e5e7eb;
 }
 
 .course-content td {
     padding: 10px 14px;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--line);
     vertical-align: middle;
 }
 
 .course-content tbody tr:nth-child(even) {
-    background: #fafafa;
+    background: rgba(27, 42, 74, 0.03);
 }
 
 /* Blank compatti dentro le celle: non gonfiano la colonna */

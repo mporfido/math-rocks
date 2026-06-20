@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>{% block title %}{{ site_name }}{% endblock %}</title>
 
+    <meta name="theme-color" content="#FBFBF6">
+
+    <!-- Font above-the-fold: preload dei pesi visibili subito (titolo + corpo) -->
+    <link rel="preload" href="{{ url_for('static', filename='fonts/space-grotesk-700.woff2') }}" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{{ url_for('static', filename='fonts/ibm-plex-serif-400.woff2') }}" as="font" type="font/woff2" crossorigin>
+
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='components.css') }}">
 
@@ -13,7 +19,7 @@
 <body>
     <header class="main-header">
         <nav class="navbar">
-            <a href="{{ url_for('home') }}" class="logo">📚 {{ site_name }}</a>
+            <a href="{{ url_for('home') }}" class="logo"><span class="logo-mark" aria-hidden="true">✓</span>{{ site_name }}</a>
             <div class="nav-links">
                 <a href="{{ url_for('home') }}">Home</a>
             </div>

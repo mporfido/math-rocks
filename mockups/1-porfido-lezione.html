@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Porfido · Lezione — mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;700;900&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --porfido:#6E2A48; --porfido-deep:#4A1B30; --magma:#C0436B; --magma-deep:#9E2F53;
+  --quarzo:#D8C2A8; --pietra:#ECE9EE; --pietra-2:#E2DEE6; --carta:#FBFAFB;
+  --ink:#211A26; --ink-soft:#5C5263; --serpentino:#2F7D5B;
+  --line:#D6CFDB;
+  --disp:'Schibsted Grotesk',sans-serif; --body:'Source Serif 4',Georgia,serif; --mono:'Space Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--body);color:var(--ink);background:var(--pietra);line-height:1.7;-webkit-font-smoothing:antialiased;
+  background-image:radial-gradient(circle at 18% 30%,rgba(110,42,72,.045) 0 1px,transparent 1.5px),radial-gradient(circle at 75% 70%,rgba(33,26,38,.04) 0 1px,transparent 1.5px);
+  background-size:150px 150px,190px 190px}
+.wrap{max-width:1160px;margin:0 auto;padding:0 clamp(1.1rem,4vw,2.4rem)}
+header{position:sticky;top:0;z-index:50;background:rgba(236,233,238,.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;justify-content:space-between;height:64px}
+.brand{display:flex;align-items:center;gap:.55rem;font-family:var(--disp);font-weight:900;font-size:1.22rem;letter-spacing:-.02em;color:var(--ink);text-decoration:none}
+.brand b{color:var(--porfido)}
+.gem{width:20px;height:20px;transform:rotate(8deg)}
+.crumb{font-family:var(--mono);font-size:.78rem;color:var(--ink-soft)}
+.crumb a{color:var(--porfido);text-decoration:none}
+
+.layout{display:grid;grid-template-columns:268px 1fr;gap:2.2rem;padding:2rem 0 4rem;align-items:start}
+
+/* sidebar */
+.side{position:sticky;top:84px;background:var(--carta);border:1px solid var(--line);border-radius:16px;padding:1.3rem}
+.side .lesson-k{font-family:var(--mono);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--magma-deep)}
+.side h3{font-family:var(--disp);font-weight:700;font-size:1.15rem;margin:.3rem 0 1rem;letter-spacing:-.01em}
+.side .pct{font-family:var(--mono);font-size:.78rem;color:var(--ink-soft);margin-bottom:.4rem}
+.sprog{height:6px;background:var(--pietra-2);border-radius:99px;overflow:hidden;margin-bottom:1.2rem}
+.sprog i{display:block;height:100%;width:43%;background:linear-gradient(90deg,var(--porfido),var(--magma))}
+.steps{list-style:none;display:flex;flex-direction:column;gap:.15rem}
+.steps a{display:flex;align-items:center;gap:.65rem;padding:.6rem .7rem;border-radius:9px;text-decoration:none;color:var(--ink-soft);font-size:.93rem;min-height:44px}
+.steps a:hover{background:rgba(110,42,72,.06);color:var(--ink)}
+.steps a .dot{width:22px;height:22px;flex:none;border-radius:6px;display:grid;place-items:center;font-family:var(--mono);font-size:.7rem;border:1.5px solid var(--line);color:var(--ink-soft);transform:rotate(45deg)}
+.steps a .dot span{transform:rotate(-45deg)}
+.steps a.done{color:var(--ink)}
+.steps a.done .dot{background:var(--serpentino);border-color:var(--serpentino);color:#fff}
+.steps a.active{background:var(--porfido);color:#fff;font-weight:600}
+.steps a.active .dot{border-color:#fff;background:rgba(255,255,255,.16);color:#fff}
+.steps a.locked{color:#A99FB0}
+.steps a.locked .dot{background:var(--pietra-2)}
+.reset{margin-top:1.2rem;width:100%;font-family:var(--disp);font-weight:500;font-size:.82rem;color:var(--ink-soft);background:none;border:1px solid var(--line);border-radius:8px;padding:.55rem;cursor:pointer}
+.reset:hover{border-color:var(--magma);color:var(--magma-deep)}
+
+/* content */
+.content{background:var(--carta);border:1px solid var(--line);border-radius:18px;padding:clamp(1.4rem,4vw,2.8rem)}
+.content .step-k{font-family:var(--mono);font-size:.78rem;letter-spacing:.2em;text-transform:uppercase;color:var(--magma-deep)}
+.content h1{font-family:var(--disp);font-weight:900;font-size:clamp(1.8rem,5vw,2.6rem);letter-spacing:-.03em;line-height:1.05;margin:.5rem 0 1.4rem}
+.content p{margin:0 0 1.15rem;font-size:1.06rem}
+.content h2{font-family:var(--disp);font-weight:700;font-size:1.35rem;margin:2rem 0 .8rem;letter-spacing:-.01em}
+.kbd{font-family:var(--mono);background:rgba(110,42,72,.08);color:var(--porfido);padding:.1rem .4rem;border-radius:5px;font-size:.9em}
+
+/* interactive demo block */
+.lab{border:1px solid var(--line);border-left:4px solid var(--porfido);border-radius:12px;background:linear-gradient(180deg,#fff,rgba(236,233,238,.5));padding:1.4rem 1.5rem;margin:1.6rem 0}
+.lab .lab-k{font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--porfido);margin-bottom:.7rem}
+.lab .q{font-size:1.1rem;margin-bottom:1rem}
+.blank{display:inline-flex;align-items:center;border:2px solid var(--line);border-radius:8px;padding:.35rem .7rem;font-family:var(--mono);font-weight:700;min-width:64px;background:#fff}
+.blank.ok{border-color:var(--serpentino);background:#EAF6F0;color:var(--serpentino)}
+.slider-row{display:flex;align-items:center;gap:1rem;margin:1.2rem 0}
+.slider-row label{font-family:var(--mono);font-size:.85rem;color:var(--ink-soft);min-width:34px}
+input[type=range]{-webkit-appearance:none;appearance:none;height:8px;border-radius:99px;flex:1;max-width:280px;background:linear-gradient(90deg,var(--porfido) 0 60%,var(--pietra-2) 60%)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:var(--porfido);border:3px solid #fff;box-shadow:0 2px 8px rgba(74,27,48,.5);cursor:pointer}
+.val{font-family:var(--mono);font-weight:700;color:var(--porfido);font-size:1.1rem}
+.btn{font-family:var(--disp);font-weight:700;font-size:.95rem;border:none;border-radius:10px;padding:.7rem 1.3rem;cursor:pointer;min-height:46px;display:inline-flex;align-items:center;gap:.5rem;transition:transform .12s,background .2s,box-shadow .2s}
+.btn-check{background:var(--porfido);color:#fff;box-shadow:0 4px 0 var(--porfido-deep)}
+.btn-check:hover{background:var(--magma-deep);transform:translateY(-1px)}
+.btn-check.done{background:var(--serpentino);box-shadow:0 4px 0 #1f5a40}
+.feedback{font-family:var(--disp);font-weight:600;margin-left:.8rem;color:var(--serpentino)}
+
+/* crystallize reveal */
+.reveal{margin-top:1.5rem;padding:1.3rem 1.5rem;border-radius:12px;color:#fff;position:relative;overflow:hidden;
+  background:radial-gradient(circle at 22% 30%,rgba(216,194,168,.6) 0 4px,transparent 5px),radial-gradient(circle at 80% 65%,rgba(255,255,255,.4) 0 4px,transparent 5px),linear-gradient(135deg,var(--porfido),var(--porfido-deep));
+  animation:crystallize .7s ease both}
+@keyframes crystallize{from{opacity:0;transform:scale(.96);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
+.reveal .r-k{font-family:var(--mono);font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--quarzo);margin-bottom:.4rem}
+.reveal p{margin:0;color:#fff;font-size:1.05rem}
+
+.stepnav{display:flex;justify-content:space-between;gap:.8rem;margin-top:2.2rem;flex-wrap:wrap}
+.btn-sec{background:transparent;color:var(--porfido);border:1.5px solid var(--line)}
+.btn-sec:hover{border-color:var(--porfido)}
+.btn-next{background:var(--porfido);color:#fff;box-shadow:0 4px 0 var(--porfido-deep)}
+.btn-next:hover{background:var(--magma-deep)}
+.btn-next.disabled{opacity:.45;pointer-events:none;box-shadow:none}
+
+a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid var(--magma);outline-offset:3px}
+@media(max-width:860px){.layout{grid-template-columns:1fr}.side{position:static;order:2}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<header><div class="wrap nav">
+  <a class="brand" href="1-porfido-home.html"><svg class="gem" viewBox="0 0 24 24"><path d="M6 3h12l4 6-10 12L2 9z" fill="#6E2A48"/><path d="M6 3l6 6 6-6M2 9h20M12 9v12" stroke="#C0436B" stroke-width="1.1" fill="none"/></svg>math<b>·</b>rocks</a>
+  <span class="crumb"><a href="1-porfido-home.html">← I numeri naturali</a></span>
+</div></header>
+
+<main class="wrap"><div class="layout">
+  <aside class="side">
+    <div class="lesson-k">Lezione 03</div>
+    <h3>Le sfide</h3>
+    <div class="pct">3 / 7 passi · 43%</div>
+    <div class="sprog"><i></i></div>
+    <ol class="steps">
+      <li><a class="done" href="#"><span class="dot"><span>✓</span></span>Il segno della retta</a></li>
+      <li><a class="done" href="#"><span class="dot"><span>✓</span></span>Ordinare i naturali</a></li>
+      <li><a class="done" href="#"><span class="dot"><span>✓</span></span>Raggruppare</a></li>
+      <li><a class="active" href="#"><span class="dot"><span>4</span></span>Parentesi tonde</a></li>
+      <li><a class="locked" href="#"><span class="dot"><span>5</span></span>Parentesi quadre</a></li>
+      <li><a class="locked" href="#"><span class="dot"><span>6</span></span>Parentesi graffe</a></li>
+      <li><a class="locked" href="#"><span class="dot"><span>7</span></span>La grande sfida</a></li>
+    </ol>
+    <button class="reset">Azzera progressi</button>
+  </aside>
+
+  <article class="content">
+    <div class="step-k">Passo 04 · parentesi tonde</div>
+    <h1>Prima sciogli il nodo più interno</h1>
+    <p>In un'espressione con le parentesi, il <strong>porfido si scioglie a strati</strong>: parti sempre dal cristallo più interno. Le parentesi tonde <span class="kbd">( )</span> hanno la precedenza su tutto il resto.</p>
+    <p>Prova a calcolare il valore dentro la parentesi prima di moltiplicare.</p>
+
+    <div class="lab">
+      <div class="lab-k">◆ Mettiti alla prova</div>
+      <div class="q">Quanto vale &nbsp; <strong>3 × (4 + 2)</strong> ?</div>
+      <div>Dentro la parentesi: 4 + 2 = <span class="blank ok">6</span> &nbsp;→&nbsp; poi 3 × 6 = <span class="blank ok">18</span></div>
+    </div>
+
+    <h2>Esplora: cambia il numero</h2>
+    <p>Muovi il cursore e osserva come cambia il risultato. La regola resta la stessa.</p>
+    <div class="lab">
+      <div class="lab-k">◆ Laboratorio</div>
+      <div class="slider-row">
+        <label for="n">n =</label>
+        <input id="n" type="range" min="0" max="10" value="6">
+        <span class="val" id="nv">6</span>
+      </div>
+      <div class="q">3 × (4 + <span class="val" id="nv2">6</span>) = <span class="val" id="res">30</span></div>
+      <button class="btn btn-check" id="chk">Verifica →</button>
+      <span class="feedback" id="fb" style="display:none">Esatto! ◆ cristallizzato</span>
+
+      <div class="reveal" id="rev" style="display:none">
+        <div class="r-k">◆ concetto cristallizzato</div>
+        <p>Hai capito la regola: <strong>prima la parentesi, poi la moltiplicazione</strong>. Questo è il primo strato del porfido — al prossimo passo aggiungiamo le quadre.</p>
+      </div>
+    </div>
+
+    <div class="stepnav">
+      <a class="btn btn-sec" href="#">← Precedente</a>
+      <a class="btn btn-next disabled" id="next" href="#">Successivo →</a>
+    </div>
+  </article>
+</div></main>
+
+<script>
+const n=document.getElementById('n'),nv=document.getElementById('nv'),nv2=document.getElementById('nv2'),res=document.getElementById('res');
+function upd(){const v=+n.value;nv.textContent=v;nv2.textContent=v;res.textContent=3*(4+v);n.style.background=`linear-gradient(90deg,#6E2A48 0 ${v*10}%,#E2DEE6 ${v*10}%)`}
+n.addEventListener('input',upd);upd();
+document.getElementById('chk').addEventListener('click',e=>{
+  e.target.classList.add('done');e.target.textContent='Risolto ✓';
+  document.getElementById('fb').style.display='inline';
+  document.getElementById('rev').style.display='block';
+  document.getElementById('next').classList.remove('disabled');
+});
+</script>
+</body>
+</html>

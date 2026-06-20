@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brutalist · Home — mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=Archivo+Expanded:wght@700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F2EFE9; --ink:#15110F; --oxblood:#7A2233; --citrino:#E4C234; --paper:#FFFFFF;
+  --line:#15110F; --muted:#5A534E;
+  --disp:'Archivo Expanded',sans-serif; --body:'Archivo',sans-serif; --mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--body);color:var(--ink);background:var(--bg);line-height:1.55;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:0 clamp(1rem,4vw,2.2rem)}
+header{position:sticky;top:0;z-index:50;background:var(--bg);border-bottom:3px solid var(--ink)}
+.nav{display:flex;align-items:center;justify-content:space-between;height:70px}
+.brand{font-family:var(--disp);font-weight:900;font-size:1.25rem;letter-spacing:-.02em;text-transform:uppercase;color:var(--ink);text-decoration:none}
+.brand em{font-style:normal;color:var(--oxblood)}
+.nav-links{display:flex;gap:.6rem;align-items:center;font-family:var(--mono);font-weight:700;font-size:.85rem;text-transform:uppercase}
+.nav-links a{color:var(--ink);text-decoration:none;padding:.4rem .6rem}
+.nav-links a:hover{background:var(--ink);color:var(--bg)}
+.nav-links .pill{background:var(--citrino);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink)}
+.nav-links .pill:hover{background:var(--ink);color:var(--citrino)}
+
+.hero{padding:clamp(2.6rem,7vw,5rem) 0 clamp(2rem,5vw,3.5rem);border-bottom:3px solid var(--ink)}
+.eyebrow{font-family:var(--mono);font-weight:700;font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;color:var(--oxblood);margin-bottom:1rem}
+.hero h1{font-family:var(--disp);font-weight:900;font-size:clamp(2.4rem,8.5vw,5.6rem);line-height:.92;letter-spacing:-.035em;text-transform:uppercase}
+.hero h1 .hl{background:var(--citrino);box-shadow:0 0 0 4px var(--citrino);box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.hero h1 .ox{color:var(--oxblood)}
+.lead{font-size:clamp(1.05rem,2.4vw,1.4rem);max-width:42ch;margin:1.6rem 0 2rem;font-weight:500}
+.cta-row{display:flex;flex-wrap:wrap;gap:.9rem}
+.btn{font-family:var(--mono);font-weight:700;font-size:.9rem;text-transform:uppercase;letter-spacing:.04em;text-decoration:none;border:3px solid var(--ink);padding:.85rem 1.4rem;display:inline-flex;align-items:center;gap:.5rem;min-height:50px;cursor:pointer;box-shadow:5px 5px 0 var(--ink);transition:transform .1s,box-shadow .1s,background .12s}
+.btn:hover{transform:translate(-2px,-2px);box-shadow:7px 7px 0 var(--ink)}
+.btn:active{transform:translate(3px,3px);box-shadow:1px 1px 0 var(--ink)}
+.btn-primary{background:var(--oxblood);color:#fff}
+.btn-ghost{background:var(--paper);color:var(--ink)}
+
+.facts{display:flex;flex-wrap:wrap;border-top:3px solid var(--ink);margin-top:2.6rem}
+.fact{flex:1 1 130px;padding:1.2rem 1rem;border-right:3px solid var(--ink)}
+.fact:last-child{border-right:none}
+.fact .n{font-family:var(--disp);font-weight:900;font-size:1.9rem;line-height:1}
+.fact .l{font-family:var(--mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-top:.3rem}
+
+.section{padding:clamp(2.4rem,6vw,4rem) 0}
+.section-head{display:flex;align-items:center;gap:1rem;margin-bottom:1.8rem}
+.section-head .no{font-family:var(--mono);font-weight:700;background:var(--ink);color:var(--bg);padding:.2rem .55rem}
+.section-head h2{font-family:var(--disp);font-weight:800;font-size:clamp(1.4rem,4vw,2.1rem);text-transform:uppercase;letter-spacing:-.02em}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:1.4rem}
+.card{background:var(--paper);border:3px solid var(--ink);box-shadow:6px 6px 0 var(--ink);text-decoration:none;color:inherit;display:flex;flex-direction:column;transition:transform .1s,box-shadow .1s}
+.card:hover{transform:translate(-3px,-3px);box-shadow:9px 9px 0 var(--oxblood)}
+.card-head{display:flex;justify-content:space-between;align-items:center;padding:.8rem 1rem;border-bottom:3px solid var(--ink);font-family:var(--mono);font-weight:700;font-size:.78rem;text-transform:uppercase}
+.card-head .lev{background:var(--citrino);padding:.15rem .5rem;border:2px solid var(--ink)}
+.card-body{padding:1.2rem}
+.card h3{font-family:var(--disp);font-weight:800;font-size:1.3rem;text-transform:uppercase;letter-spacing:-.02em;margin-bottom:.5rem}
+.card p{font-size:.96rem;font-weight:500;margin-bottom:1.1rem}
+.prog{height:14px;border:3px solid var(--ink);background:#fff;overflow:hidden}
+.prog i{display:block;height:100%;background:repeating-linear-gradient(45deg,var(--oxblood) 0 8px,#5d1826 8px 16px)}
+.card-foot{display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-weight:700;font-size:.8rem;margin-top:.7rem;text-transform:uppercase}
+.card:hover .go{color:var(--oxblood)}
+
+footer{border-top:3px solid var(--ink);padding:1.8rem 0;font-family:var(--mono);font-size:.78rem;text-transform:uppercase}
+footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+a:focus-visible,button:focus-visible{outline:3px solid var(--oxblood);outline-offset:3px}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header><div class="wrap nav">
+  <a class="brand" href="#">MATH<em>·</em>ROCKS</a>
+  <nav class="nav-links"><a href="#">Corsi</a><a href="#">Info</a><a class="pill" href="#">Inizia →</a></nav>
+</div></header>
+
+<main>
+<section class="hero"><div class="wrap">
+  <p class="eyebrow">// porfido.rocks — matematica interattiva</p>
+  <h1>La matematica<br>è <span class="hl">dura</span> <span class="ox">come</span><br>una roccia.</h1>
+  <p class="lead">E si spacca allo stesso modo: un colpo preciso alla volta. Corsi che si risolvono trascinando, provando, sbagliando.</p>
+  <div class="cta-row">
+    <a class="btn btn-primary" href="#">Esplora i corsi →</a>
+    <a class="btn btn-ghost" href="#">Guarda una lezione</a>
+  </div>
+  <div class="facts">
+    <div class="fact"><div class="n">6</div><div class="l">Corsi</div></div>
+    <div class="fact"><div class="n">48</div><div class="l">Lezioni</div></div>
+    <div class="fact"><div class="n">100%</div><div class="l">Interattivo</div></div>
+    <div class="fact"><div class="n">0€</div><div class="l">Studenti</div></div>
+  </div>
+</div></section>
+
+<section class="section"><div class="wrap">
+  <div class="section-head"><span class="no">01</span><h2>Algebra &amp; Aritmetica</h2></div>
+  <div class="grid">
+    <a class="card" href="#">
+      <div class="card-head"><span>№ 01</span><span class="lev">Base</span></div>
+      <div class="card-body">
+        <h3>Numeri naturali</h3>
+        <p>Conta, ordina, raggruppa. Dalla retta numerica alle sfide con le parentesi.</p>
+        <div class="prog"><i style="width:60%"></i></div>
+        <div class="card-foot"><span>4/7 passi</span><span class="go">Continua →</span></div>
+      </div>
+    </a>
+    <a class="card" href="#">
+      <div class="card-head"><span>№ 02</span><span class="lev">Base</span></div>
+      <div class="card-body">
+        <h3>Frazioni</h3>
+        <p>Spezzare l'intero senza perdersi: torte, metri e percentuali.</p>
+        <div class="prog"><i style="width:0%"></i></div>
+        <div class="card-foot"><span>0/9 passi</span><span class="go">Inizia →</span></div>
+      </div>
+    </a>
+    <a class="card" href="#">
+      <div class="card-head"><span>№ 03</span><span class="lev">Medio</span></div>
+      <div class="card-body">
+        <h3>Equazioni 1°</h3>
+        <p>La bilancia in equilibrio: isola l'incognita un passo alla volta.</p>
+        <div class="prog"><i style="width:0%"></i></div>
+        <div class="card-foot"><span>0/8 passi</span><span class="go">Inizia →</span></div>
+      </div>
+    </a>
+  </div>
+</div></section>
+</main>
+
+<footer><div class="wrap">
+  <span>© 2026 porfido.rocks</span>
+  <span>math·rocks // mockup dir. 3</span>
+</div></footer>
+</body>
+</html>
