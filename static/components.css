@@ -228,6 +228,8 @@ x-variable {
     background: linear-gradient(to right, #e5e7eb 0%, #3b82f6 100%);
     cursor: pointer;
     -webkit-appearance: none;
+    /* Il trascinamento orizzontale regola il valore senza scrollare la pagina */
+    touch-action: pan-y;
 }
 
 .variable-slider::-webkit-slider-thumb {
@@ -826,19 +828,41 @@ x-graph {
         gap: 8px;
     }
 
+    /* Slider afferrabile col dito: track più alto e thumb più grande */
     .variable-slider {
         width: 100%;
         min-width: 0;
+        height: 10px;
+        border-radius: 5px;
     }
 
-    /* Grafici interattivi più bassi su mobile (JSXGraph si ridisegna da solo) */
+    .variable-slider::-webkit-slider-thumb {
+        width: 28px;
+        height: 28px;
+    }
+
+    .variable-slider::-moz-range-thumb {
+        width: 28px;
+        height: 28px;
+    }
+
+    /* Anti-zoom iOS: gli input devono restare a 16px nonostante il font ridotto
+       della tabella, altrimenti Safari ingrandisce la pagina al focus. */
+    .course-content .blank-input,
+    .course-content .blank-select,
+    .course-content .variable-input {
+        font-size: 16px;
+    }
+
+    /* Grafici proporzionati al viewport (JSXGraph si ridisegna da solo al resize):
+       non occupano mai più di metà schermo in portrait. */
     .graph-container {
-        height: 300px;
+        height: min(56vh, 320px);
     }
 }
 
 @media (max-width: 480px) {
     .graph-container {
-        height: 260px;
+        height: min(52vh, 280px);
     }
 }
