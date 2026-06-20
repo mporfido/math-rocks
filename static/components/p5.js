@@ -42,6 +42,12 @@ class XP5 extends HTMLElement {
 
     const container = document.createElement('div');
     container.className = 'p5-container';
+    // Senza una larghezza esplicita lo sketch è responsive: rendiamo il
+    // container block così riempie la colonna di testo e possiamo misurarne la
+    // larghezza reale. Un inline-block vuoto misurerebbe 0 → il canvas verrebbe
+    // creato a una larghezza di ripiego (troppo larga) e poi schiacciato dal
+    // CSS in orizzontale (cerchi che diventano ellissi, testo illeggibile).
+    if (!widthAttr) container.style.display = 'block';
     this.appendChild(container);
 
     // Carica p5.js al volo (no-op se già presente/caricato)
@@ -68,6 +74,10 @@ class XP5 extends HTMLElement {
 
     const changeCallbacks = [];
     const self = this;
+    // Larghezza iniziale: quella imposta dall'autore, altrimenti la larghezza
+    // reale del container (sketch responsive). Fallback prudente se la misura
+    // non è ancora disponibile.
+    const initialWidth = widthAttr || container.clientWidth || 600;
     const ctx = {
       completed: savedDone,
       // Modello live: risolto a ogni accesso perché l'upgrade dei custom
@@ -82,8 +92,12 @@ class XP5 extends HTMLElement {
       onChange(cb) {
         if (typeof cb === 'function') changeCallbacks.push(cb);
       },
-      width: widthAttr || container.clientWidth || 600,
-      height,
+      // Dimensioni live: lo sketch rilegge ctx.width/height a ogni frame (es.
+      // nella sua layout()), così segue i ridimensionamenti del canvas
+      // (rotazione, cambio device). Prima dell'avvio dell'istanza valgono i
+      // valori iniziali.
+      get width() { return self.p5Instance ? self.p5Instance.width : initialWidth; },
+      get height() { return self.p5Instance ? self.p5Instance.height : height; },
     };
 
     // Lo sketch viene dai file del corso (input fidato, non utente), come le
@@ -108,6 +122,24 @@ class XP5 extends HTMLElement {
       return;
     }
 
+    // Sketch responsive (senza width fissa): ridimensiona il canvas quando la
+    // colonna di testo cambia larghezza (rotazione del device, resize della
+    // finestra, cambio device negli strumenti di sviluppo). La layout() dello
+    // sketch usa ctx.width/height, quindi si riadatta da sola al frame
+    // successivo. Niente loop: la larghezza del canvas segue il container, non
+    // viceversa.
+    if (!widthAttr && this.p5Instance && typeof ResizeObserver !== 'undefined') {
+      this._resizeObserver = new ResizeObserver(() => {
+        const w = container.clientWidth;
+        const inst = this.p5Instance;
+        if (w && inst && typeof inst.resizeCanvas === 'function'
+            && Math.abs(w - inst.width) > 1) {
+          inst.resizeCanvas(w, height);
+        }
+      });
+      this._resizeObserver.observe(container);
+    }
+
     // Reattività agli slider/campi numerici della pagina: inoltra i cambi alle
     // callback registrate e ridisegna gli sketch che usano noLoop.
     if (step) {
@@ -124,6 +156,11 @@ class XP5 extends HTMLElement {
   }
 
   disconnectedCallback() {
+    // Ferma l'osservazione del resize prima di smontare lo sketch.
+    if (this._resizeObserver) {
+      this._resizeObserver.disconnect();
+      this._resizeObserver = null;
+    }
     // Libera il canvas e il loop di p5 quando lo step viene rimosso dal DOM.
     if (this.p5Instance && typeof this.p5Instance.remove === 'function') {
       this.p5Instance.remove();
