@@ -47,7 +47,15 @@ class XP5 extends HTMLElement {
     // larghezza reale. Un inline-block vuoto misurerebbe 0 → il canvas verrebbe
     // creato a una larghezza di ripiego (troppo larga) e poi schiacciato dal
     // CSS in orizzontale (cerchi che diventano ellissi, testo illeggibile).
-    if (!widthAttr) container.style.display = 'block';
+    if (!widthAttr) {
+      container.style.display = 'block';
+    } else {
+      // Larghezza fissa: block + cap a maxWidth (NON inline-block, che come
+      // shrink-to-fit collassa insieme al canvas max-width:100% e viene
+      // ritagliato da overflow:hidden). Su colonne strette scala in proporzione.
+      container.style.display = 'block';
+      container.style.maxWidth = widthAttr + 'px';
+    }
     this.appendChild(container);
 
     // Carica p5.js al volo (no-op se già presente/caricato)
@@ -92,12 +100,20 @@ class XP5 extends HTMLElement {
       onChange(cb) {
         if (typeof cb === 'function') changeCallbacks.push(cb);
       },
-      // Dimensioni live: lo sketch rilegge ctx.width/height a ogni frame (es.
-      // nella sua layout()), così segue i ridimensionamenti del canvas
-      // (rotazione, cambio device). Prima dell'avvio dell'istanza valgono i
-      // valori iniziali.
-      get width() { return self.p5Instance ? self.p5Instance.width : initialWidth; },
-      get height() { return self.p5Instance ? self.p5Instance.height : height; },
+      // Larghezza:
+      //  - fissa (widthAttr): sempre il valore d'autore. Fondamentale perché p5
+      //    esegue setup() in modo asincrono, DOPO che this.p5Instance è già
+      //    assegnato: se leggessimo self.p5Instance.width, createCanvas()
+      //    riceverebbe la larghezza di default di p5 (100) invece di widthAttr.
+      //    Gli sketch responsive vengono salvati dal ResizeObserver, quelli a
+      //    larghezza fissa no → resterebbero 100×100 (bug dei pannelli solari).
+      //  - responsive (no widthAttr): larghezza live dell'istanza, così la
+      //    layout() dello sketch segue i ridimensionamenti (rotazione, resize);
+      //    prima dell'avvio vale initialWidth (larghezza reale del container).
+      get width() { return widthAttr || (self.p5Instance ? self.p5Instance.width : initialWidth); },
+      // Altezza sempre quella d'autore: il ResizeObserver ridimensiona a
+      // (larghezza, height) mantenendola costante, quindi non serve leggerla live.
+      get height() { return height; },
     };
 
     // Lo sketch viene dai file del corso (input fidato, non utente), come le
