@@ -1,4 +1,5 @@
 """Applicazione Flask principale"""
+import re
 from flask import Flask, render_template
 from config import config
 import os
@@ -17,6 +18,26 @@ def create_app(config_name=None):
     # Registra blueprint routes
     from routes.courses import courses_bp
     app.register_blueprint(courses_bp)
+
+    @app.template_filter('resolve_static_urls')
+    def resolve_static_urls(html):
+        """Riscrive i src="/static/..." (path assoluti scritti a mano nel
+        markdown, es. dalla sintassi immagine) in url_for('static', ...).
+
+        Necessario perché Frozen-Flask rende relativi solo gli url_for
+        chiamati dai template (patcha `jinja_env.globals['url_for']`): un
+        path hardcoded nell'HTML sopravvive intatto e rompe le immagini
+        quando il sito è pubblicato sotto un subpath (es. GitHub Pages,
+        USERNAME.github.io/REPO/). Per questo peschiamo url_for da
+        jinja_env.globals invece di importarlo direttamente da flask: così
+        durante il freeze otteniamo la stessa versione "relativizzata".
+        """
+        template_url_for = app.jinja_env.globals['url_for']
+        return re.sub(
+            r'src="/static/([^"]+)"',
+            lambda m: f'src="{template_url_for("static", filename=m.group(1))}"',
+            html,
+        )
 
     @app.context_processor
     def inject_site_config():

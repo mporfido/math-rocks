@@ -106,7 +106,7 @@
                 data-step-id="{{ step.id }}"
                 {% if step.metadata.get('use-mathjs') %}data-use-mathjs="true"{% endif %}>
 
-            {{ step.html|safe }}
+            {{ step.html|resolve_static_urls|safe }}
 
         </x-step>
 
