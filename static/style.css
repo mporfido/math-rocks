@@ -397,6 +397,35 @@ img, canvas, svg, video {
     color: var(--rossa);
 }
 
+/* Bottone debug (solo config.DEBUG=True, mai in produzione): stile
+   volutamente vistoso — bordo tratteggiato + palette "errore" — per non
+   essere confuso con .reset-progress-btn o gli altri controlli reali. */
+.debug-unlock-btn {
+    margin-top: 0.6rem;
+    width: 100%;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 0.8rem;
+    color: var(--rossa-deep);
+    background: var(--error-soft);
+    border: 1.5px dashed var(--rossa);
+    border-radius: 8px;
+    padding: 0.6rem;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-style 0.15s;
+}
+
+.debug-unlock-btn:hover {
+    background: var(--rossa);
+    color: #fff;
+}
+
+.debug-unlock-btn.debug-unlock-active {
+    background: var(--rossa);
+    color: #fff;
+    border-style: solid;
+}
+
 .course-content {
     background: var(--carta);
     border: var(--border);
@@ -796,6 +825,10 @@ img, canvas, svg, video {
     }
 
     .reset-progress-btn {
+        min-height: 44px;
+    }
+
+    .debug-unlock-btn {
         min-height: 44px;
     }
 
