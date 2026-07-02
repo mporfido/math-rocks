@@ -49,6 +49,7 @@
   (function () {
     const cp = window.courseProgress;
     if (!cp || !cp.enabled) return;  // storage non disponibile → nessun blocco
+    if (cp.isDebugUnlocked()) return;  // debug: bypass totale del redirect
     const progressKey = {{ progress_key|tojson }};
     const orderedIds = {{ lesson.steps|map(attribute='id')|list|tojson }};
     const currentId = {{ step.id|tojson }};
@@ -98,6 +99,12 @@
             {% endfor %}
         </nav>
         <button class="btn btn-secondary reset-progress-btn" type="button">Azzera progressi</button>
+        {% if config.DEBUG %}
+        <button class="btn debug-unlock-btn" type="button"
+                title="Solo sviluppo locale: bypassa il gating sequenziale senza toccare goal/risposte salvate. Non presente nella build statica.">
+            🐞 Debug: sblocca tutto
+        </button>
+        {% endif %}
     </aside>
 
     <!-- Contenuto step -->
@@ -106,7 +113,7 @@
                 data-step-id="{{ step.id }}"
                 {% if step.metadata.get('use-mathjs') %}data-use-mathjs="true"{% endif %}>
 
-            {{ step.html|resolve_static_urls|safe }}
+            {{ step.html|safe }}
 
         </x-step>
 
@@ -173,7 +180,8 @@
       : null;
     const nextBtn = document.querySelector('.step-navigation .btn-primary');
     const isFinishBtn = nextBtn && nextBtn.classList.contains('lesson-finish-btn');
-    const gatingEnabled = !!(window.courseProgress && window.courseProgress.enabled);
+    const debugUnlocked = !!(window.courseProgress && window.courseProgress.isDebugUnlocked());
+    const gatingEnabled = !!(window.courseProgress && window.courseProgress.enabled) && !debugUnlocked;
 
     // Marca gli step completati al caricamento
     if (window.courseProgress) {
@@ -236,6 +244,29 @@
     }
   })();
 </script>
+
+{% if config.DEBUG %}
+<!-- Debug: sblocco globale step/lezioni per test locale. Presente SOLO
+     quando config.DEBUG è True: freeze.py usa sempre create_app('production')
+     (DEBUG=False), quindi assente dall'HTML congelato per GitHub Pages. -->
+<script>
+  (function () {
+    const btn = document.querySelector('.debug-unlock-btn');
+    const cp = window.courseProgress;
+    if (!btn || !cp) return;
+    function render() {
+      const on = cp.isDebugUnlocked();
+      btn.textContent = on ? '🐞 Debug attivo: click per ribloccare' : '🐞 Debug: sblocca tutto';
+      btn.classList.toggle('debug-unlock-active', on);
+    }
+    btn.addEventListener('click', () => {
+      cp.setDebugUnlocked(!cp.isDebugUnlocked());
+      window.location.reload();
+    });
+    render();
+  })();
+</script>
+{% endif %}
 
 <!-- Drawer indice passi (mobile): apertura/chiusura della sidebar a comparsa -->
 <script>

@@ -10,6 +10,12 @@
 {% block content %}
 <div class="course-overview">
     <a href="{{ url_for('home') }}" class="breadcrumb">← Tutti i corsi</a>
+    {% if config.DEBUG %}
+    <button class="btn debug-unlock-btn" type="button"
+            title="Solo sviluppo locale: bypassa il lock sequenziale fra lezioni.">
+        🐞 Debug: sblocca tutto
+    </button>
+    {% endif %}
 
     <header class="course-hero"
             {% if course.metadata.get('color') %}style="--course-color: {{ course.metadata.color }};"{% endif %}>
@@ -61,6 +67,7 @@
     const cards = Array.from(document.querySelectorAll('.lesson-card'));
 
     let prevComplete = true;  // la prima lezione è sempre accessibile
+    const debugUnlocked = !!(cp && cp.isDebugUnlocked());
 
     cards.forEach(card => {
       const lessonId = card.dataset.lessonId;
@@ -85,7 +92,7 @@
       const status = card.querySelector('.lesson-status');
 
       // Gating fra lezioni (solo se progression: sequential e storage attivo)
-      const locked = sequential && cp && cp.enabled && !prevComplete;
+      const locked = sequential && cp && cp.enabled && !prevComplete && !debugUnlocked;
       if (locked) {
         card.classList.add('locked');
         card.setAttribute('aria-disabled', 'true');
@@ -103,4 +110,26 @@
     });
   })();
 </script>
+{% if config.DEBUG %}
+<!-- Debug: sblocco globale step/lezioni per test locale. Presente SOLO
+     quando config.DEBUG è True: freeze.py usa sempre create_app('production')
+     (DEBUG=False), quindi assente dall'HTML congelato per GitHub Pages. -->
+<script>
+  (function () {
+    const btn = document.querySelector('.debug-unlock-btn');
+    const cp = window.courseProgress;
+    if (!btn || !cp) return;
+    function render() {
+      const on = cp.isDebugUnlocked();
+      btn.textContent = on ? '🐞 Debug attivo: click per ribloccare' : '🐞 Debug: sblocca tutto';
+      btn.classList.toggle('debug-unlock-active', on);
+    }
+    btn.addEventListener('click', () => {
+      cp.setDebugUnlocked(!cp.isDebugUnlocked());
+      window.location.reload();
+    });
+    render();
+  })();
+</script>
+{% endif %}
 {% endblock %}

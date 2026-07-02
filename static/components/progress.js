@@ -21,6 +21,10 @@ class CourseProgress {
   constructor() {
     this.VERSION = 1;
     this.PREFIX = 'mathrocks:progress:';
+    // Flag globale "sblocca tutto" per debug locale — chiave separata da
+    // PREFIX apposta: non è per-corso/lezione, quindi clearCourse() (bottone
+    // "Azzera progressi") non deve mai spegnerlo né viceversa.
+    this.DEBUG_KEY = 'mathrocks:debug-unlock';
     // Se localStorage non è utilizzabile, il gating sequenziale va disattivato
     // (altrimenti nessuno step risulterebbe completato e l'utente resterebbe
     // intrappolato sul primo step).
@@ -134,6 +138,30 @@ class CourseProgress {
       localStorage.removeItem(this._key(courseId));
     } catch (e) {
       // no-op
+    }
+  }
+
+  // --- Debug unlock (solo per uso locale in sviluppo) ---------------------
+
+  // True se il bypass globale del gating è attivo.
+  isDebugUnlocked() {
+    try {
+      return localStorage.getItem(this.DEBUG_KEY) === '1';
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // Imposta/rimuove il flag globale.
+  setDebugUnlocked(value) {
+    try {
+      if (value) {
+        localStorage.setItem(this.DEBUG_KEY, '1');
+      } else {
+        localStorage.removeItem(this.DEBUG_KEY);
+      }
+    } catch (e) {
+      // Storage non disponibile: no-op.
     }
   }
 }
