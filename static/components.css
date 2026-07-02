@@ -476,7 +476,11 @@ x-graph {
 .p5-container canvas {
     display: block;
     max-width: 100%;
-    height: auto;
+    /* !important perché p5 impone sul canvas uno style inline height:NNNpx: senza
+       forzare, su colonne più strette del canvas la larghezza si riduce
+       (max-width:100%) ma l'altezza resta fissa → schiacciamento orizzontale.
+       Con height:auto il canvas scala in proporzione (fisso o responsive). */
+    height: auto !important;
     /* Lo swipe verticale scrolla la pagina; i gesti orizzontali e i tap
        restano allo sketch (es. esplorazione della semiretta). */
     touch-action: pan-y;
