@@ -53,6 +53,13 @@ class CourseParser:
         self.p5_counter = 0
         self.expr_counter = 0
 
+        # Estrai i code fence ``` a livello di FILE, prima dello split degli
+        # step: un fence che mostra un esempio contenente '---' non deve generare
+        # step spuri (lo split vedrebbe il '---' letterale dentro il fence). I
+        # marker sono univoci e sopravvivono allo split; vengono ripristinati
+        # per-step dopo il preprocessing.
+        content, code_fences = self._extract_code_fences(content)
+
         # Split in steps (separati da ---)
         steps_raw = re.split(r'\n---\n', content)
         steps = []
@@ -70,10 +77,6 @@ class CourseParser:
             if not steps and not lesson_metadata and metadata and not md_content.strip():
                 lesson_metadata = metadata
                 continue
-
-            # Estrai i code fence ``` così i preprocessori non toccano
-            # la sintassi custom mostrata come esempio letterale
-            md_content, code_fences = self._extract_code_fences(md_content)
 
             # Pre-processing: converti sintassi custom
             md_content, block_replacements = self._preprocess(md_content)
@@ -153,10 +156,21 @@ class CourseParser:
         metadata = {}
         if metadata_lines:
             try:
-                metadata = yaml.safe_load('\n'.join(metadata_lines)) or {}
+                parsed = yaml.safe_load('\n'.join(metadata_lines))
             except yaml.YAMLError as e:
                 print(f'Warning: Errore parsing metadata YAML: {e}')
-                metadata = {}
+                parsed = None
+
+            if isinstance(parsed, dict):
+                metadata = parsed
+            else:
+                # Le righe '>' non sono metadata YAML validi (es. una citazione
+                # markdown "> testo" → safe_load restituisce una stringa/lista):
+                # trattale come contenuto blockquote normale invece che come
+                # front-matter, altrimenti metadata.get(...) a valle solleverebbe
+                # AttributeError e scarterebbe l'intero corso dalla build.
+                quote_block = ['> ' + line for line in metadata_lines]
+                content_lines = quote_block + [''] + content_lines
 
         return metadata, '\n'.join(content_lines)
 

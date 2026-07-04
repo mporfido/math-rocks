@@ -88,7 +88,7 @@ def process_graphs(content, graph_counter):
                 # Serializza la lista come JSON e HTML-escapa le virgolette
                 attrs.append(f'data-{key}="{html_lib.escape(json.dumps(value))}"')
                 continue
-            attrs.append(f'data-{key}="{value}"')
+            attrs.append(f'data-{key}="{html_lib.escape(str(value), quote=True)}"')
 
         return f'<x-graph {" ".join(attrs)}></x-graph>'
 
@@ -339,7 +339,8 @@ def process_blanks(content, blank_counter):
             raw = answer.strip()[len('select:'):]
             clean_choices, solution = parse_choices(raw)
             choices_attr = html_lib.escape(json.dumps(clean_choices))
-            return f'<x-blank id="{blank_id}" data-choices="{choices_attr}" data-solution="{solution}" data-display="dropdown"></x-blank>'
+            solution_attr = html_lib.escape(solution, quote=True)
+            return f'<x-blank id="{blank_id}" data-choices="{choices_attr}" data-solution="{solution_attr}" data-display="dropdown"></x-blank>'
         elif '||' in answer:
             # Input testuale con più risposte accettate (es. "2/16 || 1/8")
             # Serializza come JSON HTML-escaped: niente '|' nell'attributo, così
@@ -347,16 +348,19 @@ def process_blanks(content, blank_counter):
             accepted = [a.strip() for a in answer.split('||') if a.strip()]
             solution = accepted[0]
             accept_attr = html_lib.escape(json.dumps(accepted))
-            return f'<x-blank id="{blank_id}" data-solution="{solution}" data-accept="{accept_attr}"></x-blank>'
+            solution_attr = html_lib.escape(solution, quote=True)
+            return f'<x-blank id="{blank_id}" data-solution="{solution_attr}" data-accept="{accept_attr}"></x-blank>'
         elif '|' in answer:
             # Scelta multipla a bottoni. Le opzioni sono serializzate in JSON
             # HTML-escaped (come il dropdown) così il blank è sicuro anche in tabella.
             clean_choices, solution = parse_choices(answer)
             choices_attr = html_lib.escape(json.dumps(clean_choices))
-            return f'<x-blank id="{blank_id}" data-choices="{choices_attr}" data-solution="{solution}"></x-blank>'
+            solution_attr = html_lib.escape(solution, quote=True)
+            return f'<x-blank id="{blank_id}" data-choices="{choices_attr}" data-solution="{solution_attr}"></x-blank>'
         else:
             # Single answer
-            return f'<x-blank id="{blank_id}" data-solution="{answer}"></x-blank>'
+            solution_attr = html_lib.escape(answer, quote=True)
+            return f'<x-blank id="{blank_id}" data-solution="{solution_attr}"></x-blank>'
 
     processed = re.sub(r'\[\[([^\]]+)\]\]', replace_blank, content)
     return processed, blank_counter
@@ -400,14 +404,18 @@ def process_variables(content, variable_counter):
         # Salva il valore iniziale per questa variabile
         variables[bind] = initial
 
+        # Escaping dei valori interpolati negli attributi HTML (input d'autore)
+        bind_attr = html_lib.escape(bind, quote=True)
+        initial_attr = html_lib.escape(initial, quote=True)
+
         # Modalità input: ${display}{bind|initial|input} → campo numerico editabile
         # a mano (niente slider, niente range).
         if range_str.strip() == 'input':
             return (
                 f'<x-variable id="{var_id}" '
                 f'data-display="input" '
-                f'data-bind="{bind}" '
-                f'data-initial="{initial}">'
+                f'data-bind="{bind_attr}" '
+                f'data-initial="{initial_attr}">'
                 f'</x-variable>'
             )
 
@@ -418,11 +426,11 @@ def process_variables(content, variable_counter):
 
         return (
             f'<x-variable id="{var_id}" '
-            f'data-bind="{bind}" '
-            f'data-initial="{initial}" '
-            f'data-min="{min_val}" '
-            f'data-max="{max_val}" '
-            f'data-step="{step}">'
+            f'data-bind="{bind_attr}" '
+            f'data-initial="{initial_attr}" '
+            f'data-min="{html_lib.escape(min_val, quote=True)}" '
+            f'data-max="{html_lib.escape(max_val, quote=True)}" '
+            f'data-step="{html_lib.escape(step, quote=True)}">'
             f'</x-variable>'
         )
 
@@ -466,7 +474,8 @@ def process_checks(content, check_counter):
         condition = match.group(2).strip()
         check_id = f'check-{check_counter}'
         check_counter += 1
-        return f'<x-check id="{check_id}" data-condition="{condition}">{label}</x-check>'
+        condition_attr = html_lib.escape(condition, quote=True)
+        return f'<x-check id="{check_id}" data-condition="{condition_attr}">{label}</x-check>'
 
     pattern = r'\[([^\]]+)\]\{check:\s*([^}]+)\}'
     processed = re.sub(pattern, replace_check, content)

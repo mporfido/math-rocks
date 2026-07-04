@@ -240,7 +240,10 @@ class XGraph extends HTMLElement {
       const snapStep = cfg.snap !== undefined ? parseFloat(cfg.snap) : globalSnap;
       const tolerance = cfg.tolerance !== undefined
         ? parseFloat(cfg.tolerance)
-        : hasTarget ? (Math.abs(tx) + Math.abs(ty)) * 0.01 : 0;
+        // Soglia minima assoluta: con target nell'origine ("0,0") o vicino, la
+        // tolleranza proporzionale sarebbe ~0 e il goal risulterebbe di fatto
+        // incompletabile senza snap. 0.15 garantisce sempre un margine.
+        : hasTarget ? Math.max(0.15, (Math.abs(tx) + Math.abs(ty)) * 0.01) : 0;
 
       const point = this.board.create('point', [0, 0], {
         name: label,
