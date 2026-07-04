@@ -197,6 +197,14 @@ def process_expr(content, expr_counter):
         (4 + 5*4) - (8:2 + 6)
         :::
     `show-steps` mostra sotto l'albero lo svolgimento classico passo-passo.
+    `powers` attiva la modalità potenze: le potenze restano simboliche e si
+    riducono con le proprietà (stessa base, stesso esponente, potenza di
+    potenza, cambio di base). `:::powers` è un alias di `:::expr powers`:
+    stesso componente, zucchero sintattico. show-steps non è supportato in
+    modalità potenze.
+    `no-eval` (solo con powers) vieta la valutazione numerica delle potenze:
+    forza il percorso delle proprietà; l'esercizio deve essere risolvibile
+    con le sole proprietà.
 
     Linguaggio dell'espressione (input fidato dell'autore):
         operatori: + - * (moltiplicazione) : (divisione) ^ (potenza)
@@ -217,7 +225,7 @@ def process_expr(content, expr_counter):
         Tuple (contenuto con marker, dict marker→HTML, nuovo valore counter)
     """
     pattern = re.compile(
-        r'^:::expr[ \t]*(?P<opts>[^\n]*)\n(?P<body>.*?)\n:::[ \t]*$',
+        r'^:::(?P<tag>expr|powers)[ \t]*(?P<opts>[^\n]*)\n(?P<body>.*?)\n:::[ \t]*$',
         re.DOTALL | re.MULTILINE,
     )
     replacements = {}
@@ -226,11 +234,15 @@ def process_expr(content, expr_counter):
         nonlocal expr_counter
         expr = match.group('body').strip()
         opts = match.group('opts').split()
+        powers = match.group('tag') == 'powers' or 'powers' in opts
         show_steps_attr = ' data-show-steps="true"' if 'show-steps' in opts else ''
+        mode_attr = ' data-mode="powers"' if powers else ''
+        no_eval_attr = ' data-no-eval="true"' if powers and 'no-eval' in opts else ''
         marker = f'XEXPRBLOCK{expr_counter}X'
         expr_attr = html_lib.escape(expr, quote=True)
         replacements[marker] = (
-            f'<x-expr id="expr-{expr_counter}" data-expr="{expr_attr}"{show_steps_attr}></x-expr>'
+            f'<x-expr id="expr-{expr_counter}" data-expr="{expr_attr}"'
+            f'{show_steps_attr}{mode_attr}{no_eval_attr}></x-expr>'
         )
         expr_counter += 1
         return marker

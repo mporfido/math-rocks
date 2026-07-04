@@ -381,7 +381,45 @@ risolta; quando si scende di un livello nell'albero si aggiunge una nuova riga (
 :::
 ```
 
-**Esempi:**
+**Modalità potenze** (flag `powers`, oppure l'alias `:::powers` — stesso
+componente). Le potenze `base^esp` restano **simboliche** (niente numeroni
+calcolati) e le operazioni tra potenze si riducono applicando le **proprietà**:
+
+```markdown
+:::powers
+7^15 : 7^12
+:::
+```
+
+| Proprietà | Esempio | Risposta attesa |
+|---|---|---|
+| prodotto, stessa base | `2^3 * 2^4` | `2^7` |
+| quoziente, stessa base | `7^15 : 7^12` | `7^3` |
+| potenza di potenza | `(2^3)^2` | `2^6` |
+| prodotto, stesso esponente | `2^3 * 5^3` | `10^3` |
+| quoziente, stesso esponente | `10^3 : 5^3` | `2^3` |
+| numero come potenza | `2 * 2^3` | `2^4` |
+
+Lo studente digita il risultato **in forma di potenza** (`base^esponente`, es.
+`7^3`); se una forma è ambigua (es. `2^3 * 2^3`) sono accettate tutte le
+risposte valide (`2^6` e `4^3`). Cliccare l'**esponente** di una singola
+potenza — o l'**etichetta-valore** di un nodo già risolto in forma di potenza —
+permette invece di:
+- **valutarla** (es. `2^3` → `8`) — è il percorso per i casi senza proprietà;
+- **cambiarle base** (es. `9^3` → `3^6`): serve nei casi a basi riconducibili
+  come `9^3 : 3^5`, dove la proprietà scatta solo dopo la riscrittura.
+
+Con il flag **`no-eval`** (`:::powers no-eval`) la valutazione numerica è
+**vietata**: resta solo il cambio di base, e l'esercizio va risolto con le
+sole proprietà. Usalo per impedire il percorso "calcola tutto" — ma solo su
+espressioni interamente risolvibili con le proprietà (es. niente `+`/`-` tra
+potenze, che senza valutazione non si sbloccano).
+
+> **Vincoli d'autore in modalità potenze.** `show-steps` non è supportato. La
+> valutazione diretta di una potenza è disponibile solo finché il valore resta
+> un intero "esatto" in doppia precisione (fino a ~9·10^15: `7^15` sì, `2^60`
+> no) — oltre, la potenza si può solo riscrivere. Nei corsi sui naturali cura
+> che nei quozienti l'esponente del dividendo sia ≥ di quello del divisore.
 
 ```markdown
 # Solo parentesi tonde
