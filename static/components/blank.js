@@ -45,7 +45,9 @@ class XBlank extends HTMLElement {
     return String(str)
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;');
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   }
 
   renderTextInput(solution) {
@@ -109,11 +111,15 @@ class XBlank extends HTMLElement {
   renderMultipleChoice(choices, solution) {
     this.innerHTML = `
       <span class="blank-choices">
-        ${choices.map(choice => `
-          <button class="choice-btn" data-value="${choice.trim()}">
-            ${choice.trim()}
+        ${choices.map(choice => {
+          const text = choice.trim();
+          const safe = this.escapeHtml(text);
+          return `
+          <button class="choice-btn" data-value="${safe}">
+            ${safe}
           </button>
-        `).join('')}
+        `;
+        }).join('')}
       </span>
     `;
 

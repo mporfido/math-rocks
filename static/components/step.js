@@ -262,8 +262,10 @@ class XStep extends HTMLElement {
   }
 
   updateVariableDisplays(varName, value) {
-    // Aggiorna gli elementi che contengono marker per questa variabile
-    const varPattern = new RegExp(`\\{\\{VAR:${varName}:[^}]+\\}\\}`, 'g');
+    // Aggiorna gli elementi che contengono marker per questa variabile.
+    // NB: niente flag 'g' — il pattern è usato con .test() dentro un forEach e
+    // con 'g' .test() è stateful (lastIndex avanza), saltando elementi alternati.
+    const varPattern = new RegExp(`\\{\\{VAR:${varName}:[^}]+\\}\\}`);
     const elementsToUpdate = [];
 
     // Trova tutti gli elementi con template che contengono questa variabile

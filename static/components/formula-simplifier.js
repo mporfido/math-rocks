@@ -56,8 +56,11 @@ class FormulaSimplifier {
       return placeholder;
     });
 
-    // Applica le regole al resto (fuori dai delimitatori LaTeX)
-    formula = this._applyRegexRules(formula);
+    // NB: NON applichiamo le regole regex al "resto" fuori dai delimitatori
+    // LaTeX: quel testo è markup HTML (tag e attributi del paragrafo-template),
+    // e la Regola 4 (spazi attorno a - / =) lo corromperebbe a ogni update
+    // variabile (es. </strong> → < / strong>, data-x="1" → data - x = "1").
+    // I contenuti dentro $...$ sono già stati semplificati in fase di estrazione.
 
     // Ripristina i placeholder
     formula = formula.replace(/__LATEX_(DISPLAY|INLINE)_(\d+)__/g, (match, type, index) => {
