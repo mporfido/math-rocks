@@ -734,6 +734,7 @@ class XExpr extends HTMLElement {
   onOpClick(node) {
     if (this.savedDone) return;
     if (node.resolved) return;
+    if (this.hasResolvedAncestor(node)) return; // termine già usato da un antenato
     if (this.activeNode) return; // un'operazione alla volta finché non si risolve
 
     if (!this.isReducible(node)) {
@@ -764,6 +765,19 @@ class XExpr extends HTMLElement {
     if (this.hasResolvedAncestor(node)) return;
     this.activeNode = node;
     this.showInputFor(node);
+  }
+
+  /** Aggiorna l'affordance di click dei bersagli "spesi": una potenza-letterale
+   *  (o un'etichetta-potenza) sotto un antenato risolto non serve più. La
+   *  guardia logica è in onOpClick/onValueClick; qui si allinea il cursore. */
+  refreshSpentState() {
+    for (const node of this.opNodes) {
+      const spent = this.hasResolvedAncestor(node);
+      if (node.opEl && this.isPowLiteral(node)) node.opEl.classList.toggle('expr-spent', spent);
+      if (node.valueEl && node.valueEl.classList.contains('expr-value-clickable')) {
+        node.valueEl.classList.toggle('expr-spent', spent);
+      }
+    }
   }
 
   /** Messaggio quando si clicca un'operazione non (ancora) riducibile. */
@@ -957,6 +971,7 @@ class XExpr extends HTMLElement {
     // esplicitamente (R6/R7) smette di essere foglia e occupa una riga.
     if (this.powersMode) this.maxLevel = this.assignLevels(this.ast);
     this.layout(); // ridisegna linee + riposiziona valori
+    if (this.powersMode) this.refreshSpentState();
 
     if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
       MathJax.typesetPromise([label]).catch(() => {});
@@ -1055,6 +1070,7 @@ class XExpr extends HTMLElement {
     }
     if (this.powersMode) this.maxLevel = this.assignLevels(this.ast);
     this.layout();
+    if (this.powersMode) this.refreshSpentState();
     if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
       MathJax.typesetPromise([this.nodeLayer]).catch(() => {});
     }
@@ -1275,6 +1291,7 @@ class XExpr extends HTMLElement {
     }
     if (this.powersMode) this.maxLevel = this.assignLevels(this.ast);
     this.layout();
+    if (this.powersMode) this.refreshSpentState();
     if (this.history.length) {
       this.flashWithUndo('Passaggio annullato.');
     } else {
