@@ -511,7 +511,7 @@ Quando i livelli sono **tre**, il più esterno usa le **parentesi graffe** `{ }`
 L'ordine di annidamento, dal di dentro al di fuori, è sempre lo stesso:
 
 :::div.highlight
-🔑 **Tonde → quadre → graffe**, cioè $\{\,[\,(\ \dots\ )\,]\,\}$: si svolgono prima
+🔑 **Tonde → quadre → graffe**, cioè $\lbrace\,[\,(\ \dots\ )\,]\,\rbrace$: si svolgono prima
 le **tonde**, poi le **quadre**, infine le **graffe**, e solo alla fine le
 operazioni rimaste fuori da tutto.
 :::
@@ -533,4 +533,42 @@ verso fuori.
 🎉 **Sfida superata!** Ora sai svolgere anche le espressioni a più livelli con
 tonde, quadre e graffe — sia con il metodo a nodi, sia con lo svolgimento
 classico passo dopo passo. Sono lo stesso ragionamento, scritto in due modi.
+:::
+
+---
+
+> id: approfondimento
+> title: Si può dividere per zero?
+
+# Approfondimento: Perché non si può dividere per zero?
+
+Alcune operazioni non si possono eseguire all'interno dei numeri naturali, come ad esempio $3 - 5$. Noi sappiamo che il risultato è $-2$, ma quello è un numero negativo (fa parte dei numeri *interi* o *relativi*) e non è un numero naturale.
+
+Anche $1 : 2$ non ha un risultato nei numeri naturali, ma i numeri *razionali* esistono per permettere anche queste divisioni (sappiamo che il risultato è $\frac{1}{2}$ o $0,5$). Studieremo nel dettaglio anche questi numeri.
+
+Ci sono però alcune operazioni che **non hanno proprio senso**, non solo nei numeri naturali, ma in qualsiasi insieme numerico. Ad esempio $1 : 0$ è una operazione che non ammette alcun risultato per definizione. Cerchiamo di capire perchè.
+
+## Le operazioni inverse
+
+La **sottrazione** non è una operazione indipendente ma è inversa dell'addizione: che vuol dire? Vuol dire che $7$ meno $4$ fa $3$ **perché $3$ più $4$ fa $7$**. Posso spiegare come funziona la sottrazione usando solo un'altra operazione: l'addizione.
+
+Adesso possiamo capire meglio perche $3-5$ non si può fare nei numeri naturali: 
+
+[[perché non posso togliere cinque oggetti se ne ho solo tre|*perché nessun numero naturale, aggiunto a 5, può dare 3 come risultato|perché 3-5 è un numero negativo]]
+
+Ora passiamo alla divisione, che invece è l'operazione inversa della moltiplicazione: $15:3$ fa $5$ perché $5 \cdot 3 = 15$. Ancora una volta, il funzionamento della divisione si spiega usando un'altra operazione: la moltiplicazione.
+
+Quanto fa $0:5$?
+
+[[non si può fare perché nessun numero naturale moltiplicato per $5$ fa $0$|*fa $0$ perché $0 \cdot 5 = 0$|fa $5$ perché $0 \cdot 5 = 5$]]
+
+Ora pensaci bene: quanto fa $5:0$?
+[[*non si può fare perché nessun numero naturale moltiplicato per $0$ fa $5$|fa $0$ perché $0 \cdot 5 = 0$|fa $5$ perché $0 \cdot 5 = 5$]]
+
+:::div.reveal
+Il punto è proprio quello! Qualsiasi numero, **moltiplicato per zero fa zero** e non può dare nessun altro risultato, nemmeno un numero negativo o con la virgola...
+
+**BONUS: quanto fa $0:0$?**
+
+Questa volta ci rendiamo conto che qualsiasi numero $n$, moltiplicato per zero, farà sempre zero! E quindi qualsiasi numero può essere soluzione di questa operazione. Motivo per cui non diciamo che è impossibile, ma che è **indeterminata**
 :::
