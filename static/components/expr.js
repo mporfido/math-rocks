@@ -438,6 +438,12 @@ class XExpr extends HTMLElement {
     if ('ResizeObserver' in window) {
       this._ro = new ResizeObserver(() => this.layout());
       this._ro.observe(this);
+      // Il typeset MathJax cambia la larghezza dei token (testo grezzo
+      // `\(...\)` → CHTML) senza toccare la dimensione del componente: senza
+      // osservarli, le linee disegnate dal restore pre-typeset resterebbero
+      // alle coordinate vecchie.
+      this.tokensRow.querySelectorAll('.expr-token')
+        .forEach((el) => this._ro.observe(el));
     }
   }
 
@@ -550,7 +556,8 @@ class XExpr extends HTMLElement {
     if (this.showSteps) this.buildSteps();
 
     if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
-      MathJax.typesetPromise([this.tokensRow]).catch(() => {});
+      // Dopo il typeset i token cambiano larghezza: le linee vanno ridisegnate.
+      MathJax.typesetPromise([this.tokensRow]).then(() => this.layout()).catch(() => {});
     }
   }
 
