@@ -547,6 +547,18 @@ x-graph {
     box-shadow: 0 0 0 2px var(--rossa) inset;
 }
 
+/* Bersaglio "speso": il termine è già stato usato da un'operazione risolta */
+.expr-op.expr-spent,
+.expr-value-clickable.expr-spent {
+    cursor: default;
+}
+
+.expr-op.expr-spent:hover,
+.expr-value-clickable.expr-spent:hover {
+    background: none;
+    color: inherit;
+}
+
 /* Esponente di una potenza: in apice e cliccabile (sostituisce l'operatore ^) */
 .expr-exp {
     vertical-align: super;
