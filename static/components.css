@@ -607,6 +607,18 @@ x-graph {
     white-space: nowrap;
 }
 
+/* Etichetta-valore che contiene una potenza (modalità potenze): cliccabile
+   per valutarla o cambiarle base, come l'esponente di una letterale */
+.expr-value-clickable {
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background 0.15s ease;
+}
+
+.expr-value-clickable:hover {
+    background: rgba(27, 42, 74, 0.08);
+}
+
 /* Campo per inserire il risultato di un'operazione */
 .expr-input-wrap {
     position: absolute;
@@ -665,6 +677,24 @@ x-graph {
     border-color: var(--rossa);
 }
 
+/* Tasto ✕: chiude il prompt senza rispondere */
+.expr-cancel {
+    padding: 4px 8px;
+    border: 2px solid var(--ink-soft);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--ink-soft);
+    font-weight: 600;
+    cursor: pointer;
+    font-family: var(--font-disp);
+    line-height: 1;
+}
+
+.expr-cancel:hover {
+    border-color: var(--ink);
+    color: var(--ink);
+}
+
 .expr-input-feedback {
     font-weight: bold;
     min-width: 16px;
@@ -683,6 +713,25 @@ x-graph {
 }
 
 .expr-feedback.info {
+    color: var(--ink);
+}
+
+/* Bottone "annulla l'ultimo passaggio" accanto ai messaggi guida */
+.expr-undo {
+    margin-left: 8px;
+    padding: 2px 10px;
+    border: 1.5px solid var(--ink-soft);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--ink-soft);
+    font-family: var(--font-disp);
+    font-size: 0.85em;
+    cursor: pointer;
+    vertical-align: middle;
+}
+
+.expr-undo:hover {
+    border-color: var(--ink);
     color: var(--ink);
 }
 
