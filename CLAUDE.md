@@ -40,10 +40,13 @@ math-rocks/
 ├── static/                     # Asset statici (CSS, JS)
 │   ├── style.css               # Stili globali
 │   ├── components.css          # Stili per web components
-│   └── components/             # Web Components JavaScript
-│       ├── blank.js            # <x-blank>: input/scelta multipla
-│       ├── step.js             # <x-step>: container step con goal tracking
-│       └── variable.js         # <x-variable>: slider interattivo
+│   ├── components/             # Web Components JavaScript
+│   │   ├── blank.js            # <x-blank>: input/scelta multipla
+│   │   ├── step.js             # <x-step>: container step con goal tracking
+│   │   ├── variable.js         # <x-variable>: slider interattivo
+│   │   └── p5.js               # <x-p5>: sketch p5.js (inline o riusabile, lazy-load)
+│   └── sketches/               # Sketch p5 riusabili: un file per sketch, caricati
+│                               # on-demand da <x-p5> (window.P5Sketches['<nome>'])
 │
 ├── content/                    # Contenuti dei corsi (sorgente)
 │   └── esempi/                 # Un CORSO = una cartella

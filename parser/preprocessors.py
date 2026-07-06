@@ -100,8 +100,10 @@ def process_p5(content, p5_counter):
     """
     Converte blocchi :::p5 ... ::: in <x-p5> web component (sketch p5.js).
 
-    Le opzioni vanno sulla riga di apertura (il corpo è codice JS al 100%, così
-    non collide con il separatore di step `---`):
+    Due modalità:
+
+    1. Sketch INLINE: il codice JS dello sketch è nel corpo del blocco (il corpo
+       è codice al 100%, così non collide con il separatore di step `---`):
         :::p5 goal height=400 bind=a
         p.setup = () => { p.createCanvas(400, 400); };
         p.draw = () => {
@@ -111,16 +113,27 @@ def process_p5(content, p5_counter):
         };
         :::
 
+    2. Sketch RIUSABILE per nome: il codice vive in static/components/p5-sketches.js
+       (registro window.P5Sketches) e il markdown lo richiama con `sketch=<nome>`
+       passando i parametri sulla riga di apertura. Il corpo è vuoto:
+        :::p5 sketch=rettangoli-divisori n=6 height=360
+        :::
+
     Opzioni riconosciute sulla riga di apertura:
         goal           flag: rende lo sketch un goal (gli assegna un id)
         height=400     altezza del canvas (default 400)
         width=600      larghezza del canvas (opzionale)
         bind=a,b       variabili da osservare per ctx.onChange / redraw
+        sketch=nome    usa lo sketch registrato `nome` (niente corpo JS)
+    Ogni altra coppia `chiave=valore` è un PARAMETRO dello sketch: viene raccolto
+    e serializzato in data-params (JSON), disponibile allo sketch come ctx.params.
+    I valori numerici (`n=6`) sono convertiti in numeri.
 
     Lo sketch riceve `p` (istanza p5 in instance mode) e `ctx`:
         ctx.complete()    segnala il completamento del goal (idempotente)
         ctx.model         valori live di slider e campi numerici (${a}, ${ax}, …)
         ctx.onChange(cb)  registra una callback chiamata a ogni cambio di variabile
+        ctx.params        parametri passati dal markdown (solo sketch riusabili)
 
     Lo sketch conta come goal (riceve un id) SOLO con il flag `goal`; altrimenti
     è pura visualizzazione e non blocca lo step.
@@ -138,11 +151,26 @@ def process_p5(content, p5_counter):
     Returns:
         Tuple (contenuto con marker, dict marker→HTML, nuovo valore counter)
     """
+    # Opzioni con un significato speciale: NON diventano parametri dello sketch.
+    RESERVED_OPTS = {'goal', 'height', 'width', 'bind', 'sketch'}
+
     # `^` ancora l'apertura a inizio riga: un eventuale `:::p5` citato a metà
     # frase (es. `` `:::p5` `` nel testo) non viene catturato. La chiusura è un
-    # `:::` su riga propria.
-    pattern = re.compile(r'^:::p5[ \t]*([^\n]*)\n(.*?)\n:::[ \t]*$', re.DOTALL | re.MULTILINE)
+    # `:::` su riga propria. Il `\n?` prima di `:::` rende il corpo opzionale
+    # (uno sketch riusabile `sketch=...` non ha corpo JS).
+    pattern = re.compile(r'^:::p5[ \t]*([^\n]*)\n(.*?)\n?:::[ \t]*$', re.DOTALL | re.MULTILINE)
     replacements = {}
+
+    def coerce(value):
+        """Converte i parametri numerici in int/float; il resto resta stringa."""
+        try:
+            return int(value)
+        except ValueError:
+            pass
+        try:
+            return float(value)
+        except ValueError:
+            return value
 
     def replace_p5(match):
         nonlocal p5_counter
@@ -150,12 +178,19 @@ def process_p5(content, p5_counter):
         code = match.group(2)
 
         # Parsing opzioni: token separati da spazi; `goal` è un flag,
-        # gli altri sono coppie chiave=valore.
+        # gli altri sono coppie chiave=valore. Le chiavi non riservate sono
+        # parametri dello sketch.
         opts = {}
+        params = {}
         for token in options_str.split():
             if '=' in token:
                 key, _, value = token.partition('=')
-                opts[key.strip()] = value.strip()
+                key = key.strip()
+                value = value.strip()
+                if key in RESERVED_OPTS:
+                    opts[key] = value
+                else:
+                    params[key] = coerce(value)
             else:
                 opts[token] = True
 
@@ -171,11 +206,19 @@ def process_p5(content, p5_counter):
             attrs.append(f'data-width="{opts["width"]}"')
         if opts.get('bind'):
             attrs.append(f'data-bind="{opts["bind"]}"')
+        if opts.get('sketch'):
+            attrs.append(f'data-sketch="{html_lib.escape(opts["sketch"], quote=True)}"')
+        if params:
+            attrs.append(f'data-params="{html_lib.escape(json.dumps(params))}"')
 
         p5_counter += 1
 
-        script = f'<script type="application/x-p5-sketch">\n{code}\n</script>'
-        replacements[marker] = f'<x-p5 {" ".join(attrs)}>{script}</x-p5>'
+        # Sketch riusabile (sketch=…): niente <script>, il codice è nel registro.
+        if opts.get('sketch'):
+            replacements[marker] = f'<x-p5 {" ".join(attrs)}></x-p5>'
+        else:
+            script = f'<script type="application/x-p5-sketch">\n{code}\n</script>'
+            replacements[marker] = f'<x-p5 {" ".join(attrs)}>{script}</x-p5>'
         return marker
 
     processed = pattern.sub(replace_p5, content)

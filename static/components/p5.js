@@ -1,10 +1,17 @@
 /**
  * <x-p5> - Sketch / simulazione / visualizzazione interattiva con p5.js
  *
- * Il codice dello sketch è scritto nel markdown dentro un blocco :::p5 e
- * arriva qui come testo di uno <script type="application/x-p5-sketch"> (non
- * eseguibile dal browser). Lo eseguiamo in p5 "instance mode": lo sketch
- * riceve `p` (l'istanza p5) e `ctx` (il ponte con la piattaforma).
+ * Lo sketch può arrivare in due modi:
+ *   - INLINE: il codice è scritto nel markdown dentro un blocco :::p5 e arriva
+ *     qui come testo di uno <script type="application/x-p5-sketch"> (non
+ *     eseguibile dal browser).
+ *   - RIUSABILE: il blocco usa `sketch=<nome>` (attributo data-sketch) e il
+ *     codice vive in static/sketches/<nome>.js (un file per sketch, che si
+ *     registra in window.P5Sketches). Il file viene caricato AL VOLO solo quando
+ *     serve, come p5 dal CDN. I parametri del markdown arrivano in data-params
+ *     (JSON) e sono esposti allo sketch come ctx.params.
+ * In entrambi i casi lo sketch gira in p5 "instance mode" e riceve `p`
+ * (l'istanza p5) e `ctx` (il ponte con la piattaforma).
  *
  * Attributi:
  *   id           presente solo se il blocco ha il flag `goal`: rende lo sketch
@@ -13,6 +20,8 @@
  *   data-width   larghezza suggerita del canvas (opzionale)
  *   data-bind    variabili osservate (per ctx.onChange e per il redraw degli
  *                sketch con noLoop), separate da virgola
+ *   data-sketch  nome dello sketch registrato in window.P5Sketches (riusabile)
+ *   data-params  JSON dei parametri passati dal markdown (→ ctx.params)
  *
  * Oggetto ctx passato allo sketch:
  *   ctx.complete()    segnala il completamento del goal (idempotente; no-op se
@@ -22,6 +31,9 @@
  *                     (es. ctx.model.a, ctx.model.ax): stesso modello di x-graph
  *   ctx.onChange(cb)  registra cb(nome, valore) chiamata a ogni variable-change
  *   ctx.width/height  dimensioni suggerite (da usare in p.createCanvas)
+ *   ctx.setHeight(h)  cambia l'altezza del canvas a runtime (es. per passare a
+ *                     un layout portrait su mobile); il ResizeObserver la rispetta
+ *   ctx.params        parametri del markdown (solo sketch riusabili)
  *
  * Eventi:
  *   goal-complete: quando lo sketch chiama ctx.complete() (solo se ha id)
@@ -32,12 +44,40 @@
 
 const P5_CDN = 'https://cdn.jsdelivr.net/npm/p5@1.11.0/lib/p5.min.js';
 
+// URL di QUESTO script, catturato a load-time (document.currentScript è valido
+// solo durante l'esecuzione sincrona iniziale, non nelle callback async). Serve
+// a risolvere i file degli sketch riusabili come fratelli di p5.js, così i path
+// restano corretti anche sotto un subpath (GitHub Pages, Frozen-Flask).
+const SELF_URL =
+  (document.currentScript && document.currentScript.src) ||
+  (document.querySelector('script[src*="/components/p5.js"]') || {}).src ||
+  '';
+
+// .../static/components/p5.js  →  .../static/sketches/<nome>.js
+function sketchUrl(name) {
+  return SELF_URL.replace(/components\/p5\.js(\?.*)?$/, `sketches/${name}.js`);
+}
+
 class XP5 extends HTMLElement {
   async connectedCallback() {
     const scriptEl = this.querySelector('script[type="application/x-p5-sketch"]');
     const code = scriptEl ? scriptEl.textContent : '';
 
-    const height = parseInt(this.dataset.height || '400', 10);
+    const sketchName = this.dataset.sketch || null;
+    // Parametri del markdown (solo sketch riusabili). Input d'autore, ma
+    // difendiamoci comunque da un JSON malformato.
+    let params = {};
+    if (this.dataset.params) {
+      try {
+        params = JSON.parse(this.dataset.params);
+      } catch (e) {
+        console.error('data-params non è JSON valido:', e);
+      }
+    }
+
+    // Altezza mutabile: uno sketch può chiamare ctx.setHeight(h) per cambiare
+    // layout a runtime (es. passare a portrait su mobile).
+    let height = parseInt(this.dataset.height || '400', 10);
     const widthAttr = this.dataset.width ? parseInt(this.dataset.width, 10) : null;
 
     const container = document.createElement('div');
@@ -111,21 +151,58 @@ class XP5 extends HTMLElement {
       //    layout() dello sketch segue i ridimensionamenti (rotazione, resize);
       //    prima dell'avvio vale initialWidth (larghezza reale del container).
       get width() { return widthAttr || (self.p5Instance ? self.p5Instance.width : initialWidth); },
-      // Altezza sempre quella d'autore: il ResizeObserver ridimensiona a
-      // (larghezza, height) mantenendola costante, quindi non serve leggerla live.
+      // Altezza: normalmente quella d'autore, ma uno sketch può cambiarla con
+      // ctx.setHeight() (es. layout portrait su mobile). `height` è una `let`
+      // catturata nella closure: il getter e il ResizeObserver ne leggono il
+      // valore live.
       get height() { return height; },
+      setHeight(h) {
+        // Confrontiamo con l'altezza REALE del canvas (non con la sola variabile
+        // `height`): così, se la prima chiamata avviene prima che p5Instance sia
+        // assegnato, un draw successivo applica comunque il resize invece di
+        // saltarlo per via di un guard su un valore già aggiornato.
+        height = Math.max(1, Math.round(h));
+        const inst = self.p5Instance;
+        if (inst && typeof inst.resizeCanvas === 'function'
+            && Math.abs(inst.height - height) > 0) {
+          inst.resizeCanvas(inst.width, height);
+        }
+      },
+      // Parametri passati dal markdown (data-params). Vuoto per gli sketch inline.
+      params,
     };
 
-    // Lo sketch viene dai file del corso (input fidato, non utente), come le
-    // espressioni di x-graph.
+    // Risolve la funzione dello sketch:
+    //  - riusabile (data-sketch): dal registro globale window.P5Sketches;
+    //  - inline: compilando il codice del <script> (input fidato dell'autore,
+    //    come le espressioni di x-graph).
     let sketchFn;
-    try {
-      // eslint-disable-next-line no-new-func
-      sketchFn = new Function('p', 'ctx', code);
-    } catch (e) {
-      console.error('Errore di sintassi nello sketch p5:', e);
-      container.innerHTML = '<p class="p5-error">Errore nello sketch p5.</p>';
-      return;
+    if (sketchName) {
+      // Carica al volo static/sketches/<nome>.js (no-op se già presente) e poi
+      // pesca la factory dal registro.
+      try {
+        await XP5.loadSketch(sketchName);
+      } catch (e) {
+        console.error(`Impossibile caricare lo sketch p5 "${sketchName}":`, e);
+        container.innerHTML = `<p class="p5-error">Sketch p5 "${sketchName}" non caricato.</p>`;
+        return;
+      }
+      const registry = window.P5Sketches || {};
+      sketchFn = registry[sketchName];
+      if (typeof sketchFn !== 'function') {
+        console.error(`Sketch p5 "${sketchName}" non trovato nel registro window.P5Sketches.`);
+        container.innerHTML = `<p class="p5-error">Sketch p5 "${sketchName}" non trovato.</p>`;
+        return;
+      }
+    } else {
+      try {
+        // eslint-disable-next-line no-new-func
+        sketchFn = new Function('p', 'ctx', code);
+      } catch (e) {
+        console.error('Errore di sintassi nello sketch p5:', e);
+        container.innerHTML = '<p class="p5-error">Errore nello sketch p5.</p>';
+        return;
+      }
     }
 
     try {
@@ -214,8 +291,32 @@ class XP5 extends HTMLElement {
     });
     return XP5._loadPromise;
   }
+
+  // Carica lo sketch riusabile `name` da static/sketches/<name>.js, una sola
+  // volta per pagina; le chiamate concorrenti condividono la stessa promise.
+  // Ogni file registra la sua factory in window.P5Sketches.
+  static loadSketch(name) {
+    if (window.P5Sketches && typeof window.P5Sketches[name] === 'function') {
+      return Promise.resolve();
+    }
+    XP5._sketchPromises = XP5._sketchPromises || {};
+    if (XP5._sketchPromises[name]) return XP5._sketchPromises[name];
+
+    XP5._sketchPromises[name] = new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = sketchUrl(name);
+      script.onload = () => resolve();
+      script.onerror = () => {
+        XP5._sketchPromises[name] = null;
+        reject(new Error(`sketch load failed: ${name}`));
+      };
+      document.head.appendChild(script);
+    });
+    return XP5._sketchPromises[name];
+  }
 }
 
 XP5._loadPromise = null;
+XP5._sketchPromises = {};
 
 customElements.define('x-p5', XP5);

@@ -314,6 +314,52 @@ p.draw = () => {
 | `height=400` | Altezza suggerita del canvas (default 400). |
 | `width=600` | Larghezza suggerita del canvas (opzionale). |
 | `bind=a,b` | Variabili da osservare per `ctx.onChange` e per il redraw degli sketch con `noLoop`. |
+| `sketch=nome` | Usa uno **sketch riusabile** dal registro (vedi sotto): niente codice nel corpo. |
+
+Oltre a `ctx.complete/completed/model/onChange/width/height`, lo sketch dispone di:
+
+| `ctx` | Cosa fa |
+| ----- | ------- |
+| `ctx.setHeight(h)` | Cambia l'altezza del canvas a runtime (es. passare a un layout *portrait* su schermi stretti). |
+| `ctx.params` | Parametri passati dal markdown (solo sketch riusabili, vedi sotto). |
+
+#### Sketch riusabili (`sketch=nome`)
+
+Uno sketch usato in più punti non va ricopiato nel markdown: il suo codice vive
+una volta sola in `static/sketches/<nome>.js` (un file per sketch, che si
+registra nel registro globale `window.P5Sketches`) e lo si richiama **per nome**,
+passando i **parametri** sulla riga di apertura. Il corpo del blocco resta vuoto:
+
+```markdown
+:::p5 sketch=rettangoli-divisori n=6 height=360
+:::
+```
+
+- `sketch=nome` sceglie la factory `window.P5Sketches['nome']`.
+- Ogni altra coppia `chiave=valore` **non riservata** (cioè diversa da
+  `goal`/`height`/`width`/`bind`/`sketch`) è un **parametro**: arriva allo sketch
+  in `ctx.params` (i valori numerici come `n=6` sono convertiti in numeri). Così
+  lo stesso sketch si riusa con comportamento diverso — es. `n=6`, `n=12`, `n=7`.
+- Il flag `goal` funziona anche qui: uno sketch riusabile può essere un goal.
+- Il file dello sketch è **caricato al volo** solo nelle pagine che lo usano (come
+  p5.js dal CDN), quindi aggiungerne di nuovi non appesantisce le altre lezioni.
+
+**Registrare un nuovo sketch** — crea `static/sketches/<nome>.js`:
+
+```javascript
+(function () {
+  window.P5Sketches = window.P5Sketches || {};
+  window.P5Sketches['nome'] = function (p, ctx) {
+    const n = Number(ctx.params.n) || 6;      // legge i parametri del markdown
+    p.setup = () => { p.createCanvas(ctx.width, ctx.height); };
+    p.draw = () => { /* ...disegno... */ };
+  };
+})();
+```
+
+Il nome del file deve combaciare con la chiave usata in `sketch=<nome>`. Gli
+sketch **inline** (codice JS nel corpo del blocco `:::p5`) restano supportati per
+i casi usa-e-getta; per riusare o alleggerire il markdown, preferisci un file.
 
 **Lo sketch riceve due argomenti**, `p` (l'istanza p5, in *instance mode*) e
 `ctx` (il ponte con la piattaforma):

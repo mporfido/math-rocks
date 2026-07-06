@@ -143,6 +143,8 @@
 <script src="{{ url_for('static', filename='components/check.js') }}"></script>
 <script src="{{ url_for('static', filename='components/variable.js') }}"></script>
 <script src="{{ url_for('static', filename='components/graph.js') }}"></script>
+<!-- p5.js carica al volo (lazy) i singoli sketch riusabili da static/sketches/
+     <nome>.js, solo nelle pagine che li usano; non serve caricare un registro. -->
 <script src="{{ url_for('static', filename='components/p5.js') }}"></script>
 <script src="{{ url_for('static', filename='components/expr.js') }}"></script>
 <script src="{{ url_for('static', filename='components/step.js') }}"></script>
