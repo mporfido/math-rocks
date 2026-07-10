@@ -10,3 +10,8 @@ footer_text: Prof. Michele Porfido
 
 # Lingua del sito (attributo lang dell'HTML)
 language: it
+
+# Prefisso delle chiavi localStorage (progressi degli studenti nel browser).
+# NON cambiarlo a sito pubblicato: i progressi salvati verrebbero "persi"
+# (restano su disco ma sotto le vecchie chiavi).
+storage_prefix: mathrocks

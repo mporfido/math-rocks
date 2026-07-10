@@ -1,7 +1,8 @@
 /**
  * Persistenza dei progressi del corso in localStorage.
  *
- * Schema (una chiave per corso: "mathrocks:progress:{courseId}"):
+ * Schema (una chiave per corso: "{prefix}:progress:{courseId}", con prefix
+ * da site.yaml → meta tag x-storage-prefix):
  *   {
  *     "v": 1,
  *     "steps": {
@@ -20,11 +21,16 @@
 class CourseProgress {
   constructor() {
     this.VERSION = 1;
-    this.PREFIX = 'mathrocks:progress:';
+    // Prefisso delle chiavi: configurato per-istanza in site.yaml
+    // (storage_prefix) e iniettato nel template base come meta tag, così
+    // funziona identico anche nel sito statico congelato.
+    const meta = document.querySelector('meta[name="x-storage-prefix"]');
+    const prefix = (meta && meta.content) || 'corsi';
+    this.PREFIX = prefix + ':progress:';
     // Flag globale "sblocca tutto" per debug locale — chiave separata da
     // PREFIX apposta: non è per-corso/lezione, quindi clearCourse() (bottone
     // "Azzera progressi") non deve mai spegnerlo né viceversa.
-    this.DEBUG_KEY = 'mathrocks:debug-unlock';
+    this.DEBUG_KEY = prefix + ':debug-unlock';
     // Se localStorage non è utilizzabile, il gating sequenziale va disattivato
     // (altrimenti nessuno step risulterebbe completato e l'utente resterebbe
     // intrappolato sul primo step).

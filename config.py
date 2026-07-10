@@ -23,6 +23,8 @@ class Config:
     SITE_SUBTITLE = os.environ.get('SITE_SUBTITLE') or _site.get('site_subtitle') or ''
     FOOTER_TEXT = os.environ.get('FOOTER_TEXT') or _site.get('footer_text') or ''
     LANGUAGE = os.environ.get('SITE_LANGUAGE') or _site.get('language') or 'it'
+    # Prefisso delle chiavi localStorage (progress.js lo legge da un meta tag).
+    STORAGE_PREFIX = os.environ.get('STORAGE_PREFIX') or _site.get('storage_prefix') or 'corsi'
 
 class DevelopmentConfig(Config):
     """Configurazione per ambiente di sviluppo"""

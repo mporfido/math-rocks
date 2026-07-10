@@ -6,6 +6,8 @@
     <title>{% block title %}{{ site_name }}{% endblock %}</title>
 
     <meta name="theme-color" content="#FBFBF6">
+    <!-- Prefisso localStorage per i progressi: letto da progress.js -->
+    <meta name="x-storage-prefix" content="{{ storage_prefix }}">
 
     <!-- Font above-the-fold: preload dei pesi visibili subito (titolo + corpo) -->
     <link rel="preload" href="{{ url_for('static', filename='fonts/space-grotesk-700.woff2') }}" as="font" type="font/woff2" crossorigin>

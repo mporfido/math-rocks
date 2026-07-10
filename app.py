@@ -49,6 +49,7 @@ def create_app(config_name=None):
             'site_subtitle': app.config['SITE_SUBTITLE'],
             'footer_text': app.config['FOOTER_TEXT'],
             'site_language': app.config['LANGUAGE'],
+            'storage_prefix': app.config['STORAGE_PREFIX'],
             'current_year': date.today().year,
         }
 
