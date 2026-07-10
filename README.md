@@ -18,8 +18,9 @@ di Hugo / Jekyll / MkDocs.
 - **Engine / framework** (ciò che un domani diventerà open source): `parser/`,
   `routes/`, `templates/`, `static/components/`, `build_courses.py`,
   `freeze.py`. Codice che *non* sa nulla di un sito specifico.
-- **Istanza / il "tuo" sito**: `content/` (i contenuti) + la configurazione del
-  sito (nome, titolo, footer… oggi i default in `config.py`) + eventuale tema.
+- **Istanza / il "tuo" sito**: `content/` (i contenuti) + `site.yaml` (nome,
+  titolo, footer, lingua, prefisso storage, flag `math`, font) + il tema
+  `static/theme.css` (design token: colori, tipografia, forma).
   Sono i dati che *tu* fornisci all'engine.
 - **Output**: sito statico pubblicato.
 
@@ -115,7 +116,9 @@ http://localhost:5000
 ```
 math-rocks/
 ├── app.py                      # Applicazione Flask principale
-├── config.py                   # Configurazione
+├── config.py                   # Configurazione (engine)
+├── site.yaml                   # Config di istanza (testi sito, tema, math)
+├── site_config.py              # Lettore di site.yaml (usato anche dalla build)
 ├── build_courses.py            # Script per build corsi
 ├── requirements.txt            # Dipendenze Python
 │

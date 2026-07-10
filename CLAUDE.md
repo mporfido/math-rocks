@@ -19,7 +19,10 @@ scegliere, fai riferimento a quella sezione del README.
 ```
 math-rocks/
 ├── app.py                      # Entry point Flask, server principale
-├── config.py                   # Configurazione globale dell'app
+├── config.py                   # Configurazione dell'app (engine)
+├── site.yaml                   # Config di ISTANZA: testi sito, lingua, storage_prefix,
+│                               # flag math, tema, preload font (vince sui default engine)
+├── site_config.py              # Lettore di site.yaml (senza Flask: usato anche dalla build)
 ├── build_courses.py            # Script per compilare corsi da markdown a JSON
 ├── requirements.txt            # Dipendenze Python
 │
@@ -38,7 +41,8 @@ math-rocks/
 │   └── course.html             # Viewer corso singolo
 │
 ├── static/                     # Asset statici (CSS, JS)
-│   ├── style.css               # Stili globali
+│   ├── style.css               # Stili strutturali engine (+ token di fallback neutro)
+│   ├── theme.css               # Tema di ISTANZA: design token "Quaderno" + @font-face
 │   ├── components.css          # Stili per web components
 │   ├── components/             # Web Components JavaScript
 │   │   ├── blank.js            # <x-blank>: input/scelta multipla
