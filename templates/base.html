@@ -5,16 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>{% block title %}{{ site_name }}{% endblock %}</title>
 
-    <meta name="theme-color" content="#FBFBF6">
+    <meta name="theme-color" content="{{ theme_color }}">
     <!-- Prefisso localStorage per i progressi: letto da progress.js -->
     <meta name="x-storage-prefix" content="{{ storage_prefix }}">
 
-    <!-- Font above-the-fold: preload dei pesi visibili subito (titolo + corpo) -->
-    <link rel="preload" href="{{ url_for('static', filename='fonts/space-grotesk-700.woff2') }}" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="{{ url_for('static', filename='fonts/ibm-plex-serif-400.woff2') }}" as="font" type="font/woff2" crossorigin>
+    <!-- Font above-the-fold: preload dei pesi visibili subito (da site.yaml) -->
+    {% for font in preload_fonts %}
+    <link rel="preload" href="{{ url_for('static', filename=font) }}" as="font" type="font/woff2" crossorigin>
+    {% endfor %}
 
+    <!-- CSS engine (strutturale) prima, tema di istanza dopo: i token del
+         tema vincono sul fallback neutro di style.css -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='components.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename=theme_file) }}">
 
     {% block extra_css %}{% endblock %}
 </head>

@@ -50,6 +50,9 @@ def create_app(config_name=None):
             'footer_text': app.config['FOOTER_TEXT'],
             'site_language': app.config['LANGUAGE'],
             'storage_prefix': app.config['STORAGE_PREFIX'],
+            'theme_file': app.config['THEME_FILE'],
+            'theme_color': app.config['THEME_COLOR'],
+            'preload_fonts': app.config['PRELOAD_FONTS'],
             'current_year': date.today().year,
         }
 

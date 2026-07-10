@@ -26,6 +26,12 @@ class Config:
     # Prefisso delle chiavi localStorage (progress.js lo legge da un meta tag).
     STORAGE_PREFIX = os.environ.get('STORAGE_PREFIX') or _site.get('storage_prefix') or 'corsi'
 
+    # Tema dell'istanza: file CSS con i design token (caricato dopo i CSS
+    # engine), colore del meta theme-color e font da precaricare.
+    THEME_FILE = _site.get('theme_file') or 'theme.css'
+    THEME_COLOR = _site.get('theme_color') or '#FFFFFF'
+    PRELOAD_FONTS = _site.get('preload_fonts') or []
+
 class DevelopmentConfig(Config):
     """Configurazione per ambiente di sviluppo"""
     DEBUG = True
