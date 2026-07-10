@@ -1,0 +1,12 @@
+# Configurazione del sito (istanza) — modificabile senza toccare il codice.
+#
+# Precedenza: variabile d'ambiente > questo file > default neutro dell'engine.
+# Le chiavi commentate sono opzionali.
+
+site_name: Math Rocks
+site_title: Benvenuti ai Corsi Interattivi di Matematica
+site_subtitle: Lezioni di matematica interattive e coinvolgenti
+footer_text: Prof. Michele Porfido
+
+# Lingua del sito (attributo lang dell'HTML)
+language: it
