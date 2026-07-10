@@ -28,6 +28,11 @@ class Config:
 
     # Tema dell'istanza: file CSS con i design token (caricato dopo i CSS
     # engine), colore del meta theme-color e font da precaricare.
+    # Default globale del flag matematica (override per-corso in metadata.yaml):
+    # governa il caricamento di MathJax; build_courses.py legge la stessa
+    # chiave per l'auto-detect delle formule nei backtick.
+    MATH_DEFAULT = bool(_site.get('math', False))
+
     THEME_FILE = _site.get('theme_file') or 'theme.css'
     THEME_COLOR = _site.get('theme_color') or '#FFFFFF'
     PRELOAD_FONTS = _site.get('preload_fonts') or []

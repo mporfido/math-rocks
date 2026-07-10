@@ -18,6 +18,7 @@ import json
 import re
 from pathlib import Path
 from parser.markdown_parser import CourseParser
+from site_config import load_site_config
 import yaml
 
 
@@ -36,7 +37,7 @@ def _find_lesson_files(course_dir):
     return [legacy] if legacy.exists() else []
 
 
-def _build_course(course_dir, parser):
+def _build_course(course_dir, parser, math_default=False):
     """Compila un singolo corso (cartella) → dict pronto per il dump JSON."""
     lesson_files = _find_lesson_files(course_dir)
     if not lesson_files:
@@ -48,6 +49,10 @@ def _build_course(course_dir, parser):
     if metadata_file.exists():
         with open(metadata_file, 'r', encoding='utf-8') as f:
             metadata = yaml.safe_load(f) or {}
+
+    # Flag matematica: metadata.yaml del corso > default globale (site.yaml).
+    # Il parser è riusato tra corsi, quindi va risettato per OGNI corso.
+    parser.math_backticks = bool(metadata.get('math', math_default))
 
     lessons = []
     for lesson_file in lesson_files:
@@ -94,6 +99,7 @@ def build_all_courses(content_dir='content', output_dir='courses_data'):
     output_path.mkdir(exist_ok=True)
 
     parser = CourseParser()
+    math_default = bool(load_site_config().get('math', False))
     courses_built = 0
     courses_failed = 0
 
@@ -110,7 +116,7 @@ def build_all_courses(content_dir='content', output_dir='courses_data'):
         print(f'Parsing {course_dir.name}...', end=' ')
 
         try:
-            course_data = _build_course(course_dir, parser)
+            course_data = _build_course(course_dir, parser, math_default)
 
             # Salva JSON
             output_file = output_path / f'{course_dir.name}.json'
@@ -151,11 +157,12 @@ def build_single_course(course_id, content_dir='content', output_dir='courses_da
         return False
 
     parser = CourseParser()
+    math_default = bool(load_site_config().get('math', False))
 
     print(f'Parsing {course_id}...')
 
     try:
-        course_data = _build_course(course_dir, parser)
+        course_data = _build_course(course_dir, parser, math_default)
 
         # Salva JSON
         output_file = output_path / f'{course_id}.json'

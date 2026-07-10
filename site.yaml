@@ -11,6 +11,11 @@ footer_text: Prof. Michele Porfido
 # Lingua del sito (attributo lang dell'HTML)
 language: it
 
+# Corsi di matematica per default: attiva MathJax e l'auto-conversione dei
+# backtick matematici (`x = 5` → formula). Override per singolo corso con
+# `math: true|false` nel suo metadata.yaml.
+math: true
+
 # Prefisso delle chiavi localStorage (progressi degli studenti nel browser).
 # NON cambiarlo a sito pubblicato: i progressi salvati verrebbero "persi"
 # (restano su disco ma sotto le vecchie chiavi).

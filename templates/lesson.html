@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 
 {% set progress_key = course_id ~ '/' ~ lesson.id %}
+{# Flag matematica: metadata.yaml del corso > default globale (site.yaml).
+   Governa il caricamento di MathJax e i re-typeset. #}
+{% set course_math = course.metadata.get('math', math_default) %}
 
 {% block title %}{{ step.metadata.get('title', step.id) }} - {{ lesson.title }} - {{ site_name }}{% endblock %}
 
@@ -9,7 +12,8 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph@1.9.2/distrib/jsxgraph.css">
 <script src="https://cdn.jsdelivr.net/npm/jsxgraph@1.9.2/distrib/jsxgraphcore.min.js"></script>
 
-<!-- MathJax per rendering formule matematiche -->
+{% if course_math %}
+<!-- MathJax per rendering formule matematiche (solo corsi con math: true) -->
 <script>
   MathJax = {
     // Carica l'estensione `html` (\class{...}{...}), usata da <x-expr show-steps>
@@ -38,6 +42,7 @@
   };
 </script>
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+{% endif %}
 
 <!-- Progressi + guard sequenziale: caricato nel <head> ed eseguito in modo
      sincrono PRIMA del rendering del body, così l'eventuale redirect avviene
@@ -149,6 +154,7 @@
 <script src="{{ url_for('static', filename='components/expr.js') }}"></script>
 <script src="{{ url_for('static', filename='components/step.js') }}"></script>
 
+{% if course_math %}
 <!-- Re-render MathJax dopo caricamento componenti -->
 <script>
   // Aspetta che la pagina sia completamente caricata
@@ -172,6 +178,7 @@
     }, 50);
   });
 </script>
+{% endif %}
 
 <!-- Sidebar: checkmark sugli step completati e reset progressi -->
 <script>

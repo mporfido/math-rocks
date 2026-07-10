@@ -53,6 +53,7 @@ def create_app(config_name=None):
             'theme_file': app.config['THEME_FILE'],
             'theme_color': app.config['THEME_COLOR'],
             'preload_fonts': app.config['PRELOAD_FONTS'],
+            'math_default': app.config['MATH_DEFAULT'],
             'current_year': date.today().year,
         }
 

@@ -9,11 +9,15 @@ from parser.preprocessors import process_blanks, process_variables, process_bloc
 class CourseParser:
     """Parser per corsi con sintassi markdown custom"""
 
-    def __init__(self):
+    def __init__(self, math_backticks=True):
         self.markdown = mistune.create_markdown(
             escape=False,
             plugins=['strikethrough', 'table', 'url']
         )
+        # Auto-detect delle espressioni matematiche nei backtick (`x = 5` →
+        # $x = 5$). Va spento per i corsi non matematici (flag `math` in
+        # site.yaml / metadata.yaml): build_courses.py lo risetta per corso.
+        self.math_backticks = math_backticks
         self.blank_counter = 0
         self.variable_counter = 0
         self.check_counter = 0
@@ -252,8 +256,10 @@ class CourseParser:
         # ![alt|400](src) → <img style="width:400px">
         content = process_images(content)
 
-        # `x = 5` → $x = 5$ (converte formule matematiche in backtick)
-        content = process_math(content)
+        # `x = 5` → $x = 5$ (converte formule matematiche in backtick).
+        # Solo per corsi matematici: altrove i backtick sono sempre codice.
+        if self.math_backticks:
+            content = process_math(content)
 
         # I backtick rimasti dopo process_math sono codice inline letterale:
         # proteggili così la sintassi custom al loro interno (es. `[[5]]`)
