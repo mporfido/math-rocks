@@ -9,73 +9,7 @@
 
 Qui sono rappresentati 3 modelli di pannelli solari, i modelli Alfa, Beta e Gamma. Un pannello produce tanta più energia quanta più è la *superficie attiva*, che nel disegno è colorata in blu.
 
-:::p5 width=600 height=260
-// Tre pannelli solari, stessa superficie attiva (2/3) suddivisa diversamente.
-const PANEL = 144, COLS = 3, FRAME = 6, GAP = 30;
-const BG = '#1a1c2c', LIGHT = '#cbd3e0', SHADOW = '#11131f';
-const BLUE = '#41a6f6', BLUE_HI = '#7cc4ff', BLUE_LO = '#2a6cb0';
-const DARK = '#333c57', DARK_HI = '#46506e', DARK_LO = '#262d44';
-
-// definizione dei pannelli: righe e celle attive ("r,c")
-const active = (pairs) => new Set(pairs.map(([r, c]) => r + ',' + c));
-const panels = [
-  { name: 'ALFA',  rows: 1, on: active([[0,0],[0,1]]) },
-  { name: 'BETA',  rows: 2, on: active([[0,0],[0,1],[1,0],[1,1]]) },
-  { name: 'GAMMA', rows: 4, on: active([[0,0],[0,2],[1,1],[1,2],[2,0],[2,1],[3,1],[3,2]]) },
-];
-
-p.setup = () => {
-  p.createCanvas(ctx.width, ctx.height);
-  p.noSmooth();
-  p.noLoop();
-};
-
-function cell(x, y, w, h, base, hi, lo) {
-  p.noStroke();
-  p.fill(base);
-  p.rect(x, y, w, h);
-  // bevel 16-bit: highlight in alto/sinistra, ombra in basso/destra
-  p.fill(hi); p.rect(x, y, w, 2); p.rect(x, y, 2, h);
-  p.fill(lo); p.rect(x, y + h - 2, w, 2); p.rect(x + w - 2, y, 2, h);
-}
-
-function panel(px, py, pan) {
-  const outer = PANEL + FRAME * 2;
-  // ombra portata
-  p.noStroke(); p.fill(SHADOW);
-  p.rect(px + 5, py + 5, outer, outer);
-  // cornice grigio chiaro
-  p.fill(LIGHT);
-  p.rect(px, py, outer, outer);
-  // griglia di celle, a filo (nessuno spazio)
-  const gx = px + FRAME, gy = py + FRAME;
-  const cw = PANEL / COLS, ch = PANEL / pan.rows;
-  for (let r = 0; r < pan.rows; r++) {
-    for (let c = 0; c < COLS; c++) {
-      const on = pan.on.has(r + ',' + c);
-      cell(gx + c * cw, gy + r * ch, cw, ch,
-           on ? BLUE : DARK,
-           on ? BLUE_HI : DARK_HI,
-           on ? BLUE_LO : DARK_LO);
-    }
-  }
-  // etichetta
-  p.fill(LIGHT);
-  p.textFont('monospace');
-  p.textStyle(p.BOLD);
-  p.textSize(16);
-  p.textAlign(p.CENTER, p.TOP);
-  p.text(pan.name, px + outer / 2, py + outer + 8);
-}
-
-p.draw = () => {
-  p.background(BG);
-  const outer = PANEL + FRAME * 2;
-  const totalW = panels.length * outer + (panels.length - 1) * GAP;
-  let x = (p.width - totalW) / 2;
-  const y = 28;
-  for (const pan of panels) { panel(x, y, pan); x += outer + GAP; }
-};
+:::p5 sketch=frazioni-pannelli-suddivisioni width=600 height=260
 :::
 
 Un ingegnere sostiene che il Modello Gamma sia il più efficiente di tutti perché ha ben 8 settori attivi, mentre il Modello Alfa ne ha soltanto 2. Un secondo ingegnere, invece, sostiene che i tre pannelli producano esattamente la stessa energia.
@@ -98,90 +32,7 @@ Trascina lo slider per far scivolare verso sinistra tutti i blocchi attivi di Ga
 
 Riordina Gamma: ${t}{t|0|0,100,1}
 
-:::p5 width=600 height=260 bind=t
-// Stesso disegno dello step precedente, ma i blocchi attivi di GAMMA
-// scivolano a sinistra al variare dello slider t (0 = sparsi, 100 = allineati).
-const PANEL = 144, COLS = 3, FRAME = 6, GAP = 30;
-const BG = '#1a1c2c', LIGHT = '#cbd3e0', SHADOW = '#11131f';
-const BLUE = '#41a6f6', BLUE_HI = '#7cc4ff', BLUE_LO = '#2a6cb0';
-const DARK = '#333c57', DARK_HI = '#46506e', DARK_LO = '#262d44';
-const OUTER = PANEL + FRAME * 2;
-
-// blocchi attivi di GAMMA: colonna di partenza (sparsa) → di arrivo (2 col sx)
-const gamma = [
-  { r: 0, from: 0, to: 0 }, { r: 0, from: 2, to: 1 },
-  { r: 1, from: 1, to: 0 }, { r: 1, from: 2, to: 1 },
-  { r: 2, from: 0, to: 0 }, { r: 2, from: 1, to: 1 },
-  { r: 3, from: 1, to: 0 }, { r: 3, from: 2, to: 1 },
-];
-
-p.setup = () => {
-  p.createCanvas(ctx.width, ctx.height);
-  p.noSmooth();
-  p.noLoop();
-};
-
-function cell(x, y, w, h, base, hi, lo) {
-  p.noStroke();
-  p.fill(base); p.rect(x, y, w, h);
-  // bevel 16-bit: highlight in alto/sinistra, ombra in basso/destra
-  p.fill(hi); p.rect(x, y, w, 2); p.rect(x, y, 2, h);
-  p.fill(lo); p.rect(x, y + h - 2, w, 2); p.rect(x + w - 2, y, 2, h);
-}
-
-function frame(px, py) {
-  p.noStroke();
-  p.fill(SHADOW); p.rect(px + 5, py + 5, OUTER, OUTER);
-  p.fill(LIGHT);  p.rect(px, py, OUTER, OUTER);
-}
-
-function label(px, py, name) {
-  p.fill(LIGHT);
-  p.textFont('monospace'); p.textStyle(p.BOLD);
-  p.textSize(16); p.textAlign(p.CENTER, p.TOP);
-  p.text(name, px + OUTER / 2, py + OUTER + 8);
-}
-
-// pannello statico (ALFA/BETA): le 2 colonne di sinistra sono attive
-function staticPanel(px, py, rows, name) {
-  frame(px, py);
-  const gx = px + FRAME, gy = py + FRAME, cw = PANEL / COLS, ch = PANEL / rows;
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < COLS; c++) {
-      const on = c < 2;
-      cell(gx + c * cw, gy + r * ch, cw, ch,
-           on ? BLUE : DARK, on ? BLUE_HI : DARK_HI, on ? BLUE_LO : DARK_LO);
-    }
-  }
-  label(px, py, name);
-}
-
-// GAMMA: griglia 4x3; gli 8 blocchi attivi scivolano a sinistra al variare di t
-function gammaPanel(px, py, t) {
-  frame(px, py);
-  const gx = px + FRAME, gy = py + FRAME, cw = PANEL / COLS, ch = PANEL / 4;
-  // sfondo: tutte le 12 celle in grigio scuro
-  for (let r = 0; r < 4; r++)
-    for (let c = 0; c < COLS; c++)
-      cell(gx + c * cw, gy + r * ch, cw, ch, DARK, DARK_HI, DARK_LO);
-  // 8 blocchi blu in posizione interpolata (stessa riga, scorrimento orizzontale)
-  for (const b of gamma) {
-    const c = p.lerp(b.from, b.to, t);
-    cell(gx + c * cw, gy + b.r * ch, cw, ch, BLUE, BLUE_HI, BLUE_LO);
-  }
-  label(px, py, 'GAMMA');
-}
-
-p.draw = () => {
-  p.background(BG);
-  const t = (ctx.model.t ?? 0) / 100;
-  const totalW = 3 * OUTER + 2 * GAP;
-  let x = (p.width - totalW) / 2;
-  const y = 28;
-  staticPanel(x, y, 1, 'ALFA'); x += OUTER + GAP;
-  staticPanel(x, y, 2, 'BETA'); x += OUTER + GAP;
-  gammaPanel(x, y, t);
-};
+:::p5 sketch=frazioni-pannelli-allineamento width=600 height=260 bind=t
 :::
 
 :::div.reveal
@@ -218,59 +69,7 @@ Trascina lo slider per accendere i settori, fermandoti dove la zona blu copre la
 
 Settori attivi: ${k}{k|0|0,24,1}
 
-:::p5 width=600 height=300 bind=k
-// Modello DELTA: griglia 6×4 = 24 settori. Lo slider k accende i primi k
-// settori, colonna per colonna. La linea dorata segna i 2/3 della larghezza
-// (= 16 settori, ovvero 4 colonne su 6).
-const COLS = 6, ROWS = 4, PANEL = 216, FRAME = 6;
-const BG = '#1a1c2c', LIGHT = '#cbd3e0', SHADOW = '#11131f';
-const BLUE = '#41a6f6', BLUE_HI = '#7cc4ff', BLUE_LO = '#2a6cb0';
-const DARK = '#333c57', DARK_HI = '#46506e', DARK_LO = '#262d44';
-const GOLD = '#ffcd75';
-const OUTER = PANEL + FRAME * 2;
-
-p.setup = () => {
-  p.createCanvas(ctx.width, ctx.height);
-  p.noSmooth();
-  p.noLoop();
-};
-
-function cell(x, y, w, h, base, hi, lo) {
-  p.noStroke();
-  p.fill(base); p.rect(x, y, w, h);
-  p.fill(hi); p.rect(x, y, w, 2); p.rect(x, y, 2, h);
-  p.fill(lo); p.rect(x, y + h - 2, w, 2); p.rect(x + w - 2, y, 2, h);
-}
-
-p.draw = () => {
-  p.background(BG);
-  const k = Math.round(ctx.model.k ?? 0);
-  const px = (p.width - OUTER) / 2, py = 20;
-  p.noStroke(); p.fill(SHADOW); p.rect(px + 5, py + 5, OUTER, OUTER);
-  p.fill(LIGHT); p.rect(px, py, OUTER, OUTER);
-  const gx = px + FRAME, gy = py + FRAME;
-  const cw = PANEL / COLS, ch = PANEL / ROWS;
-  // accende i primi k settori, colonna per colonna (alto -> basso)
-  let n = 0;
-  for (let c = 0; c < COLS; c++) {
-    for (let r = 0; r < ROWS; r++) {
-      const on = n < k;
-      cell(gx + c * cw, gy + r * ch, cw, ch,
-           on ? BLUE : DARK, on ? BLUE_HI : DARK_HI, on ? BLUE_LO : DARK_LO);
-      n++;
-    }
-  }
-  // linea dorata ai 2/3 della larghezza (confine dei 16 settori = 4 colonne)
-  const lineX = gx + cw * 4;
-  p.fill(GOLD); p.rect(lineX - 1, py, 3, OUTER);
-  // etichette
-  p.fill(LIGHT);
-  p.textFont('monospace'); p.textStyle(p.BOLD);
-  p.textAlign(p.CENTER, p.TOP); p.textSize(16);
-  p.text('DELTA', px + OUTER / 2, py + OUTER + 8);
-  p.textSize(14);
-  p.text(k + ' / 24 settori attivi', p.width / 2, py + OUTER + 30);
-};
+:::p5 sketch=frazioni-griglia-settori width=600 height=300 bind=k
 :::
 
 [Verifica]{check: k == 16}
@@ -313,42 +112,7 @@ Ultima sfida: è possibile progettare un pannello equivalente ai precedenti divi
 È possibile?
 [[Sì, basta accendere 7 settori|*No: 10 non è divisibile per 3, quindi i 2/3 non danno un numero intero di settori|Sì, basta accendere 6 settori]]
 
-:::p5 width=600 height=180
-// 10 settori in fila: 2/3 di 10 = 6,67 -> 6 settori interi + 0,67 di settore.
-// Il pezzetto arancione che avanza non è un settore intero: con 10 parti uguali
-// la frazione 2/3 non si può ottenere.
-const N = 10, CW = 44, CH = 60;
-const BG = '#1a1c2c', LIGHT = '#cbd3e0';
-const BLUE = '#41a6f6', BLUE_HI = '#7cc4ff', BLUE_LO = '#2a6cb0';
-const DARK = '#333c57', DARK_HI = '#46506e', DARK_LO = '#262d44';
-const GOLD = '#ef7d57', GOLD_HI = '#ffb380', GOLD_LO = '#c25a3a';
-
-p.setup = () => {
-  p.createCanvas(ctx.width, ctx.height);
-  p.noSmooth();
-  p.noLoop();
-};
-
-function cell(x, y, w, h, base, hi, lo) {
-  p.noStroke();
-  p.fill(base); p.rect(x, y, w, h);
-  p.fill(hi); p.rect(x, y, w, 2); p.rect(x, y, 2, h);
-  p.fill(lo); p.rect(x, y + h - 2, w, 2); p.rect(x + w - 2, y, 2, h);
-}
-
-p.draw = () => {
-  p.background(BG);
-  const totalW = N * CW;
-  const x0 = (p.width - totalW) / 2, y = 36;
-  for (let i = 0; i < N; i++) cell(x0 + i * CW, y, CW, CH, DARK, DARK_HI, DARK_LO);
-  for (let i = 0; i < 6; i++) cell(x0 + i * CW, y, CW, CH, BLUE, BLUE_HI, BLUE_LO);
-  // 7° settore riempito solo per 2/3: la parte che "avanza"
-  cell(x0 + 6 * CW, y, CW * 2 / 3, CH, GOLD, GOLD_HI, GOLD_LO);
-  p.fill(LIGHT);
-  p.textFont('monospace'); p.textStyle(p.BOLD);
-  p.textAlign(p.CENTER, p.TOP); p.textSize(15);
-  p.text('2/3 di 10 = 6,67 settori', p.width / 2, y + CH + 18);
-};
+:::p5 sketch=frazioni-dieci-settori width=600 height=180
 :::
 
 Perché un pannello equivalente sia possibile, il numero totale di settori deve essere un **multiplo di** [[3]].

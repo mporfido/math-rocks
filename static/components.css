@@ -464,6 +464,11 @@ x-graph {
 }
 
 /* ========== p5.js sketch (<x-p5>) ========== */
+x-p5 {
+    display: block;
+    margin: 1.5rem 0;
+}
+
 .p5-container {
     display: inline-block;
     max-width: 100%;
