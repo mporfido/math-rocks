@@ -335,6 +335,17 @@ passando i **parametri** sulla riga di apertura. Il corpo del blocco resta vuoto
 :::
 ```
 
+Esempio con un goal e più parametri (procedura guidata per MCD e mcm a partire
+dalle scomposizioni: colonne = primi comuni, celle da riempire con gli esponenti):
+
+```markdown
+:::p5 goal sketch=mcd-mcm-tabella a=84 b=90 modo=entrambi
+:::
+```
+
+Parametri di `mcd-mcm-tabella`: `a`, `b` (i due numeri), `modo` (`mcd` | `mcm` |
+`entrambi`), `titolo` (opzionale).
+
 - `sketch=nome` sceglie la factory `window.P5Sketches['nome']`.
 - Ogni altra coppia `chiave=valore` **non riservata** (cioè diversa da
   `goal`/`height`/`width`/`bind`/`sketch`) è un **parametro**: arriva allo sketch
