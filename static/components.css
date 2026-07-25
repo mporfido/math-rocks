@@ -414,6 +414,43 @@ details.syntax-doc > p {
     border-top: 1px solid var(--line);
 }
 
+/* ========== Hint (suggerimento a scomparsa) ========== */
+/* Stessa struttura di .syntax-doc ma con accento "penna rossa": comunica
+   un contenuto per lo studente (suggerimento), non documentazione tecnica. */
+
+details.hint {
+    margin: 1rem 0 1.5rem;
+    border: 2px solid var(--line);
+    border-left: 6px solid var(--rossa);
+    border-radius: var(--radius);
+    background: var(--surface);
+}
+
+details.hint summary {
+    cursor: pointer;
+    padding: 0.6rem 1rem;
+    font-family: var(--font-disp);
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--rossa-deep);
+    user-select: none;
+}
+
+details.hint summary:hover {
+    color: var(--rossa);
+}
+
+details.hint[open] summary {
+    border-bottom: 1px solid var(--line);
+}
+
+details.hint > p {
+    padding: 0.6rem 1rem;
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--ink);
+}
+
 /* ========== Graph Component ========== */
 
 x-graph {
