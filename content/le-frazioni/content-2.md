@@ -56,6 +56,8 @@ Ora completa la tabella: scriviamo per ogni pannello il numero totale di sezioni
 
 :::div.reveal
 Perfetto! Le tre frazioni — $\frac{2}{3}$, $\frac{4}{6}$ e $\frac{8}{12}$ — rappresentano tutte la stessa quantità: diciamo che sono frazioni **equivalenti**.
+
+*Attenzione a non confondere due parole vicine:* nella lezione scorsa erano due **figure** con la stessa area a dirsi *equiestese*; qui invece parliamo di **frazioni** — cioè di numeri — che indicano la stessa quantità, e si dicono *equivalenti*.
 :::
 
 ---
@@ -104,6 +106,58 @@ Qual è l'"operazione segreta" che hai fatto sui numeri?
 
 ---
 
+> id: semplificare
+> title: Tornare indietro
+
+# Si può percorrere la strada al contrario?
+
+Finora abbiamo sempre reso la griglia **più fitta**: da 3 settori a 6, a 12, a 24, a 90, moltiplicando numeratore e denominatore per lo stesso numero.
+
+Ma la stessa strada si può percorrere **all'indietro**. Riprendiamo il Modello **Gamma**: 12 settori totali, 8 attivi, cioè $\frac{8}{12}$.
+
+:::p5 sketch=frazioni-pannelli-suddivisioni width=600 height=260
+:::
+
+Invece di dividere i settori, questa volta **raggruppiamoli a quattro a quattro**.
+
+Quanti gruppi vengono fuori dai 12 settori totali? [[3]]
+
+E quanti di quei gruppi sono fatti di settori attivi? [[2]]
+
+Quindi lo stesso pannello si può descrivere anche così: $\frac{8}{12} = \frac{2}{3}$.
+
+## L'operazione sui numeri
+
+Guarda che cosa è successo ai due numeri della frazione: $8 \div 4 = 2$ e $12 \div 4 = 3$.
+
+Qual è stata l'"operazione segreta"?
+
+[[Ho diviso solo il denominatore per 4|*Ho diviso numeratore e denominatore per lo stesso numero|Ho sottratto 4 da numeratore e denominatore]]
+
+:::div.reveal
+**Esatto.** È la stessa regola di prima, letta al contrario: **dividere** numeratore e denominatore per lo stesso numero dà ancora una frazione **equivalente**. Questa operazione si chiama **semplificare** una frazione.
+
+Quando non si può più semplificare — come $\frac{2}{3}$, perché nessun numero divide sia 2 sia 3 — si dice che la frazione è **ridotta ai minimi termini**.
+:::
+
+## Ti ricordi il campo dei Rossi?
+
+Nella lezione scorsa avevamo raggruppato i 16 mattoncini **a coppie**, e la zona D era passata da $\frac{2}{16}$ a $\frac{1}{8}$. Era una semplificazione, solo che non ne conoscevamo ancora il nome:
+
+$$\frac{2}{16} = \frac{2 \div 2}{16 \div 2} = \frac{1}{8}$$
+
+Prova ora con la zona **A**, che valeva $\frac{4}{16}$: semplificala dividendo entrambi i numeri per **4**.
+
+$\frac{4}{16} =$ [[1/4]]
+
+:::div.reveal
+$\frac{4}{16} = \frac{4 \div 4}{16 \div 4} = \frac{1}{4}$, ed è ridotta ai minimi termini.
+
+Ecco perché una stessa zona di terreno poteva avere due nomi: $\frac{4}{16}$ e $\frac{1}{4}$ sono frazioni **equivalenti**.
+:::
+
+---
+
 > id: frazioni-equivalenti-6
 > title: Si può sempre?
 
@@ -119,4 +173,39 @@ Perché un pannello equivalente sia possibile, il numero totale di settori deve 
 
 :::div.reveal
 **Esatto, non si può creare un pannello equivalente.** $\frac{2}{3}$ di 10 fa $6{,}67$: dovremmo accendere "6 settori e due terzi", ma un settore o è acceso o è spento — non esistono mezzi settori. La frazione $\frac{2}{3}$ si può mantenere solo se il totale è un **multiplo di 3** (3, 6, 9, 12, 24, 90…), così la divisione dà un numero intero di settori attivi.
+:::
+
+---
+
+> id: recap
+> title: "Recap: Frazioni Equivalenti"
+
+# Recap: Frazioni Equivalenti
+
+Fissiamo le idee di questa lezione completando ogni definizione con il termine giusto.
+
+## Definizione
+
+Due frazioni si dicono **equivalenti** quando rappresentano la stessa [[select: forma|*quantità|quantità di numeri]], anche se sono scritte con numeri diversi: $\frac{2}{3}$, $\frac{4}{6}$, $\frac{8}{12}$ e $\frac{60}{90}$ sono tutte equivalenti fra loro.
+
+Nel pannello Gamma, spostare i settori attivi da una parte all'altra [[select: aumenta|*non cambia|riduce]] la superficie attiva: ciò che conta è **quanta** superficie è accesa, non **dove** si trova.
+
+## Regole
+
+**Regola 1 — Amplificare (griglia più fitta).** Moltiplicando numeratore e denominatore per [[select: numeri diversi|*lo stesso numero|il solo numeratore]] si ottiene una frazione equivalente: $\frac{2}{3} = \frac{2 \times 30}{3 \times 30} = \frac{60}{90}$.
+
+**Regola 2 — Semplificare (griglia più larga).** La stessa cosa vale all'indietro: [[select: sottraendo|*dividendo]] numeratore e denominatore per lo stesso numero, $\frac{8}{12}$ diventa $\frac{2}{3}$. Quando non si può più semplificare, la frazione è **ridotta ai [[select: massimi|*minimi]] termini**.
+
+**Regola 3 — Non sempre si può.** Per scrivere $\frac{2}{3}$ con un altro denominatore, quel denominatore deve essere un [[select: divisore|*multiplo]] di 3: con 10 settori totali non esiste nessun pannello equivalente.
+
+:::div.reveal
+**Le regole d'oro delle frazioni equivalenti:**
+
+- Frazioni **equivalenti** → stessa quantità, scrittura diversa.
+- $\times$ lo stesso numero sopra e sotto → **amplificare** ($\frac{2}{3} = \frac{60}{90}$).
+- $\div$ lo stesso numero sopra e sotto → **semplificare** ($\frac{8}{12} = \frac{2}{3}$).
+- Nessuna delle due operazioni **cambia il valore** della frazione: cambia solo in quante parti hai diviso l'intero.
+- Una frazione che non si può più semplificare è **ridotta ai minimi termini**.
+
+Ora sai perché la zona D del campo dei Rossi poteva chiamarsi sia $\frac{2}{16}$ sia $\frac{1}{8}$! 🎉
 :::

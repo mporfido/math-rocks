@@ -704,6 +704,22 @@ Eventuale spiegazione aggiuntiva.
 
 I corsi `esempio-algebra` ed `esempio-grafici` usano questo pattern dopo ogni componente interattivo.
 
+#### Suggerimento a scomparsa per lo studente
+
+Stesso meccanismo `details`, ma classe `.hint` invece di `.syntax-doc`: è
+pensato per un **suggerimento** rivolto allo studente (non per documentare la
+sintassi), quindi ha uno stile distinto (accento "penna rossa") per non
+confondersi visivamente con i box di documentazione.
+
+```markdown
+:::details.hint
+<summary>💡 Suggerimento</summary>
+
+Prova a isolare `x` portando i termini noti dall'altra parte dell'uguale.
+
+:::
+```
+
 ### Tabelle
 
 ```markdown

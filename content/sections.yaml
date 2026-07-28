@@ -9,6 +9,7 @@ sections:
     title: Aritmetica
     courses:
       - numeri-naturali
+      - numeri-interi
       - le-frazioni
   - id: esempi
     title: Corsi di esempio
