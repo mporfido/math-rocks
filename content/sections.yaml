@@ -11,6 +11,10 @@ sections:
       - numeri-naturali
       - numeri-interi
       - le-frazioni
+  - id: geometria
+    title: Geometria
+    courses:
+      - fondamenti-geometria-euclidea
   - id: esempi
     title: Corsi di esempio
     courses:
