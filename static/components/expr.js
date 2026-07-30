@@ -422,9 +422,9 @@ class XExpr extends HTMLElement {
     // no-eval (solo in modalità potenze): niente valutazione numerica delle
     // potenze (R7), si accettano solo proprietà e cambio di base.
     this.noEval = this.powersMode && this.dataset.noEval === 'true';
-    // show-steps non è supportato in modalità potenze (i livelli sono dinamici
-    // e romperebbero l'indicizzazione delle righe dello svolgimento).
-    this.showSteps = this.dataset.showSteps === 'true' && !this.powersMode;
+    // Svolgimento classico. Due strategie di riga, vedi buildSteps(): per
+    // livello (default) oppure cronologica (modalità potenze).
+    this.showSteps = this.dataset.showSteps === 'true';
 
     try {
       if (exprStr.length > MAX_EXPR_LENGTH) throw new Error('Espressione troppo lunga');
@@ -594,15 +594,27 @@ class XExpr extends HTMLElement {
 
   // -- Svolgimento classico (show-steps) ------------------------------------
 
-  /** Crea l'area dello svolgimento con la prima riga = espressione di partenza. */
+  /**
+   * Crea l'area dello svolgimento con la prima riga = espressione di partenza.
+   *
+   * Due strategie di riga, a seconda della modalità:
+   * - default: righe indicizzate per LIVELLO dell'albero (stepsLines[0] =
+   *   espressione di partenza, stepsLines[L] = stato con tutti i nodi fino al
+   *   livello L risolti), come si scrive a mano un'espressione numerica;
+   * - potenze: righe CRONOLOGICHE, una per passaggio dello studente
+   *   (stepsLines è una pila allineata a this.history). Qui i livelli non sono
+   *   fissi — una potenza-letterale è foglia finché resta simbolica e smette di
+   *   esserlo appena viene sciolta (R6/R7), spostando i livelli degli antenati —
+   *   quindi una riga già scritta si riferirebbe a un livello che ha cambiato
+   *   significato. La catena cronologica di uguaglianze è anche più fedele a
+   *   come si applicano a mano le proprietà delle potenze.
+   */
   buildSteps() {
     this.stepsWrap = document.createElement('div');
     this.stepsWrap.className = 'expr-steps';
     this.appendChild(this.stepsWrap);
 
-    // Le righe sono indicizzate per livello: stepsLines[0] = espressione di
-    // partenza, stepsLines[L] = stato dopo aver risolto tutti i nodi fino al
-    // livello L. stepsMaxLevel è la riga più profonda creata finora.
+    // stepsMaxLevel è la riga più profonda creata finora (solo modo per livello).
     this.stepsMaxLevel = 0;
     const first = this.makeStepLine(false);
     first.querySelector('.expr-step-math').innerHTML = `\\(${this.renderState(this.ast, null, 0)}\\)`;
@@ -655,6 +667,28 @@ class XExpr extends HTMLElement {
     if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
       MathJax.typesetPromise(toTypeset).catch(() => {});
     }
+  }
+
+  /**
+   * Modalità potenze: aggiunge una riga con lo stato COMPLETO dell'espressione
+   * dopo il passaggio appena fatto (nessun cutoff di livello). `flashNode`
+   * evidenzia la zona appena riscritta.
+   */
+  pushChronoStep(flashNode) {
+    if (!this.showSteps || !this.stepsWrap) return;
+    const line = this.makeStepLine(true);
+    line.querySelector('.expr-step-math').innerHTML = `\\(${this.renderState(this.ast, flashNode, undefined)}\\)`;
+    this.stepsLines.push(line);
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      MathJax.typesetPromise([line]).catch(() => {});
+    }
+  }
+
+  /** Toglie l'ultima riga cronologica (undoLast). La riga 0 — l'espressione di
+   *  partenza — non si annulla. */
+  popChronoStep() {
+    if (!this.showSteps || !this.stepsLines || this.stepsLines.length <= 1) return;
+    this.stepsLines.pop().remove();
   }
 
   /**
@@ -1008,8 +1042,9 @@ class XExpr extends HTMLElement {
       MathJax.typesetPromise([label]).catch(() => {});
     }
 
-    // Svolgimento classico: aggiorna/aggiunge la riga corrispondente.
-    this.pushStep(node);
+    // Svolgimento classico: riga cronologica (potenze) o riga di livello.
+    if (this.powersMode) this.pushChronoStep(node);
+    else this.pushStep(node);
 
     if (this.ast.resolved) {
       this.flash(`Risolto! Risultato: ${this.ast.value.toString()}`, true);
@@ -1035,11 +1070,22 @@ class XExpr extends HTMLElement {
       }
     }
     this.layout();
+    // Anche la riscrittura di un valore è un passaggio: ha la sua riga.
+    this.pushChronoStep(node);
     this.clearFlash();
   }
 
   /** Risolve l'intero albero senza interazione (restore / stato salvato). */
   solveAll() {
+    // Svolgimento cronologico (potenze): il restore non passa da this.history,
+    // quindi fotografiamo lo stato dopo ogni mutazione e creiamo le righe alla
+    // fine, in ordine.
+    const chrono = this.showSteps && this.powersMode;
+    const snapshots = [];
+    const snap = () => {
+      if (chrono) snapshots.push(this.renderState(this.ast, null, undefined));
+    };
+
     const resolveWithLabel = (node, value) => {
       node.value = value;
       node.resolved = true;
@@ -1048,6 +1094,7 @@ class XExpr extends HTMLElement {
       label.innerHTML = `\\(${value.toLatex()}\\)`;
       this.nodeLayer.appendChild(label);
       node.valueEl = label;
+      snap();
     };
 
     let guard = 0;
@@ -1098,6 +1145,7 @@ class XExpr extends HTMLElement {
               if (!v) continue;
               node.value = v;
               if (node.valueEl) node.valueEl.innerHTML = `\\(${node.value.toLatex()}\\)`;
+              snap();
               progressed = true;
               break;
             }
@@ -1119,12 +1167,21 @@ class XExpr extends HTMLElement {
     // Svolgimento classico (restore): tutte le righe già complete, senza flash.
     // La riga 0 (espressione di partenza) è già in this.stepsLines.
     if (this.showSteps && this.stepsWrap) {
-      for (let lvl = 1; lvl <= this.maxLevel; lvl++) {
-        const line = this.makeStepLine(true);
-        line.querySelector('.expr-step-math').innerHTML = `\\(${this.renderState(this.ast, null, lvl)}\\)`;
-        this.stepsLines[lvl] = line;
+      if (chrono) {
+        // Una riga per passaggio, nell'ordine in cui il restore li ha fatti.
+        snapshots.forEach((tex) => {
+          const line = this.makeStepLine(true);
+          line.querySelector('.expr-step-math').innerHTML = `\\(${tex}\\)`;
+          this.stepsLines.push(line);
+        });
+      } else {
+        for (let lvl = 1; lvl <= this.maxLevel; lvl++) {
+          const line = this.makeStepLine(true);
+          line.querySelector('.expr-step-math').innerHTML = `\\(${this.renderState(this.ast, null, lvl)}\\)`;
+          this.stepsLines[lvl] = line;
+        }
+        this.stepsMaxLevel = this.maxLevel;
       }
-      this.stepsMaxLevel = this.maxLevel;
       if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
         MathJax.typesetPromise([this.stepsWrap]).catch(() => {});
       }
@@ -1327,6 +1384,8 @@ class XExpr extends HTMLElement {
       if (node.valueEl) { node.valueEl.remove(); node.valueEl = null; }
     }
     if (this.powersMode) this.maxLevel = this.assignLevels(this.ast);
+    // Le righe cronologiche sono allineate a history: ne cade l'ultima.
+    this.popChronoStep();
     this.layout();
     if (this.powersMode) this.refreshSpentState();
     if (this.history.length) {

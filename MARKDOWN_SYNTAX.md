@@ -438,6 +438,13 @@ risolta; quando si scende di un livello nell'albero si aggiunge una nuova riga (
 :::
 ```
 
+In **modalità potenze** lo svolgimento funziona allo stesso modo ma le righe sono
+**cronologiche**: una riga per ogni passaggio dello studente (e il bottone
+*annulla l'ultimo passaggio* toglie anche l'ultima riga). Lì i livelli
+dell'albero non sono fissi — una potenza è una foglia finché resta simbolica —
+e la catena di uguaglianze una-per-mossa è comunque il modo in cui si scrivono a
+mano le proprietà delle potenze.
+
 **Modalità potenze** (flag `powers`, oppure l'alias `:::powers` — stesso
 componente). Le potenze `base^esp` restano **simboliche** (niente numeroni
 calcolati) e le operazioni tra potenze si riducono applicando le **proprietà**:
@@ -472,7 +479,7 @@ sole proprietà. Usalo per impedire il percorso "calcola tutto" — ma solo su
 espressioni interamente risolvibili con le proprietà (es. niente `+`/`-` tra
 potenze, che senza valutazione non si sbloccano).
 
-> **Vincoli d'autore in modalità potenze.** `show-steps` non è supportato. La
+> **Vincoli d'autore in modalità potenze.** La
 > valutazione diretta di una potenza è disponibile solo finché il valore resta
 > un intero "esatto" in doppia precisione (fino a ~9·10^15: `7^15` sì, `2^60`
 > no) — oltre, la potenza si può solo riscrivere. Nei corsi sui naturali cura

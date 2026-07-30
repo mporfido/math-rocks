@@ -243,8 +243,8 @@ def process_expr(content, expr_counter):
     `powers` attiva la modalità potenze: le potenze restano simboliche e si
     riducono con le proprietà (stessa base, stesso esponente, potenza di
     potenza, cambio di base). `:::powers` è un alias di `:::expr powers`:
-    stesso componente, zucchero sintattico. show-steps non è supportato in
-    modalità potenze.
+    stesso componente, zucchero sintattico. Con `powers` le righe dello
+    svolgimento sono cronologiche (una per passaggio) invece che per livello.
     `no-eval` (solo con powers) vieta la valutazione numerica delle potenze:
     forza il percorso delle proprietà; l'esercizio deve essere risolvibile
     con le sole proprietà.
