@@ -20,7 +20,7 @@ tools:
     title: Espressioni aritmetiche
     description: >-
       Risolvi un'espressione un'operazione per volta, con il metodo ad albero
-      ("sciogliamo i nodi"). Componi la tua scheda e condividila con un link.
+      ("sciogliamo i nodi").
     icon: "🧮"
     defaults:
       ex:

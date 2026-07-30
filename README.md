@@ -271,6 +271,11 @@ Non serve costruire quegli indirizzi a mano: **ogni pagina-strumento contiene un
 costruttore** ("Componi una scheda e ottieni il link") con un campo per le
 espressioni, le opzioni e il bottone *Copia*.
 
+Il link copiato è quello **per gli studenti**: porta il parametro `noeditor=1`,
+quindi chi lo apre trova solo la scheda da svolgere, senza il costruttore. Non è
+una protezione (l'indirizzo dello strumento resta pubblico), è un modo di non
+mettere davanti alla classe un pannello che non le serve.
+
 Parametri dello strumento `espressioni` / `potenze` (kind `expr`):
 
 | Parametro | Significato |
@@ -278,8 +283,9 @@ Parametri dello strumento `espressioni` / `potenze` (kind `expr`):
 | `ex` | un'espressione; ripetibile (`?ex=…&ex=…`) o con più voci separate da `\|` |
 | `mode=powers` | le potenze restano simboliche e si riducono con le loro proprietà |
 | `noeval=1` | (solo con `mode=powers`) vieta la valutazione numerica delle potenze |
-| `steps=1` | mostra anche lo svolgimento classico (non disponibile con `mode=powers`) |
+| `steps=1` | mostra anche lo svolgimento classico |
 | `titolo` | titolo della scheda |
+| `noeditor=1` | pagina "per gli studenti": mostra solo la scheda, nasconde il costruttore |
 
 **Quali strumenti compaiono** lo decide l'istanza in `content/tools.yaml` (id,
 titolo, descrizione, valori di partenza). L'engine fornisce le route, il

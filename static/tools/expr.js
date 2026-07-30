@@ -11,8 +11,13 @@
  *           parametro con più espressioni separate da "|")
  *   mode    "powers" → proprietà delle potenze (le potenze restano simboliche)
  *   noeval  "1" → in modalità potenze vieta la valutazione numerica
- *   steps   "1" → mostra anche lo svolgimento classico (non con mode=powers)
+ *   steps   "1" → mostra anche lo svolgimento classico
  *   titolo  titolo della scheda
+ *   noeditor "1" → pagina "per gli studenti": si vede solo la scheda, il
+ *           costruttore di link non viene montato. È il parametro che il
+ *           costruttore aggiunge da sé al link da copiare, così chi lo riceve
+ *           svolge gli esercizi e basta (non è una protezione: chi conosce
+ *           l'indirizzo può sempre aprire lo strumento senza parametri).
  *
  * Senza parametri si usano i `defaults` dell'istanza (content/tools.yaml) e il
  * costruttore di link si apre già espanso.
@@ -103,9 +108,9 @@
       fromUrl: hasParams,
       raw: readExpressions(params),
       powers,
-      // show-steps non è supportato dal componente in modalità potenze
-      showSteps: !powers && flag('steps', defaults.steps),
+      showSteps: flag('steps', defaults.steps),
       noEval: powers && flag('noeval', defaults.noeval),
+      noEditor: flag('noeditor', defaults.noeditor),
       title: String(params.get('titolo') || defaults.titolo || '').slice(0, MAX_TITLE_LEN),
       index: 0,
     };
@@ -136,8 +141,9 @@
     exprs.forEach((e) => params.append('ex', e));
     if (opts.powers) params.set('mode', 'powers');
     if (opts.powers && opts.noEval) params.set('noeval', '1');
-    if (!opts.powers && opts.showSteps) params.set('steps', '1');
+    if (opts.showSteps) params.set('steps', '1');
     if (opts.title) params.set('titolo', opts.title);
+    if (opts.noEditor) params.set('noeditor', '1');
     const base = window.location.origin + window.location.pathname;
     const qs = params.toString();
     return qs ? `${base}?${qs}` : base;
@@ -156,7 +162,8 @@
   const builderWrap = el('details', 'tool-builder');
   root.textContent = '';
   root.appendChild(sheet);
-  root.appendChild(builderWrap);
+  // Con `noeditor` la pagina è quella dello studente: esiste solo la scheda.
+  if (!state.noEditor) root.appendChild(builderWrap);
 
   function renderSheet() {
     const { valid, rejected } = partition();
@@ -180,9 +187,11 @@
     if (!valid.length) {
       const empty = el('div', 'tool-empty');
       empty.appendChild(el('p', null, 'Nessun esercizio in questa scheda.'));
-      empty.appendChild(el('p', 'hint', 'Componi la tua scheda qui sotto: otterrai un link da condividere.'));
+      empty.appendChild(el('p', 'hint', state.noEditor
+        ? 'Il link potrebbe essere incompleto: chiedi all\'insegnante di rimandartelo.'
+        : 'Componi la tua scheda qui sotto: otterrai un link da condividere.'));
       sheet.appendChild(empty);
-      builderWrap.open = true;
+      if (!state.noEditor) builderWrap.open = true;
       return;
     }
 
@@ -311,13 +320,10 @@
     const stepsBox = checkbox('Mostra anche lo svolgimento classico', state.showSteps);
     form.appendChild(opts);
 
-    // Le due opzioni condizionate: `noeval` ha senso solo con le potenze,
-    // `steps` non è supportato dal componente in modalità potenze.
+    // `noeval` ha senso solo con le potenze.
     function syncOptions() {
       noEvalBox.disabled = !powersBox.checked;
       if (!powersBox.checked) noEvalBox.checked = false;
-      stepsBox.disabled = powersBox.checked;
-      if (powersBox.checked) stepsBox.checked = false;
     }
     powersBox.addEventListener('change', syncOptions);
     syncOptions();
@@ -339,6 +345,9 @@
     linkRow.appendChild(copyBtn);
     linkRow.appendChild(applyBtn);
     form.appendChild(linkRow);
+
+    form.appendChild(el('p', 'tool-hint',
+      'Chi apre il link vede solo la scheda: gli esercizi non si possono cambiare.'));
 
     /** Legge il form → { exprs, opts, rejected } e aggiorna link ed errori. */
     function collect() {
@@ -365,7 +374,9 @@
         showSteps: stepsBox.checked,
         title: titleInput.value.trim().slice(0, MAX_TITLE_LEN),
       };
-      linkInput.value = buildUrl(exprs, options);
+      // Il link da condividere è quello "per gli studenti": porta la scheda,
+      // non il costruttore. Qui invece (`Prova la scheda`) l'editor resta.
+      linkInput.value = buildUrl(exprs, Object.assign({ noEditor: true }, options));
       applyBtn.disabled = exprs.length === 0;
       return { exprs, options };
     }
@@ -396,7 +407,7 @@
       state.raw = exprs;
       state.powers = options.powers;
       state.noEval = options.powers && options.noEval;
-      state.showSteps = !options.powers && options.showSteps;
+      state.showSteps = options.showSteps;
       state.title = options.title;
       state.index = 0;
       completed.clear();
