@@ -1,0 +1,100 @@
+{# ============================================================
+   Asset condivisi dalle pagine che ospitano i web component
+   ============================================================
+   Usato da `lesson.html` (uno step di corso) e da `tool.html` (uno strumento
+   standalone): le due pagine devono caricare ESATTAMENTE gli stessi script,
+   altrimenti un componente nuovo funziona in lezione e non nello strumento
+   (o viceversa). Tutto ciò che è "quali librerie e quali componenti servono"
+   vive qui e solo qui.
+
+   Importare con il contesto (serve `url_for`):
+       {% import "_assets.html" as assets with context %}
+
+   NB: `progress.js` NON è qui. È specifico delle lezioni (gating sequenziale)
+   e va caricato nel <head> prima del body; le pagine-strumento non lo
+   caricano affatto, così una scheda condivisa via link non scrive nulla nei
+   progressi del corso.
+   ============================================================ #}
+
+{# Librerie esterne + config MathJax. Va nel <head> (blocco extra_css).
+   `math`: se falso, MathJax non viene caricato (corsi senza formule). #}
+{% macro head_assets(math) -%}
+<!-- JSXGraph per grafici interattivi -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph@1.9.2/distrib/jsxgraph.css">
+<script src="https://cdn.jsdelivr.net/npm/jsxgraph@1.9.2/distrib/jsxgraphcore.min.js"></script>
+
+{% if math %}
+<!-- MathJax per rendering formule matematiche (solo pagine con math: true) -->
+<script>
+  MathJax = {
+    // Carica l'estensione `html` (\class{...}{...}), usata da <x-expr show-steps>
+    // per evidenziare la zona appena semplificata nello svolgimento. Va caricata
+    // esplicitamente: il build combinato non la include e marcarla solo tra i
+    // packages disattiverebbe l'autoload lasciando \class indefinito.
+    loader: {load: ['[tex]/html']},
+    tex: {
+      packages: {'[+]': ['html']},
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$', '$$'], ['\\[', '\\]']],
+      processEscapes: true,
+      processEnvironments: true
+    },
+    options: {
+      skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+      ignoreHtmlClass: 'no-math'
+    },
+    startup: {
+      pageReady: () => {
+        return MathJax.startup.defaultPageReady().then(() => {
+          console.log('MathJax loaded and ready');
+        });
+      }
+    }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+{% endif %}
+{%- endmacro %}
+
+{# Web Components della piattaforma. Va in fondo al body (blocco scripts). #}
+{% macro component_scripts() -%}
+<script src="{{ url_for('static', filename='components/formula-simplifier.js') }}"></script>
+<script src="{{ url_for('static', filename='components/blank.js') }}"></script>
+<script src="{{ url_for('static', filename='components/check.js') }}"></script>
+<script src="{{ url_for('static', filename='components/variable.js') }}"></script>
+<script src="{{ url_for('static', filename='components/graph.js') }}"></script>
+<!-- p5.js carica al volo (lazy) i singoli sketch riusabili da static/sketches/
+     <nome>.js, solo nelle pagine che li usano; non serve caricare un registro. -->
+<script src="{{ url_for('static', filename='components/p5.js') }}"></script>
+<script src="{{ url_for('static', filename='components/expr.js') }}"></script>
+<script src="{{ url_for('static', filename='components/step.js') }}"></script>
+{%- endmacro %}
+
+{# Re-typeset MathJax dopo il caricamento dei componenti e a ogni cambio di
+   variabile (slider). Va in fondo al body, dopo component_scripts(). #}
+{% macro mathjax_refresh(math) -%}
+{% if math %}
+<script>
+  // Aspetta che la pagina sia completamente caricata
+  window.addEventListener('load', () => {
+    // Singolo typeset dopo il caricamento completo
+    setTimeout(() => {
+      if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+        MathJax.typesetPromise()
+          .then(() => console.log('MathJax rendering completato'))
+          .catch((err) => console.error('MathJax typeset error:', err));
+      }
+    }, 200);
+  });
+
+  // Re-render quando cambiano le variabili dinamiche
+  document.addEventListener('variable-change', () => {
+    setTimeout(() => {
+      if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+        MathJax.typesetPromise().catch((err) => console.error('MathJax typeset error:', err));
+      }
+    }, 50);
+  });
+</script>
+{% endif %}
+{%- endmacro %}

@@ -19,6 +19,7 @@ from pathlib import Path
 from flask_frozen import Freezer, MissingURLGeneratorWarning
 
 from app import create_app
+from routes.tools import load_tools
 
 app = create_app('production')
 
@@ -67,6 +68,23 @@ def course_urls():
                     'lesson_id': lesson['id'],
                     'step_id': step['id'],
                 }
+
+
+@freezer.register_generator
+def tool_urls():
+    """URL delle pagine-strumento (elenco + una pagina per strumento).
+
+    I parametri della scheda vivono nella query string e NON vengono congelati:
+    ogni strumento è una pagina sola e la configurazione la legge il JS nel
+    browser (vedi routes/tools.py).
+    """
+    with app.app_context():
+        tools = load_tools()
+    if not tools:
+        return
+    yield 'tools.tools_index', {}
+    for tool in tools:
+        yield 'tools.tool_page', {'tool_id': tool['id']}
 
 
 if __name__ == '__main__':

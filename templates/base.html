@@ -28,6 +28,7 @@
             <a href="{{ url_for('home') }}" class="logo"><span class="logo-mark" aria-hidden="true">✓</span>{{ site_name }}</a>
             <div class="nav-links">
                 <a href="{{ url_for('home') }}">Home</a>
+                {% if has_tools %}<a href="{{ url_for('tools.tools_index') }}">Strumenti</a>{% endif %}
             </div>
         </nav>
     </header>

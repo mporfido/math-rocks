@@ -17,7 +17,9 @@ def create_app(config_name=None):
 
     # Registra blueprint routes
     from routes.courses import courses_bp
+    from routes.tools import tools_bp, load_tools
     app.register_blueprint(courses_bp)
+    app.register_blueprint(tools_bp)
 
     @app.template_filter('resolve_static_urls')
     def resolve_static_urls(html):
@@ -55,6 +57,9 @@ def create_app(config_name=None):
             'preload_fonts': app.config['PRELOAD_FONTS'],
             'math_default': app.config['MATH_DEFAULT'],
             'current_year': date.today().year,
+            # Il menu mostra "Strumenti" solo se l'istanza ne espone almeno uno
+            # (content/tools.yaml): un sito senza quel file resta identico a prima.
+            'has_tools': bool(load_tools()),
         }
 
     @app.route('/')

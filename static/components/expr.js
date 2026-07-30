@@ -34,6 +34,14 @@
 // Aritmetica razionale esatta
 // ---------------------------------------------------------------------------
 
+// Limiti di sicurezza sull'espressione. In una lezione l'espressione la scrive
+// l'autore, ma la stessa `data-expr` può arrivare dai parametri di un URL
+// (pagina-strumento), quindi non è più input fidato: senza questi limiti un
+// link con `9^999999999` o un numero di 300 cifre bloccherebbe il browser.
+const MAX_EXPR_LENGTH = 500;   // caratteri dell'espressione
+const MAX_EXPONENT = 4096;     // valore assoluto dell'esponente calcolabile
+const MAX_DIGITS = 15;         // cifre di un singolo numero letterale
+
 function gcd(a, b) {
   a = Math.abs(a);
   b = Math.abs(b);
@@ -67,6 +75,12 @@ class Rational {
   /** Potenza a esponente intero (anche negativo). */
   pow(exp) {
     if (!Number.isInteger(exp)) throw new Error('Esponente non intero');
+    // Guardia: il calcolo è un ciclo di moltiplicazioni, quindi un esponente
+    // enorme bloccherebbe la pagina. Oltre il limite il risultato uscirebbe
+    // comunque dai double esatti (vedi safeEvaluate): meglio dichiararlo
+    // subito. Serve soprattutto fuori dai corsi, dove l'espressione può
+    // arrivare da un URL e non dall'autore (vedi static/tools/expr.js).
+    if (Math.abs(exp) > MAX_EXPONENT) throw new Error('Esponente troppo grande');
     if (exp < 0) return new Rational(1).div(this.pow(-exp));
     let result = new Rational(1);
     for (let i = 0; i < exp; i++) result = result.mul(this);
@@ -122,9 +136,15 @@ class Power {
   toString() { return `${this.base.toString()}^${this.exp.toString()}`; }
 }
 
-/** Valutazione con guardia overflow: null se il risultato esce dai double esatti. */
+/** Valutazione con guardia overflow: null se il risultato esce dai double
+ *  esatti o se l'esponente supera MAX_EXPONENT (pow solleva). */
 function safeEvaluate(p) {
-  const v = p.evaluate();
+  let v;
+  try {
+    v = p.evaluate();
+  } catch (err) {
+    return null;
+  }
   return (Number.isSafeInteger(v.num) && Number.isSafeInteger(v.den)) ? v : null;
 }
 
@@ -206,10 +226,14 @@ function tokenize(input) {
     if (/\d/.test(c)) {
       let j = i;
       while (j < src.length && /\d/.test(src[j])) j++;
+      // Oltre ~15 cifre i numeri non sono più interi esatti in JS: l'aritmetica
+      // razionale del componente smetterebbe di essere esatta senza dirlo.
+      if (j - i > MAX_DIGITS) throw new Error('Numero troppo grande');
       // Letterale frazione int/int (la barra non è seguita/preceduta da altro)
       if (src[j] === '/' && /\d/.test(src[j + 1] || '')) {
         let k = j + 1;
         while (k < src.length && /\d/.test(src[k])) k++;
+        if (k - j - 1 > MAX_DIGITS) throw new Error('Numero troppo grande');
         tokens.push({ type: 'num', value: new Rational(parseInt(src.slice(i, j), 10), parseInt(src.slice(j + 1, k), 10)) });
         i = k;
       } else {
@@ -403,9 +427,16 @@ class XExpr extends HTMLElement {
     this.showSteps = this.dataset.showSteps === 'true' && !this.powersMode;
 
     try {
+      if (exprStr.length > MAX_EXPR_LENGTH) throw new Error('Espressione troppo lunga');
       this.ast = parse(tokenize(exprStr));
     } catch (err) {
-      this.innerHTML = `<p class="expr-error">Espressione non valida: ${err.message}</p>`;
+      // textContent, non innerHTML: il messaggio riporta il token incriminato,
+      // che con `data-expr` proveniente da un URL sarebbe un vettore di
+      // injection.
+      const p = document.createElement('p');
+      p.className = 'expr-error';
+      p.textContent = `Espressione non valida: ${err.message}`;
+      this.replaceChildren(p);
       return;
     }
 
@@ -1053,13 +1084,19 @@ class XExpr extends HTMLElement {
         if (!progressed) {
           for (const node of this.opNodes) {
             if (this.hasResolvedAncestor(node)) continue;
+            // safeEvaluate (non evaluate): una potenza fuori scala restituisce
+            // null e il restore la salta invece di sollevare.
             if (this.isPowLiteral(node)) {
-              resolveWithLabel(node, this.valueOf(node).evaluate());
+              const v = safeEvaluate(this.valueOf(node));
+              if (!v) continue;
+              resolveWithLabel(node, v);
               progressed = true;
               break;
             }
             if (node.resolved && node.value instanceof Power && node !== this.ast) {
-              node.value = node.value.evaluate();
+              const v = safeEvaluate(node.value);
+              if (!v) continue;
+              node.value = v;
               if (node.valueEl) node.valueEl.innerHTML = `\\(${node.value.toLatex()}\\)`;
               progressed = true;
               break;

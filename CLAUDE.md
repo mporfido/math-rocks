@@ -33,12 +33,18 @@ math-rocks/
 │
 ├── routes/                     # Route Flask (blueprint)
 │   ├── __init__.py
-│   └── courses.py              # Route per visualizzare corsi (/course/<id>)
+│   ├── courses.py              # Route per visualizzare corsi (/course/<id>)
+│   └── tools.py                # Route pagine-strumento (/tools/<id>), whitelist dei kind
 │
 ├── templates/                  # Template Jinja2
 │   ├── base.html               # Template base (layout comune)
+│   ├── _assets.html            # Macro: librerie esterne + script dei componenti,
+│   │                           # condivisi da lesson.html e tool.html
 │   ├── home.html               # Homepage con lista corsi
-│   └── course.html             # Viewer corso singolo
+│   ├── course.html             # Panoramica corso (elenco lezioni)
+│   ├── lesson.html             # Viewer step di lezione
+│   ├── tools.html              # Elenco degli strumenti
+│   └── tool.html               # Pagina di un singolo strumento
 │
 ├── static/                     # Asset statici (CSS, JS)
 │   ├── style.css               # Stili strutturali engine (+ token di fallback neutro)
@@ -49,10 +55,13 @@ math-rocks/
 │   │   ├── step.js             # <x-step>: container step con goal tracking
 │   │   ├── variable.js         # <x-variable>: slider interattivo
 │   │   └── p5.js               # <x-p5>: sketch p5.js (inline o riusabile, lazy-load)
-│   └── sketches/               # Sketch p5 riusabili: un file per sketch, caricati
-│                               # on-demand da <x-p5> (window.P5Sketches['<nome>'])
+│   ├── sketches/               # Sketch p5 riusabili: un file per sketch, caricati
+│   │                           # on-demand da <x-p5> (window.P5Sketches['<nome>'])
+│   └── tools/                  # Implementazioni delle pagine-strumento: un file per
+│                               # `kind` (expr.js), montato da tool.html
 │
 ├── content/                    # Contenuti dei corsi (sorgente)
+│   ├── tools.yaml              # Config di ISTANZA: quali strumenti espone il sito
 │   └── esempi/                 # Un CORSO = una cartella
 │       ├── metadata.yaml       # Metadati corso (titolo, descrizione, colore, progression)
 │       ├── content-1.md        # Una LEZIONE = un file content-N.md (step separati da ---)
@@ -75,6 +84,10 @@ math-rocks/
 - **app.py**: Server Flask principale, registra blueprint e serve l'app
 - **config.py**: Configurazione (cartelle content, courses_data, ecc.)
 - **build_courses.py**: Script CLI per compilare corsi da markdown
+- **routes/tools.py**: Blueprint delle pagine-strumento:
+  - `/tools/` → elenco degli strumenti esposti dall'istanza
+  - `/tools/<tool_id>/` → strumento a pagina intera, configurato dai **parametri
+    della query string** (letti dal JS, non dal server: il sito è statico)
 - **routes/courses.py**: Blueprint con le route a 3 livelli:
   - `/course/<id>` → panoramica corso (elenco lezioni, template `course.html`)
   - `/course/<id>/<lesson_id>` → redirect al primo step della lezione
