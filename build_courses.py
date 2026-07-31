@@ -19,6 +19,8 @@ import re
 from pathlib import Path
 from parser.markdown_parser import CourseParser
 from site_config import load_site_config
+from tools_config import corpus_tools
+from build_corpus import build_all_corpora
 import yaml
 
 
@@ -145,8 +147,13 @@ def build_all_courses(content_dir='content', output_dir='courses_data'):
 
     print('Build corsi iniziato...\n')
 
+    # I corpora degli strumenti (content/<corpus>/, vedi TEORIA.md) vivono
+    # accanto ai corsi ma non sono corsi: li compila build_corpus.py, e qui
+    # vanno saltati senza far rumore.
+    corpora = {t['corpus'] for t in corpus_tools(content_dir)}
+
     for course_dir in sorted(content_path.iterdir()):
-        if not course_dir.is_dir():
+        if not course_dir.is_dir() or course_dir.name in corpora:
             continue
 
         if not _find_lesson_files(course_dir):
@@ -175,6 +182,14 @@ def build_all_courses(content_dir='content', output_dir='courses_data'):
     print(f'   Corsi generati: {courses_built}')
     if courses_failed > 0:
         print(f'   Corsi falliti: {courses_failed}')
+
+    # I corpora sono contenuti quanto i corsi: un solo comando li compila
+    # entrambi, altrimenti si pubblica un sito con la mappa vecchia.
+    corpora_built, corpora_failed = build_all_corpora(content_dir)
+    if corpora_built or corpora_failed:
+        print(f'   Corpora generati: {corpora_built}')
+        if corpora_failed:
+            print(f'   Corpora falliti: {corpora_failed}')
 
 
 def build_single_course(course_id, content_dir='content', output_dir='courses_data'):

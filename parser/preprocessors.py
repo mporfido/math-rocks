@@ -478,7 +478,7 @@ def _check_theorem_warrant(warrant, teoria, course_theorems, where):
 
 
 def process_theorem(content, theorem_counter, render_text=None,
-                    teoria=None, course_theorems=None):
+                    teoria=None, course_theorems=None, collect=None, titoli=None):
     """
     Converte blocchi :::theorem ... ::: in <x-theorem> web component.
 
@@ -533,6 +533,11 @@ def process_theorem(content, theorem_counter, render_text=None,
             Se None, la validazione delle garanzie è saltata.
         course_theorems: Insieme degli id di TUTTI i teoremi del corso, per
             distinguere "garanzia inesistente" da "dimostrata più avanti"
+        collect: Lista opzionale a cui appendere la struttura di ogni teorema
+            (id, titolo, passi, distrattori, figura, modi, html). Serve a chi
+            compila un CORPUS e deve leggere le garanzie per costruire il grafo
+            (build_corpus.py): l'HTML da solo obbligherebbe a rifare il parsing
+            all'indietro dagli attributi.
 
     Returns:
         Tuple (contenuto con marker, dict marker→HTML, nuovo valore counter)
@@ -552,7 +557,10 @@ def process_theorem(content, theorem_counter, render_text=None,
         for key, value in preamble.items():
             attrs.setdefault(key, value)
 
-        titolo = attrs.get('titolo', '')
+        # L'enunciato può venire da fuori (in un corpus è teoria.yaml a
+        # possederlo): l'attributo `titolo=` serve solo a chi scrive un teorema
+        # che vive dentro una lezione e non ha un registro alle spalle.
+        titolo = attrs.get('titolo') or (titoli or {}).get(attrs.get('id'), '')
         where = f"teorema '{attrs.get('id') or titolo or theorem_counter}'"
 
         # --- Parsing delle sezioni in liste di voci ---------------------------
@@ -700,7 +708,21 @@ def process_theorem(content, theorem_counter, render_text=None,
             html_attrs.append(f'data-teoria="{html_lib.escape(json.dumps(teoria_usata, ensure_ascii=False))}"')
 
         marker = f'XTHEOREMBLOCK{theorem_counter}X'
-        replacements[marker] = f'<x-theorem {" ".join(html_attrs)}></x-theorem>'
+        html = f'<x-theorem {" ".join(html_attrs)}></x-theorem>'
+        replacements[marker] = html
+
+        if collect is not None:
+            collect.append({
+                'id': attrs.get('id'),
+                'titolo': titolo,
+                'passi': passi,
+                'tesi': [t['id'] for t in items['tesi']],
+                'distrattori': distrattori,
+                'figura': attrs.get('figura'),
+                'modi': attrs.get('modi', 'leggi'),
+                'html': html,
+            })
+
         theorem_counter += 1
         return marker
 

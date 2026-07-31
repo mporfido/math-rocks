@@ -1,0 +1,502 @@
+{
+  "id": "geometria",
+  "aree": [
+    {
+      "id": "congruenza",
+      "nome": "Congruenza",
+      "colore": "#26518A",
+      "descrizione": "I criteri, e i primi teoremi sui triangoli"
+    },
+    {
+      "id": "parallelismo",
+      "nome": "Rette parallele",
+      "colore": "#1F7A5A",
+      "descrizione": "Trasversali, angoli e somma degli angoli"
+    },
+    {
+      "id": "quadrilateri",
+      "nome": "Quadrilateri",
+      "colore": "#A8571E",
+      "descrizione": "Parallelogrammi e loro casi particolari"
+    }
+  ],
+  "livelli": 4,
+  "teoremi": [
+    {
+      "id": "primo-criterio",
+      "nome": "Primo criterio",
+      "enunciato": "due triangoli con due lati e l'angolo tra essi compreso congruenti sono congruenti",
+      "area": "congruenza",
+      "livello": 0,
+      "indice": 0,
+      "usa": [],
+      "usa_nomi": [],
+      "usato_da": [
+        "triangolo-isoscele-angoli-base",
+        "diagonali-rettangolo"
+      ],
+      "fondamenti": [],
+      "ha_dimostrazione": false,
+      "modi": "",
+      "figura": null,
+      "html": ""
+    },
+    {
+      "id": "secondo-criterio",
+      "nome": "Secondo criterio",
+      "enunciato": "due triangoli con un lato e i due angoli a esso adiacenti congruenti sono congruenti",
+      "area": "congruenza",
+      "livello": 0,
+      "indice": 1,
+      "usa": [],
+      "usa_nomi": [],
+      "usato_da": [
+        "triangolo-due-angoli-congruenti",
+        "lati-opposti-parallelogramma",
+        "diagonali-parallelogramma"
+      ],
+      "fondamenti": [],
+      "ha_dimostrazione": false,
+      "modi": "",
+      "figura": null,
+      "html": ""
+    },
+    {
+      "id": "terzo-criterio",
+      "nome": "Terzo criterio",
+      "enunciato": "due triangoli con i tre lati congruenti sono congruenti",
+      "area": "congruenza",
+      "livello": 0,
+      "indice": 2,
+      "usa": [],
+      "usa_nomi": [],
+      "usato_da": [
+        "angoli-opposti-parallelogramma",
+        "rombo-e-parallelogramma"
+      ],
+      "fondamenti": [],
+      "ha_dimostrazione": false,
+      "modi": "",
+      "figura": null,
+      "html": ""
+    },
+    {
+      "id": "angoli-opposti-al-vertice",
+      "nome": "Angoli opposti al vertice",
+      "enunciato": "due angoli opposti al vertice sono congruenti",
+      "area": "congruenza",
+      "livello": 0,
+      "indice": 3,
+      "usa": [],
+      "usa_nomi": [],
+      "usato_da": [],
+      "fondamenti": [],
+      "ha_dimostrazione": false,
+      "modi": "",
+      "figura": null,
+      "html": ""
+    },
+    {
+      "id": "triangolo-isoscele-angoli-base",
+      "nome": "Angoli alla base dell'isoscele",
+      "enunciato": "in un triangolo isoscele gli angoli alla base sono congruenti",
+      "area": "congruenza",
+      "livello": 1,
+      "indice": 0,
+      "usa": [
+        "primo-criterio"
+      ],
+      "usa_nomi": [
+        "Primo criterio"
+      ],
+      "usato_da": [],
+      "fondamenti": [
+        {
+          "id": "definizione-isoscele",
+          "nome": "Definizione di triangolo isoscele",
+          "enunciato": "un triangolo con due lati congruenti",
+          "tipo": "definizione"
+        },
+        {
+          "id": "definizione-bisettrice",
+          "nome": "Definizione di bisettrice",
+          "enunciato": "la semiretta che divide un angolo in due angoli congruenti",
+          "tipo": "definizione"
+        },
+        {
+          "id": "proprieta-riflessiva",
+          "nome": "Proprietà riflessiva",
+          "enunciato": "ogni figura è congruente a se stessa",
+          "tipo": "assioma"
+        },
+        {
+          "id": "elementi-corrispondenti",
+          "nome": "Elementi corrispondenti",
+          "enunciato": "in due triangoli congruenti gli elementi corrispondenti sono congruenti",
+          "tipo": "definizione"
+        }
+      ],
+      "ha_dimostrazione": true,
+      "modi": "leggi,ordina,giustifica,completa,costruisci",
+      "figura": null,
+      "html": "<x-theorem id=\"theorem-0\" data-theorem-id=\"triangolo-isoscele-angoli-base\" data-titolo=\"In un triangolo isoscele gli angoli alla base sono congruenti\" data-modi=\"leggi,ordina,giustifica,completa,costruisci\" data-mancanti=\"2\" data-etichette=\"{&quot;ipotesi&quot;: &quot;Ipotesi&quot;, &quot;tesi&quot;: &quot;Tesi&quot;, &quot;dimostrazione&quot;: &quot;Dimostrazione&quot;}\" data-passi=\"[{&quot;id&quot;: &quot;h1&quot;, &quot;testo&quot;: &quot;Il triangolo $ABC$ è isoscele sulla base $BC$&quot;, &quot;statuto&quot;: &quot;ipotesi&quot;, &quot;da&quot;: [], &quot;perche&quot;: null, &quot;fig&quot;: null}, {&quot;id&quot;: &quot;h2&quot;, &quot;testo&quot;: &quot;$AH$ è la bisettrice dell&#x27;angolo $B\\\\hat{A}C$, con $H$ sulla base&quot;, &quot;statuto&quot;: &quot;ipotesi&quot;, &quot;da&quot;: [], &quot;perche&quot;: null, &quot;fig&quot;: null}, {&quot;id&quot;: &quot;p1&quot;, &quot;testo&quot;: &quot;$AB \\\\cong AC$&quot;, &quot;statuto&quot;: &quot;dedotto&quot;, &quot;da&quot;: [&quot;h1&quot;], &quot;perche&quot;: &quot;definizione-isoscele&quot;, &quot;fig&quot;: null}, {&quot;id&quot;: &quot;p2&quot;, &quot;testo&quot;: &quot;$B\\\\hat{A}H \\\\cong H\\\\hat{A}C$&quot;, &quot;statuto&quot;: &quot;dedotto&quot;, &quot;da&quot;: [&quot;h2&quot;], &quot;perche&quot;: &quot;definizione-bisettrice&quot;, &quot;fig&quot;: null}, {&quot;id&quot;: &quot;p3&quot;, &quot;testo&quot;: &quot;$AH \\\\cong AH$&quot;, &quot;statuto&quot;: &quot;dedotto&quot;, &quot;da&quot;: [], &quot;perche&quot;: &quot;proprieta-riflessiva&quot;, &quot;fig&quot;: null}, {&quot;id&quot;: &quot;p4&quot;, &quot;testo&quot;: &quot;Il triangolo $ABH \\\\cong$ il triangolo $ACH$&quot;, &quot;statuto&quot;: &quot;dedotto&quot;, &quot;da&quot;: [&quot;p1&quot;, &quot;p2&quot;, &quot;p3&quot;], &quot;perche&quot;: &quot;primo-criterio&quot;, &quot;fig&quot;: null}, {&quot;id&quot;: &quot;t1&quot;, &quot;testo&quot;: &quot;$A\\\\hat{B}C \\\\cong A\\\\hat{C}B$&quot;, &quot;statuto&quot;: &quot;tesi&quot;, &quot;da&quot;: [&quot;p4&quot;], &quot;perche&quot;: &quot;elementi-corrispondenti&quot;, &quot;fig&quot;: null}]\" data-tesi=\"[&quot;t1&quot;]\" data-distrattori=\"[{&quot;id&quot;: &quot;d1&quot;, &quot;testo&quot;: &quot;$BH \\\\cong HC$&quot;, &quot;perche&quot;: &quot;elementi-corrispondenti&quot;, &quot;tipo&quot;: &quot;inutile&quot;}, {&quot;id&quot;: &quot;d2&quot;, &quot;testo&quot;: &quot;Il triangolo $ABH \\\\cong$ il triangolo $ACH$&quot;, &quot;perche&quot;: &quot;terzo-criterio&quot;, &quot;tipo&quot;: &quot;garanzia-sbagliata&quot;}, {&quot;id&quot;: &quot;d3&quot;, &quot;testo&quot;: &quot;$AB \\\\cong BC$&quot;, &quot;perche&quot;: &quot;definizione-isoscele&quot;, &quot;tipo&quot;: &quot;falso&quot;}]\" data-teoria=\"{&quot;definizione-isoscele&quot;: {&quot;nome&quot;: &quot;Definizione di triangolo isoscele&quot;, &quot;enunciato&quot;: &quot;un triangolo con due lati congruenti&quot;, &quot;tipo&quot;: &quot;definizione&quot;}, &quot;definizione-bisettrice&quot;: {&quot;nome&quot;: &quot;Definizione di bisettrice&quot;, &quot;enunciato&quot;: &quot;la semiretta che divide un angolo in due angoli congruenti&quot;, &quot;tipo&quot;: &quot;definizione&quot;}, &quot;elementi-corrispondenti&quot;: {&quot;nome&quot;: &quot;Elementi corrispondenti&quot;, &quot;enunciato&quot;: &quot;in due triangoli congruenti gli elementi corrispondenti sono congruenti&quot;, &quot;tipo&quot;: &quot;definizione&quot;}, &quot;proprieta-riflessiva&quot;: {&quot;nome&quot;: &quot;Proprietà riflessiva&quot;, &quot;enunciato&quot;: &quot;ogni figura è congruente a se stessa&quot;, &quot;tipo&quot;: &quot;assioma&quot;}, &quot;primo-criterio&quot;: {&quot;nome&quot;: &quot;Primo criterio&quot;, &quot;enunciato&quot;: &quot;due triangoli con due lati e l&#x27;angolo tra essi compreso congruenti sono congruenti&quot;, &quot;area&quot;: &quot;congruenza&quot;, &quot;tipo&quot;: &quot;teorema&quot;}, &quot;terzo-criterio&quot;: {&quot;nome&quot;: &quot;Terzo criterio&quot;, &quot;enunciato&quot;: &quot;due triangoli con i tre lati congruenti sono congruenti&quot;, &quot;area&quot;: &quot;congruenza&quot;, &quot;tipo&quot;: &quot;teorema&quot;}}\"></x-theorem>"
+    },
+    {
+      "id": "triangolo-due-angoli-congruenti",
+      "nome": "Inverso dell'isoscele",
+      "enunciato": "un triangolo con due angoli congruenti è isoscele",
+      "area": "congruenza",
+      "livello": 1,
+      "indice": 1,
+      "usa": [
+        "secondo-criterio"
+      ],
+      "usa_nomi": [
+        "Secondo criterio"
+      ],
+      "usato_da": [],
+      "fondamenti": [],
+      "ha_dimostrazione": false,
+      "modi": "",
+      "figura": null,
+      "html": ""
+    },
+    {
+      "id": "angoli-alterni-interni",
+      "nome": "Angoli alterni interni",
+      "enunciato": "due rette parallele tagliate da una trasversale formano angoli alterni interni congruenti",
+      "area": "parallelismo",
+      "livello": 0,
+      "indice": 0,
+      "usa": [],
+      "usa_nomi": [],
+      "usato_da": [
+        "somma-angoli-triangolo",
+        "lati-opposti-parallelogramma",
+        "diagonali-parallelogramma"
+      ],
+      "fondamenti": [],
+      "ha_dimostrazione": false,
+      "modi": "",
+      "figura": null,
+      "html": ""
+    },
+    {
+      "id": "criterio-di-parallelismo",
+      "nome": "Criterio di parallelismo",
+      "enunciato": "se due rette tagliate da una trasversale formano angoli alterni interni congruenti, allora sono parallele",
+      "area": "parallelismo",
+      "livello": 0,
+      "indice": 1,
+      "usa": [],
+      "usa_nomi": [],
+      "usato_da": [
+        "rombo-e-parallelogramma"
+      ],
+      "fondamenti": [],
+      "ha_dimostrazione": false,
+      "modi": "",
+      "figura": null,
+      "html": ""
+    },
+    {
+      "id": "somma-angoli-triangolo",
+      "nome": "Somma degli angoli interni",
+      "enunciato": "la somma degli angoli interni di un triangolo è un angolo piatto",
+      "area": "parallelismo",
+      "livello": 1,
+      "indice": 0,
+      "usa": [
+        "angoli-alterni-interni"
+      ],
+      "usa_nomi": [
+        "Angoli alterni interni"
+      ],
+      "usato_da": [
+        "angolo-esterno"
+      ],
+      "fondamenti": [
+        {
+          "id": "assioma-angolo-piatto",
+          "nome": "Angoli supplementari",
+          "enunciato": "due angoli adiacenti che formano un angolo piatto misurano insieme 180°",
+          "tipo": "assioma"
+        },
+        {
+          "id": "sostituzione",
+          "nome": "Sostituzione",
+          "enunciato": "grandezze congruenti possono essere sostituite l'una all'altra",
+          "tipo": "assioma"
+        }
+      ],
+      "ha_dimostrazione": true,
+      "modi": "leggi,ordina,giustifica,completa,costruisci",
+      "figura": null,
+      "html": "<x-theorem id=\"theorem-0\" data-theorem-id=\"somma-angoli-triangolo\" data-titolo=\"La somma degli angoli interni di un triangolo è un angolo piatto\" data-modi=\"leggi,ordina,giustifica,completa,costruisci\" data-mancanti=\"2\" data-etichette=\"{&quot;ipotesi&quot;: &quot;Ipotesi&quot;, &quot;tesi&quot;: &quot;Tesi&quot;, &quot;dimostrazione&quot;: &quot;Dimostrazione&quot;}\" data-passi=\"[{&quot;id&quot;: &quot;h1&quot;, &quot;testo&quot;: &quot;$ABC$ è un triangolo&quot;, &quot;statuto&quot;: &quot;ipotesi&quot;, &quot;da&quot;: [], &quot;perche&quot;: null, &quot;fig&quot;: null}, {&quot;id&quot;: &quot;h2&quot;, &quot;testo&quot;: &quot;$r$ è la parallela a $BC$ passante per $A$&quot;, &quot;statuto&quot;: &quot;ipotesi&quot;, &quot;da&quot;: [], &quot;perche&quot;: null, &quot;fig&quot;: null}, {&quot;id&quot;: &quot;p1&quot;, &quot;testo&quot;: &quot;$A\\\\hat{B}C \\\\cong \\\\alpha_1$, l&#x27;angolo che $r$ forma con $AB$&quot;, &quot;statuto&quot;: &quot;dedotto&quot;, &quot;da&quot;: [&quot;h2&quot;], &quot;perche&quot;: &quot;angoli-alterni-interni&quot;, &quot;fig&quot;: null}, {&quot;id&quot;: &quot;p2&quot;, &quot;testo&quot;: &quot;$B\\\\hat{C}A \\\\cong \\\\alpha_2$, l&#x27;angolo che $r$ forma con $AC$&quot;, &quot;statuto&quot;: &quot;dedotto&quot;, &quot;da&quot;: [&quot;h2&quot;], &quot;perche&quot;: &quot;angoli-alterni-interni&quot;, &quot;fig&quot;: null}, {&quot;id&quot;: &quot;p3&quot;, &quot;testo&quot;: &quot;$\\\\alpha_1 + C\\\\hat{A}B + \\\\alpha_2$ è un angolo piatto&quot;, &quot;statuto&quot;: &quot;dedotto&quot;, &quot;da&quot;: [&quot;h2&quot;], &quot;perche&quot;: &quot;assioma-angolo-piatto&quot;, &quot;fig&quot;: null}, {&quot;id&quot;: &quot;t1&quot;, &quot;testo&quot;: &quot;$A\\\\hat{B}C + B\\\\hat{C}A + C\\\\hat{A}B$ è un angolo piatto&quot;, &quot;statuto&quot;: &quot;tesi&quot;, &quot;da&quot;: [&quot;p1&quot;, &quot;p2&quot;, &quot;p3&quot;], &quot;perche&quot;: &quot;sostituzione&quot;, &quot;fig&quot;: null}]\" data-tesi=\"[&quot;t1&quot;]\" data-distrattori=\"[{&quot;id&quot;: &quot;d1&quot;, &quot;testo&quot;: &quot;$\\\\alpha_1$ è congruente all&#x27;angolo a lui opposto al vertice&quot;, &quot;perche&quot;: &quot;angoli-opposti-al-vertice&quot;, &quot;tipo&quot;: &quot;inutile&quot;}, {&quot;id&quot;: &quot;d2&quot;, &quot;testo&quot;: &quot;$A\\\\hat{B}C \\\\cong \\\\alpha_1$&quot;, &quot;perche&quot;: &quot;angoli-opposti-al-vertice&quot;, &quot;tipo&quot;: &quot;garanzia-sbagliata&quot;}, {&quot;id&quot;: &quot;d3&quot;, &quot;testo&quot;: &quot;$\\\\alpha_1 \\\\cong \\\\alpha_2$&quot;, &quot;perche&quot;: &quot;angoli-alterni-interni&quot;, &quot;tipo&quot;: &quot;falso&quot;}]\" data-teoria=\"{&quot;assioma-angolo-piatto&quot;: {&quot;nome&quot;: &quot;Angoli supplementari&quot;, &quot;enunciato&quot;: &quot;due angoli adiacenti che formano un angolo piatto misurano insieme 180°&quot;, &quot;tipo&quot;: &quot;assioma&quot;}, &quot;sostituzione&quot;: {&quot;nome&quot;: &quot;Sostituzione&quot;, &quot;enunciato&quot;: &quot;grandezze congruenti possono essere sostituite l&#x27;una all&#x27;altra&quot;, &quot;tipo&quot;: &quot;assioma&quot;}, &quot;angoli-opposti-al-vertice&quot;: {&quot;nome&quot;: &quot;Angoli opposti al vertice&quot;, &quot;enunciato&quot;: &quot;due angoli opposti al vertice sono congruenti&quot;, &quot;area&quot;: &quot;congruenza&quot;, &quot;tipo&quot;: &quot;teorema&quot;}, &quot;angoli-alterni-interni&quot;: {&quot;nome&quot;: &quot;Angoli alterni interni&quot;, &quot;enunciato&quot;: &quot;due rette parallele tagliate da una trasversale formano angoli alterni interni congruenti&quot;, &quot;area&quot;: &quot;parallelismo&quot;, &quot;tipo&quot;: &quot;teorema&quot;}}\"></x-theorem>"
+    },
+    {
+      "id": "angolo-esterno",
+      "nome": "Angolo esterno",
+      "enunciato": "un angolo esterno di un triangolo è congruente alla somma dei due angoli interni non adiacenti",
+      "area": "parallelismo",
+      "livello": 2,
+      "indice": 0,
+      "usa": [
+        "somma-angoli-triangolo"
+      ],
+      "usa_nomi": [
+        "Somma degli angoli interni"
+      ],
+      "usato_da": [],
+      "fondamenti": [
+        {
+          "id": "assioma-angolo-piatto",
+          "nome": "Angoli supplementari",
+          "enunciato": "due angoli adiacenti che formano un angolo piatto misurano insieme 180°",
+          "tipo": "assioma"
+        }
+      ],
+      "ha_dimostrazione": false,
+      "modi": "",
+      "figura": null,
+      "html": ""
+    },
+    {
+      "id": "lati-opposti-parallelogramma",
+      "nome": "Lati opposti",
+      "enunciato": "in un parallelogramma i lati opposti sono congruenti",
+      "area": "quadrilateri",
+      "livello": 1,
+      "indice": 0,
+      "usa": [
+        "angoli-alterni-interni",
+        "secondo-criterio"
+      ],
+      "usa_nomi": [
+        "Angoli alterni interni",
+        "Secondo criterio"
+      ],
+      "usato_da": [
+        "angoli-opposti-parallelogramma",
+        "diagonali-parallelogramma",
+        "diagonali-rettangolo"
+      ],
+      "fondamenti": [
+        {
+          "id": "definizione-parallelogramma",
+          "nome": "Definizione di parallelogramma",
+          "enunciato": "un quadrilatero con i lati opposti paralleli",
+          "tipo": "definizione"
+        },
+        {
+          "id": "proprieta-riflessiva",
+          "nome": "Proprietà riflessiva",
+          "enunciato": "ogni figura è congruente a se stessa",
+          "tipo": "assioma"
+        },
+        {
+          "id": "elementi-corrispondenti",
+          "nome": "Elementi corrispondenti",
+          "enunciato": "in due triangoli congruenti gli elementi corrispondenti sono congruenti",
+          "tipo": "definizione"
+        }
+      ],
+      "ha_dimostrazione": true,
+      "modi": "leggi,ordina,giustifica,completa,costruisci",
+      "figura": null,
+      "html": "<x-theorem id=\"theorem-0\" data-theorem-id=\"lati-opposti-parallelogramma\" data-titolo=\"In un parallelogramma i lati opposti sono congruenti\" data-modi=\"leggi,ordina,giustifica,completa,costruisci\" data-mancanti=\"2\" data-etichette=\"{&quot;ipotesi&quot;: &quot;Ipotesi&quot;, &quot;tesi&quot;: &quot;Tesi&quot;, &quot;dimostrazione&quot;: &quot;Dimostrazione&quot;}\" data-passi=\"[{&quot;id&quot;: &quot;h1&quot;, &quot;testo&quot;: &quot;$ABCD$ è un parallelogramma&quot;, &quot;statuto&quot;: &quot;ipotesi&quot;, &quot;da&quot;: [], &quot;perche&quot;: null, &quot;fig&quot;: null}, {&quot;id&quot;: &quot;h2&quot;, &quot;testo&quot;: &quot;$AC$ è una sua diagonale&quot;, &quot;statuto&quot;: &quot;ipotesi&quot;, &quot;da&quot;: [], &quot;perche&quot;: null, &quot;fig&quot;: null}, {&quot;id&quot;: &quot;p1&quot;, &quot;testo&quot;: &quot;$AB$ è parallelo a $DC$, e $BC$ è parallelo a $AD$&quot;, &quot;statuto&quot;: &quot;dedotto&quot;, &quot;da&quot;: [&quot;h1&quot;], &quot;perche&quot;: &quot;definizione-parallelogramma&quot;, &quot;fig&quot;: null}, {&quot;id&quot;: &quot;p2&quot;, &quot;testo&quot;: &quot;$B\\\\hat{A}C \\\\cong A\\\\hat{C}D$&quot;, &quot;statuto&quot;: &quot;dedotto&quot;, &quot;da&quot;: [&quot;p1&quot;], &quot;perche&quot;: &quot;angoli-alterni-interni&quot;, &quot;fig&quot;: null}, {&quot;id&quot;: &quot;p3&quot;, &quot;testo&quot;: &quot;$B\\\\hat{C}A \\\\cong C\\\\hat{A}D$&quot;, &quot;statuto&quot;: &quot;dedotto&quot;, &quot;da&quot;: [&quot;p1&quot;], &quot;perche&quot;: &quot;angoli-alterni-interni&quot;, &quot;fig&quot;: null}, {&quot;id&quot;: &quot;p4&quot;, &quot;testo&quot;: &quot;$AC \\\\cong AC$&quot;, &quot;statuto&quot;: &quot;dedotto&quot;, &quot;da&quot;: [], &quot;perche&quot;: &quot;proprieta-riflessiva&quot;, &quot;fig&quot;: null}, {&quot;id&quot;: &quot;p5&quot;, &quot;testo&quot;: &quot;Il triangolo $ABC \\\\cong$ il triangolo $CDA$&quot;, &quot;statuto&quot;: &quot;dedotto&quot;, &quot;da&quot;: [&quot;p2&quot;, &quot;p3&quot;, &quot;p4&quot;], &quot;perche&quot;: &quot;secondo-criterio&quot;, &quot;fig&quot;: null}, {&quot;id&quot;: &quot;t1&quot;, &quot;testo&quot;: &quot;$AB \\\\cong CD$ e $BC \\\\cong AD$&quot;, &quot;statuto&quot;: &quot;tesi&quot;, &quot;da&quot;: [&quot;p5&quot;], &quot;perche&quot;: &quot;elementi-corrispondenti&quot;, &quot;fig&quot;: null}]\" data-tesi=\"[&quot;t1&quot;]\" data-distrattori=\"[{&quot;id&quot;: &quot;d1&quot;, &quot;testo&quot;: &quot;La diagonale $AC$ divide il quadrilatero in due triangoli&quot;, &quot;perche&quot;: &quot;definizione-parallelogramma&quot;, &quot;tipo&quot;: &quot;inutile&quot;}, {&quot;id&quot;: &quot;d2&quot;, &quot;testo&quot;: &quot;Il triangolo $ABC \\\\cong$ il triangolo $CDA$&quot;, &quot;perche&quot;: &quot;primo-criterio&quot;, &quot;tipo&quot;: &quot;garanzia-sbagliata&quot;}, {&quot;id&quot;: &quot;d3&quot;, &quot;testo&quot;: &quot;$AC \\\\cong BD$&quot;, &quot;perche&quot;: &quot;diagonali-rettangolo&quot;, &quot;tipo&quot;: &quot;falso&quot;}]\" data-teoria=\"{&quot;definizione-parallelogramma&quot;: {&quot;nome&quot;: &quot;Definizione di parallelogramma&quot;, &quot;enunciato&quot;: &quot;un quadrilatero con i lati opposti paralleli&quot;, &quot;tipo&quot;: &quot;definizione&quot;}, &quot;elementi-corrispondenti&quot;: {&quot;nome&quot;: &quot;Elementi corrispondenti&quot;, &quot;enunciato&quot;: &quot;in due triangoli congruenti gli elementi corrispondenti sono congruenti&quot;, &quot;tipo&quot;: &quot;definizione&quot;}, &quot;proprieta-riflessiva&quot;: {&quot;nome&quot;: &quot;Proprietà riflessiva&quot;, &quot;enunciato&quot;: &quot;ogni figura è congruente a se stessa&quot;, &quot;tipo&quot;: &quot;assioma&quot;}, &quot;primo-criterio&quot;: {&quot;nome&quot;: &quot;Primo criterio&quot;, &quot;enunciato&quot;: &quot;due triangoli con due lati e l&#x27;angolo tra essi compreso congruenti sono congruenti&quot;, &quot;area&quot;: &quot;congruenza&quot;, &quot;tipo&quot;: &quot;teorema&quot;}, &quot;secondo-criterio&quot;: {&quot;nome&quot;: &quot;Secondo criterio&quot;, &quot;enunciato&quot;: &quot;due triangoli con un lato e i due angoli a esso adiacenti congruenti sono congruenti&quot;, &quot;area&quot;: &quot;congruenza&quot;, &quot;tipo&quot;: &quot;teorema&quot;}, &quot;angoli-alterni-interni&quot;: {&quot;nome&quot;: &quot;Angoli alterni interni&quot;, &quot;enunciato&quot;: &quot;due rette parallele tagliate da una trasversale formano angoli alterni interni congruenti&quot;, &quot;area&quot;: &quot;parallelismo&quot;, &quot;tipo&quot;: &quot;teorema&quot;}, &quot;diagonali-rettangolo&quot;: {&quot;nome&quot;: &quot;Diagonali del rettangolo&quot;, &quot;enunciato&quot;: &quot;in un rettangolo le diagonali sono congruenti&quot;, &quot;area&quot;: &quot;quadrilateri&quot;, &quot;usa&quot;: [&quot;lati-opposti-parallelogramma&quot;, &quot;primo-criterio&quot;], &quot;tipo&quot;: &quot;teorema&quot;}}\"></x-theorem>"
+    },
+    {
+      "id": "angoli-opposti-parallelogramma",
+      "nome": "Angoli opposti",
+      "enunciato": "in un parallelogramma gli angoli opposti sono congruenti",
+      "area": "quadrilateri",
+      "livello": 2,
+      "indice": 0,
+      "usa": [
+        "lati-opposti-parallelogramma",
+        "terzo-criterio"
+      ],
+      "usa_nomi": [
+        "Lati opposti",
+        "Terzo criterio"
+      ],
+      "usato_da": [],
+      "fondamenti": [],
+      "ha_dimostrazione": false,
+      "modi": "",
+      "figura": null,
+      "html": ""
+    },
+    {
+      "id": "rombo-e-parallelogramma",
+      "nome": "Il rombo è un parallelogramma",
+      "enunciato": "un quadrilatero con i quattro lati congruenti ha i lati opposti paralleli",
+      "area": "quadrilateri",
+      "livello": 1,
+      "indice": 1,
+      "usa": [
+        "terzo-criterio",
+        "criterio-di-parallelismo"
+      ],
+      "usa_nomi": [
+        "Terzo criterio",
+        "Criterio di parallelismo"
+      ],
+      "usato_da": [
+        "diagonali-rombo"
+      ],
+      "fondamenti": [],
+      "ha_dimostrazione": false,
+      "modi": "",
+      "figura": null,
+      "html": ""
+    },
+    {
+      "id": "diagonali-parallelogramma",
+      "nome": "Diagonali del parallelogramma",
+      "enunciato": "in un parallelogramma le diagonali si tagliano scambievolmente per metà",
+      "area": "quadrilateri",
+      "livello": 2,
+      "indice": 1,
+      "usa": [
+        "lati-opposti-parallelogramma",
+        "angoli-alterni-interni",
+        "secondo-criterio"
+      ],
+      "usa_nomi": [
+        "Lati opposti",
+        "Angoli alterni interni",
+        "Secondo criterio"
+      ],
+      "usato_da": [
+        "diagonali-rombo"
+      ],
+      "fondamenti": [
+        {
+          "id": "definizione-parallelogramma",
+          "nome": "Definizione di parallelogramma",
+          "enunciato": "un quadrilatero con i lati opposti paralleli",
+          "tipo": "definizione"
+        },
+        {
+          "id": "elementi-corrispondenti",
+          "nome": "Elementi corrispondenti",
+          "enunciato": "in due triangoli congruenti gli elementi corrispondenti sono congruenti",
+          "tipo": "definizione"
+        }
+      ],
+      "ha_dimostrazione": true,
+      "modi": "leggi,ordina,giustifica,completa,costruisci",
+      "figura": "parallelogramma-diagonali",
+      "html": "<x-theorem id=\"theorem-1\" data-theorem-id=\"diagonali-parallelogramma\" data-titolo=\"In un parallelogramma le diagonali si tagliano scambievolmente per metà\" data-modi=\"leggi,ordina,giustifica,completa,costruisci\" data-mancanti=\"2\" data-figura=\"parallelogramma-diagonali\" data-etichette=\"{&quot;ipotesi&quot;: &quot;Ipotesi&quot;, &quot;tesi&quot;: &quot;Tesi&quot;, &quot;dimostrazione&quot;: &quot;Dimostrazione&quot;}\" data-passi=\"[{&quot;id&quot;: &quot;h1&quot;, &quot;testo&quot;: &quot;$ABCD$ è un parallelogramma&quot;, &quot;statuto&quot;: &quot;ipotesi&quot;, &quot;da&quot;: [], &quot;perche&quot;: null, &quot;fig&quot;: &quot;quadrilatero&quot;}, {&quot;id&quot;: &quot;h2&quot;, &quot;testo&quot;: &quot;Le diagonali $AC$ e $BD$ si incontrano in $M$&quot;, &quot;statuto&quot;: &quot;ipotesi&quot;, &quot;da&quot;: [], &quot;perche&quot;: null, &quot;fig&quot;: &quot;diagonali&quot;}, {&quot;id&quot;: &quot;p1&quot;, &quot;testo&quot;: &quot;$AB$ è parallelo a $DC$&quot;, &quot;statuto&quot;: &quot;dedotto&quot;, &quot;da&quot;: [&quot;h1&quot;], &quot;perche&quot;: &quot;definizione-parallelogramma&quot;, &quot;fig&quot;: &quot;lati-opposti&quot;}, {&quot;id&quot;: &quot;p2&quot;, &quot;testo&quot;: &quot;$AB \\\\cong DC$&quot;, &quot;statuto&quot;: &quot;dedotto&quot;, &quot;da&quot;: [&quot;h1&quot;], &quot;perche&quot;: &quot;lati-opposti-parallelogramma&quot;, &quot;fig&quot;: &quot;lati-opposti&quot;}, {&quot;id&quot;: &quot;p3&quot;, &quot;testo&quot;: &quot;L&#x27;angolo $B\\\\hat{A}M \\\\cong$ l&#x27;angolo $D\\\\hat{C}M$&quot;, &quot;statuto&quot;: &quot;dedotto&quot;, &quot;da&quot;: [&quot;p1&quot;], &quot;perche&quot;: &quot;angoli-alterni-interni&quot;, &quot;fig&quot;: &quot;angoli-alterni-1&quot;}, {&quot;id&quot;: &quot;p4&quot;, &quot;testo&quot;: &quot;L&#x27;angolo $A\\\\hat{B}M \\\\cong$ l&#x27;angolo $C\\\\hat{D}M$&quot;, &quot;statuto&quot;: &quot;dedotto&quot;, &quot;da&quot;: [&quot;p1&quot;], &quot;perche&quot;: &quot;angoli-alterni-interni&quot;, &quot;fig&quot;: &quot;angoli-alterni-2&quot;}, {&quot;id&quot;: &quot;p5&quot;, &quot;testo&quot;: &quot;Il triangolo $ABM \\\\cong$ il triangolo $CDM$&quot;, &quot;statuto&quot;: &quot;dedotto&quot;, &quot;da&quot;: [&quot;p2&quot;, &quot;p3&quot;, &quot;p4&quot;], &quot;perche&quot;: &quot;secondo-criterio&quot;, &quot;fig&quot;: &quot;triangoli&quot;}, {&quot;id&quot;: &quot;t1&quot;, &quot;testo&quot;: &quot;$AM \\\\cong MC$ e $BM \\\\cong MD$&quot;, &quot;statuto&quot;: &quot;tesi&quot;, &quot;da&quot;: [&quot;p5&quot;], &quot;perche&quot;: &quot;elementi-corrispondenti&quot;, &quot;fig&quot;: &quot;meta&quot;}]\" data-tesi=\"[&quot;t1&quot;]\" data-distrattori=\"[{&quot;id&quot;: &quot;d1&quot;, &quot;testo&quot;: &quot;L&#x27;angolo $B\\\\hat{A}D \\\\cong$ l&#x27;angolo $B\\\\hat{C}D$&quot;, &quot;perche&quot;: &quot;angoli-opposti-parallelogramma&quot;, &quot;tipo&quot;: &quot;inutile&quot;}, {&quot;id&quot;: &quot;d2&quot;, &quot;testo&quot;: &quot;Il triangolo $ABM \\\\cong$ il triangolo $CDM$&quot;, &quot;perche&quot;: &quot;primo-criterio&quot;, &quot;tipo&quot;: &quot;garanzia-sbagliata&quot;}, {&quot;id&quot;: &quot;d3&quot;, &quot;testo&quot;: &quot;$AC \\\\cong BD$&quot;, &quot;perche&quot;: &quot;diagonali-rettangolo&quot;, &quot;tipo&quot;: &quot;falso&quot;}]\" data-teoria=\"{&quot;definizione-parallelogramma&quot;: {&quot;nome&quot;: &quot;Definizione di parallelogramma&quot;, &quot;enunciato&quot;: &quot;un quadrilatero con i lati opposti paralleli&quot;, &quot;tipo&quot;: &quot;definizione&quot;}, &quot;elementi-corrispondenti&quot;: {&quot;nome&quot;: &quot;Elementi corrispondenti&quot;, &quot;enunciato&quot;: &quot;in due triangoli congruenti gli elementi corrispondenti sono congruenti&quot;, &quot;tipo&quot;: &quot;definizione&quot;}, &quot;primo-criterio&quot;: {&quot;nome&quot;: &quot;Primo criterio&quot;, &quot;enunciato&quot;: &quot;due triangoli con due lati e l&#x27;angolo tra essi compreso congruenti sono congruenti&quot;, &quot;area&quot;: &quot;congruenza&quot;, &quot;tipo&quot;: &quot;teorema&quot;}, &quot;secondo-criterio&quot;: {&quot;nome&quot;: &quot;Secondo criterio&quot;, &quot;enunciato&quot;: &quot;due triangoli con un lato e i due angoli a esso adiacenti congruenti sono congruenti&quot;, &quot;area&quot;: &quot;congruenza&quot;, &quot;tipo&quot;: &quot;teorema&quot;}, &quot;angoli-alterni-interni&quot;: {&quot;nome&quot;: &quot;Angoli alterni interni&quot;, &quot;enunciato&quot;: &quot;due rette parallele tagliate da una trasversale formano angoli alterni interni congruenti&quot;, &quot;area&quot;: &quot;parallelismo&quot;, &quot;tipo&quot;: &quot;teorema&quot;}, &quot;lati-opposti-parallelogramma&quot;: {&quot;nome&quot;: &quot;Lati opposti&quot;, &quot;enunciato&quot;: &quot;in un parallelogramma i lati opposti sono congruenti&quot;, &quot;area&quot;: &quot;quadrilateri&quot;, &quot;tipo&quot;: &quot;teorema&quot;}, &quot;angoli-opposti-parallelogramma&quot;: {&quot;nome&quot;: &quot;Angoli opposti&quot;, &quot;enunciato&quot;: &quot;in un parallelogramma gli angoli opposti sono congruenti&quot;, &quot;area&quot;: &quot;quadrilateri&quot;, &quot;usa&quot;: [&quot;lati-opposti-parallelogramma&quot;, &quot;terzo-criterio&quot;], &quot;tipo&quot;: &quot;teorema&quot;}, &quot;diagonali-rettangolo&quot;: {&quot;nome&quot;: &quot;Diagonali del rettangolo&quot;, &quot;enunciato&quot;: &quot;in un rettangolo le diagonali sono congruenti&quot;, &quot;area&quot;: &quot;quadrilateri&quot;, &quot;usa&quot;: [&quot;lati-opposti-parallelogramma&quot;, &quot;primo-criterio&quot;], &quot;tipo&quot;: &quot;teorema&quot;}}\"></x-theorem>"
+    },
+    {
+      "id": "diagonali-rettangolo",
+      "nome": "Diagonali del rettangolo",
+      "enunciato": "in un rettangolo le diagonali sono congruenti",
+      "area": "quadrilateri",
+      "livello": 2,
+      "indice": 2,
+      "usa": [
+        "lati-opposti-parallelogramma",
+        "primo-criterio"
+      ],
+      "usa_nomi": [
+        "Lati opposti",
+        "Primo criterio"
+      ],
+      "usato_da": [],
+      "fondamenti": [],
+      "ha_dimostrazione": false,
+      "modi": "",
+      "figura": null,
+      "html": ""
+    },
+    {
+      "id": "diagonali-rombo",
+      "nome": "Diagonali del rombo",
+      "enunciato": "in un rombo le diagonali si tagliano scambievolmente per metà",
+      "area": "quadrilateri",
+      "livello": 3,
+      "indice": 0,
+      "usa": [
+        "rombo-e-parallelogramma",
+        "diagonali-parallelogramma"
+      ],
+      "usa_nomi": [
+        "Il rombo è un parallelogramma",
+        "Diagonali del parallelogramma"
+      ],
+      "usato_da": [],
+      "fondamenti": [],
+      "ha_dimostrazione": true,
+      "modi": "leggi,giustifica",
+      "figura": null,
+      "html": "<x-theorem id=\"theorem-2\" data-theorem-id=\"diagonali-rombo\" data-titolo=\"In un rombo le diagonali si tagliano scambievolmente per metà\" data-modi=\"leggi,giustifica\" data-mancanti=\"2\" data-etichette=\"{&quot;ipotesi&quot;: &quot;Ipotesi&quot;, &quot;tesi&quot;: &quot;Tesi&quot;, &quot;dimostrazione&quot;: &quot;Dimostrazione&quot;}\" data-passi=\"[{&quot;id&quot;: &quot;h1&quot;, &quot;testo&quot;: &quot;$ABCD$ è un rombo&quot;, &quot;statuto&quot;: &quot;ipotesi&quot;, &quot;da&quot;: [], &quot;perche&quot;: null, &quot;fig&quot;: null}, {&quot;id&quot;: &quot;h2&quot;, &quot;testo&quot;: &quot;Le diagonali $AC$ e $BD$ si incontrano in $M$&quot;, &quot;statuto&quot;: &quot;ipotesi&quot;, &quot;da&quot;: [], &quot;perche&quot;: null, &quot;fig&quot;: null}, {&quot;id&quot;: &quot;p1&quot;, &quot;testo&quot;: &quot;$ABCD$ è un parallelogramma&quot;, &quot;statuto&quot;: &quot;dedotto&quot;, &quot;da&quot;: [&quot;h1&quot;], &quot;perche&quot;: &quot;rombo-e-parallelogramma&quot;, &quot;fig&quot;: null}, {&quot;id&quot;: &quot;t1&quot;, &quot;testo&quot;: &quot;$AM \\\\cong MC$ e $BM \\\\cong MD$&quot;, &quot;statuto&quot;: &quot;tesi&quot;, &quot;da&quot;: [&quot;p1&quot;, &quot;h2&quot;], &quot;perche&quot;: &quot;diagonali-parallelogramma&quot;, &quot;fig&quot;: null}]\" data-tesi=\"[&quot;t1&quot;]\" data-distrattori=\"[{&quot;id&quot;: &quot;d1&quot;, &quot;testo&quot;: &quot;Le diagonali $AC$ e $BD$ sono perpendicolari&quot;, &quot;perche&quot;: &quot;definizione-rombo&quot;, &quot;tipo&quot;: &quot;inutile&quot;}, {&quot;id&quot;: &quot;d2&quot;, &quot;testo&quot;: &quot;$ABCD$ è un parallelogramma&quot;, &quot;perche&quot;: &quot;definizione-parallelogramma&quot;, &quot;tipo&quot;: &quot;garanzia-sbagliata&quot;}, {&quot;id&quot;: &quot;d3&quot;, &quot;testo&quot;: &quot;$AC \\\\cong BD$&quot;, &quot;perche&quot;: &quot;diagonali-rettangolo&quot;, &quot;tipo&quot;: &quot;falso&quot;}]\" data-teoria=\"{&quot;definizione-parallelogramma&quot;: {&quot;nome&quot;: &quot;Definizione di parallelogramma&quot;, &quot;enunciato&quot;: &quot;un quadrilatero con i lati opposti paralleli&quot;, &quot;tipo&quot;: &quot;definizione&quot;}, &quot;definizione-rombo&quot;: {&quot;nome&quot;: &quot;Definizione di rombo&quot;, &quot;enunciato&quot;: &quot;un quadrilatero con i quattro lati congruenti&quot;, &quot;tipo&quot;: &quot;definizione&quot;}, &quot;rombo-e-parallelogramma&quot;: {&quot;nome&quot;: &quot;Il rombo è un parallelogramma&quot;, &quot;enunciato&quot;: &quot;un quadrilatero con i quattro lati congruenti ha i lati opposti paralleli&quot;, &quot;area&quot;: &quot;quadrilateri&quot;, &quot;usa&quot;: [&quot;terzo-criterio&quot;, &quot;criterio-di-parallelismo&quot;], &quot;tipo&quot;: &quot;teorema&quot;}, &quot;diagonali-parallelogramma&quot;: {&quot;nome&quot;: &quot;Diagonali del parallelogramma&quot;, &quot;enunciato&quot;: &quot;in un parallelogramma le diagonali si tagliano scambievolmente per metà&quot;, &quot;area&quot;: &quot;quadrilateri&quot;, &quot;tipo&quot;: &quot;teorema&quot;}, &quot;diagonali-rettangolo&quot;: {&quot;nome&quot;: &quot;Diagonali del rettangolo&quot;, &quot;enunciato&quot;: &quot;in un rettangolo le diagonali sono congruenti&quot;, &quot;area&quot;: &quot;quadrilateri&quot;, &quot;usa&quot;: [&quot;lati-opposti-parallelogramma&quot;, &quot;primo-criterio&quot;], &quot;tipo&quot;: &quot;teorema&quot;}}\"></x-theorem>"
+    }
+  ],
+  "fondamenti": [
+    {
+      "id": "definizione-parallelogramma",
+      "nome": "Definizione di parallelogramma",
+      "enunciato": "un quadrilatero con i lati opposti paralleli",
+      "tipo": "definizione"
+    },
+    {
+      "id": "definizione-rombo",
+      "nome": "Definizione di rombo",
+      "enunciato": "un quadrilatero con i quattro lati congruenti",
+      "tipo": "definizione"
+    },
+    {
+      "id": "definizione-rettangolo",
+      "nome": "Definizione di rettangolo",
+      "enunciato": "un parallelogramma con i quattro angoli retti",
+      "tipo": "definizione"
+    },
+    {
+      "id": "definizione-isoscele",
+      "nome": "Definizione di triangolo isoscele",
+      "enunciato": "un triangolo con due lati congruenti",
+      "tipo": "definizione"
+    },
+    {
+      "id": "definizione-bisettrice",
+      "nome": "Definizione di bisettrice",
+      "enunciato": "la semiretta che divide un angolo in due angoli congruenti",
+      "tipo": "definizione"
+    },
+    {
+      "id": "elementi-corrispondenti",
+      "nome": "Elementi corrispondenti",
+      "enunciato": "in due triangoli congruenti gli elementi corrispondenti sono congruenti",
+      "tipo": "definizione"
+    },
+    {
+      "id": "assioma-parallela",
+      "nome": "Assioma della parallela",
+      "enunciato": "per un punto esterno a una retta passa una sola parallela a quella retta",
+      "tipo": "assioma"
+    },
+    {
+      "id": "assioma-angolo-piatto",
+      "nome": "Angoli supplementari",
+      "enunciato": "due angoli adiacenti che formano un angolo piatto misurano insieme 180°",
+      "tipo": "assioma"
+    },
+    {
+      "id": "proprieta-riflessiva",
+      "nome": "Proprietà riflessiva",
+      "enunciato": "ogni figura è congruente a se stessa",
+      "tipo": "assioma"
+    },
+    {
+      "id": "sostituzione",
+      "nome": "Sostituzione",
+      "enunciato": "grandezze congruenti possono essere sostituite l'una all'altra",
+      "tipo": "assioma"
+    }
+  ],
+  "avvisi": []
+}

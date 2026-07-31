@@ -281,6 +281,18 @@ Il compilatore fallisce rumorosamente se:
 
 ## 7. Confine con le pagine-strumento
 
-Un teorema **non sta in una query string** come ci sta un'espressione. Se
-servirà come strumento condivisibile (`/tools/…`), la strada è il contenuto in
-`content/` o un markdown incollato in un textarea, non i parametri URL.
+Un teorema **non sta in una query string** come ci sta un'espressione: il
+contenuto vive in `content/`, e l'URL porta al massimo la configurazione.
+
+Su questa base i teoremi sono diventati uno strumento — un **corpus** esposto
+come mappa a livelli, con una pagina per teorema: vedi [TEORIA.md](TEORIA.md).
+Il path dice quale teorema (ed è l'indirizzo che si condivide), la query string
+dice come presentarlo (`modi`, `distrattori`).
+
+Due conseguenze su quanto scritto qui sopra:
+
+- la **teoria** può essere di corpus e non di corso (§2.1): un corpus ha il suo
+  `teoria.yaml`, che è il registro di tutti i nodi della mappa, dimostrati e non;
+- i **distrattori** sono un asse indipendente dalla modalità (§4): la tabella
+  di §4 resta il default, ma quante ne mostra lo decide chi costruisce la
+  scheda, con `data-distrattori-n`.

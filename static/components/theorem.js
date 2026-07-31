@@ -19,6 +19,9 @@
  *   data-titolo       enunciato del teorema
  *   data-modi         modalità offerte, in ordine, separate da virgola
  *   data-mancanti     quanti passi togliere in modalità `completa`
+ *   data-distrattori-n  quanti intrusi mostrare, se imposto da fuori (TEORIA.md
+ *                     §5): i distrattori sono un asse indipendente dalla
+ *                     modalità. Ignorato dove non c'è un mucchio di cartellini.
  *   data-theorem-id   id nella teoria del corso (seed del caso deterministico)
  *   data-figura       nome dello sketch da mostrare accanto alla dimostrazione;
  *                     i `fig` dei passi sono id di elementi DENTRO quello sketch
@@ -101,6 +104,14 @@ class XTheorem extends HTMLElement {
     );
     this.mancanti = parseInt(this.dataset.mancanti || '2', 10);
     this.seme = this.dataset.theoremId || this.id || 'teorema';
+
+    // Quanti distrattori mostrare, se qualcuno lo impone (TEORIA.md §5): i
+    // distrattori sono un ASSE indipendente dalla modalità, non una sua
+    // proprietà. `null` = lascia decidere alla maschera. Vale solo dove c'è un
+    // mucchio di cartellini: in `leggi` e `giustifica` non c'è dove metterli.
+    const nDistrattori = parseInt(this.dataset.distrattoriN, 10);
+    this.nDistrattori = Number.isFinite(nDistrattori)
+      ? Math.max(0, nDistrattori) : null;
 
     this.modi = (this.dataset.modi || 'leggi')
       .split(',').map(m => m.trim()).filter(m => THEOREM_MODI[m]);
@@ -232,6 +243,23 @@ class XTheorem extends HTMLElement {
     return this.passi.map(p => p.id).filter(id => !tolti.has(id));
   }
 
+  /**
+   * Gli intrusi da mettere nel mucchio, in numero deciso dalla maschera o
+   * imposto da chi ha costruito la scheda.
+   *
+   * La scelta è deterministica e seminata dall'id del teorema, NON dalla
+   * modalità: un link dato per compito deve produrre lo stesso esercizio per
+   * tutta la classe, altrimenti in classe non se ne può parlare.
+   */
+  distrattoriDaMostrare(modo) {
+    const conBanco = modo.partenza !== 'tutti';
+    let quanti = modo.distrattori ? this.distrattori.length : 0;
+    if (conBanco && this.nDistrattori !== null) quanti = this.nDistrattori;
+    quanti = Math.min(quanti, this.distrattori.length);
+    if (quanti <= 0) return [];
+    return this.mescola(this.distrattori.map(d => d.id), 'distrattori').slice(0, quanti);
+  }
+
   mescola(ids, chiave) {
     const rand = theoremRandom(theoremSeed(this.seme + ':' + chiave));
     const out = ids.slice();
@@ -248,7 +276,7 @@ class XTheorem extends HTMLElement {
 
     const partenza = this.passiDiPartenza(this.modo);
     const restanti = this.passi.map(p => p.id).filter(id => !partenza.includes(id));
-    const intrusi = this.modo.distrattori ? this.distrattori.map(d => d.id) : [];
+    const intrusi = this.distrattoriDaMostrare(this.modo);
 
     this.catena = partenza.slice();
     this.fissi = new Set(partenza);
@@ -266,9 +294,14 @@ class XTheorem extends HTMLElement {
     let consegna = this.modo.consegna;
     if (nome === 'completa') {
       const n = this.passi.length - partenza.length;
-      consegna = `Mancano ${n === 1 ? 'un passo' : n + ' passi'}. ` +
-        'Nel mucchio ci sono anche cartellini che non servono: uno è vero ma inutile, ' +
-        'uno ha la giustificazione sbagliata, uno è falso.';
+      consegna = `Mancano ${n === 1 ? 'un passo' : n + ' passi'}.`;
+    }
+    // Gli intrusi sono un numero variabile (possono essere zero anche in una
+    // modalità che di solito li mostra): l'avviso segue quello che c'è davvero.
+    if (intrusi.length) {
+      consegna += intrusi.length === 1
+        ? ' Attenzione: nel mucchio c\'è anche un cartellino che non serve.'
+        : ` Attenzione: nel mucchio ci sono anche ${intrusi.length} cartellini che non servono.`;
     }
     this.elConsegna.textContent = consegna;
 
@@ -501,8 +534,18 @@ class XTheorem extends HTMLElement {
     const intruso = this.catena.findIndex(id => this.distrattori.some(d => d.id === id));
     if (intruso !== -1) {
       const d = this.perId[this.catena[intruso]];
+      let perche = THEOREM_DISTRATTORI[d.tipo] || '';
+      // Con le garanzie in chiaro, un distrattore `garanzia-sbagliata` ha lo
+      // stesso testo di un passo vero: nel mucchio ci sono due cartellini
+      // quasi identici, e un messaggio generico si legge come un bug. Va detto
+      // QUALE differenza conta — che è poi tutto il punto dell'esercizio.
+      if (d.tipo === 'garanzia-sbagliata' && this.modo.garanzieVisibili && d.perche) {
+        const nome = (this.teoria[d.perche] || {}).nome || d.perche;
+        perche = `L'asserzione è giusta, ma «${nome}» non te la dà: ` +
+          'guarda la garanzia, non la conclusione.';
+      }
       return no(`Il passo ${intruso + 1} non fa parte di questa dimostrazione. ` +
-        (THEOREM_DISTRATTORI[d.tipo] || ''), [intruso]);
+        perche, [intruso]);
     }
 
     // 2. Completezza: ogni tesi va raggiunta

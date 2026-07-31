@@ -15,6 +15,9 @@ class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
     CONTENT_DIR = 'content'
     COURSES_DATA_DIR = 'courses_data'
+    # Corpora degli strumenti compilati (build_corpus.py): un corpus non è un
+    # corso e non ha lezioni, quindi non sta in COURSES_DATA_DIR.
+    TOOLS_DATA_DIR = 'tools_data'
 
     # Testi configurabili del sito.
     # Il footer aggiunge "© <anno>" nel template, con anno dinamico.

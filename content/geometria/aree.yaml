@@ -1,0 +1,25 @@
+# Le aree del corpus: le colonne della mappa.
+#
+# L'ordine di dichiarazione è l'ordine da sinistra a destra, ed è una decisione
+# DIDATTICA che non si deduce dai dati: il grafo sa che cosa serve a che cosa,
+# non in che ordine si insegna.
+#
+# Il colore entra nella card e nella banda della colonna: su una LIM, a tre
+# metri, il colore si legge prima del testo. Tenerli distinguibili anche in
+# scala di grigi (chi stampa la mappa lo fa in bianco e nero).
+
+aree:
+  - id: congruenza
+    nome: Congruenza
+    colore: "#26518A"
+    descrizione: I criteri, e i primi teoremi sui triangoli
+
+  - id: parallelismo
+    nome: Rette parallele
+    colore: "#1F7A5A"
+    descrizione: Trasversali, angoli e somma degli angoli
+
+  - id: quadrilateri
+    nome: Quadrilateri
+    colore: "#A8571E"
+    descrizione: Parallelogrammi e loro casi particolari

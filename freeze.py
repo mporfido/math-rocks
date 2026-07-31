@@ -19,7 +19,7 @@ from pathlib import Path
 from flask_frozen import Freezer, MissingURLGeneratorWarning
 
 from app import create_app
-from routes.tools import load_tools
+from routes.tools import load_corpus, load_tools
 
 app = create_app('production')
 
@@ -75,16 +75,22 @@ def tool_urls():
     """URL delle pagine-strumento (elenco + una pagina per strumento).
 
     I parametri della scheda vivono nella query string e NON vengono congelati:
-    ogni strumento è una pagina sola e la configurazione la legge il JS nel
-    browser (vedi routes/tools.py).
+    la configurazione la legge il JS nel browser (vedi routes/tools.py).
+
+    Gli strumenti con un corpus (`kind: theory`, vedi TEORIA.md) hanno invece
+    una pagina PER VOCE, e quelle sì che si congelano: il path è l'indirizzo
+    che si condivide con la classe, e deve restare valido anche in statico.
     """
     with app.app_context():
         tools = load_tools()
-    if not tools:
-        return
-    yield 'tools.tools_index', {}
-    for tool in tools:
-        yield 'tools.tool_page', {'tool_id': tool['id']}
+        if not tools:
+            return
+        yield 'tools.tools_index', {}
+        for tool in tools:
+            yield 'tools.tool_page', {'tool_id': tool['id']}
+            corpus = load_corpus(tool)
+            for teorema in (corpus or {}).get('teoremi', []):
+                yield 'tools.tool_item', {'tool_id': tool['id'], 'item_id': teorema['id']}
 
 
 if __name__ == '__main__':

@@ -138,6 +138,50 @@ class CourseParser:
             'lesson_metadata': lesson_metadata
         }
 
+    def parse_theorems(self, content, titoli=None):
+        """
+        Estrae i blocchi :::theorem da un file di CORPUS (vedi TEORIA.md).
+
+        Un corpus non ha lezioni né step: è una sequenza di teoremi. Serve
+        quindi la struttura di ognuno (passi, garanzie, distrattori) oltre
+        all'HTML, perché è dai `per:` dei passi che si ricava il grafo.
+
+        La teoria va impostata prima con set_course_theory(): per un corpus è
+        il registro completo (teoria.yaml), così l'ordine dei file non conta.
+
+        Args:
+            content: Testo del file markdown del corpus
+            titoli: Dict id → enunciato, usato quando il blocco non ha
+                `titolo=`: in un corpus l'enunciato lo possiede il registro,
+                e riscriverlo nel .md sarebbe una seconda fonte
+
+        Returns:
+            Tuple (teoremi, residuo): `teoremi` è la lista di dict raccolti da
+            process_theorem, `residuo` è il testo rimasto fuori dai blocchi —
+            che in un corpus è quasi sempre un errore d'autore, e chi chiama
+            lo segnala.
+        """
+        self.blank_counter = 0
+        self.variable_counter = 0
+        self.check_counter = 0
+        self.theorem_counter = 0
+
+        theorems = []
+        processed, _replacements, self.theorem_counter = process_theorem(
+            content, self.theorem_counter,
+            render_text=self._render_theorem_text,
+            teoria=self.teoria,
+            course_theorems=self.course_theorems,
+            collect=theorems,
+            titoli=titoli,
+        )
+
+        # Il residuo: via i marker dei blocchi e i commenti HTML (l'unico modo
+        # sensato di annotare un file che non viene renderizzato).
+        residuo = re.sub(r'XTHEOREMBLOCK\d+X', '', processed)
+        residuo = re.sub(r'<!--.*?-->', '', residuo, flags=re.DOTALL)
+        return theorems, residuo.strip()
+
     def _extract_metadata(self, content):
         """
         Estrae metadata YAML (righe con >) e restituisce (metadata, contenuto)

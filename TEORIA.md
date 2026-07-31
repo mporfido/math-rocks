@@ -1,10 +1,16 @@
 # Teoria — Il corpus di geometria come strumento
 
-**Stato: specifica, non ancora implementata.** Questo documento fissa il corpus
-di teoremi, il grafo che lo mostra e gli URL che lo rendono condivisibile. Si
-appoggia interamente al modello dati di [DIMOSTRAZIONI.md](DIMOSTRAZIONI.md):
-qui non si inventa nessuna entità nuova per il singolo teorema, si decide dove
-vivono i teoremi tutti insieme e come si naviga fra loro.
+**Stato: implementato.** Questo documento fissa il corpus di teoremi, il grafo
+che lo mostra e gli URL che lo rendono condivisibile. Si appoggia interamente al
+modello dati di [DIMOSTRAZIONI.md](DIMOSTRAZIONI.md): qui non si inventa
+nessuna entità nuova per il singolo teorema, si decide dove vivono i teoremi
+tutti insieme e come si naviga fra loro.
+
+Il codice: `build_corpus.py` (compilazione e grafo), `tools_config.py` (il
+manifest, letto anche dalla build), `routes/tools.py` (le due route),
+`templates/theory_map.html` e `theory_theorem.html`, `static/tools/theory.js`,
+gli stili `.mappa-*` e `.teorema-*` in `static/style.css`. Il corpus d'esempio è
+`content/geometria/`.
 
 Ne discende una modifica a `DIMOSTRAZIONI.md` §7 ("Confine con le pagine
 strumento"), che oggi dice che un teorema non diventa uno strumento: diventa uno
@@ -69,9 +75,31 @@ diagonali-parallelogramma:
 | `enunciato` | sì           | Formulazione estesa |
 | `tipo`      | no           | `definizione` \| `assioma` \| `teorema` (default: `teorema`) |
 | `area`      | no\*         | Id di un'area dichiarata in `aree.yaml`. \*Obbligatorio per i `tipo: teorema` di un corpus: senza, la card non ha colonna |
+| `usa`       | no           | Prerequisiti dichiarati a mano, **solo per i teoremi non ancora dimostrati** (§2.4) |
 
 Una voce può esistere **senza dimostrazione**: nessun `:::theorem` la definisce,
 e resta un nodo con il solo enunciato (§4.3).
+
+L'`enunciato` è scritto in minuscolo perché si legge di seguito al nome
+(*Lati opposti: in un parallelogramma…*); dove fa da titolo di pagina la build
+gli mette la maiuscola. È anche l'unica fonte del titolo del teorema: i blocchi
+`:::theorem` di un corpus **non** hanno `titolo=`.
+
+### 2.4 `usa` — l'impalcatura provvisoria
+
+Gli archi li danno i `per:` dei passi, e un teorema senza dimostrazione non ne
+ha nessuno: finirebbe a livello 0 anche quando il suo posto è in fondo. Con
+sessanta enunciati e sei dimostrazioni scritte, la mappa sarebbe piatta e
+falsa proprio nella fase in cui serve di più.
+
+`usa:` è la stampella per quel caso: i prerequisiti noti, dichiarati a mano,
+che tengono il nodo al livello giusto finché la dimostrazione non arriva.
+
+È un elenco di prerequisiti mantenuto a mano — cioè esattamente la cosa che
+questo documento evita ovunque — e regge solo perché **si auto-elimina**:
+quando la dimostrazione arriva, `usa:` viene ignorato (gli archi veri
+vincono) e la build lo segnala come da cancellare. Non può divergere in
+silenzio, perché non sopravvive al suo scopo.
 
 ### 2.3 `aree.yaml` — l'ordine è una decisione d'autore
 
@@ -102,8 +130,12 @@ colore è ciò che si legge prima del testo.
 ### 3.1 Archi
 
 C'è un arco `A → B` quando un passo di `B` cita `A` come garanzia (`per: A`) e
-`A` è una voce di `tipo: teorema`. Le garanzie di tipo `definizione` e `assioma`
-**non generano archi**: sono la parte di teoria che è vera ovunque e che, se
+`A` è una voce di `tipo: teorema`. Contano **solo i passi**: le garanzie dei
+*distrattori* sono sbagliate o irrilevanti per costruzione, e portarle nel
+grafo significherebbe disegnare relazioni che la teoria non ha (un distrattore
+può citare di proposito un teorema che viene dopo).
+
+Le garanzie di tipo `definizione` e `assioma` **non generano archi**: sono la parte di teoria che è vera ovunque e che, se
 disegnata, renderebbe il grafo un pettine illeggibile.
 
 Non spariscono però dalla vista: ogni card e ogni pagina-teorema elenca in un
@@ -123,9 +155,16 @@ livello sotto ognuno di quelli che usa, che è la regola voluta. È ben definito
 perché il grafo è aciclico, e questo il compilatore già lo verifica
 (`_check_theorem_cycles`, `DIMOSTRAZIONI.md` §6).
 
-Il livello si calcola **in build**, insieme alle posizioni: il grafo non cambia
-fra un caricamento e l'altro, quindi non c'è motivo di far girare un algoritmo
-di layout nel browser, né di aggiungere una libreria per farlo.
+Il livello si calcola **in build**: il grafo non cambia fra un caricamento e
+l'altro, quindi non c'è motivo di far girare un algoritmo di layout nel
+browser, né di aggiungere una libreria per farlo.
+
+La build produce `(livello, area, indice)` — riga, colonna, e posto dentro la
+cella quando più teoremi la condividono. Non produce coordinate in pixel: le
+card hanno l'altezza che il loro testo richiede, e la griglia CSS le sistema
+meglio di qualunque calcolo fatto prima. Gli **archi** li misura quindi il JS
+sul DOM (`static/tools/theory.js`), ridisegnandoli al resize e quando i font
+finiscono di caricare.
 
 ### 3.3 Layout
 
@@ -211,7 +250,11 @@ teorema). Il determinismo non è un dettaglio: un link dato per compito deve
 produrre lo stesso esercizio per tutta la classe, altrimenti in classe non se ne
 può parlare.
 
-`0` disattiva; il parametro assente lascia il default della modalità.
+`0` disattiva; il parametro assente lascia il default della modalità. Sul
+componente l'attributo è `data-distrattori-n` (`data-distrattori` è già il JSON
+dei cartellini), e `static/tools/theory.js` lo scrive **prima** che
+`theorem.js` sia caricato: `<x-theorem>` legge i suoi attributi una volta sola,
+quando si registra.
 
 ### 5.2 Dove la manopola ha senso
 
@@ -287,9 +330,16 @@ Stesso preprocessore (`process_theorem()`), stessa validazione di
 cicli e garanzie inesistenti, su sessanta teoremi, sono probabili davvero. Al
 JSON si aggiungono i livelli, le posizioni e gli archi calcolati in §3.
 
-Un warning nuovo, non un errore: una modalità che attiva i distrattori per
-default offerta su un teorema che non ne ha degrada silenziosamente, e l'autore
-lo scoprirebbe solo aprendo la pagina.
+`build_courses.py` lo invoca a fine build: i corpora sono contenuti quanto i
+corsi, e due comandi separati significano prima o poi pubblicare un sito con la
+mappa vecchia. Restano comunque due moduli, e `python build_corpus.py
+<corpus>` compila un corpus da solo.
+
+Warning, non errori: una modalità che attiva i distrattori per default offerta
+su un teorema che non ne ha (degrada, ma l'autore lo scoprirebbe solo aprendo
+la pagina); un `usa:` rimasto su un teorema ormai dimostrato; testo scritto
+fuori dai blocchi `:::theorem`, che in un corpus non viene renderizzato da
+nessuna parte e sparirebbe in silenzio.
 
 ### 7.2 Route
 
@@ -333,6 +383,11 @@ corpus**.
   logica o di fisica.
 
 ### 8.1 Il corpus è l'autorità sulla teoria
+
+> **Non ancora implementato** (§8.1 e §8.2). Oggi il corpus funziona da solo e
+> `content/dimostrazioni/` resta un corso separato con la sua `teoria.yaml`:
+> finché nessuna lezione cita il corpus non c'è divergenza, ma appena una lo
+> farà servono il campo `teoria:` e l'inclusione `ref=` descritti qui sotto.
 
 Oggi `teoria.yaml` è un'entità di corso. Con un corpus condiviso quel file
 esisterebbe in due posti e le voci divergerebbero in due settimane. Quindi: **un
