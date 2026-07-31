@@ -127,22 +127,30 @@ math-rocks/
 │   └── preprocessors.py        # Preprocessori sintassi
 │
 ├── routes/
-│   └── courses.py              # Routes Flask per corsi
+│   ├── courses.py              # Routes Flask per corsi
+│   └── tools.py                # Routes per le pagine-strumento (/tools/...)
 │
 ├── templates/
 │   ├── base.html               # Template base
+│   ├── _assets.html            # Macro asset condivisi (librerie + componenti)
 │   ├── home.html               # Homepage
-│   └── course.html             # Visualizzatore corso
+│   ├── course.html             # Visualizzatore corso
+│   ├── lesson.html             # Visualizzatore step
+│   ├── tools.html              # Elenco strumenti
+│   └── tool.html               # Pagina di uno strumento
 │
 ├── static/
 │   ├── components/
 │   │   ├── blank.js            # Web Component input
 │   │   ├── variable.js         # Web Component slider
 │   │   └── step.js             # Web Component container
+│   ├── tools/
+│   │   └── expr.js             # Implementazione della pagina-strumento `expr`
 │   ├── style.css               # Stili globali
 │   └── components.css          # Stili componenti
 │
 ├── content/                    # Corsi sorgente (markdown)
+│   ├── tools.yaml              # Strumenti esposti dal sito (istanza)
 │   └── esempio-algebra/
 │       ├── content.md          # Contenuto corso
 │       └── metadata.yaml       # Metadati
@@ -247,6 +255,56 @@ Display: $$\int_0^1 f(x) dx$$
 ```
 
 Per la sintassi completa, vedi [MARKDOWN_SYNTAX.md](MARKDOWN_SYNTAX.md).
+
+## Strumenti (componenti a pagina intera)
+
+Alcuni componenti sono utili anche **fuori da un corso**: `/tools/<id>/` li apre
+a pagina intera e li configura con i **parametri dell'indirizzo**, così un link
+è già una scheda di esercizi pronta da condividere con la classe.
+
+```
+/tools/espressioni/?ex=(4%20%2B%205*4)%20-%20(8%3A2%20%2B%206)&ex=2%2B2&titolo=Compiti
+/tools/potenze/?ex=2%5E3*2%5E4&mode=powers&noeval=1
+```
+
+Non serve costruire quegli indirizzi a mano: **ogni pagina-strumento contiene un
+costruttore** ("Componi una scheda e ottieni il link") con un campo per le
+espressioni, le opzioni e il bottone *Copia*.
+
+Il link copiato è quello **per gli studenti**: porta il parametro `noeditor=1`,
+quindi chi lo apre trova solo la scheda da svolgere, senza il costruttore. Non è
+una protezione (l'indirizzo dello strumento resta pubblico), è un modo di non
+mettere davanti alla classe un pannello che non le serve.
+
+Parametri dello strumento `espressioni` / `potenze` (kind `expr`):
+
+| Parametro | Significato |
+|---|---|
+| `ex` | un'espressione; ripetibile (`?ex=…&ex=…`) o con più voci separate da `\|` |
+| `mode=powers` | le potenze restano simboliche e si riducono con le loro proprietà |
+| `noeval=1` | (solo con `mode=powers`) vieta la valutazione numerica delle potenze |
+| `steps=1` | mostra anche lo svolgimento classico |
+| `titolo` | titolo della scheda |
+| `noeditor=1` | pagina "per gli studenti": mostra solo la scheda, nasconde il costruttore |
+
+**Quali strumenti compaiono** lo decide l'istanza in `content/tools.yaml` (id,
+titolo, descrizione, valori di partenza). L'engine fornisce le route, il
+template `tool.html` e un'implementazione per `kind` in `static/tools/<kind>.js`;
+i `kind` ammessi sono in whitelist in `routes/tools.py`. Se `content/tools.yaml`
+manca, la sezione — e la voce di menu — semplicemente non esiste.
+
+Due conseguenze del modello static-first:
+
+- I parametri li legge il **browser**, non Flask: Frozen-Flask congela i
+  percorsi, non le query string. Le pagine-strumento funzionano identiche in
+  locale e su GitHub Pages.
+- Una pagina-strumento **non carica `progress.js`**: una scheda condivisa via
+  link non tocca i progressi salvati dei corsi.
+
+Poiché l'espressione può arrivare da un link (e non più solo dal markdown di un
+autore), viene validata prima di essere montata — caratteri ammessi, parentesi
+bilanciate, lunghezze — e il componente ha comunque i propri limiti interni su
+cifre ed esponenti.
 
 ## Comandi Utili
 

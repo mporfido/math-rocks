@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% import "_assets.html" as assets with context %}
 
 {% set progress_key = course_id ~ '/' ~ lesson.id %}
 {# Flag matematica: metadata.yaml del corso > default globale (site.yaml).
@@ -8,41 +9,7 @@
 {% block title %}{{ step.metadata.get('title', step.id) }} - {{ lesson.title }} - {{ site_name }}{% endblock %}
 
 {% block extra_css %}
-<!-- JSXGraph per grafici interattivi -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph@1.9.2/distrib/jsxgraph.css">
-<script src="https://cdn.jsdelivr.net/npm/jsxgraph@1.9.2/distrib/jsxgraphcore.min.js"></script>
-
-{% if course_math %}
-<!-- MathJax per rendering formule matematiche (solo corsi con math: true) -->
-<script>
-  MathJax = {
-    // Carica l'estensione `html` (\class{...}{...}), usata da <x-expr show-steps>
-    // per evidenziare la zona appena semplificata nello svolgimento. Va caricata
-    // esplicitamente: il build combinato non la include e marcarla solo tra i
-    // packages disattiverebbe l'autoload lasciando \class indefinito.
-    loader: {load: ['[tex]/html']},
-    tex: {
-      packages: {'[+]': ['html']},
-      inlineMath: [['$', '$'], ['\\(', '\\)']],
-      displayMath: [['$$', '$$'], ['\\[', '\\]']],
-      processEscapes: true,
-      processEnvironments: true
-    },
-    options: {
-      skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
-      ignoreHtmlClass: 'no-math'
-    },
-    startup: {
-      pageReady: () => {
-        return MathJax.startup.defaultPageReady().then(() => {
-          console.log('MathJax loaded and ready');
-        });
-      }
-    }
-  };
-</script>
-<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-{% endif %}
+{{ assets.head_assets(course_math) }}
 
 <!-- Progressi + guard sequenziale: caricato nel <head> ed eseguito in modo
      sincrono PRIMA del rendering del body, così l'eventuale redirect avviene
@@ -143,42 +110,10 @@
 
 {% block scripts %}
 <!-- Carica Web Components (progress.js è già caricato nel <head>) -->
-<script src="{{ url_for('static', filename='components/formula-simplifier.js') }}"></script>
-<script src="{{ url_for('static', filename='components/blank.js') }}"></script>
-<script src="{{ url_for('static', filename='components/check.js') }}"></script>
-<script src="{{ url_for('static', filename='components/variable.js') }}"></script>
-<script src="{{ url_for('static', filename='components/graph.js') }}"></script>
-<!-- p5.js carica al volo (lazy) i singoli sketch riusabili da static/sketches/
-     <nome>.js, solo nelle pagine che li usano; non serve caricare un registro. -->
-<script src="{{ url_for('static', filename='components/p5.js') }}"></script>
-<script src="{{ url_for('static', filename='components/expr.js') }}"></script>
-<script src="{{ url_for('static', filename='components/step.js') }}"></script>
+{{ assets.component_scripts() }}
 
-{% if course_math %}
 <!-- Re-render MathJax dopo caricamento componenti -->
-<script>
-  // Aspetta che la pagina sia completamente caricata
-  window.addEventListener('load', () => {
-    // Singolo typeset dopo il caricamento completo
-    setTimeout(() => {
-      if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
-        MathJax.typesetPromise()
-          .then(() => console.log('MathJax rendering completato'))
-          .catch((err) => console.error('MathJax typeset error:', err));
-      }
-    }, 200);
-  });
-
-  // Re-render quando cambiano le variabili dinamiche
-  document.addEventListener('variable-change', () => {
-    setTimeout(() => {
-      if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
-        MathJax.typesetPromise().catch((err) => console.error('MathJax typeset error:', err));
-      }
-    }, 50);
-  });
-</script>
-{% endif %}
+{{ assets.mathjax_refresh(course_math) }}
 
 <!-- Sidebar: checkmark sugli step completati e reset progressi -->
 <script>

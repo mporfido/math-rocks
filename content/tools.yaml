@@ -1,0 +1,43 @@
+# Strumenti esposti dal sito (config di ISTANZA)
+#
+# Uno strumento è un componente della piattaforma usabile da solo, a pagina
+# intera, fuori da un corso: /tools/<id>/. La configurazione della singola
+# scheda passa dai parametri dell'URL, così un link è già un esercizio pronto
+# da condividere (la pagina stessa ha un costruttore di link).
+#
+# Campi:
+#   id           segmento dell'URL (/tools/<id>/)
+#   kind         tipo di strumento fornito dall'engine (per ora: expr)
+#   title        titolo mostrato
+#   description  sottotitolo / spiegazione breve
+#   icon         emoji opzionale per la card nell'elenco
+#   math         carica MathJax (default: true)
+#   defaults     valori di partenza, usati quando l'URL non ha parametri
+
+tools:
+  - id: espressioni
+    kind: expr
+    title: Espressioni aritmetiche
+    description: >-
+      Risolvi un'espressione un'operazione per volta, con il metodo ad albero
+      ("sciogliamo i nodi").
+    icon: "🧮"
+    defaults:
+      ex:
+        - "(4 + 5*4) - (8:2 + 6)"
+        - "12 : (2 + 2) + 3*(7 - 5)"
+        - "[10 - (3 + 4)] * 2 + 5"
+
+  - id: potenze
+    kind: expr
+    title: Proprietà delle potenze
+    description: >-
+      Le potenze restano in forma simbolica e si riducono con le loro
+      proprietà: stessa base, stesso esponente, potenza di potenza.
+    icon: "⚡"
+    defaults:
+      mode: powers
+      ex:
+        - "2^3 * 2^4"
+        - "(3^2)^3 : 3^4"
+        - "5^6 : 5^2 * 5"

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Strumenti - {{ site_name }}{% endblock %}
+
+{% block content %}
+<div class="home-container">
+    <h1>Strumenti</h1>
+    <p class="subtitle">
+        Componenti interattivi usabili da soli, fuori dai corsi. Ogni strumento
+        si configura dall'indirizzo della pagina: componi una scheda e condividi
+        il link con la classe.
+    </p>
+
+    <div class="courses-grid">
+        {% for tool in tools %}
+        <div class="course-card tool-card">
+            <h3>{% if tool.icon %}<span class="tool-card-icon" aria-hidden="true">{{ tool.icon }}</span>{% endif %}{{ tool.title }}</h3>
+            <p>{{ tool.description }}</p>
+            <a href="{{ url_for('tools.tool_page', tool_id=tool.id) }}" class="btn btn-primary">
+                Apri lo strumento
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

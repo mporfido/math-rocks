@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% import "_assets.html" as assets with context %}
+
+{% block title %}{{ tool.title }} - {{ site_name }}{% endblock %}
+
+{% block extra_css %}
+{{ assets.head_assets(tool.math) }}
+{% endblock %}
+
+{% block content %}
+<div class="tool-container">
+    <nav class="breadcrumb">
+        <a href="{{ url_for('tools.tools_index') }}">← Strumenti</a>
+    </nav>
+
+    <header class="tool-header">
+        <h1>{% if tool.icon %}<span class="tool-card-icon" aria-hidden="true">{{ tool.icon }}</span>{% endif %}{{ tool.title }}</h1>
+        {% if tool.description %}<p class="subtitle">{{ tool.description }}</p>{% endif %}
+    </header>
+
+    {# Punto di innesto dello strumento: il contenuto lo costruisce
+       static/tools/<kind>.js leggendo i parametri della query string (in
+       statico il server non li vede) e, in mancanza, i `defaults` dell'istanza. #}
+    <div class="tool-root"
+         data-tool-id="{{ tool.id }}"
+         data-kind="{{ tool.kind }}"
+         data-defaults='{{ tool.defaults|tojson }}'>
+        <noscript>
+            <p class="tool-noscript">Questo strumento richiede JavaScript attivo.</p>
+        </noscript>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ assets.component_scripts() }}
+<!-- Implementazione dello strumento (whitelist `TOOL_KINDS` in routes/tools.py) -->
+<script src="{{ url_for('static', filename='tools/' ~ tool.kind ~ '.js') }}"></script>
+{{ assets.mathjax_refresh(tool.math) }}
+{% endblock %}
