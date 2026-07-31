@@ -1,0 +1,50 @@
+# La cassetta degli attrezzi del corso.
+#
+# La teoria è un'entità DI CORSO, non del singolo teorema: il secondo criterio
+# di congruenza serve in dodici dimostrazioni e va scritto una volta sola. Ogni
+# voce è citabile da un passo con `{per: <id>}`.
+#
+# Campi: `nome` (quello che lo studente sceglie dal menu), `enunciato` (la
+# formulazione estesa, mostrata come promemoria), `tipo` (facoltativo:
+# definizione | assioma | teorema).
+#
+# Un teorema DIMOSTRATO in una lezione entra qui da solo: un blocco
+# `:::theorem id=diag-par` registra la voce `diag-par`, e le lezioni successive
+# possono citarla come garanzia.
+
+def-par:
+  nome: Definizione di parallelogramma
+  enunciato: un quadrilatero con i lati opposti paralleli
+  tipo: definizione
+
+lati-opp:
+  nome: Lati opposti
+  enunciato: in un parallelogramma i lati opposti sono congruenti
+
+alt-int:
+  nome: Angoli alterni interni
+  enunciato: due rette parallele tagliate da una trasversale formano angoli alterni interni congruenti
+
+crit1:
+  nome: Primo criterio di congruenza
+  enunciato: due triangoli con due lati e l'angolo tra essi compreso congruenti sono congruenti
+
+crit2:
+  nome: Secondo criterio di congruenza
+  enunciato: due triangoli con un lato e i due angoli adiacenti congruenti sono congruenti
+
+corr:
+  nome: Elementi corrispondenti
+  enunciato: in due triangoli congruenti gli elementi corrispondenti sono congruenti
+
+rombo-par:
+  nome: Il rombo è un parallelogramma
+  enunciato: un quadrilatero con i quattro lati congruenti ha i lati opposti paralleli
+
+ang-opp:
+  nome: Angoli opposti
+  enunciato: in un parallelogramma gli angoli opposti sono congruenti
+
+diag-rett:
+  nome: Diagonali del rettangolo
+  enunciato: in un rettangolo le diagonali sono congruenti

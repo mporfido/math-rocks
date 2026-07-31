@@ -35,8 +35,22 @@
  *                     un layout portrait su mobile); il ResizeObserver la rispetta
  *   ctx.params        parametri del markdown (solo sketch riusabili)
  *
+ * Ponte con chi comanda la figura da fuori (oggi <x-theorem>, DIMOSTRAZIONI.md §5):
+ *   el.highlight(e)   metodo DELL'ELEMENTO, non del ctx: chi possiede la figura
+ *                     le dice cosa evidenziare. `e` è una mappa {idElemento: ruolo}
+ *                     ('fuoco' | 'premessa' | …) oppure un array di id (= 'fuoco').
+ *   ctx.evidenza      la mappa live, leggibile dentro draw()
+ *   ctx.evidenziato(id) il ruolo dell'elemento, o null; senza argomenti dice se
+ *                     c'è qualcosa di evidenziato
+ *   ctx.onHighlight(cb) cb(evidenza) a ogni cambio (per gli sketch che non
+ *                     rileggono lo stato a ogni frame)
+ *   ctx.evidenzia(id) verso l'ALTRO senso: la figura chiede di evidenziare il
+ *                     proprio elemento `id` (click su un triangolo → il passo che
+ *                     lo nomina). Emette `figure-highlight`.
+ *
  * Eventi:
  *   goal-complete: quando lo sketch chiama ctx.complete() (solo se ha id)
+ *   figure-highlight: quando lo sketch chiama ctx.evidenzia(id); detail {id}
  *
  * p5.js viene caricato dal CDN al volo, solo nelle pagine che contengono almeno
  * uno sketch (lazy load con guard "una volta sola", come mathjs).
@@ -121,6 +135,7 @@ class XP5 extends HTMLElement {
     if (savedDone) this.setAttribute('data-completed', 'true');
 
     const changeCallbacks = [];
+    const highlightCallbacks = [];
     const self = this;
     // Larghezza iniziale: quella imposta dall'autore, altrimenti la larghezza
     // reale del container (sketch responsive). Fallback prudente se la misura
@@ -170,7 +185,27 @@ class XP5 extends HTMLElement {
       },
       // Parametri passati dal markdown (data-params). Vuoto per gli sketch inline.
       params,
+
+      // -- Evidenziazione (ponte con <x-theorem>) ------------------------------
+      // Letta a ogni accesso: highlight() può arrivare PRIMA che lo sketch sia
+      // partito (il componente che possiede la figura è già montato), e lo
+      // stato vive sull'elemento, non nella closure.
+      get evidenza() { return self._evidenza || {}; },
+      evidenziato(id) {
+        const e = self._evidenza || {};
+        if (id === undefined) return Object.keys(e).length > 0;
+        return e[id] || null;
+      },
+      onHighlight(cb) {
+        if (typeof cb === 'function') highlightCallbacks.push(cb);
+      },
+      evidenzia(id) {
+        self.dispatchEvent(new CustomEvent('figure-highlight', {
+          bubbles: true, composed: true, detail: { id: id || null },
+        }));
+      },
     };
+    this._highlightCallbacks = highlightCallbacks;
 
     // Risolve la funzione dello sketch:
     //  - riusabile (data-sketch): dal registro globale window.P5Sketches;
@@ -258,6 +293,30 @@ class XP5 extends HTMLElement {
     if (this.p5Instance && typeof this.p5Instance.remove === 'function') {
       this.p5Instance.remove();
       this.p5Instance = null;
+    }
+  }
+
+  /**
+   * Dice alla figura cosa evidenziare. Lo chiama chi possiede la figura
+   * (<x-theorem>: "questo passo parla di QUESTI elementi"), anche prima che lo
+   * sketch sia partito: lo stato vive qui e ctx.evidenza lo rilegge a ogni
+   * accesso.
+   *
+   * `evidenza` è una mappa {idElemento: ruolo} o un array di id (ruolo 'fuoco').
+   */
+  highlight(evidenza) {
+    const mappa = Array.isArray(evidenza)
+      ? Object.fromEntries(evidenza.map(id => [id, 'fuoco']))
+      : (evidenza || {});
+    this._evidenza = mappa;
+    (this._highlightCallbacks || []).forEach((cb) => {
+      try { cb(mappa); } catch (err) { console.error(err); }
+    });
+    // Gli sketch con noLoop disegnano solo su richiesta: senza redraw
+    // l'evidenziazione non comparirebbe mai.
+    const inst = this.p5Instance;
+    if (inst && typeof inst.isLooping === 'function' && !inst.isLooping()) {
+      inst.redraw();
     }
   }
 

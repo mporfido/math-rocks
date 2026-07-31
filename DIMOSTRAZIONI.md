@@ -1,9 +1,12 @@
 # Dimostrazioni — Modello dati e sintassi
 
-**Stato: specifica, non ancora implementata.** Questo documento fissa il modello
-dati e la sintassi d'autore del componente `<x-theorem>` prima di scrivere il
-codice: la sintassi è la cosa che poi non si cambia più senza riscrivere i
-contenuti.
+**Stato: implementato, ponte con la figura compreso.** Questo documento fissa il
+modello dati e la sintassi d'autore del componente `<x-theorem>`: la sintassi è
+la cosa che poi non si cambia più senza riscrivere i contenuti. Il parser è in
+`process_theorem()` (`parser/preprocessors.py`), il componente in
+`static/components/theorem.js`, il contratto di evidenziazione in
+`static/components/p5.js`, l'esempio in `content/dimostrazioni/` con la figura
+`static/sketches/parallelogramma-diagonali.js`.
 
 Il componente presenta un teorema — enunciato, ipotesi, tesi, dimostrazione — e
 lo rende **manipolabile**: gli stessi dati generano una lettura guidata, un
@@ -126,13 +129,13 @@ figura: parallelogramma-diagonali
 
 ## ipotesi
 - ABCD è un parallelogramma {fig: quadrilatero}
-- Le diagonali AC e BD si incontrano in M {fig: M}
+- Le diagonali AC e BD si incontrano in M {fig: diagonali}
 
 ## tesi
-- $AM \cong MC$ e $BM \cong MD$
+- $AM \cong MC$ e $BM \cong MD$ {fig: meta}
 
 ## dimostrazione
-- AB è parallelo a DC {da: h1, per: def-par}
+- AB è parallelo a DC {da: h1, per: def-par, fig: lati-opposti}
 - $AB \cong DC$ {da: h1, per: lati-opp}
 - L'angolo BAM $\cong$ l'angolo DCM {da: p1, per: alt-int}
 - L'angolo ABM $\cong$ l'angolo CDM {da: p1, per: alt-int}
@@ -166,7 +169,8 @@ figura: parallelogramma-diagonali
 | `titolo`  | —       | Enunciato, mostrato come titolo |
 | `modi`    | `leggi` | Modalità offerte, in ordine; più di una fa comparire la navigazione |
 | `mancanti`| `2`     | Quanti passi togliere in modalità `completa` |
-| `figura`  | —       | Sketch o grafico associato (riga `figura:` nel corpo, vedi §5) |
+| `figura`  | —       | Sketch associato (riga `figura:` nel corpo, vedi §5): i `fig:` dei passi ne nominano gli elementi |
+| `figura-altezza` | `300` | Altezza suggerita del canvas; uno sketch che si dimensiona da sé la ignora |
 
 ### Etichette configurabili
 
@@ -198,14 +202,52 @@ sorgente sarebbe di nuovo bookkeeping.
 
 ## 5. Ponte con la figura
 
-Se un passo dichiara `fig:`, il componente chiama `ctx.highlight(id)` sullo
-sketch associato — un piccolo contratto opzionale da aggiungere a `<x-p5>` e
-`<x-graph>`. L'evidenziazione è **bidirezionale**: dal passo alla figura e dal
-passo alle sue premesse, e viceversa dalle premesse a tutti i passi che le
-usano. È lì che lo studente vede che un'ipotesi serve davvero, tre volte.
+L'attributo `figura` nomina uno sketch riusabile (`static/sketches/<nome>.js`),
+che `<x-theorem>` monta accanto alla dimostrazione. I `fig:` dei passi sono id
+di **elementi dentro quello sketch**: selezionare un passo li accende.
+
+### Il contratto
+
+Non è il ctx a decidere: è **chi possiede la figura** a dirle cosa evidenziare.
+Il metodo sta quindi sull'elemento, non nel ctx dello sketch:
+
+```js
+elementoXP5.highlight({ triangoli: 'fuoco', quadrilatero: 'premessa' });
+```
+
+e lo sketch, dentro `draw()`, chiede il ruolo di ciò che sta per disegnare:
+
+```js
+const ruolo = ctx.evidenziato('triangoli');   // 'fuoco' | 'premessa' | null
+if (ctx.evidenziato()) { /* qualcosa è acceso: il resto arretra */ }
+ctx.onHighlight(cb)                           // per gli sketch che non rileggono
+                                              // lo stato a ogni frame
+```
+
+I ruoli sono gli **stessi della catena** — `fuoco` è il passo selezionato,
+`premessa` ciò su cui si appoggia — così il testo e il disegno dicono la stessa
+cosa due volte. Uno sketch che non implementa nulla resta un disegno muto: il
+contratto è opzionale e non rompe niente. Il metodo è oggi su `<x-p5>`;
+`<x-graph>` può adottarlo con la stessa firma quando servirà.
+
+### Nei due sensi
+
+L'evidenziazione è **bidirezionale** su due assi:
+
+- *dentro la catena*: dal passo alle sue premesse, e da un passo a tutti quelli
+  che lo usano. È lì che lo studente vede che un'ipotesi serve davvero, tre volte;
+- *fra catena e figura*: dal passo agli elementi del disegno, e dal disegno al
+  passo — un click su un triangolo chiama `ctx.evidenzia(id)`, che emette
+  `figure-highlight`, e il componente seleziona il passo che quell'elemento lo
+  nomina. Un click nel vuoto (`id` nullo) spegne tutto.
+
+Una premessa viene accesa solo se è **davvero nella catena**: in `ordina` e
+`costruisci` un passo può citarne una che lo studente non ha ancora messo, e la
+figura non deve anticipargliela.
 
 Ogni riferimento è un `<button>`: funziona da tastiera e, su touch dove l'hover
-non esiste, con tap sticky.
+non esiste, con tap sticky. Nella catena, i passi che hanno un `fig:` portano una
+piccola spia: senza, non c'è modo di sapere quali vale la pena aprire.
 
 ---
 

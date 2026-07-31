@@ -37,6 +37,41 @@ def _find_lesson_files(course_dir):
     return [legacy] if legacy.exists() else []
 
 
+def _load_theory(course_dir):
+    """
+    Legge content/<corso>/teoria.yaml: la cassetta degli attrezzi del corso.
+
+    La teoria è un'entità DI CORSO, non del singolo teorema (il secondo criterio
+    di congruenza serve in dodici dimostrazioni e va scritto una volta sola).
+    Restituisce un dict vuoto se il file non c'è: un corso senza dimostrazioni
+    non ha teoria da dichiarare.
+    """
+    theory_file = course_dir / 'teoria.yaml'
+    if not theory_file.exists():
+        return {}
+    with open(theory_file, 'r', encoding='utf-8') as f:
+        return yaml.safe_load(f) or {}
+
+
+def _scan_theorem_ids(lesson_files):
+    """
+    Id di tutti i teoremi del corso, nell'ordine in cui sono dimostrati.
+
+    Serve a distinguere una garanzia che non esiste da una dimostrata più
+    avanti nel corso: la seconda è una dipendenza circolare nella progressione
+    e va segnalata come tale.
+    """
+    pattern = re.compile(r'^:::theorem[ \t]+([^\n]*)$', re.MULTILINE)
+    ids = []
+    for lesson_file in lesson_files:
+        text = lesson_file.read_text(encoding='utf-8')
+        for opening in pattern.findall(text):
+            match = re.search(r'(?:^|\s)id=(?:"([^"]*)"|(\S+))', opening)
+            if match:
+                ids.append(match.group(1) or match.group(2))
+    return ids
+
+
 def _build_course(course_dir, parser, math_default=False):
     """Compila un singolo corso (cartella) → dict pronto per il dump JSON."""
     lesson_files = _find_lesson_files(course_dir)
@@ -53,6 +88,11 @@ def _build_course(course_dir, parser, math_default=False):
     # Flag matematica: metadata.yaml del corso > default globale (site.yaml).
     # Il parser è riusato tra corsi, quindi va risettato per OGNI corso.
     parser.math_backticks = bool(metadata.get('math', math_default))
+
+    # Teoria del corso per i blocchi :::theorem. Come il flag math, va risettata
+    # per OGNI corso: il parser è riusato, e la teoria si arricchisce lezione
+    # dopo lezione con i teoremi dimostrati.
+    parser.set_course_theory(_load_theory(course_dir), _scan_theorem_ids(lesson_files))
 
     lessons = []
     for lesson_file in lesson_files:
