@@ -6,26 +6,27 @@
      (DIMOSTRAZIONI.md §8). Niente `ordina`/`costruisci`: uno scope non è
      esprimibile in una catena da riordinare. -->
 :::theorem id=secondo-criterio modi=leggi,giustifica
+figura: geometria-secondo-criterio
 
 ## ipotesi
-- $BC \cong B'C'$
-- $A\hat{B}C \cong A'\hat{B'}C'$
-- $A\hat{C}B \cong A'\hat{C'}B'$
+- $BC \cong B'C'$ {fig: lati}
+- $A\hat{B}C \cong A'\hat{B'}C'$ {fig: angoli-b}
+- $A\hat{C}B \cong A'\hat{C'}B'$ {fig: angoli-c}
 
 ## tesi
-- Il triangolo $ABC \cong$ il triangolo $A'B'C'$
+- Il triangolo $ABC \cong$ il triangolo $A'B'C'$ {fig: triangoli}
 
 ## dimostrazione
 - I due triangoli **non** sono congruenti {assurdo: t1}
 - Non può essere $AB \cong A'B'$ {da: s1,h1,h2, per: primo-criterio}
 - Dunque $AB > A'B'$ oppure $AB < A'B'$ {da: p1, per: confronto-segmenti}
 
-### caso $AB > A'B'$ {da: p2}
-- Si prenda su $AB$ il punto $P$ tale che $BP \cong B'A'$ {costruzione, da: a1, per: assioma-trasporto}
-- Il triangolo $PBC \cong$ il triangolo $A'B'C'$ {da: c1,h1,h2, per: primo-criterio}
-- $P\hat{C}B \cong A'\hat{C'}B'$ {da: a2, per: elementi-corrispondenti}
+### caso $AB > A'B'$ {da: p2, fig: lati-ab}
+- Si prenda su $AB$ il punto $P$ tale che $BP \cong B'A'$ {costruzione, da: a1, per: assioma-trasporto, fig: punto-p}
+- Il triangolo $PBC \cong$ il triangolo $A'B'C'$ {da: c1,h1,h2, per: primo-criterio, fig: triangolo-p}
+- $P\hat{C}B \cong A'\hat{C'}B'$ {da: a2, per: elementi-corrispondenti, fig: angolo-pcb}
 - $P\hat{C}B \cong A\hat{C}B$ {da: a3,h3, per: proprieta-transitiva}
-- $P\hat{C}B < A\hat{C}B$ {da: c1, per: parte-minore-del-tutto}
+- $P\hat{C}B < A\hat{C}B$ {da: c1, per: parte-minore-del-tutto, fig: confronto-angoli}
 - {contraddizione, da: a4,a5}
 
 ### caso $AB < A'B'$ {da: p2}
