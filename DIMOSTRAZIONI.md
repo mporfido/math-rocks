@@ -115,6 +115,13 @@ dall'autore perché il feedback sia mirato e non generico:
 Il secondo è il più formativo: costringe a distinguere *un argomento valido* da
 *uno che sembra valido perché la conclusione è giusta*.
 
+Proprio per questo `garanzia-sbagliata` vive **solo dove le garanzie si vedono**
+(§4): la sua conclusione è giusta per definizione del tipo, quindi il testo
+coincide con quello di un passo vero. Con la garanzia in chiaro i due cartellini
+si distinguono, ed è tutto l'esercizio; senza, sono cloni e sceglierne uno è un
+sorteggio. In `costruisci` il componente li tiene fuori dal mucchio da sé:
+l'autore può scriverli senza pensarci.
+
 ---
 
 ## 3. Sintassi d'autore
@@ -192,7 +199,7 @@ lista di passi.
 | `ordina`     | solo ipotesi | visibili | no        | La dipendenza logica |
 | `giustifica` | tutti      | **da scegliere** | no  | Quale teorema autorizza questo passo |
 | `completa`   | tutti meno `mancanti` | visibili | sì | Riconoscere il passo che manca, e gli intrusi |
-| `costruisci` | solo ipotesi | da scegliere | sì | Tutto insieme |
+| `costruisci` | solo ipotesi | da scegliere | sì, ma non i `garanzia-sbagliata` (§2.4) | Tutto insieme |
 
 In `completa` i passi da togliere sono scelti **deterministicamente** (seed
 dall'id del teorema), non elencati a mano dall'autore: un elenco di id nel
