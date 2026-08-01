@@ -294,6 +294,480 @@ def process_expr(content, expr_counter):
     return processed, replacements, expr_counter
 
 
+# Sezione del blocco :::theorem → statuto dei passi che contiene.
+# I nomi delle sezioni sono SINTASSI (fissi); le etichette mostrate a schermo
+# sono invece attributi con default (vedi DIMOSTRAZIONI.md §3).
+THEOREM_SECTIONS = {
+    'ipotesi': 'ipotesi',
+    'tesi': 'tesi',
+    'dimostrazione': 'dedotto',
+    'distrattori': None,      # non sono passi: non hanno statuto
+}
+
+# Prefisso degli id impliciti, per sezione
+THEOREM_PREFIXES = {
+    'ipotesi': 'h',
+    'tesi': 't',
+    'dimostrazione': 'p',
+    'distrattori': 'd',
+}
+
+# Parola riservata nell'annotazione: marca un passo di COSTRUZIONE, che non
+# asserisce ma introduce un oggetto (DIMOSTRAZIONI.md §2.5). Sta nella
+# dimostrazione, dove l'atto avviene, ma ha un suo namespace di id (`c1, c2…`)
+# perché non è un anello della catena deduttiva come gli altri.
+THEOREM_COSTRUZIONE = 'costruzione'
+THEOREM_COSTRUZIONE_PREFIX = 'c'
+
+THEOREM_LABELS = {
+    'ipotesi': 'Ipotesi',
+    'tesi': 'Tesi',
+    'dimostrazione': 'Dimostrazione',
+}
+
+DISTRACTOR_TYPES = ('inutile', 'garanzia-sbagliata', 'falso')
+
+
+def _parse_theorem_attrs(line):
+    """
+    Parsa gli attributi della riga di apertura `:::theorem ...`.
+
+    Accetta `chiave=valore` e `chiave="valore con spazi"`.
+    """
+    attrs = {}
+    for match in re.finditer(r'([\w-]+)=(?:"([^"]*)"|(\S+))', line):
+        key = match.group(1).lower()
+        attrs[key] = match.group(2) if match.group(2) is not None else match.group(3)
+    return attrs
+
+
+def _parse_annotation(raw):
+    """
+    Parsa l'annotazione in coda a una riga: `{t1, da: p2,p3, per: crit2}`.
+
+    Restituisce (riferimento, campi):
+    - `riferimento` è il token nudo iniziale (l'id di una tesi referenziata),
+      `None` se assente;
+    - i valori sono stringhe; le liste (`da: p2,p3`) restano da splittare.
+
+    Le virgole separano i campi, ma compaiono anche DENTRO un valore
+    (`da: p2,p3,p4`): un frammento senza `:` è la continuazione del campo
+    precedente, non un campo nuovo.
+    """
+    ref = None
+    fields = {}
+    key = None
+    for part in raw.split(','):
+        part = part.strip()
+        if not part:
+            continue
+        if ':' in part:
+            name, _, value = part.partition(':')
+            key = name.strip().lower()
+            fields[key] = value.strip()
+        elif key is None:
+            ref = part
+        else:
+            fields[key] = f'{fields[key]},{part}' if fields[key] else part
+    return ref, fields
+
+
+def _split_theorem_sections(body):
+    """
+    Divide il corpo del blocco in sezioni `## nome`.
+
+    Restituisce (sezioni, preambolo): `sezioni` è {nome: [righe grezze]},
+    `preambolo` sono le righe `chiave: valore` prima della prima sezione
+    (oggi solo `figura:`).
+    """
+    sections = {}
+    preamble = {}
+    current = None
+
+    for line in body.split('\n'):
+        stripped = line.strip()
+        if not stripped:
+            continue
+        heading = re.match(r'^#{1,6}\s+(.+)$', stripped)
+        if heading:
+            name = heading.group(1).strip().lower()
+            if name not in THEOREM_SECTIONS:
+                raise ValueError(
+                    f"sezione '{name}' non riconosciuta in :::theorem "
+                    f"(ammesse: {', '.join(THEOREM_SECTIONS)})"
+                )
+            current = name
+            sections.setdefault(current, [])
+            continue
+        if current is None:
+            key, sep, value = stripped.partition(':')
+            if sep and re.fullmatch(r'[\w-]+', key.strip()):
+                preamble[key.strip().lower()] = value.strip()
+            continue
+        sections[current].append(stripped)
+
+    return sections, preamble
+
+
+def _parse_theorem_item(line, section, counters, where):
+    """
+    Parsa una riga `- testo {da: …, per: …}` di una sezione.
+
+    Restituisce un dict con id, testo, ref (tesi referenziata) e i campi
+    dell'annotazione già normalizzati.
+
+    `counters` è il contatore degli id impliciti della sezione, per prefisso:
+    le costruzioni hanno un namespace tutto loro (`c1, c2…`), così aggiungerne
+    una non rinumera i passi dedotti già scritti.
+    """
+    item_match = re.match(r'^-\s*(.*)$', line)
+    if not item_match:
+        raise ValueError(f"riga non riconosciuta nella sezione '{section}': {line}")
+
+    rest = item_match.group(1).strip()
+
+    # L'annotazione è l'ULTIMO gruppo tra graffe a fine riga: così un `${a}` o
+    # un `\{` nel testo non viene scambiato per annotazione.
+    ann_match = re.search(r'\{([^{}]*)\}\s*$', rest)
+    ref, fields = (None, {})
+    if ann_match:
+        ref, fields = _parse_annotation(ann_match.group(1))
+        rest = rest[:ann_match.start()].strip()
+
+    # Il token nudo è di norma la tesi referenziata; `costruzione` è la sola
+    # parola riservata, e marca il passo che introduce un oggetto.
+    costruzione = ref == THEOREM_COSTRUZIONE
+    if costruzione:
+        ref = None
+        if section != 'dimostrazione':
+            raise ValueError(
+                f"{where}: `costruzione` compare nella sezione '{section}'; "
+                'una costruzione è un atto della dimostrazione, non un dato'
+            )
+
+    # `per` è la sintassi d'autore, `perche` il nome del campo nel modello:
+    # accettiamo entrambi in scrittura.
+    warrant = fields.get('per') or fields.get('perche')
+    premises = [p.strip() for p in fields.get('da', '').split(',') if p.strip()]
+
+    prefisso = (THEOREM_COSTRUZIONE_PREFIX if costruzione
+                else THEOREM_PREFIXES[section])
+    counters[prefisso] = counters.get(prefisso, 0) + 1
+
+    return {
+        'id': fields.get('id') or f'{prefisso}{counters[prefisso]}',
+        'testo': rest,
+        'ref': ref,
+        'costruzione': costruzione,
+        'da': premises,
+        'perche': warrant,
+        'fig': fields.get('fig'),
+        'tipo': fields.get('tipo'),
+    }
+
+
+def _check_theorem_cycles(steps, where):
+    """Solleva ValueError se il grafo delle premesse contiene un ciclo."""
+    graph = {s['id']: s['da'] for s in steps}
+    state = {}  # id → 1 in visita, 2 chiuso
+
+    def visit(node, path):
+        if state.get(node) == 2:
+            return
+        if state.get(node) == 1:
+            ciclo = ' → '.join(path[path.index(node):] + [node])
+            raise ValueError(f'{where}: ciclo nelle premesse ({ciclo})')
+        state[node] = 1
+        for premise in graph.get(node, []):
+            visit(premise, path + [node])
+        state[node] = 2
+
+    for step_id in graph:
+        visit(step_id, [])
+
+
+def _check_theorem_warrant(warrant, teoria, course_theorems, where):
+    """
+    Verifica che la garanzia citata esista nella teoria del corso.
+
+    `teoria` contiene le voci di `teoria.yaml` PIÙ i teoremi già dimostrati
+    fino a questo punto del corso: citare un teorema dimostrato più avanti
+    significa non trovarlo qui, ed è un errore di progressione.
+    """
+    if teoria is None or warrant is None or warrant in teoria:
+        return
+    if course_theorems and warrant in course_theorems:
+        raise ValueError(
+            f"{where}: la garanzia '{warrant}' è un teorema dimostrato più "
+            'avanti nel corso (dipendenza circolare nella progressione)'
+        )
+    raise ValueError(f"{where}: la garanzia '{warrant}' non esiste nella teoria del corso")
+
+
+def process_theorem(content, theorem_counter, render_text=None,
+                    teoria=None, course_theorems=None, collect=None, titoli=None):
+    """
+    Converte blocchi :::theorem ... ::: in <x-theorem> web component.
+
+    Sintassi (vedi DIMOSTRAZIONI.md per il modello dati completo):
+
+        :::theorem id=diag-par titolo="In un parallelogramma le diagonali…" modi=leggi,ordina
+        figura: parallelogramma-diagonali
+
+        ## ipotesi
+        - ABCD è un parallelogramma {fig: quadrilatero}
+
+        ## tesi
+        - $AM \\cong MC$
+
+        ## dimostrazione
+        - Si tracci la diagonale AC {costruzione, da: h1}
+        - AB è parallelo a DC {da: h1, per: def-par}
+        - {t1, da: p1,c1, per: corr}
+
+        ## distrattori
+        - $AC \\cong BD$ {per: diag-rett, tipo: falso}
+        :::
+
+    **Sezioni in scrittura, lista piatta in memoria**: lo `statuto` di ogni
+    passo è derivato dalla sezione che lo contiene (`ipotesi`/`dedotto`/`tesi`),
+    e ipotesi e tesi non sono duplicate nell'intestazione: quella è
+    renderizzata dai passi stessi. L'ultimo passo non riscrive la tesi, la
+    **referenzia** (`- {t1, da: p5, per: corr}`): il testo viene da `t1` e la
+    catena ha un nodo terminale verificabile.
+
+    L'unica eccezione alla regola "statuto = sezione" è la **costruzione**
+    (`{costruzione, …}`, id `c1, c2…`): un passo che non asserisce ma introduce
+    un oggetto. Sta nella dimostrazione perché è lì che l'atto avviene — e non
+    fra le ipotesi, dove finirebbe per far credere che l'oggetto fosse dato.
+
+    Attributi della riga di apertura: `id` (registra il teorema nella teoria del
+    corso), `titolo`, `modi` (default `leggi`), `mancanti` (default 2), `figura`
+    (sketch mostrato accanto ai passi: i `fig:` ne nominano gli elementi);
+    `ipotesi`/`tesi`/`dimostrazione` ridefiniscono le etichette mostrate
+    (in fisica: Dati / Richiesto / Soluzione).
+
+    Validazione in build (fallisce rumorosamente, DIMOSTRAZIONI.md §6): garanzia
+    inesistente nella teoria o dimostrata più avanti nel corso, `da:` che punta a
+    un id inesistente, cicli nel grafo delle premesse, tesi non raggiunta.
+
+    Come :::p5 e :::expr il blocco viene estratto in un marker: il corpo contiene
+    heading, liste e graffe che mistune e gli altri preprocessori
+    interpreterebbero.
+
+    Args:
+        content: Contenuto markdown
+        theorem_counter: Contatore per ID univoci
+        render_text: Callable opzionale che renderizza il markdown inline del
+            testo di ogni passo (`$…$`, grassetto, [[blank]])
+        teoria: Dict della teoria del corso (id → {nome, enunciato, tipo}).
+            Viene ARRICCHITO in loco con i teoremi dimostrati: un blocco con
+            `id=` entra nella teoria e i teoremi successivi possono citarlo.
+            Se None, la validazione delle garanzie è saltata.
+        course_theorems: Insieme degli id di TUTTI i teoremi del corso, per
+            distinguere "garanzia inesistente" da "dimostrata più avanti"
+        collect: Lista opzionale a cui appendere la struttura di ogni teorema
+            (id, titolo, passi, distrattori, figura, modi, html). Serve a chi
+            compila un CORPUS e deve leggere le garanzie per costruire il grafo
+            (build_corpus.py): l'HTML da solo obbligherebbe a rifare il parsing
+            all'indietro dagli attributi.
+
+    Returns:
+        Tuple (contenuto con marker, dict marker→HTML, nuovo valore counter)
+    """
+    pattern = re.compile(r'^:::theorem[ \t]*([^\n]*)\n(.*?)\n:::[ \t]*$',
+                         re.DOTALL | re.MULTILINE)
+    replacements = {}
+    render = render_text or (lambda text: text)
+
+    def replace_theorem(match):
+        nonlocal theorem_counter
+
+        attrs = _parse_theorem_attrs(match.group(1))
+        sections, preamble = _split_theorem_sections(match.group(2))
+        # Le righe `chiave: valore` nel corpo (oggi `figura:`) non sovrascrivono
+        # un attributo esplicito sulla riga di apertura.
+        for key, value in preamble.items():
+            attrs.setdefault(key, value)
+
+        # L'enunciato può venire da fuori (in un corpus è teoria.yaml a
+        # possederlo): l'attributo `titolo=` serve solo a chi scrive un teorema
+        # che vive dentro una lezione e non ha un registro alle spalle.
+        titolo = attrs.get('titolo') or (titoli or {}).get(attrs.get('id'), '')
+        where = f"teorema '{attrs.get('id') or titolo or theorem_counter}'"
+
+        # --- Parsing delle sezioni in liste di voci ---------------------------
+        items = {}
+        for section in THEOREM_SECTIONS:
+            counters = {}
+            items[section] = [
+                _parse_theorem_item(line, section, counters, where)
+                for line in sections.get(section, [])
+            ]
+
+        if not items['tesi']:
+            raise ValueError(f'{where}: manca la sezione "## tesi"')
+
+        tesi_by_id = {item['id']: item for item in items['tesi']}
+
+        # --- Lista piatta: ipotesi + passi della dimostrazione ----------------
+        passi = []
+        for item in items['ipotesi']:
+            if item['perche']:
+                raise ValueError(
+                    f"{where}: l'ipotesi '{item['id']}' ha una garanzia; "
+                    'le ipotesi valgono per ipotesi'
+                )
+            passi.append({
+                'id': item['id'], 'testo': item['testo'],
+                'statuto': 'ipotesi', 'da': [], 'perche': None, 'fig': item['fig'],
+            })
+
+        raggiunte = set()
+        for item in items['dimostrazione']:
+            if item['ref']:
+                # Passo che referenzia una tesi: il testo viene da lì.
+                tesi = tesi_by_id.get(item['ref'])
+                if tesi is None:
+                    raise ValueError(
+                        f"{where}: il passo referenzia la tesi '{item['ref']}', "
+                        'che non esiste'
+                    )
+                if item['testo']:
+                    raise ValueError(
+                        f"{where}: il passo che referenzia '{item['ref']}' non "
+                        'deve riscrivere il testo della tesi'
+                    )
+                raggiunte.add(item['ref'])
+                passi.append({
+                    'id': tesi['id'], 'testo': tesi['testo'], 'statuto': 'tesi',
+                    'da': item['da'], 'perche': item['perche'],
+                    'fig': item['fig'] or tesi['fig'],
+                })
+            else:
+                # Una costruzione non asserisce, introduce: se ne può dichiarare
+                # la garanzia (l'assioma che ne assicura l'esistenza), ma quando
+                # manca vale "per costruzione" e non è un buco da riempire.
+                passi.append({
+                    'id': item['id'], 'testo': item['testo'],
+                    'statuto': 'costruzione' if item['costruzione'] else 'dedotto',
+                    'da': item['da'], 'perche': item['perche'], 'fig': item['fig'],
+                })
+
+        # --- Validazione (DIMOSTRAZIONI.md §6) -------------------------------
+        ids = set()
+        for passo in passi:
+            if passo['id'] in ids:
+                raise ValueError(f"{where}: id di passo duplicato '{passo['id']}'")
+            ids.add(passo['id'])
+
+        for passo in passi:
+            for premise in passo['da']:
+                if premise not in ids:
+                    raise ValueError(
+                        f"{where}: il passo '{passo['id']}' cita la premessa "
+                        f"'{premise}', che non esiste"
+                    )
+            _check_theorem_warrant(passo['perche'], teoria, course_theorems,
+                                   f"{where}, passo '{passo['id']}'")
+
+        _check_theorem_cycles(passi, where)
+
+        non_raggiunte = [t['id'] for t in items['tesi'] if t['id'] not in raggiunte]
+        if non_raggiunte:
+            raise ValueError(
+                f"{where}: nessun passo raggiunge la tesi "
+                f"{', '.join(non_raggiunte)} (serve una riga "
+                f"`- {{{non_raggiunte[0]}, da: …, per: …}}`)"
+            )
+
+        distrattori = []
+        for item in items['distrattori']:
+            tipo = item['tipo'] or 'inutile'
+            if tipo not in DISTRACTOR_TYPES:
+                raise ValueError(
+                    f"{where}: distrattore '{item['id']}' con tipo '{tipo}' "
+                    f"non riconosciuto (ammessi: {', '.join(DISTRACTOR_TYPES)})"
+                )
+            _check_theorem_warrant(item['perche'], teoria, course_theorems,
+                                   f"{where}, distrattore '{item['id']}'")
+            distrattori.append({
+                'id': item['id'], 'testo': item['testo'],
+                'perche': item['perche'], 'tipo': tipo,
+            })
+
+        # --- Il teorema dimostrato entra nella teoria del corso ---------------
+        if teoria is not None and attrs.get('id'):
+            teoria.setdefault(attrs['id'], {
+                'nome': titolo or attrs['id'],
+                'enunciato': titolo or attrs['id'],
+                'tipo': 'teorema',
+            })
+
+        # --- Serializzazione --------------------------------------------------
+        for passo in passi:
+            passo['testo'] = render(passo['testo'])
+        for distrattore in distrattori:
+            distrattore['testo'] = render(distrattore['testo'])
+
+        # Nel componente la teoria serve come menu delle garanzie: ne bastano le
+        # voci citate (dai passi e dai distrattori), non l'intero corso.
+        citate = [p['perche'] for p in passi] + [d['perche'] for d in distrattori]
+        teoria_usata = {
+            key: value for key, value in (teoria or {}).items()
+            if key in set(filter(None, citate))
+        }
+
+        etichette = {
+            key: attrs.get(key, default) for key, default in THEOREM_LABELS.items()
+        }
+
+        html_attrs = [f'id="theorem-{theorem_counter}"']
+        if attrs.get('id'):
+            html_attrs.append(f'data-theorem-id="{html_lib.escape(attrs["id"], quote=True)}"')
+        html_attrs.append(f'data-titolo="{html_lib.escape(render(titolo), quote=True)}"')
+        html_attrs.append(f'data-modi="{html_lib.escape(attrs.get("modi", "leggi"), quote=True)}"')
+        html_attrs.append(f'data-mancanti="{html_lib.escape(str(attrs.get("mancanti", 2)), quote=True)}"')
+        if attrs.get('figura'):
+            html_attrs.append(f'data-figura="{html_lib.escape(attrs["figura"], quote=True)}"')
+            # Altezza SUGGERITA del canvas: uno sketch che si dimensiona da sé
+            # (ctx.setHeight) la ignora.
+            if attrs.get('figura-altezza'):
+                html_attrs.append(
+                    f'data-figura-altezza="{html_lib.escape(attrs["figura-altezza"], quote=True)}"')
+        html_attrs.append(f'data-etichette="{html_lib.escape(json.dumps(etichette, ensure_ascii=False))}"')
+        html_attrs.append(f'data-passi="{html_lib.escape(json.dumps(passi, ensure_ascii=False))}"')
+        # Le tesi in ordine di dichiarazione: l'intestazione le mostra così,
+        # a prescindere da dove la dimostrazione le raggiunge.
+        html_attrs.append(f'data-tesi="{html_lib.escape(json.dumps([t["id"] for t in items["tesi"]]))}"')
+        if distrattori:
+            html_attrs.append(f'data-distrattori="{html_lib.escape(json.dumps(distrattori, ensure_ascii=False))}"')
+        if teoria_usata:
+            html_attrs.append(f'data-teoria="{html_lib.escape(json.dumps(teoria_usata, ensure_ascii=False))}"')
+
+        marker = f'XTHEOREMBLOCK{theorem_counter}X'
+        html = f'<x-theorem {" ".join(html_attrs)}></x-theorem>'
+        replacements[marker] = html
+
+        if collect is not None:
+            collect.append({
+                'id': attrs.get('id'),
+                'titolo': titolo,
+                'passi': passi,
+                'tesi': [t['id'] for t in items['tesi']],
+                'distrattori': distrattori,
+                'figura': attrs.get('figura'),
+                'modi': attrs.get('modi', 'leggi'),
+                'html': html,
+            })
+
+        theorem_counter += 1
+        return marker
+
+    processed = pattern.sub(replace_theorem, content)
+    return processed, replacements, theorem_counter
+
+
 def process_math(content):
     """
     Converte backtick contenenti espressioni matematiche in delimitatori LaTeX

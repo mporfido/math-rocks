@@ -921,9 +921,560 @@ x-p5 {
     width: 56px;
 }
 
+/* ========== Dimostrazioni (<x-theorem>) ========== */
+x-theorem {
+    display: block;
+    margin: 1.5rem 0;
+}
+
+/* La scheda è una griglia a due colonne che parte dal bordo alto: la colonna
+   laterale corre accanto a TUTTO, enunciato e ipotesi comprese, così la figura
+   si guarda insieme a ciò che dichiara. Le righe di sinistra tengono la loro
+   spaziatura a margini, quindi qui c'è solo il gap fra le colonne. */
+.thm {
+    background: var(--surface);
+    border: 2px solid var(--ink);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    display: grid;
+    /* minmax(0,…): senza, un <select> con opzioni lunghe (le garanzie da
+       scegliere) impone la propria larghezza minima alla colonna e spinge la
+       cassetta degli attrezzi fuori dal riquadro. */
+    grid-template-columns: minmax(0, 1fr) 260px;
+    column-gap: 1.75rem;
+    grid-template-areas:
+        "testata  colonna"
+        "modi     colonna"
+        "consegna colonna"
+        "lavoro   colonna";
+    align-items: start;
+    align-content: start;
+}
+
+/* Con la figura la colonna è più larga: sotto i ~300px un disegno geometrico
+   con le lettere dei vertici non si legge più. */
+.thm--con-figura {
+    grid-template-columns: minmax(0, 1fr) 320px;
+}
+
+.thm-testata { grid-area: testata; }
+.thm-modi { grid-area: modi; }
+.thm-consegna { grid-area: consegna; }
+.thm-lavoro { grid-area: lavoro; }
+.thm-colonna { grid-area: colonna; }
+
+.thm [hidden] {
+    display: none !important;
+}
+
+.thm-testata {
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.thm-occhiello,
+.thm-titoletto {
+    font-family: var(--font-disp);
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--ink-soft);
+    margin: 0 0 0.5rem;
+}
+
+.thm-titolo {
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: 1.25rem;
+    line-height: 1.3;
+    margin: 0 0 0.75rem;
+    max-width: 34em;
+}
+
+.thm-dati {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 2rem;
+}
+
+.thm-dati div {
+    max-width: 34em;
+}
+
+.thm-dati b {
+    display: block;
+    font-family: var(--font-disp);
+    font-weight: 600;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+}
+
+/* Ipotesi e tesi: una per riga, così si contano a colpo d'occhio */
+.thm-elenco {
+    font-family: var(--font-body);
+    list-style: none;
+    margin: 0.15rem 0 0;
+    padding: 0;
+}
+
+.thm-elenco li {
+    padding-left: 1.35rem;
+    text-indent: -1.35rem;
+}
+
+.thm-elenco li + li {
+    margin-top: 0.2rem;
+}
+
+.thm-elenco li::before {
+    content: "—";
+    color: var(--ink-soft);
+    margin-right: 0.35rem;
+}
+
+/* Navigazione fra le modalità: compare solo se ce n'è più d'una */
+.thm-modi {
+    display: flex;
+    flex-wrap: wrap;
+    border: 2px solid var(--ink);
+    border-radius: 6px;
+    overflow: hidden;
+    width: max-content;
+    max-width: 100%;
+    margin-bottom: 0.75rem;
+}
+
+.thm-modi button {
+    font-family: var(--font-disp);
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 7px 14px;
+    background: transparent;
+    border: 0;
+    border-right: 2px solid var(--ink);
+    color: var(--ink);
+    cursor: pointer;
+}
+
+.thm-modi button:last-child {
+    border-right: 0;
+}
+
+.thm-modi button[aria-pressed="true"] {
+    background: var(--ink);
+    color: var(--carta);
+}
+
+.thm-modi button:hover:not([aria-pressed="true"]) {
+    background: var(--ink-wash-2);
+}
+
+.thm-consegna {
+    font-family: var(--font-body);
+    color: var(--ink-soft);
+    margin: 0 0 1.25rem;
+    max-width: 52em;
+}
+
+/* La colonna laterale segue la lettura: figura e cassetta degli attrezzi
+   servono TUTTI i passi, anche gli ultimi, e una dimostrazione lunga li
+   lascerebbe indietro in cima alla pagina. Sta appiccicata sotto l'header del
+   sito (come .course-sidebar) e non supera mai l'altezza dello schermo.
+   A colonna singola il riquadro sparisce (§responsive): figura e cassetta
+   tornano a essere celle della griglia esterna, per poterle separare. */
+.thm-colonna {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    position: sticky;
+    /* L'header del sito è alto ~71px ed è a sua volta sticky: sotto di lui, con
+       un dito d'aria. */
+    top: 87px;
+    /* Su uno schermo basso figura + teoria non ci stanno insieme: allora scorre
+       la colonna al proprio interno, con la figura in cima. Su uno schermo alto
+       ci stanno e questo vincolo non si vede nemmeno. */
+    max-height: calc(100vh - 103px);
+    overflow-y: auto;
+}
+
+.thm-colonna > .thm-figura {
+    flex: 0 0 auto;
+}
+
+.thm-figura {
+    margin: 0;
+    border: 2px solid var(--ink);
+    border-radius: var(--radius);
+    padding: 0.5rem;
+    background: var(--carta);
+}
+
+.thm-figura figcaption {
+    font-size: 0.75rem;
+    line-height: 1.4;
+    color: var(--ink-soft);
+    margin-top: 0.4rem;
+}
+
+/* La catena dei passi, con lo spazio a sinistra per i fili delle premesse */
+.thm-catena {
+    position: relative;
+    padding-left: 34px;
+    min-height: 40px;
+    margin-bottom: 1.25rem;
+}
+
+.thm-fili {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: visible;
+}
+
+.thm-riga {
+    position: relative;
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    background: var(--carta);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--ink);
+    border-radius: 6px;
+    padding: 0.6rem 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.thm-riga--ipotesi {
+    border-left-color: var(--ink-soft);
+}
+
+/* La costruzione non asserisce, introduce: il colore è quello dei quadretti,
+   cioè delle linee che si tracciano. Non tratteggiata: il tratteggio in questa
+   catena vuol già dire "qui il passo selezionato viene riusato". */
+.thm-riga--costruzione {
+    border-left-color: var(--grid);
+}
+
+.thm-riga--tesi {
+    border-left-color: var(--spunta);
+}
+
+.thm-riga--errore {
+    border-color: var(--error);
+    background: var(--error-soft);
+}
+
+/* Passo selezionato: sta in primo piano su carta bianca, col bordo pieno */
+.thm-riga--fuoco {
+    background: var(--surface);
+    border-color: var(--ink);
+    border-left-width: 5px;
+}
+
+/* Ciò su cui il passo poggia: è l'informazione che l'esercizio vuole far
+   vedere, quindi è il colore più deciso della catena */
+.thm-riga--premessa {
+    background: var(--ink-wash-3);
+    border-color: var(--ink);
+    border-left-width: 5px;
+}
+
+/* Dove il passo viene riusato: presente, ma di secondo piano */
+.thm-riga--uso {
+    border-color: var(--ink);
+    border-style: dashed;
+}
+
+/* Tutto il resto arretra mentre c'è una selezione */
+.thm-riga--spenta {
+    opacity: 0.4;
+}
+
+.thm-n {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--ink-soft);
+    min-width: 1rem;
+    padding-top: 0.25rem;
+}
+
+.thm-corpo-riga {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Il testo del passo è un bottone: evidenziare premesse e usi funziona da
+   tastiera e, su touch dove l'hover non esiste, con tap sticky. */
+.thm-testo {
+    display: block;
+    width: 100%;
+    text-align: left;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    color: var(--ink);
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+}
+
+/* Spia: il passo ha un corrispettivo nella figura. Un pallino, non un'icona:
+   deve dire "qui c'è qualcosa da guardare" senza rubare la riga. */
+.thm-spia-fig {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    margin-left: 0.4rem;
+    vertical-align: 0.15em;
+    background: var(--ink-soft);
+    opacity: 0.45;
+}
+
+.thm-riga--fuoco .thm-spia-fig,
+.thm-testo:hover .thm-spia-fig {
+    background: var(--rossa);
+    opacity: 1;
+}
+
+.thm-perche {
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+    margin-top: 0.2rem;
+}
+
+.thm-perche b {
+    color: var(--ink);
+    font-weight: 600;
+}
+
+.thm-riga select {
+    font-family: var(--font-disp);
+    font-size: 0.82rem;
+    margin-top: 0.35rem;
+    max-width: 100%;
+    width: 100%;
+    padding: 3px 5px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: var(--surface);
+    color: var(--ink);
+}
+
+.thm-comandi {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.thm-comandi button {
+    font-size: 0.75rem;
+    line-height: 1;
+    width: 22px;
+    height: 20px;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    background: var(--surface);
+    color: var(--ink-soft);
+    cursor: pointer;
+}
+
+.thm-comandi button:hover {
+    color: var(--ink);
+    border-color: var(--ink);
+}
+
+/* Il mucchio dei cartellini da collocare */
+.thm-banco {
+    border-top: 1px dashed var(--line);
+    padding-top: 0.9rem;
+    margin-bottom: 1.1rem;
+}
+
+.thm-cartellini {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.thm-cartellino {
+    text-align: left;
+    background: var(--carta);
+    border: 1px solid var(--line);
+    border-bottom-width: 3px;
+    border-radius: 6px;
+    padding: 0.55rem 0.75rem;
+    max-width: 100%;
+    color: var(--ink);
+    cursor: pointer;
+}
+
+.thm-cartellino:hover {
+    border-color: var(--ink);
+    background: var(--surface);
+}
+
+/* Nel mucchio una costruzione porta lo stesso bordo che avrà in catena: si
+   riconosce prima di leggerla, e non se ne cerca la garanzia. */
+.thm-cartellino--costruzione {
+    border-left: 3px solid var(--grid);
+}
+
+.thm-tag {
+    display: block;
+    font-family: var(--font-disp);
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--ink-soft);
+    margin-bottom: 0.2rem;
+}
+
+.thm-testo-cartellino {
+    display: block;
+    font-family: var(--font-body);
+}
+
+.thm-vuoto {
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+    font-style: italic;
+    margin: 0;
+}
+
+.thm-azioni {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+}
+
+.thm-azioni button {
+    font-family: var(--font-disp);
+    font-size: 0.95rem;
+    font-weight: 600;
+    padding: 8px 22px;
+    border: 2px solid var(--ink);
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.thm-verifica {
+    background: var(--ink);
+    color: var(--carta);
+}
+
+.thm-verifica:hover {
+    background: var(--rossa);
+    border-color: var(--rossa);
+}
+
+.thm-ricomincia {
+    background: transparent;
+    color: var(--ink);
+}
+
+.thm-ricomincia:hover {
+    background: var(--ink-wash-2);
+}
+
+.thm-esito {
+    display: none;
+    margin-top: 1rem;
+    padding: 0.7rem 0.85rem;
+    border-left: 3px solid;
+    border-radius: 4px;
+    font-size: 0.95rem;
+}
+
+.thm-esito--ok {
+    display: block;
+    border-color: var(--spunta);
+    background: var(--spunta-soft);
+    color: var(--spunta);
+}
+
+.thm-esito--no {
+    display: block;
+    border-color: var(--error);
+    background: var(--error-soft);
+    color: var(--error);
+}
+
+/* Cassetta degli attrezzi: la teoria in cui il teorema vive */
+.thm-attrezzi {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.thm-attrezzi li {
+    background: var(--carta);
+    padding: 0.5rem 0.7rem;
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+.thm-attrezzi li b {
+    display: block;
+    font-family: var(--font-disp);
+    font-weight: 600;
+    font-size: 0.78rem;
+    color: var(--ink);
+}
+
+.thm-attrezzi li span {
+    color: var(--ink-soft);
+}
+
 /* ========== Responsive ========== */
 
 @media (max-width: 768px) {
+    /* A colonna unica la figura va SOPRA i passi — è quello che si guarda
+       mentre si legge — e la cassetta degli attrezzi resta in fondo. Per
+       separarle il riquadro della colonna si dissolve (`display: contents`) e
+       i due tornano celle della griglia della scheda; niente sticky, qui lo
+       schermo non ha una colonna da tenere ferma. */
+    .thm-colonna {
+        display: contents;
+    }
+
+    .thm {
+        padding: 0.9rem;
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "testata"
+            "modi"
+            "consegna"
+            "figura"
+            "lavoro"
+            "attrezzi";
+    }
+
+    /* Senza il gap di colonna la figura e la cassetta si appoggerebbero ai passi:
+       qui la distanza è a margini, come per il resto della scheda. */
+    .thm-figura { grid-area: figura; margin-bottom: 1.25rem; }
+    .thm-attrezzi-box { grid-area: attrezzi; margin-top: 1.25rem; }
+
+    .thm-catena {
+        padding-left: 28px;
+    }
+
     .blank-choices {
         flex-direction: column;
     }

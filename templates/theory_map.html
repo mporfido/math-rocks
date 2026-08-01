@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% import "_assets.html" as assets with context %}
+
+{% block title %}{{ tool.title }} - {{ site_name }}{% endblock %}
+
+{% block extra_css %}
+{{ assets.head_assets(tool.math) }}
+{% endblock %}
+
+{% block content %}
+{# La mappa di un corpus (TEORIA.md): righe = livelli, colonne = aree.
+   Tutto renderizzato qui da Jinja — niente fetch, così la pagina pesa solo
+   quello che mostra e funziona identica su Flask e su GitHub Pages. #}
+<div class="mappa-container">
+    <nav class="breadcrumb">
+        <a href="{{ url_for('tools.tools_index') }}">← Strumenti</a>
+    </nav>
+
+    <header class="tool-header">
+        <h1>{% if tool.icon %}<span class="tool-card-icon" aria-hidden="true">{{ tool.icon }}</span>{% endif %}{{ tool.title }}</h1>
+        {% if tool.description %}<p class="subtitle">{{ tool.description }}</p>{% endif %}
+    </header>
+
+    <div class="mappa"
+         data-mappa
+         style="--mappa-colonne: {{ corpus.aree|length }}">
+
+        {# Intestazione delle colonne: il colore dell'area si legge prima del
+           testo, che su una LIM a tre metri è quello che conta. #}
+        <div class="mappa-intestazioni" role="presentation">
+            {% for area in corpus.aree %}
+            <div class="mappa-area" style="--area-colore: {{ area.colore }}">
+                <span class="mappa-area-nome">{{ area.nome }}</span>
+                {% if area.descrizione %}<span class="mappa-area-desc">{{ area.descrizione }}</span>{% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        {# Gli archi: un overlay SVG che il JS riempie misurando le card. Le
+           posizioni non sono precalcolate perché devono seguire il layout a
+           qualsiasi larghezza. #}
+        <svg class="mappa-archi" data-archi aria-hidden="true"></svg>
+
+        <div class="mappa-griglia">
+            {% for riga in griglia %}
+            <div class="mappa-riga" data-livello="{{ riga.livello }}">
+                <div class="mappa-livello" aria-hidden="true">{{ riga.livello + 1 }}</div>
+                {% for cella in riga.celle %}
+                <div class="mappa-cella">
+                    {% for teorema in cella.teoremi %}
+                    <a class="mappa-card {% if not teorema.ha_dimostrazione %}mappa-card--enunciato{% endif %}"
+                       href="{{ url_for('tools.tool_item', tool_id=tool.id, item_id=teorema.id) }}"
+                       style="--area-colore: {{ cella.area.colore }}"
+                       data-teorema="{{ teorema.id }}"
+                       data-usa="{{ teorema.usa|join(' ') }}"
+                       data-usato-da="{{ teorema.usato_da|join(' ') }}">
+                        <span class="mappa-card-nome">{{ teorema.nome }}</span>
+                        <span class="mappa-card-enunciato">{{ teorema.enunciato }}</span>
+                        {% if not teorema.ha_dimostrazione %}
+                        <span class="mappa-card-stato">solo enunciato</span>
+                        {% endif %}
+                        {# Gli archi a parole: l'unica forma della relazione che
+                           sopravvive dove il grafo non si può disegnare. #}
+                        {% if teorema.usa_nomi %}
+                        <span class="mappa-card-usa">Serve: {{ teorema.usa_nomi|join(', ') }}</span>
+                        {% endif %}
+                    </a>
+                    {% endfor %}
+                </div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <p class="mappa-aiuto">
+        Ogni teorema sta sotto a quelli che gli servono. Passa sopra una card —
+        o toccala — per accendere quello da cui nasce e quello che ne discende;
+        clicca per aprire la dimostrazione.
+    </p>
+
+    {% if corpus.fondamenti %}
+    <details class="mappa-fondamenti">
+        <summary>Definizioni e assiomi <span class="mappa-fondamenti-n">{{ corpus.fondamenti|length }}</span></summary>
+        <p class="mappa-fondamenti-nota">
+            Non sono sulla mappa: valgono ovunque, e disegnarne i collegamenti
+            la renderebbe illeggibile. Ogni teorema elenca quelli che usa.
+        </p>
+        <dl>
+            {% for f in corpus.fondamenti %}
+            <dt>{{ f.nome }} <span class="tipo-badge tipo-{{ f.tipo }}">{{ f.tipo }}</span></dt>
+            <dd>{{ f.enunciato }}</dd>
+            {% endfor %}
+        </dl>
+    </details>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='tools/theory.js') }}"></script>
+{{ assets.mathjax_refresh(tool.math) }}
+{% endblock %}

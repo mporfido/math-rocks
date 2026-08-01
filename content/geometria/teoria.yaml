@@ -1,0 +1,202 @@
+# Il registro della teoria: OGNI nodo della mappa sta qui.
+#
+# In un corpus (vedi TEORIA.md) questo file è l'autorità: elenca tutti i
+# teoremi, anche quelli di cui non è ancora scritta la dimostrazione. Un file
+# .md accanto a questo AGGIUNGE la dimostrazione a una voce che già esiste; non
+# ne crea di nuove.
+#
+# Campi:
+#   nome        titolo della card sulla mappa
+#   enunciato   formulazione estesa
+#   tipo        definizione | assioma | teorema   (default: teorema)
+#   area        obbligatorio per i teoremi: la colonna della mappa
+#   usa         SOLO per i teoremi non ancora dimostrati: i prerequisiti noti,
+#               così il nodo sta al livello giusto prima che la dimostrazione
+#               esista. Quando la dimostrazione arriva viene ignorato (gli
+#               archi li danno i `per:` dei passi) e va cancellato.
+#
+# Definizioni e assiomi non sono nodi della mappa: non generano archi e
+# compaiono nel box richiudibile di chi li usa.
+
+
+# --- Definizioni ------------------------------------------------------------
+definizione-angoli-opposti-al-vertice:
+  nome: Definizione di angoli opposti al vertice
+  enunciato: due angoli i cui lati sono uno il prolungamento dell'altro
+  tipo: definizione
+
+definizione-angoli-complementari:
+  nome: Definizione di angoli complementari
+  enunciato: due angoli la cui somma è un angolo retto ($\frac{\pi}{2}$)
+  tipo: definizione
+  
+definizione-angoli-supplementari:
+  nome: Definizione di angoli supplementari
+  enunciato: due angoli la cui somma è un angolo piatto ($\pi$)
+  tipo: definizione
+
+definizione-punto-medio:
+  nome: Definizione di punto medio di un segmento
+  enunciato: il punto che divide il segmento in due segmenti congruenti
+  tipo: definizione
+
+definizione-bisettrice:
+  nome: Definizione di bisettrice
+  enunciato: la semiretta che divide un angolo in due angoli congruenti
+  tipo: definizione
+
+definizione-isoscele:
+  nome: Definizione di triangolo isoscele
+  enunciato: un triangolo con due lati congruenti
+  tipo: definizione
+  
+definizione-parallelogramma:
+  nome: Definizione di parallelogramma
+  enunciato: un quadrilatero con i lati opposti paralleli
+  tipo: definizione
+
+definizione-rombo:
+  nome: Definizione di rombo
+  enunciato: un quadrilatero con i quattro lati congruenti
+  tipo: definizione
+
+definizione-rettangolo:
+  nome: Definizione di rettangolo
+  enunciato: un parallelogramma con i quattro angoli retti
+  tipo: definizione
+
+elementi-corrispondenti:
+  nome: Elementi corrispondenti
+  enunciato: in due triangoli congruenti gli elementi corrispondenti sono congruenti
+  tipo: definizione
+
+
+# --- Assiomi ----------------------------------------------------------------
+
+assioma-parallela:
+  nome: Assioma della parallela
+  enunciato: per un punto esterno a una retta passa una sola parallela a quella retta
+  tipo: assioma
+
+assioma-angolo-piatto:
+  nome: Somma di angoli adiacenti
+  enunciato: due angoli adiacenti i cui lati esterni sono uno il prolungamento dell'altro formano insieme un angolo piatto
+  tipo: assioma
+
+differenze-congruenti:
+  nome: Differenze di grandezze congruenti
+  enunciato: sottraendo da grandezze congruenti grandezze congruenti si ottengono grandezze congruenti
+  tipo: assioma
+
+proprieta-riflessiva:
+  nome: Proprietà riflessiva
+  enunciato: ogni figura è congruente a se stessa
+  tipo: assioma
+
+proprieta-transitiva:
+  nome: Proprietà transitiva
+  enunciato: due grandezze congruenti a una terza sono congruenti fra loro
+  tipo: assioma
+
+sostituzione:
+  nome: Sostituzione
+  enunciato: grandezze congruenti possono essere sostituite l'una all'altra
+  tipo: assioma
+
+primo-criterio:
+  nome: Primo criterio di congruenza
+  enunciato: Due triangoli con due lati e l'angolo tra essi compreso congruenti sono congruenti
+  tipo: assioma
+
+# --- Congruenza -------------------------------------------------------------
+
+secondo-criterio:
+  nome: Secondo criterio di congruenza
+  enunciato: due triangoli con un lato e i due angoli a esso adiacenti congruenti sono congruenti
+  area: congruenza
+
+terzo-criterio:
+  nome: Terzo criterio
+  enunciato: due triangoli con i tre lati congruenti sono congruenti
+  area: congruenza
+
+supplementari-di-congruenti:
+  nome: Supplementari di angoli congruenti
+  enunciato: angoli supplementari di angoli congruenti sono congruenti
+  area: congruenza
+
+angoli-opposti-al-vertice:
+  nome: Angoli opposti al vertice
+  enunciato: due angoli opposti al vertice sono congruenti
+  area: congruenza
+
+triangolo-isoscele-angoli-base:
+  nome: Angoli alla base dell'isoscele
+  enunciato: in un triangolo isoscele gli angoli alla base sono congruenti
+  area: congruenza
+
+triangolo-due-angoli-congruenti:
+  nome: Inverso dell'isoscele
+  enunciato: un triangolo con due angoli congruenti è isoscele
+  area: congruenza
+  usa: [secondo-criterio]
+
+
+# --- Rette parallele --------------------------------------------------------
+
+angoli-alterni-interni:
+  nome: Angoli alterni interni
+  enunciato: due rette parallele tagliate da una trasversale formano angoli alterni interni congruenti
+  area: parallelismo
+
+criterio-di-parallelismo:
+  nome: Criterio di parallelismo
+  enunciato: se due rette tagliate da una trasversale formano angoli alterni interni congruenti, allora sono parallele
+  area: parallelismo
+
+somma-angoli-triangolo:
+  nome: Somma degli angoli interni
+  enunciato: la somma degli angoli interni di un triangolo è un angolo piatto
+  area: parallelismo
+
+angolo-esterno:
+  nome: Angolo esterno
+  enunciato: un angolo esterno di un triangolo è congruente alla somma dei due angoli interni non adiacenti
+  area: parallelismo
+  usa: [somma-angoli-triangolo, assioma-angolo-piatto]
+
+
+# --- Quadrilateri -----------------------------------------------------------
+
+lati-opposti-parallelogramma:
+  nome: Lati opposti
+  enunciato: in un parallelogramma i lati opposti sono congruenti
+  area: quadrilateri
+
+angoli-opposti-parallelogramma:
+  nome: Angoli opposti
+  enunciato: in un parallelogramma gli angoli opposti sono congruenti
+  area: quadrilateri
+  usa: [lati-opposti-parallelogramma, terzo-criterio]
+
+rombo-e-parallelogramma:
+  nome: Il rombo è un parallelogramma
+  enunciato: un quadrilatero con i quattro lati congruenti ha i lati opposti paralleli
+  area: quadrilateri
+  usa: [terzo-criterio, criterio-di-parallelismo]
+
+diagonali-parallelogramma:
+  nome: Diagonali del parallelogramma
+  enunciato: in un parallelogramma le diagonali si tagliano scambievolmente per metà
+  area: quadrilateri
+
+diagonali-rettangolo:
+  nome: Diagonali del rettangolo
+  enunciato: in un rettangolo le diagonali sono congruenti
+  area: quadrilateri
+  usa: [lati-opposti-parallelogramma, primo-criterio]
+
+diagonali-rombo:
+  nome: Diagonali del rombo
+  enunciato: in un rombo le diagonali si tagliano scambievolmente per metà
+  area: quadrilateri

@@ -13,6 +13,8 @@
 #   icon         emoji opzionale per la card nell'elenco
 #   math         carica MathJax (default: true)
 #   defaults     valori di partenza, usati quando l'URL non ha parametri
+#   corpus       solo per kind: theory — cartella in content/ con i contenuti
+#                dello strumento (default: l'id). Vedi TEORIA.md
 
 tools:
   - id: espressioni
@@ -41,3 +43,12 @@ tools:
         - "2^3 * 2^4"
         - "(3^2)^3 : 3^4"
         - "5^6 : 5^2 * 5"
+
+  - id: geometria
+    kind: theory
+    corpus: geometria
+    title: Geometria euclidea
+    description: >-
+      La teoria come mappa: ogni teorema al suo posto, dai primi alle
+      conseguenze, e ogni dimostrazione da leggere, riordinare o ricostruire.
+    icon: "📐"

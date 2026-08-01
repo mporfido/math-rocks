@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% import "_assets.html" as assets with context %}
+
+{% block title %}{{ teorema.nome }} - {{ tool.title }}{% endblock %}
+
+{% block extra_css %}
+{{ assets.head_assets(tool.math) }}
+{% endblock %}
+
+{% block content %}
+{# La pagina di un teorema del corpus. È l'indirizzo che si condivide con la
+   classe: il path dice quale teorema, la query string come presentarlo
+   (`modi`, `distrattori`) e la legge theory.js. #}
+<div class="teorema-container">
+    <nav class="breadcrumb">
+        <a href="{{ url_for('tools.tool_page', tool_id=tool.id) }}">← {{ tool.title }}</a>
+        {% if area %}
+        <span class="teorema-area" style="--area-colore: {{ area.colore }}">{{ area.nome }}</span>
+        {% endif %}
+    </nav>
+
+    {% if teorema.ha_dimostrazione %}
+    {# L'intestazione (enunciato, ipotesi, tesi) la renderizza il componente
+       dai passi stessi: qui non va riscritta. #}
+    <div class="teorema-corpo" data-teorema="{{ teorema.id }}">
+        {{ teorema.html|safe }}
+    </div>
+    {% else %}
+    <header class="tool-header">
+        <p class="thm-occhiello">Teorema</p>
+        <h1>{{ teorema.enunciato }}</h1>
+    </header>
+    <div class="teorema-mancante">
+        <p><b>La dimostrazione non è ancora scritta.</b></p>
+        <p>
+            L'enunciato però è già parte della teoria: i teoremi qui sotto lo
+            usano come garanzia, e sulla mappa occupa il suo posto.
+        </p>
+    </div>
+    {% endif %}
+
+    {% if teorema.fondamenti %}
+    <details class="teorema-fondamenti">
+        <summary>Definizioni e assiomi usati <span class="mappa-fondamenti-n">{{ teorema.fondamenti|length }}</span></summary>
+        <dl>
+            {% for f in teorema.fondamenti %}
+            <dt>{{ f.nome }} <span class="tipo-badge tipo-{{ f.tipo }}">{{ f.tipo }}</span></dt>
+            <dd>{{ f.enunciato }}</dd>
+            {% endfor %}
+        </dl>
+    </details>
+    {% endif %}
+
+    {# Il vicinato: la teoria si percorre anche da qui, non solo dalla mappa. #}
+    {% if usa or usato_da %}
+    <nav class="teorema-vicinato" aria-label="Teoremi collegati">
+        {% if usa %}
+        <div>
+            <p class="teorema-vicinato-titolo">Poggia su</p>
+            <ul>
+                {% for t in usa %}
+                <li><a href="{{ url_for('tools.tool_item', tool_id=tool.id, item_id=t.id) }}">{{ t.nome }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        {% if usato_da %}
+        <div>
+            <p class="teorema-vicinato-titolo">Serve a dimostrare</p>
+            <ul>
+                {% for t in usato_da %}
+                <li><a href="{{ url_for('tools.tool_item', tool_id=tool.id, item_id=t.id) }}">{{ t.nome }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+{# PRIMA dei componenti: applica i parametri dell'URL agli attributi di
+   <x-theorem>, che li legge una volta sola quando si registra. #}
+<script src="{{ url_for('static', filename='tools/theory.js') }}"></script>
+{{ assets.component_scripts() }}
+{{ assets.mathjax_refresh(tool.math) }}
+{% endblock %}

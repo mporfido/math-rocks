@@ -23,7 +23,10 @@ math-rocks/
 ├── site.yaml                   # Config di ISTANZA: testi sito, lingua, storage_prefix,
 │                               # flag math, tema, preload font (vince sui default engine)
 ├── site_config.py              # Lettore di site.yaml (senza Flask: usato anche dalla build)
+├── tools_config.py             # Lettore di content/tools.yaml (senza Flask: route + build)
 ├── build_courses.py            # Script per compilare corsi da markdown a JSON
+├── build_corpus.py             # Compila i corpora degli strumenti (content/<corpus>/
+│                               # → tools_data/): teoremi, grafo, livelli. Vedi TEORIA.md
 ├── requirements.txt            # Dipendenze Python
 │
 ├── parser/                     # Parser markdown custom
@@ -44,7 +47,9 @@ math-rocks/
 │   ├── course.html             # Panoramica corso (elenco lezioni)
 │   ├── lesson.html             # Viewer step di lezione
 │   ├── tools.html              # Elenco degli strumenti
-│   └── tool.html               # Pagina di un singolo strumento
+│   ├── tool.html               # Pagina di un singolo strumento
+│   ├── theory_map.html         # Mappa di un corpus (kind: theory)
+│   └── theory_theorem.html     # Pagina di un teorema del corpus
 │
 ├── static/                     # Asset statici (CSS, JS)
 │   ├── style.css               # Stili strutturali engine (+ token di fallback neutro)
@@ -62,6 +67,9 @@ math-rocks/
 │
 ├── content/                    # Contenuti dei corsi (sorgente)
 │   ├── tools.yaml              # Config di ISTANZA: quali strumenti espone il sito
+│   ├── geometria/              # Un CORPUS = la teoria di uno strumento (TEORIA.md):
+│   │                           # teoria.yaml (registro dei nodi), aree.yaml
+│   │                           # (le colonne), *.md (le dimostrazioni)
 │   └── esempi/                 # Un CORSO = una cartella
 │       ├── metadata.yaml       # Metadati corso (titolo, descrizione, colore, progression)
 │       ├── content-1.md        # Una LEZIONE = un file content-N.md (step separati da ---)
@@ -69,6 +77,9 @@ math-rocks/
 │
 ├── courses_data/               # Corsi compilati (generati da build_courses.py)
 │   └── esempi.json             # JSON: { id, metadata, lessons: [ { steps... } ] }
+│
+├── tools_data/                 # Corpora compilati (generati da build_corpus.py)
+│   └── geometria.json          # JSON: { id, aree, teoremi: [ { livello, usa... } ] }
 │
 ├── README.md                   # Introduzione e setup
 ├── GETTING_STARTED.md          # Guida rapida per iniziare
@@ -87,7 +98,10 @@ math-rocks/
 - **routes/tools.py**: Blueprint delle pagine-strumento:
   - `/tools/` → elenco degli strumenti esposti dall'istanza
   - `/tools/<tool_id>/` → strumento a pagina intera, configurato dai **parametri
-    della query string** (letti dal JS, non dal server: il sito è statico)
+    della query string** (letti dal JS, non dal server: il sito è statico).
+    Per `kind: theory` è la mappa del corpus
+  - `/tools/<tool_id>/<item_id>/` → una voce del corpus (un teorema): il path
+    dice quale, la query string come presentarlo. Vedi `TEORIA.md`
 - **routes/courses.py**: Blueprint con le route a 3 livelli:
   - `/course/<id>` → panoramica corso (elenco lezioni, template `course.html`)
   - `/course/<id>/<lesson_id>` → redirect al primo step della lezione

@@ -52,8 +52,14 @@
 }
 
 html, body {
-    /* Nessuno scroll orizzontale accidentale su mobile (canvas, tabelle, ecc.) */
+    /* Nessuno scroll orizzontale accidentale su mobile (canvas, tabelle, ecc.).
+       `clip` e non `hidden`: `hidden` rende <body> un contenitore di scorrimento
+       (l'asse verticale diventa `auto`) e allora tutto ciò che è `position:
+       sticky` — l'header, la sidebar del corso, la colonna della figura —
+       si aggancia a un box che non scorre e non si ferma mai. `clip` taglia e
+       basta, lo scorrimento resta della finestra. */
     overflow-x: hidden;
+    overflow-x: clip;
 }
 
 body {
@@ -296,6 +302,15 @@ img, canvas, svg, video {
     padding: 1.5rem;
     position: sticky;
     top: 100px;
+    /* Restando ferma, una lezione con molti passi arriverebbe sotto il bordo
+       dello schermo e gli ultimi passi si potrebbero raggiungere solo scendendo
+       in fondo alla pagina. Quindi non supera mai l'altezza della finestra: se
+       i passi sono tanti è l'indice a scorrere, sempre e da subito. */
+    max-height: calc(100vh - 116px);
+    /* Scorre tutta la sidebar, non il solo elenco: su uno schermo basso i pezzi
+       fissi (titolo, bottoni) si mangerebbero lo spazio e ai passi resterebbe
+       una fessura di sessanta pixel. Così l'elenco ha tutta l'altezza. */
+    overflow-y: auto;
 }
 
 .course-sidebar h3 {
@@ -769,6 +784,8 @@ img, canvas, svg, video {
         height: 100vh;
         /* dvh: il drawer copre l'intero schermo anche con barra URL visibile */
         height: 100dvh;
+        /* Qui comanda l'altezza del drawer, non il tetto della sidebar sticky */
+        max-height: none;
         width: 86%;
         max-width: 300px;
         border-radius: 0;
@@ -1162,5 +1179,354 @@ img, canvas, svg, video {
     .tool-nav .btn {
         flex: 1 1 auto;
         text-align: center;
+    }
+}
+
+/* ========== Mappa di un corpus (/tools/<id>/, vedi TEORIA.md) ==========
+   Il caso di progetto è la LIM: schermo largo, testo grande, bersagli da dito.
+   Sotto i 900px la mappa DEGRADA a lista per livelli invece di diventare un
+   grafo da esplorare con pan e zoom: lo studente sul telefono arriva quasi
+   sempre al teorema da un link diretto, non da qui. */
+.mappa-container {
+    max-width: 1500px;
+    margin: 0 auto;
+}
+
+.mappa {
+    position: relative;
+    margin: 1.5rem 0 1rem;
+}
+
+.mappa-intestazioni,
+.mappa-riga {
+    display: grid;
+    grid-template-columns: 2.2rem repeat(var(--mappa-colonne), minmax(0, 1fr));
+    gap: 0.9rem;
+    align-items: start;
+}
+
+/* La prima colonna della griglia è la guida dei livelli: le intestazioni delle
+   aree partono dalla seconda. */
+.mappa-intestazioni > .mappa-area:first-child {
+    grid-column: 2;
+}
+
+.mappa-area {
+    border-bottom: 3px solid var(--area-colore, var(--ink));
+    padding-bottom: 0.45rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.mappa-area-nome {
+    font-family: var(--font-disp);
+    font-weight: 700;
+    color: var(--area-colore, var(--ink));
+    font-size: 1.05rem;
+}
+
+.mappa-area-desc {
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+}
+
+.mappa-griglia {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    position: relative;
+    z-index: 1;
+}
+
+.mappa-livello {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--locked);
+    padding-top: 0.9rem;
+    text-align: right;
+}
+
+.mappa-cella {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    min-height: 1px;
+}
+
+/* --- Le card --- */
+.mappa-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.7rem 0.85rem;
+    background: var(--surface);
+    border: 2px solid var(--area-colore, var(--ink));
+    border-radius: var(--radius);
+    text-decoration: none;
+    color: var(--ink);
+    transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease;
+}
+
+.mappa-card:hover,
+.mappa-card:focus-visible {
+    transform: translate(-2px, -2px);
+    box-shadow: 4px 4px 0 var(--area-colore, var(--ink));
+}
+
+.mappa-card-nome {
+    font-family: var(--font-disp);
+    font-weight: 700;
+    font-size: 1rem;
+    line-height: 1.2;
+}
+
+.mappa-card-enunciato {
+    font-size: 0.86rem;
+    color: var(--ink-soft);
+    line-height: 1.35;
+}
+
+.mappa-card-stato {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--locked);
+}
+
+/* Gli archi a parole: servono solo dove il disegno non c'è. */
+.mappa-card-usa {
+    display: none;
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+    border-top: 1px dashed var(--line);
+    padding-top: 0.3rem;
+    margin-top: 0.15rem;
+}
+
+/* Un teorema enunciato ma non ancora dimostrato è un nodo a tutti gli effetti
+   — altri lo citano — ma si vede che è un cantiere. */
+.mappa-card--enunciato {
+    border-style: dashed;
+    background: transparent;
+}
+
+/* --- Il cono acceso: stessi ruoli della catena di una dimostrazione --- */
+.mappa-card--fuoco {
+    box-shadow: 4px 4px 0 var(--rossa);
+    border-color: var(--rossa);
+}
+
+.mappa-card--premessa {
+    border-color: var(--ink);
+    background: var(--ink-wash-1);
+}
+
+.mappa-card--discende {
+    border-style: dashed;
+    border-color: var(--grafite);
+}
+
+.mappa-card--spenta {
+    opacity: 0.3;
+}
+
+/* --- Gli archi --- */
+.mappa-archi {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    overflow: visible;
+}
+
+.mappa-arco {
+    fill: none;
+    stroke: var(--ink);
+    stroke-opacity: 0.16;
+    stroke-width: 2;
+}
+
+.mappa-arco--premessa {
+    stroke-opacity: 0.9;
+    stroke-width: 3;
+}
+
+.mappa-arco--discende {
+    stroke: var(--grafite);
+    stroke-opacity: 0.65;
+    stroke-width: 2.5;
+    stroke-dasharray: 6 4;
+}
+
+.mappa-arco--spento {
+    stroke-opacity: 0.05;
+}
+
+.mappa-aiuto {
+    color: var(--ink-soft);
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+}
+
+/* --- Definizioni e assiomi: fuori dal grafo, non fuori dalla pagina --- */
+.mappa-fondamenti,
+.teorema-fondamenti {
+    border: 2px solid var(--line);
+    border-radius: var(--radius);
+    padding: 0.8rem 1rem;
+    margin-bottom: 1.5rem;
+    background: var(--surface);
+}
+
+.mappa-fondamenti summary,
+.teorema-fondamenti summary {
+    font-family: var(--font-disp);
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.mappa-fondamenti-n {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+}
+
+.mappa-fondamenti-nota {
+    font-size: 0.86rem;
+    color: var(--ink-soft);
+    margin: 0.6rem 0 0;
+}
+
+.mappa-fondamenti dl,
+.teorema-fondamenti dl {
+    margin: 0.8rem 0 0;
+}
+
+.mappa-fondamenti dt,
+.teorema-fondamenti dt {
+    font-weight: 700;
+    margin-top: 0.6rem;
+}
+
+.mappa-fondamenti dd,
+.teorema-fondamenti dd {
+    margin: 0.1rem 0 0;
+    color: var(--ink-soft);
+    font-size: 0.9rem;
+}
+
+.tipo-badge {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ink-soft);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 0.05rem 0.45rem;
+}
+
+/* ========== Pagina di un teorema del corpus ========== */
+.teorema-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.teorema-area {
+    margin-left: 0.8rem;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--area-colore, var(--ink-soft));
+    border-bottom: 2px solid var(--area-colore, var(--line));
+}
+
+.teorema-mancante {
+    border: 2px dashed var(--line);
+    border-radius: var(--radius);
+    padding: 1.2rem 1.4rem;
+    margin-bottom: 1.5rem;
+    color: var(--ink-soft);
+}
+
+.teorema-mancante p {
+    margin: 0 0 0.5rem;
+}
+
+.teorema-vicinato {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2.5rem;
+    border-top: 2px solid var(--line);
+    padding-top: 1.2rem;
+    margin-top: 2rem;
+}
+
+.teorema-vicinato-titolo {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ink-soft);
+    margin: 0 0 0.4rem;
+}
+
+.teorema-vicinato ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.teorema-vicinato li {
+    margin-bottom: 0.25rem;
+}
+
+/* ========== Mobile: la mappa diventa una lista per livelli ========== */
+@media (max-width: 900px) {
+    /* Gli archi non si disegnano: una griglia in colonna li renderebbe
+       spaghetti. La relazione la dice `.mappa-card-usa`, a parole. */
+    .mappa-archi,
+    .mappa-intestazioni {
+        display: none;
+    }
+
+    .mappa-riga {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+        border-top: 2px solid var(--line);
+        padding-top: 0.8rem;
+        margin-top: 0.6rem;
+    }
+
+    .mappa-livello {
+        text-align: left;
+        padding-top: 0;
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .mappa-livello::before {
+        content: 'Livello ';
+    }
+
+    /* Senza colonne, una cella vuota è solo spazio morto. */
+    .mappa-cella:empty {
+        display: none;
+    }
+
+    .mappa-card-usa {
+        display: block;
+    }
+
+    .mappa-card:hover,
+    .mappa-card:focus-visible {
+        transform: none;
     }
 }

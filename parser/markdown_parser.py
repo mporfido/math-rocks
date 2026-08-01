@@ -3,7 +3,7 @@ import re
 import mistune
 import yaml
 from pathlib import Path
-from parser.preprocessors import process_blanks, process_variables, process_blocks, process_math, process_images, process_checks, process_graphs, process_p5, process_expr
+from parser.preprocessors import process_blanks, process_variables, process_blocks, process_math, process_images, process_checks, process_graphs, process_p5, process_expr, process_theorem
 
 
 class CourseParser:
@@ -18,12 +18,33 @@ class CourseParser:
         # $x = 5$). Va spento per i corsi non matematici (flag `math` in
         # site.yaml / metadata.yaml): build_courses.py lo risetta per corso.
         self.math_backticks = math_backticks
+        # Teoria del CORSO (id → {nome, enunciato, tipo}): letta da
+        # content/<corso>/teoria.yaml e arricchita in corso d'opera dai teoremi
+        # dimostrati. Il parser è riusato tra corsi: build_courses.py la risetta
+        # per ogni corso con set_course_theory().
+        self.teoria = None
+        self.course_theorems = set()
         self.blank_counter = 0
         self.variable_counter = 0
         self.check_counter = 0
         self.graph_counter = 0
         self.p5_counter = 0
         self.expr_counter = 0
+        self.theorem_counter = 0
+
+    def set_course_theory(self, teoria, course_theorems=None):
+        """
+        Imposta la teoria del corso corrente per i blocchi :::theorem.
+
+        Args:
+            teoria: Dict id → {nome, enunciato, tipo} da teoria.yaml. Viene
+                arricchito durante la build con i teoremi dimostrati, quindi
+                va passata una copia per corso.
+            course_theorems: Id di TUTTI i teoremi del corso, per distinguere
+                una garanzia inesistente da una dimostrata più avanti.
+        """
+        self.teoria = teoria
+        self.course_theorems = set(course_theorems or ())
 
     def parse_file(self, filepath):
         """
@@ -56,6 +77,7 @@ class CourseParser:
         self.graph_counter = 0
         self.p5_counter = 0
         self.expr_counter = 0
+        self.theorem_counter = 0
 
         # Estrai i code fence ``` a livello di FILE, prima dello split degli
         # step: un fence che mostra un esempio contenente '---' non deve generare
@@ -115,6 +137,50 @@ class CourseParser:
             'total_steps': len(steps),
             'lesson_metadata': lesson_metadata
         }
+
+    def parse_theorems(self, content, titoli=None):
+        """
+        Estrae i blocchi :::theorem da un file di CORPUS (vedi TEORIA.md).
+
+        Un corpus non ha lezioni né step: è una sequenza di teoremi. Serve
+        quindi la struttura di ognuno (passi, garanzie, distrattori) oltre
+        all'HTML, perché è dai `per:` dei passi che si ricava il grafo.
+
+        La teoria va impostata prima con set_course_theory(): per un corpus è
+        il registro completo (teoria.yaml), così l'ordine dei file non conta.
+
+        Args:
+            content: Testo del file markdown del corpus
+            titoli: Dict id → enunciato, usato quando il blocco non ha
+                `titolo=`: in un corpus l'enunciato lo possiede il registro,
+                e riscriverlo nel .md sarebbe una seconda fonte
+
+        Returns:
+            Tuple (teoremi, residuo): `teoremi` è la lista di dict raccolti da
+            process_theorem, `residuo` è il testo rimasto fuori dai blocchi —
+            che in un corpus è quasi sempre un errore d'autore, e chi chiama
+            lo segnala.
+        """
+        self.blank_counter = 0
+        self.variable_counter = 0
+        self.check_counter = 0
+        self.theorem_counter = 0
+
+        theorems = []
+        processed, _replacements, self.theorem_counter = process_theorem(
+            content, self.theorem_counter,
+            render_text=self._render_theorem_text,
+            teoria=self.teoria,
+            course_theorems=self.course_theorems,
+            collect=theorems,
+            titoli=titoli,
+        )
+
+        # Il residuo: via i marker dei blocchi e i commenti HTML (l'unico modo
+        # sensato di annotare un file che non viene renderizzato).
+        residuo = re.sub(r'XTHEOREMBLOCK\d+X', '', processed)
+        residuo = re.sub(r'<!--.*?-->', '', residuo, flags=re.DOTALL)
+        return theorems, residuo.strip()
 
     def _extract_metadata(self, content):
         """
@@ -253,6 +319,17 @@ class CourseParser:
         # toccato dagli altri preprocessori né da mistune.
         content, expr_replacements, self.expr_counter = process_expr(content, self.expr_counter)
 
+        # :::theorem ... ::: → marker (ripristinato a fine render). Il corpo ha
+        # heading, liste e annotazioni tra graffe: va estratto prima che mistune
+        # o gli altri preprocessori lo interpretino. Il testo dei singoli passi
+        # è markdown inline e viene renderizzato da _render_theorem_text.
+        content, theorem_replacements, self.theorem_counter = process_theorem(
+            content, self.theorem_counter,
+            render_text=self._render_theorem_text,
+            teoria=self.teoria,
+            course_theorems=self.course_theorems,
+        )
+
         # ![alt|400](src) → <img style="width:400px">
         content = process_images(content)
 
@@ -290,8 +367,31 @@ class CourseParser:
         # i blocchi div: i marker (alfanumerici) sopravvivono a mistune intatti.
         block_replacements.update(p5_replacements)
         block_replacements.update(expr_replacements)
+        block_replacements.update(theorem_replacements)
 
         return content, block_replacements
+
+    def _render_theorem_text(self, text):
+        """
+        Renderizza il testo di un passo di dimostrazione: markdown inline.
+
+        Il corpo di ogni riga di :::theorem è markdown normale ($…$, grassetto,
+        [[blank]]), ma finisce in un attributo JSON, non nel flusso della
+        pagina: va quindi renderizzato qui, e il <p> che mistune avvolge
+        attorno al paragrafo va tolto.
+        """
+        if not text:
+            return text
+
+        if self.math_backticks:
+            text = process_math(text)
+        text, self.check_counter = process_checks(text, self.check_counter)
+        text, self.blank_counter = process_blanks(text, self.blank_counter)
+        text, self.variable_counter = process_variables(text, self.variable_counter)
+
+        html = self.markdown(text).strip()
+        unwrapped = re.fullmatch(r'<p>(.*)</p>', html, re.DOTALL)
+        return unwrapped.group(1).strip() if unwrapped else html
 
     def _unescape_variable_spans(self, html):
         """
@@ -351,6 +451,10 @@ class CourseParser:
 
         # Trova tutti <x-expr id="..."> (sempre un goal)
         goals.extend(re.findall(r'<x-expr id="([^"]+)"', html))
+
+        # Trova tutti <x-theorem id="..."> (sempre un goal: in modalità `leggi`
+        # il componente si completa alla lettura, altrove alla verifica)
+        goals.extend(re.findall(r'<x-theorem id="([^"]+)"', html))
 
         return goals
 
