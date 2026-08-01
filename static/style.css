@@ -302,6 +302,15 @@ img, canvas, svg, video {
     padding: 1.5rem;
     position: sticky;
     top: 100px;
+    /* Restando ferma, una lezione con molti passi arriverebbe sotto il bordo
+       dello schermo e gli ultimi passi si potrebbero raggiungere solo scendendo
+       in fondo alla pagina. Quindi non supera mai l'altezza della finestra: se
+       i passi sono tanti è l'indice a scorrere, sempre e da subito. */
+    max-height: calc(100vh - 116px);
+    /* Scorre tutta la sidebar, non il solo elenco: su uno schermo basso i pezzi
+       fissi (titolo, bottoni) si mangerebbero lo spazio e ai passi resterebbe
+       una fessura di sessanta pixel. Così l'elenco ha tutta l'altezza. */
+    overflow-y: auto;
 }
 
 .course-sidebar h3 {
@@ -775,6 +784,8 @@ img, canvas, svg, video {
         height: 100vh;
         /* dvh: il drawer copre l'intero schermo anche con barra URL visibile */
         height: 100dvh;
+        /* Qui comanda l'altezza del drawer, non il tetto della sidebar sticky */
+        max-height: none;
         width: 86%;
         max-width: 300px;
         border-radius: 0;

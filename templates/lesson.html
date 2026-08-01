@@ -241,4 +241,19 @@
     });
   })();
 </script>
+
+<!-- L'indice sta fermo e scorre per conto suo (§.course-sidebar): su una lezione
+     lunga il passo corrente cadrebbe sotto il bordo dell'indice, e chi arriva
+     al passo 8 vedrebbe evidenziato il vuoto. Lo si porta in vista muovendo
+     SOLO l'indice: scrollIntoView() sposterebbe anche la pagina. -->
+<script>
+  (function () {
+    const sidebar = document.querySelector('.course-sidebar');
+    const attivo = sidebar && sidebar.querySelector('.step-link.active');
+    if (!attivo) return;
+
+    const margine = attivo.offsetTop - (sidebar.clientHeight - attivo.offsetHeight) / 2;
+    sidebar.scrollTop = Math.max(0, margine);
+  })();
+</script>
 {% endblock %}
