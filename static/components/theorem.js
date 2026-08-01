@@ -203,15 +203,17 @@ class XTheorem extends HTMLElement {
             </div>
             <div class="thm-esito" role="status"></div>
           </section>
-          ${figura}
-          <aside class="thm-attrezzi-box">
-            <p class="thm-titoletto">Cassetta degli attrezzi</p>
-            <ul class="thm-attrezzi">${Object.values(this.teoria).map(t =>
-              // Un teorema dimostrato entra nella teoria col proprio enunciato
-              // come nome: lì non c'è una seconda riga da mostrare.
-              `<li><b>${t.nome}</b>${t.enunciato && t.enunciato !== t.nome
-                ? `<span>${t.enunciato}</span>` : ''}</li>`).join('')}</ul>
-          </aside>
+          <div class="thm-colonna">
+            ${figura}
+            <aside class="thm-attrezzi-box">
+              <p class="thm-titoletto">Cassetta degli attrezzi</p>
+              <ul class="thm-attrezzi">${Object.values(this.teoria).map(t =>
+                // Un teorema dimostrato entra nella teoria col proprio enunciato
+                // come nome: lì non c'è una seconda riga da mostrare.
+                `<li><b>${t.nome}</b>${t.enunciato && t.enunciato !== t.nome
+                  ? `<span>${t.enunciato}</span>` : ''}</li>`).join('')}</ul>
+            </aside>
+          </div>
         </div>
       </div>
     `;

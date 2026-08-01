@@ -1061,22 +1061,37 @@ x-theorem {
     align-items: start;
 }
 
-/* Con la figura la colonna laterale è più larga (sotto i ~300px un disegno
-   geometrico con le lettere dei vertici non si legge più) e ospita due
-   riquadri: figura sopra, cassetta degli attrezzi sotto. Sono fratelli della
-   dimostrazione, non annidati in un wrapper, così a colonna singola la figura
-   può risalire SOPRA i passi e la cassetta restare in fondo. */
+/* Con la figura la colonna laterale è più larga: sotto i ~300px un disegno
+   geometrico con le lettere dei vertici non si legge più. */
 .thm-corpo--con-figura {
     grid-template-columns: minmax(0, 1fr) 320px;
-    grid-template-areas:
-        "lavoro figura"
-        "lavoro attrezzi";
     align-content: start;
 }
 
-.thm-corpo--con-figura > .thm-lavoro { grid-area: lavoro; }
-.thm-corpo--con-figura > .thm-figura { grid-area: figura; }
-.thm-corpo--con-figura > .thm-attrezzi-box { grid-area: attrezzi; }
+/* La colonna laterale segue la lettura: figura e cassetta degli attrezzi
+   servono TUTTI i passi, anche gli ultimi, e una dimostrazione lunga li
+   lascerebbe indietro in cima alla pagina. Sta appiccicata sotto l'header del
+   sito (come .course-sidebar) e non supera mai l'altezza dello schermo.
+   A colonna singola il riquadro sparisce (§responsive): figura e cassetta
+   tornano a essere celle della griglia esterna, per poterle separare. */
+.thm-colonna {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    position: sticky;
+    /* L'header del sito è alto ~71px ed è a sua volta sticky: sotto di lui, con
+       un dito d'aria. */
+    top: 87px;
+    /* Su uno schermo basso figura + teoria non ci stanno insieme: allora scorre
+       la colonna al proprio interno, con la figura in cima. Su uno schermo alto
+       ci stanno e questo vincolo non si vede nemmeno. */
+    max-height: calc(100vh - 103px);
+    overflow-y: auto;
+}
+
+.thm-colonna > .thm-figura {
+    flex: 0 0 auto;
+}
 
 .thm-figura {
     margin: 0;
@@ -1401,13 +1416,24 @@ x-theorem {
     }
 
     /* A colonna unica la figura va SOPRA i passi — è quello che si guarda
-       mentre si legge — e la cassetta degli attrezzi resta in fondo. */
+       mentre si legge — e la cassetta degli attrezzi resta in fondo. Per
+       separarle il riquadro della colonna si dissolve (`display: contents`) e
+       i due tornano celle della griglia esterna; niente sticky, qui lo schermo
+       non ha una colonna da tenere ferma. */
+    .thm-colonna {
+        display: contents;
+    }
+
     .thm-corpo--con-figura {
         grid-template-areas:
             "figura"
             "lavoro"
             "attrezzi";
     }
+
+    .thm-corpo--con-figura > .thm-lavoro { grid-area: lavoro; }
+    .thm-corpo--con-figura .thm-figura { grid-area: figura; }
+    .thm-corpo--con-figura .thm-attrezzi-box { grid-area: attrezzi; }
 
     .thm {
         padding: 0.9rem;

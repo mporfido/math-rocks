@@ -52,8 +52,14 @@
 }
 
 html, body {
-    /* Nessuno scroll orizzontale accidentale su mobile (canvas, tabelle, ecc.) */
+    /* Nessuno scroll orizzontale accidentale su mobile (canvas, tabelle, ecc.).
+       `clip` e non `hidden`: `hidden` rende <body> un contenitore di scorrimento
+       (l'asse verticale diventa `auto`) e allora tutto ciò che è `position:
+       sticky` — l'header, la sidebar del corso, la colonna della figura —
+       si aggancia a un box che non scorre e non si ferma mai. `clip` taglia e
+       basta, lo scorrimento resta della finestra. */
     overflow-x: hidden;
+    overflow-x: clip;
 }
 
 body {
