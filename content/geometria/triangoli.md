@@ -19,7 +19,7 @@ figura: geometria-secondo-criterio
 ## dimostrazione
 - I due triangoli **non** sono congruenti {assurdo: t1}
 - Non può essere $AB \cong A'B'$ {da: s1,h1,h2, per: primo-criterio}
-- Dunque $AB > A'B'$ oppure $AB < A'B'$ {da: p1, per: confronto-segmenti}
+- Dunque $AB > A'B'$ oppure $AB < A'B'$ {da: p1, per: confronto-grandezze}
 
 ### caso $AB > A'B'$ {da: p2, fig: lati-ab}
 - Si prenda su $AB$ il punto $P$ tale che $BP \cong B'A'$ {costruzione, da: a1, per: assioma-trasporto, fig: punto-p}
@@ -41,20 +41,21 @@ figura: geometria-secondo-criterio
 :::
 
 :::theorem id=triangolo-isoscele-angoli-base modi=leggi,ordina,giustifica,completa,costruisci
+figura: geometria-triangolo-isoscele
 
 ## ipotesi
-- Il triangolo $ABC$ è isoscele sulla base $BC$
+- Il triangolo $ABC$ è isoscele sulla base $BC$ {fig: triangolo}
 
 ## tesi
-- $A\hat{B}C \cong A\hat{C}B$
+- $A\hat{B}C \cong A\hat{C}B$ {fig: angoli-base}
 
 ## dimostrazione
-- Si tracci la bisettrice $AH$ dell'angolo $B\hat{A}C$, con $H$ sulla base {costruzione, da: h1}
-- $AB \cong AC$ {da: h1, per: definizione-isoscele}
-- $B\hat{A}H \cong H\hat{A}C$ {da: c1, per: definizione-bisettrice}
-- $AH \cong AH$ {da: c1, per: proprieta-riflessiva}
-- Il triangolo $ABH \cong$ il triangolo $ACH$ {da: p1,p2,p3, per: primo-criterio}
-- {t1, da: p4, per: elementi-corrispondenti}
+- Si tracci la bisettrice $AH$ dell'angolo $B\hat{A}C$, con $H$ sulla base {costruzione, da: h1, fig: bisettrice}
+- $AB \cong AC$ {da: h1, per: definizione-isoscele, fig: lati-obliqui}
+- $B\hat{A}H \cong H\hat{A}C$ {da: c1, per: definizione-bisettrice, fig: angoli-al-vertice}
+- $AH \cong AH$ {da: c1, per: proprieta-riflessiva, fig: lato-comune}
+- Il triangolo $ABH \cong$ il triangolo $ACH$ {da: p1,p2,p3, per: primo-criterio, fig: triangoli}
+- {t1, da: p4, per: elementi-corrispondenti, fig: angoli-base}
 
 ## distrattori
 - $BH \cong HC$ {per: elementi-corrispondenti, tipo: inutile}

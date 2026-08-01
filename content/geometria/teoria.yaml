@@ -103,6 +103,16 @@ sostituzione:
   enunciato: grandezze congruenti possono essere sostituite l'una all'altra
   tipo: assioma
 
+confronto-grandezze:
+  nome: Confronto di due grandezze
+  enunciato: date due grandezze omogenee (due segmenti, due angoli, due aree) o sono congruenti, o la prima è minore della seconda, o è maggiore
+  tipo: assioma
+
+parte-minore-del-tutto:
+  nome: La parte è minore del tutto
+  enunciato: una grandezza contenuta propriamente in un'altra a lei omogenea è minore di quella
+  tipo: assioma
+
 primo-criterio:
   nome: Primo criterio di congruenza
   enunciato: Due triangoli con due lati e l'angolo tra essi compreso congruenti sono congruenti
@@ -111,16 +121,6 @@ primo-criterio:
 assioma-trasporto:
   nome: Trasporto di un segmento
   enunciato: su una semiretta, a partire dall'origine, esiste un solo segmento congruente a un segmento dato
-  tipo: assioma
-
-confronto-segmenti:
-  nome: Confronto di due segmenti
-  enunciato: dati due segmenti, o sono congruenti, o il primo è minore del secondo, o è maggiore
-  tipo: assioma
-
-parte-minore-del-tutto:
-  nome: La parte è minore del tutto
-  enunciato: un angolo contenuto propriamente in un altro è minore di quello
   tipo: assioma
 
 

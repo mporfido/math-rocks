@@ -20,7 +20,7 @@ RADICE = Path(__file__).resolve().parent.parent
 # Una teoria minima: qui non interessa la geometria, interessa la struttura.
 TEORIA = {
     'primo-criterio': {'nome': 'P', 'enunciato': 'p', 'tipo': 'assioma'},
-    'confronto-segmenti': {'nome': 'C', 'enunciato': 'c', 'tipo': 'assioma'},
+    'confronto-grandezze': {'nome': 'C', 'enunciato': 'c', 'tipo': 'assioma'},
     'riduzione-all-assurdo': {'nome': 'R', 'enunciato': 'r', 'tipo': 'regola'},
     'esame-dei-casi': {'nome': 'E', 'enunciato': 'e', 'tipo': 'regola'},
 }
@@ -42,7 +42,7 @@ TEOREMA = """:::theorem id=x titolo="T" modi={modi}
 # la forma del secondo criterio, ridotta all'osso.
 VALIDA = """- Non vale la tesi {assurdo: t1}
 - Un passo {da: s1,h1, per: primo-criterio}
-- O A o B {da: p1, per: confronto-segmenti}
+- O A o B {da: p1, per: confronto-grandezze}
 
 ### caso A {da: p2}
 - Qualcosa {da: a1, per: primo-criterio}

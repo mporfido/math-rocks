@@ -399,7 +399,7 @@ incompatibili. Non serve una struttura nuova, serve un vocabolario.
 ## dimostrazione
 - I due triangoli non sono congruenti {assurdo: t1}
 - Non può essere $AB \cong A'B'$ {da: s1,h1,h2, per: primo-criterio}
-- Dunque $AB > A'B'$ oppure $AB < A'B'$ {da: p1, per: confronto-segmenti}
+- Dunque $AB > A'B'$ oppure $AB < A'B'$ {da: p1, per: confronto-grandezze}
 
 ### caso $AB > A'B'$ {da: p2}
 - Si prenda $P$ su $AB$ con $BP \cong B'A'$ {costruzione, da: a1, per: assioma-trasporto}
