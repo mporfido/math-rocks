@@ -312,6 +312,13 @@ THEOREM_PREFIXES = {
     'distrattori': 'd',
 }
 
+# Parola riservata nell'annotazione: marca un passo di COSTRUZIONE, che non
+# asserisce ma introduce un oggetto (DIMOSTRAZIONI.md §2.5). Sta nella
+# dimostrazione, dove l'atto avviene, ma ha un suo namespace di id (`c1, c2…`)
+# perché non è un anello della catena deduttiva come gli altri.
+THEOREM_COSTRUZIONE = 'costruzione'
+THEOREM_COSTRUZIONE_PREFIX = 'c'
+
 THEOREM_LABELS = {
     'ipotesi': 'Ipotesi',
     'tesi': 'Tesi',
@@ -402,12 +409,16 @@ def _split_theorem_sections(body):
     return sections, preamble
 
 
-def _parse_theorem_item(line, section, index):
+def _parse_theorem_item(line, section, counters, where):
     """
     Parsa una riga `- testo {da: …, per: …}` di una sezione.
 
     Restituisce un dict con id, testo, ref (tesi referenziata) e i campi
     dell'annotazione già normalizzati.
+
+    `counters` è il contatore degli id impliciti della sezione, per prefisso:
+    le costruzioni hanno un namespace tutto loro (`c1, c2…`), così aggiungerne
+    una non rinumera i passi dedotti già scritti.
     """
     item_match = re.match(r'^-\s*(.*)$', line)
     if not item_match:
@@ -423,15 +434,31 @@ def _parse_theorem_item(line, section, index):
         ref, fields = _parse_annotation(ann_match.group(1))
         rest = rest[:ann_match.start()].strip()
 
+    # Il token nudo è di norma la tesi referenziata; `costruzione` è la sola
+    # parola riservata, e marca il passo che introduce un oggetto.
+    costruzione = ref == THEOREM_COSTRUZIONE
+    if costruzione:
+        ref = None
+        if section != 'dimostrazione':
+            raise ValueError(
+                f"{where}: `costruzione` compare nella sezione '{section}'; "
+                'una costruzione è un atto della dimostrazione, non un dato'
+            )
+
     # `per` è la sintassi d'autore, `perche` il nome del campo nel modello:
     # accettiamo entrambi in scrittura.
     warrant = fields.get('per') or fields.get('perche')
     premises = [p.strip() for p in fields.get('da', '').split(',') if p.strip()]
 
+    prefisso = (THEOREM_COSTRUZIONE_PREFIX if costruzione
+                else THEOREM_PREFIXES[section])
+    counters[prefisso] = counters.get(prefisso, 0) + 1
+
     return {
-        'id': fields.get('id') or f'{THEOREM_PREFIXES[section]}{index}',
+        'id': fields.get('id') or f'{prefisso}{counters[prefisso]}',
         'testo': rest,
         'ref': ref,
+        'costruzione': costruzione,
         'da': premises,
         'perche': warrant,
         'fig': fields.get('fig'),
@@ -494,8 +521,9 @@ def process_theorem(content, theorem_counter, render_text=None,
         - $AM \\cong MC$
 
         ## dimostrazione
+        - Si tracci la diagonale AC {costruzione, da: h1}
         - AB è parallelo a DC {da: h1, per: def-par}
-        - {t1, da: p1, per: corr}
+        - {t1, da: p1,c1, per: corr}
 
         ## distrattori
         - $AC \\cong BD$ {per: diag-rett, tipo: falso}
@@ -507,6 +535,11 @@ def process_theorem(content, theorem_counter, render_text=None,
     renderizzata dai passi stessi. L'ultimo passo non riscrive la tesi, la
     **referenzia** (`- {t1, da: p5, per: corr}`): il testo viene da `t1` e la
     catena ha un nodo terminale verificabile.
+
+    L'unica eccezione alla regola "statuto = sezione" è la **costruzione**
+    (`{costruzione, …}`, id `c1, c2…`): un passo che non asserisce ma introduce
+    un oggetto. Sta nella dimostrazione perché è lì che l'atto avviene — e non
+    fra le ipotesi, dove finirebbe per far credere che l'oggetto fosse dato.
 
     Attributi della riga di apertura: `id` (registra il teorema nella teoria del
     corso), `titolo`, `modi` (default `leggi`), `mancanti` (default 2), `figura`
@@ -566,9 +599,10 @@ def process_theorem(content, theorem_counter, render_text=None,
         # --- Parsing delle sezioni in liste di voci ---------------------------
         items = {}
         for section in THEOREM_SECTIONS:
+            counters = {}
             items[section] = [
-                _parse_theorem_item(line, section, i)
-                for i, line in enumerate(sections.get(section, []), start=1)
+                _parse_theorem_item(line, section, counters, where)
+                for line in sections.get(section, [])
             ]
 
         if not items['tesi']:
@@ -611,8 +645,12 @@ def process_theorem(content, theorem_counter, render_text=None,
                     'fig': item['fig'] or tesi['fig'],
                 })
             else:
+                # Una costruzione non asserisce, introduce: se ne può dichiarare
+                # la garanzia (l'assioma che ne assicura l'esistenza), ma quando
+                # manca vale "per costruzione" e non è un buco da riempire.
                 passi.append({
-                    'id': item['id'], 'testo': item['testo'], 'statuto': 'dedotto',
+                    'id': item['id'], 'testo': item['testo'],
+                    'statuto': 'costruzione' if item['costruzione'] else 'dedotto',
                     'da': item['da'], 'perche': item['perche'], 'fig': item['fig'],
                 })
 

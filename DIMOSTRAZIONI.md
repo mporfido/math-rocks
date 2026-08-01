@@ -75,9 +75,9 @@ In memoria la dimostrazione è **una sola lista** di passi. Ogni passo:
 
 | Campo     | Obbligatorio | Descrizione |
 |-----------|:------------:|-------------|
-| `id`      | sì (implicito) | `h1…`, `t1…`, `p1…` — assegnato per posizione, sovrascrivibile |
+| `id`      | sì (implicito) | `h1…`, `t1…`, `p1…`, `c1…` — assegnato per posizione, sovrascrivibile |
 | `testo`   | sì\*         | L'asserzione. \*Assente nel passo che referenzia la tesi (§2.3) |
-| `statuto` | sì (derivato)| `ipotesi` \| `dedotto` \| `tesi` — **dalla sezione in cui è scritto** |
+| `statuto` | sì (derivato)| `ipotesi` \| `costruzione` \| `dedotto` \| `tesi` — **dalla sezione in cui è scritto** (unica eccezione: §2.5) |
 | `da`      | no           | Premesse: id di altri passi. Vuoto per le ipotesi |
 | `perche`  | no           | Id nella teoria. Assente per le ipotesi (valgono *per ipotesi*) |
 | `fig`     | no           | Id di un elemento della figura da evidenziare (§5) |
@@ -114,6 +114,42 @@ dall'autore perché il feedback sia mirato e non generico:
 
 Il secondo è il più formativo: costringe a distinguere *un argomento valido* da
 *uno che sembra valido perché la conclusione è giusta*.
+
+### 2.5 `costruzione` — l'unico statuto che non viene dalla sezione
+
+Una dimostrazione non deduce soltanto: a un certo punto **traccia**. La
+bisettrice, la parallela per un punto, la diagonale, l'angolo ausiliario. Quel
+gesto non è un'ipotesi — non è dato con l'enunciato — e non è una deduzione —
+non asserisce nulla di vero o falso: *istituisce un oggetto*.
+
+Senza uno statuto suo, quel gesto finisce fra le ipotesi, ed è lì che il modello
+si rompe in tre punti:
+
+- l'enunciato dice il falso: «dato un triangolo **e data** la sua bisettrice»
+  non è il teorema dell'isoscele;
+- l'ipotesi resta senza `da:` che la citi, cioè appare inutile — proprio mentre
+  il teorema accanto insegna a riconoscere i passi `tipo: inutile` (§2.4);
+- in `costruisci` lo studente riceve gratis la mossa più difficile della
+  dimostrazione, che è appunto sapere che cosa tracciare.
+
+Si marca col token nudo `costruzione` in testa all'annotazione, dentro
+`## dimostrazione`, dove l'atto avviene:
+
+```
+- Si tracci la bisettrice $AH$ dell'angolo $B\hat{A}C$ {costruzione, da: h1}
+- Si tracci la parallela a $BC$ per $A$ {costruzione, da: h1, per: assioma-parallela}
+```
+
+| Aspetto | Comportamento |
+|---------|---------------|
+| **Id**  | Namespace proprio, `c1, c2…`: aggiungere una costruzione non rinumera i passi dedotti già scritti |
+| **`da:`** | Come ogni passo: una costruzione poggia su ciò che le dà gli oggetti da cui parte, e a sua volta è citabile (`da: p1,c1`) |
+| **`per:`** | **Facoltativo.** C'è quando è un assioma di esistenza ad autorizzare il gesto (`assioma-parallela`); quando manca la riga legge *per costruzione*, che non è una casella vuota da riempire |
+| **`fig:`** | Come ogni passo — ed è il caso in cui il ponte con la figura (§5) dice più cose: una costruzione è *insieme* un atto logico e un tratto di disegno |
+| **Modalità** | Non parte in catena con le ipotesi: in `ordina` e `costruisci` è un cartellino da collocare, marcato «costruzione» perché non se ne cerchi la garanzia |
+
+`costruzione` è quindi l'**unica parola riservata** dell'annotazione: ovunque
+altro il token nudo è l'id di una tesi referenziata (§2.3).
 
 Proprio per questo `garanzia-sbagliata` vive **solo dove le garanzie si vedono**
 (§4): la sua conclusione è giusta per definizione del tipo, quindi il testo
@@ -161,10 +197,10 @@ figura: parallelogramma-diagonali
 - **Un'annotazione per riga**, in coda, tra graffe: `{da: …, per: …, fig: …}`.
   Coerente con la sintassi già in casa (`[Testo]{check: …}`, `${a}{a|2|-5,5,1}`).
 - **Id impliciti** dalla posizione nella sezione: `h1, h2…` per le ipotesi,
-  `t1…` per le tesi, `p1, p2…` per i passi. Override con `{id: nome, …}` quando
-  serve un riferimento stabile.
-- **Riferimenti sempre prefissati** (`h1`, `t1`, `p2`): mai il numero nudo. Tre
-  namespace distinti, zero ambiguità, riferimenti greppabili nei contenuti.
+  `t1…` per le tesi, `p1, p2…` per i passi, `c1, c2…` per le costruzioni
+  (§2.5). Override con `{id: nome, …}` quando serve un riferimento stabile.
+- **Riferimenti sempre prefissati** (`h1`, `t1`, `p2`, `c1`): mai il numero
+  nudo. Namespace distinti, zero ambiguità, riferimenti greppabili nei contenuti.
 - Il corpo di ogni riga è **markdown normale**: `$…$`, grassetto, e anche
   `[[blank]]` continuano a funzionare.
 
@@ -200,6 +236,10 @@ lista di passi.
 | `giustifica` | tutti      | **da scegliere** | no  | Quale teorema autorizza questo passo |
 | `completa`   | tutti meno `mancanti` | visibili | sì | Riconoscere il passo che manca, e gli intrusi |
 | `costruisci` | solo ipotesi | da scegliere | sì, ma non i `garanzia-sbagliata` (§2.4) | Tutto insieme |
+
+«Solo ipotesi» è alla lettera: le **costruzioni** (§2.5) restano nel mucchio da
+collocare. Tracciare la parallela giusta è la mossa che decide la dimostrazione,
+e regalarla in partenza svuoterebbe `costruisci` di ciò che esercita.
 
 In `completa` i passi da togliere sono scelti **deterministicamente** (seed
 dall'id del teorema), non elencati a mano dall'autore: un elenco di id nel

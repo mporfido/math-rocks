@@ -9,9 +9,10 @@
  *
  * Elementi nominabili nei `{fig: …}` dei passi (DIMOSTRAZIONI.md §5):
  *
- *   rette              r ed s, col punto O
  *   prolungamenti      le quattro semirette, appaiate: ogni lato di α ha il suo
- *                      prolungamento fra i lati di β
+ *                      prolungamento fra i lati di β. r, s e O non sono un
+ *                      elemento a sé: non sono un dato del teorema, sono ciò
+ *                      che i prolungamenti dei lati formano
  *   alfa, beta         la coppia opposta al vertice, presi uno per volta
  *   gamma, delta       i due angoli adiacenti a entrambi
  *   opposti            α e β insieme: è l'ipotesi
@@ -112,6 +113,11 @@
      * Che cosa c'è sotto il puntatore. Le rette vincono sui settori: sono
      * sottili, e senza precedenza sarebbero irraggiungibili.
      *
+     * Cliccare una retta restituisce `prolungamenti`: le due rette non sono
+     * un'ipotesi del teorema — nessun passo le dà per date — ma il passo che
+     * dice che i lati dell'uno prolungano quelli dell'altro parla proprio di
+     * quelle linee, ed è lì che il click deve portare.
+     *
      * Cliccare α o β restituisce `opposti`, non `alfa`/`beta`: nel senso inverso
      * del ponte l'id serve a ritrovare il PASSO che ne parla, e di quei due
      * angoli parla l'ipotesi, che li nomina insieme. `alfa` e `beta` restano
@@ -119,7 +125,7 @@
      */
     function elementoIn(m) {
       if (Math.hypot(m.x - O.x, m.y - O.y) > L * 1.02) return null;
-      if (distSeg(m, P[0], P[2]) < 9 || distSeg(m, P[1], P[3]) < 9) return 'rette';
+      if (distSeg(m, P[0], P[2]) < 9 || distSeg(m, P[1], P[3]) < 9) return 'prolungamenti';
       const a = norm(Math.atan2(O.y - m.y, m.x - O.x) - A[0]);
       if (a < norm(A[1] - A[0])) return 'opposti';
       if (a < norm(A[2] - A[0])) return 'gamma';
@@ -153,7 +159,6 @@
       p.cursor(hover ? p.HAND : p.ARROW);
 
       disegnaBase();
-      disegnaRette();
       disegnaProlungamenti();
       disegnaPiatti();
       disegnaSettori();
@@ -174,20 +179,6 @@
       p.pop();
     }
 
-    function disegnaRette() {
-      const s = stile('rette');
-      if (!s) return;
-      p.push();
-      p.stroke(s.col);
-      p.strokeWeight(s.peso);
-      p.line(P[0].x, P[0].y, P[2].x, P[2].y);
-      p.line(P[1].x, P[1].y, P[3].x, P[3].y);
-      p.noStroke();
-      p.fill(s.col);
-      p.circle(O.x, O.y, 9);
-      p.pop();
-    }
-
     /**
      * I lati appaiati: una tacca sulle due semirette di r, due su quelle di s.
      * È il passo che dice "ogni lato di α è il prolungamento di un lato di β",
@@ -200,6 +191,9 @@
       p.stroke(s.col);
       p.strokeWeight(s.peso);
       for (const q of P) p.line(O.x, O.y, q.x, q.y);
+      p.noStroke();
+      p.fill(s.col);
+      p.circle(O.x, O.y, 9);
       p.pop();
       for (let i = 0; i < 4; i++) tacche(O, P[i], i % 2 ? 2 : 1, s.col);
     }

@@ -1154,6 +1154,13 @@ x-theorem {
     border-left-color: var(--ink-soft);
 }
 
+/* La costruzione non asserisce, introduce: il colore è quello dei quadretti,
+   cioè delle linee che si tracciano. Non tratteggiata: il tratteggio in questa
+   catena vuol già dire "qui il passo selezionato viene riusato". */
+.thm-riga--costruzione {
+    border-left-color: var(--grid);
+}
+
 .thm-riga--tesi {
     border-left-color: var(--spunta);
 }
@@ -1313,6 +1320,23 @@ x-theorem {
 .thm-cartellino:hover {
     border-color: var(--ink);
     background: var(--surface);
+}
+
+/* Nel mucchio una costruzione porta lo stesso bordo che avrà in catena: si
+   riconosce prima di leggerla, e non se ne cerca la garanzia. */
+.thm-cartellino--costruzione {
+    border-left: 3px solid var(--grid);
+}
+
+.thm-tag {
+    display: block;
+    font-family: var(--font-disp);
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--ink-soft);
+    margin-bottom: 0.2rem;
 }
 
 .thm-testo-cartellino {

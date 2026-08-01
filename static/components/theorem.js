@@ -11,7 +11,11 @@
  * attributi data-*, prodotti da process_theorem().
  *
  * Attributi (tutti generati da parser/preprocessors.py):
- *   data-passi        JSON: [{id, testo, statuto, da, perche, fig}] — lista piatta
+ *   data-passi        JSON: [{id, testo, statuto, da, perche, fig}] — lista piatta.
+ *                     `statuto`: ipotesi | costruzione | dedotto | tesi. La
+ *                     costruzione non asserisce, introduce un oggetto: sta nella
+ *                     catena (si può usare come premessa) ma vale "per
+ *                     costruzione" se non dichiara una garanzia
  *   data-tesi         JSON: id delle tesi, in ordine di dichiarazione
  *   data-distrattori  JSON: [{id, testo, perche, tipo}] (opzionale)
  *   data-teoria       JSON: {id: {nome, enunciato, tipo}} — le garanzie citate
@@ -338,6 +342,7 @@ class XTheorem extends HTMLElement {
       riga.dataset.pos = i;
       riga.dataset.id = id;
       if (p.statuto === 'ipotesi') riga.classList.add('thm-riga--ipotesi');
+      if (p.statuto === 'costruzione') riga.classList.add('thm-riga--costruzione');
       if (p.statuto === 'tesi') riga.classList.add('thm-riga--tesi');
       if (this.errori.includes(i)) riga.classList.add('thm-riga--errore');
 
@@ -360,6 +365,10 @@ class XTheorem extends HTMLElement {
       let perche;
       if (p.statuto === 'ipotesi') {
         perche = '<div class="thm-perche">per ipotesi</div>';
+      } else if (p.statuto === 'costruzione' && !p.perche) {
+        // Una costruzione senza garanzia dichiarata non ha una casella vuota da
+        // riempire: non c'è un teorema che la autorizzi, la si fa e basta.
+        perche = '<div class="thm-perche">per costruzione</div>';
       } else if (this.modo.garanzieVisibili) {
         const t = this.teoria[p.perche];
         perche = t
@@ -412,7 +421,13 @@ class XTheorem extends HTMLElement {
       b.dataset.aggiungi = id;
       const garanzia = (this.modo.garanzieVisibili && p.perche && this.teoria[p.perche])
         ? `<span class="thm-perche">${this.teoria[p.perche].nome}</span>` : '';
-      b.innerHTML = `<span class="thm-testo-cartellino">${p.testo}</span>${garanzia}`;
+      // Una costruzione va riconosciuta già nel mucchio: è un atto, non
+      // un'asserzione, e cercargli una garanzia sarebbe cercare la cosa
+      // sbagliata.
+      if (p.statuto === 'costruzione') b.classList.add('thm-cartellino--costruzione');
+      const tag = p.statuto === 'costruzione'
+        ? '<span class="thm-tag">costruzione</span>' : '';
+      b.innerHTML = `${tag}<span class="thm-testo-cartellino">${p.testo}</span>${garanzia}`;
       this.elCartellini.appendChild(b);
     });
 

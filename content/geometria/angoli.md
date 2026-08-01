@@ -31,17 +31,16 @@ figura: geometria-angoli-supplementari
 figura: geometria-angoli-opposti-al-vertice
 
 ## ipotesi
-- Le rette $r$ ed $s$ si incontrano nel punto $O$ {fig: rette}
 - $\alpha$ e $\beta$ sono angoli opposti al vertice {fig: opposti}
-- $\gamma$ è l'angolo adiacente sia ad $\alpha$ sia a $\beta$ {fig: gamma}
 
 ## tesi
 - $\alpha \cong \beta$ {fig: tesi}
 
 ## dimostrazione
-- I lati di $\alpha$ sono i prolungamenti dei lati di $\beta$ {da: h2, per: definizione-angoli-opposti-al-vertice, fig: prolungamenti}
-- $\alpha + \gamma$ è un angolo piatto {da: p1,h3, per: assioma-angolo-piatto, fig: piatto-alfa-gamma}
-- $\beta + \gamma$ è un angolo piatto {da: p1,h3, per: assioma-angolo-piatto, fig: piatto-beta-gamma}
+- I lati di $\alpha$ sono i prolungamenti dei lati di $\beta$ {da: h1, per: definizione-angoli-opposti-al-vertice, fig: prolungamenti}
+- Sia $\gamma$ l'angolo adiacente sia ad $\alpha$ sia a $\beta$ {costruzione, da: p1, fig: gamma}
+- $\alpha + \gamma$ è un angolo piatto {da: p1,c1, per: assioma-angolo-piatto, fig: piatto-alfa-gamma}
+- $\beta + \gamma$ è un angolo piatto {da: p1,c1, per: assioma-angolo-piatto, fig: piatto-beta-gamma}
 - $\alpha + \gamma \cong \beta + \gamma$ {da: p2,p3, per: proprieta-transitiva, fig: piatti}
 - {t1, da: p4, per: differenze-congruenti}
 
