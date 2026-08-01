@@ -384,10 +384,10 @@ corpus**.
 
 ### 8.1 Il corpus è l'autorità sulla teoria
 
-> **Non ancora implementato** (§8.1 e §8.2). Oggi il corpus funziona da solo e
-> `content/dimostrazioni/` resta un corso separato con la sua `teoria.yaml`:
-> finché nessuna lezione cita il corpus non c'è divergenza, ma appena una lo
-> farà servono il campo `teoria:` e l'inclusione `ref=` descritti qui sotto.
+> **Non ancora implementato** (§8.1 e §8.2). Oggi il corpus funziona da solo:
+> nessun corso ha una `teoria.yaml` che si sovrappone alla sua, quindi non c'è
+> divergenza. Appena una lezione vorrà citare il corpus serviranno il campo
+> `teoria:` e l'inclusione `ref=` descritti qui sotto.
 
 Oggi `teoria.yaml` è un'entità di corso. Con un corpus condiviso quel file
 esisterebbe in due posti e le voci divergerebbero in due settimane. Quindi: **un

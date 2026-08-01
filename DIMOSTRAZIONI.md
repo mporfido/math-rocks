@@ -5,8 +5,8 @@ modello dati e la sintassi d'autore del componente `<x-theorem>`: la sintassi è
 la cosa che poi non si cambia più senza riscrivere i contenuti. Il parser è in
 `process_theorem()` (`parser/preprocessors.py`), il componente in
 `static/components/theorem.js`, il contratto di evidenziazione in
-`static/components/p5.js`, l'esempio in `content/dimostrazioni/` con la figura
-`static/sketches/parallelogramma-diagonali.js`.
+`static/components/p5.js`, l'esempio in `content/geometria/quadrilateri.md` con
+la figura `static/sketches/geometria-diagonali-parallelogramma.js`.
 
 Il componente presenta un teorema — enunciato, ipotesi, tesi, dimostrazione — e
 lo rende **manipolabile**: gli stessi dati generano una lettura guidata, un

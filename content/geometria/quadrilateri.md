@@ -25,7 +25,7 @@
 :::
 
 :::theorem id=diagonali-parallelogramma modi=leggi,ordina,giustifica,completa,costruisci mancanti=2
-figura: parallelogramma-diagonali
+figura: geometria-diagonali-parallelogramma
 
 ## ipotesi
 - $ABCD$ è un parallelogramma {fig: quadrilatero}

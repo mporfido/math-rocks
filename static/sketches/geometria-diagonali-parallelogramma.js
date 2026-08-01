@@ -1,5 +1,5 @@
 /**
- * Sketch p5.js riutilizzabile "parallelogramma-diagonali".
+ * Sketch p5.js riutilizzabile "geometria-diagonali-parallelogramma".
  *
  * La figura del teorema "in un parallelogramma le diagonali si tagliano
  * scambievolmente per metà": il parallelogramma ABCD, le due diagonali e il
@@ -39,7 +39,7 @@
     }
   }
 
-  window.P5Sketches['parallelogramma-diagonali'] = function (p, ctx) {
+  window.P5Sketches['geometria-diagonali-parallelogramma'] = function (p, ctx) {
     // Vertici in coordinate normalizzate (0..1) sul riquadro utile. ABCD in
     // ordine: A in basso a sinistra, B in basso a destra, C in alto a destra,
     // D in alto a sinistra — così AB e DC sono la coppia di lati paralleli di
