@@ -88,6 +88,11 @@ differenze-congruenti:
   enunciato: sottraendo da grandezze congruenti grandezze congruenti si ottengono grandezze congruenti
   tipo: assioma
 
+meta-congruenti:
+  nome: Metà di grandezze congruenti
+  enunciato: le metà di grandezze congruenti sono congruenti fra loro
+  tipo: assioma
+
 proprieta-riflessiva:
   nome: Proprietà riflessiva
   enunciato: ogni figura è congruente a se stessa
@@ -169,7 +174,6 @@ triangolo-due-angoli-congruenti:
   nome: Inverso dell'isoscele
   enunciato: un triangolo con due angoli congruenti è isoscele
   area: congruenza
-  usa: [secondo-criterio]
 
 
 # --- Rette parallele --------------------------------------------------------
