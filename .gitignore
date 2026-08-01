@@ -29,6 +29,7 @@ instance/
 
 # Generated course data
 courses_data/
+tools_data/
 
 # IDE
 .vscode/
