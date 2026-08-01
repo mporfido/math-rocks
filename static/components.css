@@ -927,12 +927,41 @@ x-theorem {
     margin: 1.5rem 0;
 }
 
+/* La scheda è una griglia a due colonne che parte dal bordo alto: la colonna
+   laterale corre accanto a TUTTO, enunciato e ipotesi comprese, così la figura
+   si guarda insieme a ciò che dichiara. Le righe di sinistra tengono la loro
+   spaziatura a margini, quindi qui c'è solo il gap fra le colonne. */
 .thm {
     background: var(--surface);
     border: 2px solid var(--ink);
     border-radius: var(--radius);
     padding: 1.25rem;
+    display: grid;
+    /* minmax(0,…): senza, un <select> con opzioni lunghe (le garanzie da
+       scegliere) impone la propria larghezza minima alla colonna e spinge la
+       cassetta degli attrezzi fuori dal riquadro. */
+    grid-template-columns: minmax(0, 1fr) 260px;
+    column-gap: 1.75rem;
+    grid-template-areas:
+        "testata  colonna"
+        "modi     colonna"
+        "consegna colonna"
+        "lavoro   colonna";
+    align-items: start;
+    align-content: start;
 }
+
+/* Con la figura la colonna è più larga: sotto i ~300px un disegno geometrico
+   con le lettere dei vertici non si legge più. */
+.thm--con-figura {
+    grid-template-columns: minmax(0, 1fr) 320px;
+}
+
+.thm-testata { grid-area: testata; }
+.thm-modi { grid-area: modi; }
+.thm-consegna { grid-area: consegna; }
+.thm-lavoro { grid-area: lavoro; }
+.thm-colonna { grid-area: colonna; }
 
 .thm [hidden] {
     display: none !important;
@@ -1049,23 +1078,6 @@ x-theorem {
     color: var(--ink-soft);
     margin: 0 0 1.25rem;
     max-width: 52em;
-}
-
-.thm-corpo {
-    display: grid;
-    /* minmax(0,…): senza, un <select> con opzioni lunghe (le garanzie da
-       scegliere) impone la propria larghezza minima alla colonna e spinge la
-       cassetta degli attrezzi fuori dal riquadro. */
-    grid-template-columns: minmax(0, 1fr) 260px;
-    gap: 1.75rem;
-    align-items: start;
-}
-
-/* Con la figura la colonna laterale è più larga: sotto i ~300px un disegno
-   geometrico con le lettere dei vertici non si legge più. */
-.thm-corpo--con-figura {
-    grid-template-columns: minmax(0, 1fr) 320px;
-    align-content: start;
 }
 
 /* La colonna laterale segue la lettura: figura e cassetta degli attrezzi
@@ -1409,35 +1421,31 @@ x-theorem {
 /* ========== Responsive ========== */
 
 @media (max-width: 768px) {
-    /* La cassetta degli attrezzi passa sotto la dimostrazione */
-    .thm-corpo,
-    .thm-corpo--con-figura {
-        grid-template-columns: 1fr;
-    }
-
     /* A colonna unica la figura va SOPRA i passi — è quello che si guarda
        mentre si legge — e la cassetta degli attrezzi resta in fondo. Per
        separarle il riquadro della colonna si dissolve (`display: contents`) e
-       i due tornano celle della griglia esterna; niente sticky, qui lo schermo
-       non ha una colonna da tenere ferma. */
+       i due tornano celle della griglia della scheda; niente sticky, qui lo
+       schermo non ha una colonna da tenere ferma. */
     .thm-colonna {
         display: contents;
     }
 
-    .thm-corpo--con-figura {
+    .thm {
+        padding: 0.9rem;
+        grid-template-columns: 1fr;
         grid-template-areas:
+            "testata"
+            "modi"
+            "consegna"
             "figura"
             "lavoro"
             "attrezzi";
     }
 
-    .thm-corpo--con-figura > .thm-lavoro { grid-area: lavoro; }
-    .thm-corpo--con-figura .thm-figura { grid-area: figura; }
-    .thm-corpo--con-figura .thm-attrezzi-box { grid-area: attrezzi; }
-
-    .thm {
-        padding: 0.9rem;
-    }
+    /* Senza il gap di colonna la figura e la cassetta si appoggerebbero ai passi:
+       qui la distanza è a margini, come per il resto della scheda. */
+    .thm-figura { grid-area: figura; margin-bottom: 1.25rem; }
+    .thm-attrezzi-box { grid-area: attrezzi; margin-top: 1.25rem; }
 
     .thm-catena {
         padding-left: 28px;

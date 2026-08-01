@@ -176,7 +176,7 @@ class XTheorem extends HTMLElement {
       : '';
 
     this.innerHTML = `
-      <div class="thm">
+      <div class="thm${figura ? ' thm--con-figura' : ''}">
         <header class="thm-testata">
           <p class="thm-occhiello">Teorema</p>
           <h3 class="thm-titolo">${this.dataset.titolo || ''}</h3>
@@ -189,31 +189,29 @@ class XTheorem extends HTMLElement {
         </header>
         ${navigazione}
         <p class="thm-consegna"></p>
-        <div class="thm-corpo${figura ? ' thm-corpo--con-figura' : ''}">
-          <section class="thm-lavoro">
-            <p class="thm-titoletto">${this.etichette.dimostrazione}</p>
-            <div class="thm-catena"><svg class="thm-fili" aria-hidden="true"></svg></div>
-            <div class="thm-banco">
-              <p class="thm-titoletto">Cartellini da collocare</p>
-              <div class="thm-cartellini"></div>
-            </div>
-            <div class="thm-azioni">
-              <button type="button" class="thm-verifica">Verifica</button>
-              <button type="button" class="thm-ricomincia">Ricomincia</button>
-            </div>
-            <div class="thm-esito" role="status"></div>
-          </section>
-          <div class="thm-colonna">
-            ${figura}
-            <aside class="thm-attrezzi-box">
-              <p class="thm-titoletto">Cassetta degli attrezzi</p>
-              <ul class="thm-attrezzi">${Object.values(this.teoria).map(t =>
-                // Un teorema dimostrato entra nella teoria col proprio enunciato
-                // come nome: lì non c'è una seconda riga da mostrare.
-                `<li><b>${t.nome}</b>${t.enunciato && t.enunciato !== t.nome
-                  ? `<span>${t.enunciato}</span>` : ''}</li>`).join('')}</ul>
-            </aside>
+        <section class="thm-lavoro">
+          <p class="thm-titoletto">${this.etichette.dimostrazione}</p>
+          <div class="thm-catena"><svg class="thm-fili" aria-hidden="true"></svg></div>
+          <div class="thm-banco">
+            <p class="thm-titoletto">Cartellini da collocare</p>
+            <div class="thm-cartellini"></div>
           </div>
+          <div class="thm-azioni">
+            <button type="button" class="thm-verifica">Verifica</button>
+            <button type="button" class="thm-ricomincia">Ricomincia</button>
+          </div>
+          <div class="thm-esito" role="status"></div>
+        </section>
+        <div class="thm-colonna">
+          ${figura}
+          <aside class="thm-attrezzi-box">
+            <p class="thm-titoletto">Cassetta degli attrezzi</p>
+            <ul class="thm-attrezzi">${Object.values(this.teoria).map(t =>
+              // Un teorema dimostrato entra nella teoria col proprio enunciato
+              // come nome: lì non c'è una seconda riga da mostrare.
+              `<li><b>${t.nome}</b>${t.enunciato && t.enunciato !== t.nome
+                ? `<span>${t.enunciato}</span>` : ''}</li>`).join('')}</ul>
+          </aside>
         </div>
       </div>
     `;
