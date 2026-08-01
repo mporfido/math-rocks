@@ -1196,6 +1196,61 @@ x-theorem {
     opacity: 0.4;
 }
 
+/* --- Ragionamento ipotetico (DIMOSTRAZIONI.md §8) ------------------------- */
+
+/* Uno scope: i passi qui dentro valgono solo finché la supposizione è in piedi.
+   Il rientro non è decorazione, è la regola di visibilità resa visibile — e il
+   tratteggio dice che il terreno è provvisorio. */
+.thm-scope {
+    margin: 0 0 0.5rem 0.75rem;
+    padding-left: 0.85rem;
+    border-left: 2px dashed var(--rossa);
+    opacity: 0.97;
+}
+
+/* Una supposizione non è un'affermazione del teorema: va riconosciuta PRIMA di
+   leggerla, o «i due triangoli non sono congruenti» si legge al contrario. */
+.thm-riga--assunzione {
+    border-left-color: var(--rossa);
+    border-left-style: dashed;
+    border-left-width: 4px;
+}
+
+.thm-riga--assunzione .thm-tag,
+.thm-riga--analogo .thm-tag {
+    color: var(--rossa);
+}
+
+/* La contraddizione è il punto in cui la supposizione si rompe: è l'unica riga
+   che conclude ⊥, e si vede da lontano. Non usa il colore dell'errore — non è
+   uno sbaglio dello studente, è il motore della dimostrazione. */
+.thm-riga--assurdo {
+    background: var(--ink-wash-3);
+    border-left-color: var(--rossa);
+    border-left-width: 5px;
+}
+
+.thm-riga--assurdo .thm-testo {
+    font-weight: 600;
+}
+
+.thm-riga--assurdo .thm-testo::before {
+    content: '⨯ ';
+    color: var(--rossa);
+}
+
+/* Un ramo chiuso per analogia: c'è, ma non è svolto. Il corsivo lo dice senza
+   farlo sembrare un passo dedotto come gli altri. */
+.thm-riga--analogo {
+    border-left-color: var(--rossa);
+    border-left-style: dotted;
+}
+
+.thm-riga--analogo .thm-testo {
+    font-style: italic;
+    color: var(--ink-soft);
+}
+
 .thm-n {
     font-family: var(--font-mono);
     font-size: 0.75rem;

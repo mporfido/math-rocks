@@ -35,7 +35,12 @@ from tools_config import corpus_tools
 
 # Le voci di teoria che non sono teoremi non sono nodi della mappa: non
 # generano archi e compaiono nel box richiudibile di chi le usa.
-NON_TEOREMI = ('definizione', 'assioma')
+#
+# `regola` sono le regole logiche (riduzione all'assurdo, esame dei casi,
+# DIMOSTRAZIONI.md §8.7): sono garanzie a tutti gli effetti — in `giustifica`
+# vanno scelte — ma non teoremi di geometria, e come card sulla mappa sarebbero
+# nodi da dimostrare che nessuno dimostrerà.
+NON_TEOREMI = ('definizione', 'assioma', 'regola')
 
 # Modalità che di default mostrano i distrattori (DIMOSTRAZIONI.md §4): su un
 # teorema che non ne ha, degradano invece di rompersi — ma l'autore va avvisato.

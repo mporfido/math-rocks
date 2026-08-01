@@ -8,14 +8,14 @@
 # Campi:
 #   nome        titolo della card sulla mappa
 #   enunciato   formulazione estesa
-#   tipo        definizione | assioma | teorema   (default: teorema)
+#   tipo        definizione | assioma | regola | teorema   (default: teorema)
 #   area        obbligatorio per i teoremi: la colonna della mappa
 #   usa         SOLO per i teoremi non ancora dimostrati: i prerequisiti noti,
 #               così il nodo sta al livello giusto prima che la dimostrazione
 #               esista. Quando la dimostrazione arriva viene ignorato (gli
 #               archi li danno i `per:` dei passi) e va cancellato.
 #
-# Definizioni e assiomi non sono nodi della mappa: non generano archi e
+# Definizioni, assiomi e regole non sono nodi della mappa: non generano archi e
 # compaiono nel box richiudibile di chi li usa.
 
 
@@ -107,6 +107,36 @@ primo-criterio:
   nome: Primo criterio di congruenza
   enunciato: Due triangoli con due lati e l'angolo tra essi compreso congruenti sono congruenti
   tipo: assioma
+
+assioma-trasporto:
+  nome: Trasporto di un segmento
+  enunciato: su una semiretta, a partire dall'origine, esiste un solo segmento congruente a un segmento dato
+  tipo: assioma
+
+confronto-segmenti:
+  nome: Confronto di due segmenti
+  enunciato: dati due segmenti, o sono congruenti, o il primo è minore del secondo, o è maggiore
+  tipo: assioma
+
+parte-minore-del-tutto:
+  nome: La parte è minore del tutto
+  enunciato: un angolo contenuto propriamente in un altro è minore di quello
+  tipo: assioma
+
+
+# --- Regole logiche ---------------------------------------------------------
+# Non sono geometria: sono i modi di ragionare. Vanno scelte in `giustifica`
+# come ogni altra garanzia, ma non sono card da dimostrare (DIMOSTRAZIONI.md §8.7).
+
+riduzione-all-assurdo:
+  nome: Riduzione all'assurdo
+  enunciato: se supporre il contrario della tesi porta a una contraddizione, la tesi è vera
+  tipo: regola
+
+esame-dei-casi:
+  nome: Esame dei casi
+  enunciato: se una conclusione segue da ognuno dei casi possibili, allora vale
+  tipo: regola
 
 # --- Congruenza -------------------------------------------------------------
 

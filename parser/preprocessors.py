@@ -319,6 +319,25 @@ THEOREM_PREFIXES = {
 THEOREM_COSTRUZIONE = 'costruzione'
 THEOREM_COSTRUZIONE_PREFIX = 'c'
 
+# --- Ragionamento ipotetico (DIMOSTRAZIONI.md §8) ---------------------------
+# Assurdo e casi sono lo STESSO primitivo: si apre uno scope supponendo qualcosa
+# che non è né dato né dedotto, e lo si chiude con uno scarico. Da qui il
+# vocabolario: due modi di aprire, due garanzie che chiudono, due terminatori.
+
+THEOREM_CONTRADDIZIONE = 'contraddizione'  # token nudo: conclusione ⊥
+THEOREM_ASSURDO_PREFIX = 's'               # `{assurdo: t1}` → s1, s2…
+THEOREM_SOTTOSEZIONI = ('caso', 'quindi')  # `### caso …` / `### quindi`
+
+REGOLA_ASSURDO = 'riduzione-all-assurdo'
+REGOLA_CASI = 'esame-dei-casi'
+
+# Il prefisso degli id di un ramo. Fuori c, d, h, p, s, t: sono già namespace.
+LETTERE_CASO = 'abefgkmnqruvwxyz'
+
+# Le maschere col mucchio di cartellini non reggono ancora uno scope: la catena
+# lì è una lista che lo studente riordina, e un rientro non è esprimibile.
+MODI_SENZA_SCOPE = ('ordina', 'completa', 'costruisci')
+
 THEOREM_LABELS = {
     'ipotesi': 'Ipotesi',
     'tesi': 'Tesi',
@@ -379,6 +398,11 @@ def _split_theorem_sections(body):
     Restituisce (sezioni, preambolo): `sezioni` è {nome: [righe grezze]},
     `preambolo` sono le righe `chiave: valore` prima della prima sezione
     (oggi solo `figura:`).
+
+    Le sotto-sezioni `### caso …` e `### quindi` (DIMOSTRAZIONI.md §8) non sono
+    sezioni: restano NELLA lista della dimostrazione, come token in mezzo ai
+    passi. È la loro posizione fra i passi a dire dove si apre e dove si chiude
+    uno scope, e perderla qui vorrebbe dire ricostruirla dopo.
     """
     sections = {}
     preamble = {}
@@ -388,9 +412,20 @@ def _split_theorem_sections(body):
         stripped = line.strip()
         if not stripped:
             continue
-        heading = re.match(r'^#{1,6}\s+(.+)$', stripped)
+        heading = re.match(r'^(#{1,6})\s+(.+)$', stripped)
         if heading:
-            name = heading.group(1).strip().lower()
+            livello = len(heading.group(1))
+            name = heading.group(2).strip()
+            if livello >= 3:
+                if current != 'dimostrazione':
+                    raise ValueError(
+                        f"'{name}': le sotto-sezioni "
+                        f"({', '.join(THEOREM_SOTTOSEZIONI)}) stanno dentro "
+                        "'## dimostrazione', dove il ragionamento avviene"
+                    )
+                sections[current].append(stripped)
+                continue
+            name = name.lower()
             if name not in THEOREM_SECTIONS:
                 raise ValueError(
                     f"sezione '{name}' non riconosciuta in :::theorem "
@@ -409,40 +444,51 @@ def _split_theorem_sections(body):
     return sections, preamble
 
 
-def _parse_theorem_item(line, section, counters, where):
+def _split_annotation(rest):
+    """Separa il testo di una riga dall'annotazione finale fra graffe.
+
+    L'annotazione è l'ULTIMO gruppo tra graffe a fine riga: così un `${a}` o un
+    `\\{` nel testo non viene scambiato per annotazione.
+    """
+    ann_match = re.search(r'\{([^{}]*)\}\s*$', rest)
+    if not ann_match:
+        return rest, None, {}
+    ref, fields = _parse_annotation(ann_match.group(1))
+    return rest[:ann_match.start()].strip(), ref, fields
+
+
+def _parse_theorem_item(line, section, counters, where, prefisso=None):
     """
     Parsa una riga `- testo {da: …, per: …}` di una sezione.
 
     Restituisce un dict con id, testo, ref (tesi referenziata) e i campi
     dell'annotazione già normalizzati.
 
-    `counters` è il contatore degli id impliciti della sezione, per prefisso:
-    le costruzioni hanno un namespace tutto loro (`c1, c2…`), così aggiungerne
-    una non rinumera i passi dedotti già scritti.
+    `counters` è il contatore degli id impliciti, per prefisso: le costruzioni
+    hanno un namespace tutto loro (`c1, c2…`), così aggiungerne una non rinumera
+    i passi dedotti già scritti. Vale lo stesso per l'assunzione per assurdo
+    (`s1…`) e per i rami di una discussione per casi (`a1…`, `b1…`, §8).
+
+    `prefisso` sovrascrive quello derivato dalla sezione: dentro un `### caso` i
+    passi prendono la lettera del ramo, non `p`.
     """
     item_match = re.match(r'^-\s*(.*)$', line)
     if not item_match:
         raise ValueError(f"riga non riconosciuta nella sezione '{section}': {line}")
 
-    rest = item_match.group(1).strip()
+    rest, ref, fields = _split_annotation(item_match.group(1).strip())
 
-    # L'annotazione è l'ULTIMO gruppo tra graffe a fine riga: così un `${a}` o
-    # un `\{` nel testo non viene scambiato per annotazione.
-    ann_match = re.search(r'\{([^{}]*)\}\s*$', rest)
-    ref, fields = (None, {})
-    if ann_match:
-        ref, fields = _parse_annotation(ann_match.group(1))
-        rest = rest[:ann_match.start()].strip()
-
-    # Il token nudo è di norma la tesi referenziata; `costruzione` è la sola
-    # parola riservata, e marca il passo che introduce un oggetto.
+    # I token nudi sono le sole parole riservate dell'annotazione: ovunque altro
+    # il token nudo è l'id di una tesi referenziata (§2.3).
     costruzione = ref == THEOREM_COSTRUZIONE
-    if costruzione:
+    contraddizione = ref == THEOREM_CONTRADDIZIONE
+    if costruzione or contraddizione:
+        parola = THEOREM_COSTRUZIONE if costruzione else THEOREM_CONTRADDIZIONE
         ref = None
         if section != 'dimostrazione':
             raise ValueError(
-                f"{where}: `costruzione` compare nella sezione '{section}'; "
-                'una costruzione è un atto della dimostrazione, non un dato'
+                f"{where}: `{parola}` compare nella sezione '{section}'; "
+                'è un atto della dimostrazione, non un dato'
             )
 
     # `per` è la sintassi d'autore, `perche` il nome del campo nel modello:
@@ -450,8 +496,12 @@ def _parse_theorem_item(line, section, counters, where):
     warrant = fields.get('per') or fields.get('perche')
     premises = [p.strip() for p in fields.get('da', '').split(',') if p.strip()]
 
-    prefisso = (THEOREM_COSTRUZIONE_PREFIX if costruzione
-                else THEOREM_PREFIXES[section])
+    if prefisso is None:
+        prefisso = THEOREM_PREFIXES[section]
+    if costruzione:
+        prefisso = THEOREM_COSTRUZIONE_PREFIX
+    elif fields.get('assurdo'):
+        prefisso = THEOREM_ASSURDO_PREFIX
     counters[prefisso] = counters.get(prefisso, 0) + 1
 
     return {
@@ -459,11 +509,272 @@ def _parse_theorem_item(line, section, counters, where):
         'testo': rest,
         'ref': ref,
         'costruzione': costruzione,
+        'contraddizione': contraddizione,
+        'assurdo': fields.get('assurdo'),
+        'analogo': fields.get('analogo'),
         'da': premises,
         'perche': warrant,
         'fig': fields.get('fig'),
         'tipo': fields.get('tipo'),
     }
+
+
+def _parse_sottosezione(raw, where):
+    """Parsa un token `### caso <testo> {da: …}` o `### quindi`."""
+    testo, _, fields = _split_annotation(raw.lstrip('#').strip())
+    parole = testo.split(None, 1)
+    parola = (parole[0] if parole else '').lower()
+    if parola not in THEOREM_SOTTOSEZIONI:
+        raise ValueError(
+            f"{where}: sotto-sezione '### {testo}' non riconosciuta "
+            f"(ammesse: {', '.join('### ' + s for s in THEOREM_SOTTOSEZIONI)})"
+        )
+    return parola, (parole[1].strip() if len(parole) > 1 else ''), fields
+
+
+def _parse_dimostrazione(righe, counters, where):
+    """
+    Percorre `## dimostrazione` assegnando a ogni passo il suo **scope**.
+
+    Assurdo e casi sono lo stesso primitivo (DIMOSTRAZIONI.md §8): si suppone
+    qualcosa che non è né dato né dedotto, si ragiona lì dentro, e si scarica.
+    Qui si tiene il conto di che cosa è aperto, perché lo scope non è scrivibile
+    dall'autore riga per riga: è la posizione del passo a dirlo, esattamente
+    come lo statuto viene dalla sezione.
+
+    Restituisce (voci, gruppi, assunzioni):
+    - `voci` sono gli item con in più `scope`, `statuto` e `sotto`;
+    - `gruppi` sono i gruppi di casi, ognuno coi suoi rami e il terminatore di
+      ciascuno: servono a verificare che l'esame dei casi li citi tutti;
+    - `assunzioni` mappa l'id di ogni assunzione allo scope in cui *sta* (cioè
+      al suo padre), che è la catena di contenimento su cui poggia la regola di
+      visibilità (§8.5).
+    """
+    voci = []
+    gruppi = []
+    assunzioni = {}
+    aperte = []          # stack degli assurdi aperti
+    lettere = iter(LETTERE_CASO)
+    scope = None
+    prefisso = THEOREM_PREFIXES['dimostrazione']
+    gruppo = None        # gruppo di casi in corso: `### caso` consecutivi
+    ramo = None
+
+    for riga in righe:
+        if riga.startswith('#'):
+            parola, testo, fields = _parse_sottosezione(riga, where)
+
+            if parola == 'quindi':
+                if gruppo is None:
+                    raise ValueError(
+                        f'{where}: `### quindi` non chiude nessuna discussione '
+                        'per casi'
+                    )
+                scope = gruppo['parent']
+                prefisso = THEOREM_PREFIXES['dimostrazione']
+                gruppo, ramo = None, None
+                continue
+
+            # `### caso`: un ramo. I `### caso` consecutivi sono rami dello
+            # STESSO gruppo — una discussione dentro un ramo non è esprimibile,
+            # e nessuna delle dimostrazioni che ci interessano la chiede.
+            if not testo:
+                raise ValueError(f'{where}: un `### caso` senza enunciato del caso')
+            if gruppo is None:
+                gruppo = {'parent': scope, 'rami': []}
+                gruppi.append(gruppo)
+            try:
+                lettera = next(lettere)
+            except StopIteration:
+                raise ValueError(f'{where}: troppi casi in un solo teorema')
+            if not fields.get('da'):
+                raise ValueError(
+                    f"{where}: il caso «{testo}» non dichiara `da:`; un caso "
+                    'nasce da una disgiunzione già dimostrata, non dal nulla'
+                )
+            caso_id = fields.get('id') or f'{lettera}1'
+            counters[lettera] = 1
+            voci.append({
+                'id': caso_id, 'testo': testo, 'ref': None,
+                'da': [p.strip() for p in fields['da'].split(',') if p.strip()],
+                'perche': None, 'fig': fields.get('fig'), 'tipo': None,
+                'costruzione': False, 'contraddizione': False,
+                'assurdo': None, 'analogo': None,
+                'statuto': 'assunzione', 'sotto': 'caso', 'scope': gruppo['parent'],
+            })
+            assunzioni[caso_id] = gruppo['parent']
+            ramo = {'id': caso_id, 'ultimo': caso_id, 'analogo': None}
+            gruppo['rami'].append(ramo)
+            scope, prefisso = caso_id, lettera
+            continue
+
+        item = _parse_theorem_item(riga, 'dimostrazione', counters, where, prefisso)
+
+        # Uno scarico esce dallo scope PRIMA di essere collocato: la conclusione
+        # di una riduzione all'assurdo non dipende più dalla supposizione, ed è
+        # esattamente ciò che la rende una dimostrazione.
+        if item['perche'] == REGOLA_ASSURDO:
+            if not aperte:
+                raise ValueError(
+                    f"{where}: il passo '{item['id']}' scarica una riduzione "
+                    "all'assurdo, ma nessuna è aperta"
+                )
+            item['scarica'] = aperte.pop()
+            scope = assunzioni[item['scarica']]
+
+        item['scope'] = scope
+        item['sotto'] = None
+        if item['assurdo']:
+            item['statuto'] = 'assunzione'
+            item['sotto'] = 'assurdo'
+            assunzioni[item['id']] = scope
+            aperte.append(item['id'])
+            scope = item['id']
+        elif item['analogo']:
+            item['statuto'] = 'analogo'
+        elif item['contraddizione']:
+            item['statuto'] = 'assurdo'
+        elif item['costruzione']:
+            item['statuto'] = 'costruzione'
+        else:
+            item['statuto'] = 'dedotto'
+
+        if ramo is not None and item['scope'] == ramo['id']:
+            ramo['ultimo'] = item['id']
+            if item['analogo']:
+                ramo['analogo'] = item['analogo']
+        voci.append(item)
+
+    if gruppo is not None:
+        raise ValueError(
+            f'{where}: la discussione per casi non è chiusa; dopo l\'ultimo '
+            '`### caso` serve un `### quindi` che ne tiri le somme'
+        )
+    if aperte:
+        raise ValueError(
+            f"{where}: l'assunzione per assurdo '{aperte[-1]}' non è mai "
+            f'scaricata (serve un passo `per: {REGOLA_ASSURDO}`)'
+        )
+    return voci, gruppi, assunzioni
+
+
+def _check_theorem_scopes(passi, gruppi, assunzioni, where):
+    """
+    La regola di visibilità (DIMOSTRAZIONI.md §8.5) e la tenuta degli scarichi.
+
+    Un passo può citare solo passi del proprio scope o di uno che lo contiene.
+    Fanno eccezione i due scarichi, che citano *dentro* lo scope che chiudono —
+    è il loro mestiere. Violare la regola è l'errore classico sull'assurdo
+    («l'ho dimostrato lì dentro e lo uso fuori»), e senza scope era invisibile.
+    """
+    per_id = {p['id']: p for p in passi}
+
+    def catena(scope):
+        """Lo scope e tutti quelli che lo contengono, dal più interno."""
+        out = []
+        while scope is not None:
+            out.append(scope)
+            scope = assunzioni.get(scope)
+        out.append(None)
+        return out
+
+    def concessioni(passo):
+        """Che cosa uno scarico può citare DENTRO lo scope che chiude.
+
+        Non tutto: solo ciò per cui esiste. Una riduzione all'assurdo guarda le
+        contraddizioni, un esame dei casi guarda i terminatori dei rami. Un
+        passo qualsiasi dello scope resta invisibile anche allo scarico — è
+        dimostrato sotto la supposizione, e la conclusione dello scarico non
+        deve dipenderne.
+        """
+        if passo.get('scarica'):
+            return {p['id'] for p in passi if p['statuto'] == 'assurdo'
+                    and passo['scarica'] in catena(p['scope'])}
+        if passo.get('perche') == REGOLA_CASI:
+            return {r['ultimo'] for g in gruppi if g['parent'] == passo['scope']
+                    for r in g['rami']}
+        return set()
+
+    for passo in passi:
+        visibili = catena(passo['scope'])
+        ammessi = concessioni(passo)
+        for premessa in passo['da']:
+            altro = per_id.get(premessa)
+            if altro is None:
+                continue                       # già segnalato altrove
+            if altro['scope'] in visibili or premessa in ammessi:
+                continue
+            dentro = altro['scope'] or 'la dimostrazione'
+            raise ValueError(
+                f"{where}: il passo '{passo['id']}' cita '{premessa}', che vive "
+                f"dentro '{dentro}' e da qui non è visibile: quello che si "
+                'dimostra sotto una supposizione vale solo finché la '
+                'supposizione è in piedi'
+            )
+
+    # Ogni ramo va citato dallo scarico: un esame dei casi che ne dimentica uno
+    # non è una dimostrazione, è una dimostrazione di uno dei casi.
+    for gruppo in gruppi:
+        terminatori = {r['ultimo'] for r in gruppo['rami']}
+        scarichi = [p for p in passi
+                    if p.get('perche') == REGOLA_CASI
+                    and terminatori & set(p['da'])]
+        if not scarichi:
+            rami = ', '.join(r['id'] for r in gruppo['rami'])
+            raise ValueError(
+                f'{where}: i casi {rami} non sono tirati insieme da nessun '
+                f'passo `per: {REGOLA_CASI}`'
+            )
+        for scarico in scarichi:
+            mancanti = terminatori - set(scarico['da'])
+            if mancanti:
+                raise ValueError(
+                    f"{where}: il passo '{scarico['id']}' esamina i casi ma non "
+                    f"cita {', '.join(sorted(mancanti))}: un caso non discusso "
+                    'lascia la dimostrazione aperta'
+                )
+
+    # Un ramo chiuso «per analogia» deve dire a quale caso è analogo, e dirlo
+    # con una simmetria scritta: è la parte che i libri omettono.
+    per_gruppo = {r['id']: g for g in gruppi for r in g['rami']}
+    for passo in passi:
+        if passo['statuto'] != 'analogo':
+            continue
+        if not passo['testo']:
+            raise ValueError(
+                f"{where}: il passo '{passo['id']}' chiude un caso per analogia "
+                'senza dire quale simmetria lo autorizza'
+            )
+        bersaglio = passo['analogo']
+        mio = per_gruppo.get(passo['scope'])
+        if bersaglio not in per_gruppo or per_gruppo[bersaglio] is not mio:
+            raise ValueError(
+                f"{where}: '{passo['id']}' è dichiarato analogo a "
+                f"'{bersaglio}', che non è un caso della stessa discussione"
+            )
+
+    for passo in passi:
+        if passo['statuto'] == 'assurdo' and len(passo['da']) < 2 \
+                and passo.get('perche') != REGOLA_CASI:
+            raise ValueError(
+                f"{where}: la contraddizione '{passo['id']}' cita una premessa "
+                'sola: un assurdo nasce da due asserzioni incompatibili'
+            )
+        if passo.get('scarica'):
+            nega = per_id[passo['scarica']].get('nega')
+            if passo['id'] != nega:
+                raise ValueError(
+                    f"{where}: il passo '{passo['id']}' scarica l'assurdo, ma "
+                    f"l'assunzione negava '{nega}': la riduzione all'assurdo "
+                    'deve concludere proprio la tesi che si era negata'
+                )
+            interni = [p for p in passi if p['id'] in passo['da']
+                       and p['statuto'] == 'assurdo']
+            if not interni:
+                raise ValueError(
+                    f"{where}: il passo '{passo['id']}' scarica l'assurdo senza "
+                    'citare nessuna contraddizione'
+                )
 
 
 def _check_theorem_cycles(steps, where):
@@ -541,6 +852,13 @@ def process_theorem(content, theorem_counter, render_text=None,
     un oggetto. Sta nella dimostrazione perché è lì che l'atto avviene — e non
     fra le ipotesi, dove finirebbe per far credere che l'oggetto fosse dato.
 
+    Dentro `## dimostrazione` si può inoltre aprire uno **scope ipotetico**
+    (DIMOSTRAZIONI.md §8): `{assurdo: t1}` suppone il contrario della tesi,
+    `### caso … {da: p2}` apre un ramo, `### quindi` li richiude. Assurdo e casi
+    sono lo stesso primitivo — si suppone, si ragiona, si scarica — e da qui
+    viene il controllo che senza scope non era possibile: quello che si dimostra
+    sotto una supposizione non è citabile da fuori.
+
     Attributi della riga di apertura: `id` (registra il teorema nella teoria del
     corso), `titolo`, `modi` (default `leggi`), `mancanti` (default 2), `figura`
     (sketch mostrato accanto ai passi: i `fig:` ne nominano gli elementi);
@@ -599,11 +917,20 @@ def process_theorem(content, theorem_counter, render_text=None,
         # --- Parsing delle sezioni in liste di voci ---------------------------
         items = {}
         for section in THEOREM_SECTIONS:
+            if section == 'dimostrazione':
+                continue
             counters = {}
             items[section] = [
                 _parse_theorem_item(line, section, counters, where)
                 for line in sections.get(section, [])
             ]
+
+        # La dimostrazione non è una lista di righe indipendenti: `### caso` e
+        # `### quindi` aprono e chiudono scope, e i contatori degli id sono
+        # condivisi da tutte le sotto-sezioni (§8).
+        counters = {}
+        voci, gruppi, assunzioni = _parse_dimostrazione(
+            sections.get('dimostrazione', []), counters, where)
 
         if not items['tesi']:
             raise ValueError(f'{where}: manca la sezione "## tesi"')
@@ -621,11 +948,42 @@ def process_theorem(content, theorem_counter, render_text=None,
             passi.append({
                 'id': item['id'], 'testo': item['testo'],
                 'statuto': 'ipotesi', 'da': [], 'perche': None, 'fig': item['fig'],
+                'scope': None,
             })
 
         raggiunte = set()
-        for item in items['dimostrazione']:
-            if item['ref']:
+        for item in voci:
+            # Una costruzione non asserisce, introduce: se ne può dichiarare la
+            # garanzia (l'assioma che ne assicura l'esistenza), ma quando manca
+            # vale "per costruzione" e non è un buco da riempire. Lo stesso per
+            # l'assunzione e per la contraddizione (§8.7).
+            passo = {
+                'id': item['id'], 'testo': item['testo'],
+                'statuto': item['statuto'], 'da': item['da'],
+                'perche': item['perche'], 'fig': item['fig'],
+                'scope': item['scope'],
+            }
+            if item['sotto']:
+                passo['sotto'] = item['sotto']
+            if item.get('scarica'):
+                passo['scarica'] = item['scarica']
+
+            if item['assurdo']:
+                if item['assurdo'] not in tesi_by_id:
+                    raise ValueError(
+                        f"{where}: si suppone per assurdo il contrario di "
+                        f"'{item['assurdo']}', che non è una tesi"
+                    )
+                if not item['testo']:
+                    raise ValueError(
+                        f"{where}: l'assunzione per assurdo '{item['id']}' è "
+                        'senza testo: la negazione della tesi va scritta, non '
+                        'esiste un modo meccanico di ricavarla'
+                    )
+                passo['nega'] = item['assurdo']
+            elif item['analogo']:
+                passo['analogo'] = item['analogo']
+            elif item['ref']:
                 # Passo che referenzia una tesi: il testo viene da lì.
                 tesi = tesi_by_id.get(item['ref'])
                 if tesi is None:
@@ -639,20 +997,11 @@ def process_theorem(content, theorem_counter, render_text=None,
                         'deve riscrivere il testo della tesi'
                     )
                 raggiunte.add(item['ref'])
-                passi.append({
+                passo.update({
                     'id': tesi['id'], 'testo': tesi['testo'], 'statuto': 'tesi',
-                    'da': item['da'], 'perche': item['perche'],
                     'fig': item['fig'] or tesi['fig'],
                 })
-            else:
-                # Una costruzione non asserisce, introduce: se ne può dichiarare
-                # la garanzia (l'assioma che ne assicura l'esistenza), ma quando
-                # manca vale "per costruzione" e non è un buco da riempire.
-                passi.append({
-                    'id': item['id'], 'testo': item['testo'],
-                    'statuto': 'costruzione' if item['costruzione'] else 'dedotto',
-                    'da': item['da'], 'perche': item['perche'], 'fig': item['fig'],
-                })
+            passi.append(passo)
 
         # --- Validazione (DIMOSTRAZIONI.md §6) -------------------------------
         ids = set()
@@ -672,6 +1021,20 @@ def process_theorem(content, theorem_counter, render_text=None,
                                    f"{where}, passo '{passo['id']}'")
 
         _check_theorem_cycles(passi, where)
+        _check_theorem_scopes(passi, gruppi, assunzioni, where)
+
+        # Le maschere col mucchio di cartellini presentano la catena come una
+        # lista da riordinare: uno scope lì non è esprimibile, e l'esercizio
+        # risulterebbe non risolvibile invece che difficile (§8).
+        if any(p['scope'] for p in passi):
+            vietati = [m for m in attrs.get('modi', 'leggi').split(',')
+                       if m.strip() in MODI_SENZA_SCOPE]
+            if vietati:
+                raise ValueError(
+                    f"{where}: la modalità {', '.join(m.strip() for m in vietati)} "
+                    'non regge un ragionamento per assurdo o per casi; per ora '
+                    'un teorema con scope offre solo leggi e giustifica'
+                )
 
         non_raggiunte = [t['id'] for t in items['tesi'] if t['id'] not in raggiunte]
         if non_raggiunte:
