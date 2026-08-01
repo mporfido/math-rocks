@@ -252,14 +252,23 @@ class XTheorem extends HTMLElement {
    * La scelta è deterministica e seminata dall'id del teorema, NON dalla
    * modalità: un link dato per compito deve produrre lo stesso esercizio per
    * tutta la classe, altrimenti in classe non se ne può parlare.
+   *
+   * Un `garanzia-sbagliata` non entra dove le garanzie non si vedono. Quel
+   * distrattore È la sua garanzia: la conclusione, per definizione del tipo, è
+   * giusta. Tolta la garanzia dal cartellino resta il gemello identico di un
+   * passo vero, e sceglierne uno diventa un sorteggio — con in più il caso
+   * assurdo dello studente che gli assegna la garanzia GIUSTA e si sente dire
+   * che è un intruso. Non è un intruso: è un clone, e va tenuto fuori.
    */
   distrattoriDaMostrare(modo) {
     const conBanco = modo.partenza !== 'tutti';
-    let quanti = modo.distrattori ? this.distrattori.length : 0;
+    const utili = this.distrattori.filter(
+      d => modo.garanzieVisibili || d.tipo !== 'garanzia-sbagliata');
+    let quanti = modo.distrattori ? utili.length : 0;
     if (conBanco && this.nDistrattori !== null) quanti = this.nDistrattori;
-    quanti = Math.min(quanti, this.distrattori.length);
+    quanti = Math.min(quanti, utili.length);
     if (quanti <= 0) return [];
-    return this.mescola(this.distrattori.map(d => d.id), 'distrattori').slice(0, quanti);
+    return this.mescola(utili.map(d => d.id), 'distrattori').slice(0, quanti);
   }
 
   mescola(ids, chiave) {
