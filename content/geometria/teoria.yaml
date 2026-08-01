@@ -20,7 +20,36 @@
 
 
 # --- Definizioni ------------------------------------------------------------
+definizione-angoli-opposti-al-vertice:
+  nome: Definizione di angoli opposti al vertice
+  enunciato: due angoli i cui lati sono uno il prolungamento dell'altro
+  tipo: definizione
 
+definizione-angoli-complementari:
+  nome: Definizione di angoli complementari
+  enunciato: due angoli la cui somma è un angolo retto ($\frac{\pi}{2}$)
+  tipo: definizione
+  
+definizione-angoli-supplementari:
+  nome: Definizione di angoli supplementari
+  enunciato: due angoli la cui somma è un angolo piatto ($\pi$)
+  tipo: definizione
+
+definizione-punto-medio:
+  nome: Definizione di punto medio di un segmento
+  enunciato: il punto che divide il segmento in due segmenti congruenti
+  tipo: definizione
+
+definizione-bisettrice:
+  nome: Definizione di bisettrice
+  enunciato: la semiretta che divide un angolo in due angoli congruenti
+  tipo: definizione
+
+definizione-isoscele:
+  nome: Definizione di triangolo isoscele
+  enunciato: un triangolo con due lati congruenti
+  tipo: definizione
+  
 definizione-parallelogramma:
   nome: Definizione di parallelogramma
   enunciato: un quadrilatero con i lati opposti paralleli
@@ -34,16 +63,6 @@ definizione-rombo:
 definizione-rettangolo:
   nome: Definizione di rettangolo
   enunciato: un parallelogramma con i quattro angoli retti
-  tipo: definizione
-
-definizione-isoscele:
-  nome: Definizione di triangolo isoscele
-  enunciato: un triangolo con due lati congruenti
-  tipo: definizione
-
-definizione-bisettrice:
-  nome: Definizione di bisettrice
-  enunciato: la semiretta che divide un angolo in due angoli congruenti
   tipo: definizione
 
 elementi-corrispondenti:
@@ -60,8 +79,13 @@ assioma-parallela:
   tipo: assioma
 
 assioma-angolo-piatto:
-  nome: Angoli supplementari
-  enunciato: due angoli adiacenti che formano un angolo piatto misurano insieme 180°
+  nome: Somma di angoli adiacenti
+  enunciato: due angoli adiacenti i cui lati esterni sono uno il prolungamento dell'altro formano insieme un angolo piatto
+  tipo: assioma
+
+differenze-congruenti:
+  nome: Differenze di grandezze congruenti
+  enunciato: sottraendo da grandezze congruenti grandezze congruenti si ottengono grandezze congruenti
   tipo: assioma
 
 proprieta-riflessiva:
@@ -69,27 +93,36 @@ proprieta-riflessiva:
   enunciato: ogni figura è congruente a se stessa
   tipo: assioma
 
+proprieta-transitiva:
+  nome: Proprietà transitiva
+  enunciato: due grandezze congruenti a una terza sono congruenti fra loro
+  tipo: assioma
+
 sostituzione:
   nome: Sostituzione
   enunciato: grandezze congruenti possono essere sostituite l'una all'altra
   tipo: assioma
 
+primo-criterio:
+  nome: Primo criterio di congruenza
+  enunciato: Due triangoli con due lati e l'angolo tra essi compreso congruenti sono congruenti
+  tipo: assioma
 
 # --- Congruenza -------------------------------------------------------------
 
-primo-criterio:
-  nome: Primo criterio
-  enunciato: due triangoli con due lati e l'angolo tra essi compreso congruenti sono congruenti
-  area: congruenza
-
 secondo-criterio:
-  nome: Secondo criterio
+  nome: Secondo criterio di congruenza
   enunciato: due triangoli con un lato e i due angoli a esso adiacenti congruenti sono congruenti
   area: congruenza
 
 terzo-criterio:
   nome: Terzo criterio
   enunciato: due triangoli con i tre lati congruenti sono congruenti
+  area: congruenza
+
+supplementari-di-congruenti:
+  nome: Supplementari di angoli congruenti
+  enunciato: angoli supplementari di angoli congruenti sono congruenti
   area: congruenza
 
 angoli-opposti-al-vertice:
