@@ -984,8 +984,27 @@ x-theorem {
     color: var(--ink-soft);
 }
 
-.thm-dati span {
+/* Ipotesi e tesi: una per riga, così si contano a colpo d'occhio */
+.thm-elenco {
     font-family: var(--font-body);
+    list-style: none;
+    margin: 0.15rem 0 0;
+    padding: 0;
+}
+
+.thm-elenco li {
+    padding-left: 1.35rem;
+    text-indent: -1.35rem;
+}
+
+.thm-elenco li + li {
+    margin-top: 0.2rem;
+}
+
+.thm-elenco li::before {
+    content: "—";
+    color: var(--ink-soft);
+    margin-right: 0.35rem;
 }
 
 /* Navigazione fra le modalità: compare solo se ce n'è più d'una */

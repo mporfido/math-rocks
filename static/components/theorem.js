@@ -181,8 +181,10 @@ class XTheorem extends HTMLElement {
           <p class="thm-occhiello">Teorema</p>
           <h3 class="thm-titolo">${this.dataset.titolo || ''}</h3>
           <div class="thm-dati">
-            <div><b>${this.etichette.ipotesi}</b><span>${ipotesi.map(p => p.testo).join('. ')}</span></div>
-            <div><b>${this.etichette.tesi}</b><span>${tesi.map(p => p.testo).join('; ')}</span></div>
+            <div><b>${this.etichette.ipotesi}</b><ul class="thm-elenco">${
+              ipotesi.map(p => `<li>${p.testo}</li>`).join('')}</ul></div>
+            <div><b>${this.etichette.tesi}</b><ul class="thm-elenco">${
+              tesi.map(p => `<li>${p.testo}</li>`).join('')}</ul></div>
           </div>
         </header>
         ${navigazione}
