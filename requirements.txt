@@ -3,3 +3,4 @@ mistune==3.0.2
 PyYAML==6.0.1
 gunicorn==23.0.0  # solo per il deploy in produzione
 Frozen-Flask==1.0.2  # solo per l'export statico (freeze.py)
+pytest==8.3.4  # solo per i test (python -m pytest tests/)

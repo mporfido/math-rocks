@@ -81,6 +81,11 @@ math-rocks/
 ├── tools_data/                 # Corpora compilati (generati da build_corpus.py)
 │   └── geometria.json          # JSON: { id, aree, teoremi: [ { livello, usa... } ] }
 │
+├── tests/                      # `python -m pytest tests/`. Guardano soprattutto la
+│                               # VALIDAZIONE in build: una dimostrazione sbagliata
+│                               # che compila in silenzio diventa una scheda che lo
+│                               # studente non può risolvere
+│
 ├── README.md                   # Introduzione e setup
 ├── GETTING_STARTED.md          # Guida rapida per iniziare
 ├── MARKDOWN_SYNTAX.md          # Sintassi markdown estesa
@@ -145,7 +150,8 @@ Vedi `MARKDOWN_SYNTAX.md` per la struttura completa corso → lezioni → step.
 1. **Creazione contenuto**: Scrivi `content/[corso-id]/content-N.md` (una lezione per file) usando la sintassi custom
 2. **Build**: Esegui `python build_courses.py` per compilare markdown → JSON
 3. **Sviluppo**: `python app.py` avvia server Flask su http://localhost:5000
-4. **Produzione**: Deploy su Heroku/Render/altro con gunicorn
+4. **Test**: `python -m pytest tests/`
+5. **Produzione**: Deploy su Heroku/Render/altro con gunicorn
 
 ## Sintassi Custom
 

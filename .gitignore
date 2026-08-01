@@ -27,6 +27,9 @@ MANIFEST
 instance/
 .webassets-cache
 
+# Test
+.pytest_cache/
+
 # Generated course data
 courses_data/
 tools_data/
