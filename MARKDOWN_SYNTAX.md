@@ -555,6 +555,55 @@ Hai completato entrambi gli esercizi. Ora puoi procedere!
 :::
 ```
 
+### 9. Tabelle con frecce
+
+Sintassi: blocco `:::table` con una normale tabella a pipe, in cui un **glifo di
+verso** al posto di un'intestazione dichiara una **corsia** di frecce
+etichettate. Serve quando quello che conta non è una colonna in più, ma
+l'operazione che porta da una riga alla successiva — che sta *fra* due righe.
+
+```markdown
+:::table
+| Potenza  | Valore  | v : 2 |
+| -------- | ------- | ----- |
+| $2^1$    | 2       |
+| $2^0$    | [[1]]   |
+| $2^{-1}$ | [[1/2]] |
+:::
+```
+
+| Marcatore | Dove | Corsia |
+| --------- | ---- | ------ |
+| `v` `^` | intestazione di colonna | frecce verticali (giù / su) |
+| `>` `<` | prima cella di una riga | frecce orizzontali (destra / sinistra) |
+
+L'etichetta dopo il glifo vale per tutti i salti; una cella la sovrascrive per
+il proprio salto; `-` rompe la catena e `~` prolunga la freccia aperta sopra
+(una freccia che scavalca più righe).
+
+```markdown
+:::table
+| v : 2 | Potenza          | Valore | v : $k$ |
+| ----- | ---------------- | ------ | ------- |
+|       | $2^1$            | 2      |
+| ~     | il gradino nuovo | ?      |
+|       | $2^0$            | 1      |
+:::
+```
+
+Il contenuto delle celle è markdown normale: `$…$`, `[[1/2]]`, `${a}` funzionano
+come nel resto della pagina, e i blank contano come goal dello step. Una scelta
+multipla `[[a|*b|c]]` funziona qui e **non** in una tabella markdown normale
+(lì le sue pipe verrebbero lette come divisori di cella).
+
+> ⚠️ Gli id dei blank dentro una `:::table` sono assegnati prima di quelli del
+> testo che la precede. È indifferente, tranne che per i progressi salvati nel
+> browser (indicizzati per id): aggiungere una tabella a uno step **già usato
+> dagli studenti** ne azzera i progressi.
+
+📖 **Documentazione completa**: vedi [TABELLE.md](TABELLE.md) per tutti i
+marcatori, gli esempi e gli errori di build.
+
 ## Formule Matematiche
 
 ### Inline Math
@@ -735,6 +784,10 @@ Prova a isolare `x` portando i termini noti dall'altra parte dell'uguale.
 | Cell 1   | Cell 2   |
 | Cell 3   | Cell 4   |
 ```
+
+Per una tabella in cui conta **il passaggio da una riga all'altra** (con frecce
+etichettate a lato) usa il blocco `:::table`: vedi *9. Tabelle con frecce* qui
+sopra e [TABELLE.md](TABELLE.md).
 
 ## Esempi Completi
 

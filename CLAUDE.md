@@ -118,6 +118,8 @@ math-rocks/
 - **parser/preprocessors.py**: Pre-processori per:
   - `[[answer]]` → `<x-blank>` (input/scelta multipla)
   - `${var}{config}` → `<x-variable>` (slider)
+  - `:::table` → tabella con frecce etichettate fra le righe (CSS Grid, niente
+    JS: vedi TABELLE.md)
   - `:::div.class` → `<div class="class">` (blocchi custom)
 
 ### Frontend (JavaScript)

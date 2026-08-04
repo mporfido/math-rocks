@@ -96,6 +96,548 @@ def process_graphs(content, graph_counter):
     return processed, graph_counter
 
 
+# ---------------------------------------------------------------------------
+# :::table — tabelle con frecce etichettate
+# ---------------------------------------------------------------------------
+# In una tabella didattica quello che conta spesso non è una colonna in più, ma
+# l'operazione che porta da una riga alla successiva: sta FRA due righe, non
+# dentro una. Qui una CORSIA (una colonna, o una riga) dichiarata da un glifo di
+# verso al posto dell'intestazione ospita quelle frecce. Non ci sono chiavi da
+# ricordare: il corpo resta una normale tabella a pipe.
+#
+# L'etichetta di un salto si scrive nella cella da cui il salto PARTE; il glifo
+# può portare un'etichetta di default valida per tutti i salti della corsia.
+# `-` rompe la catena, `~` prolunga la freccia aperta sopra (freccia che
+# scavalca più righe). Vedi TABELLE.md.
+
+# Glifo del marcatore → verso della freccia.
+CORSIA_VERTICALE = {'v': 'giu', '↓': 'giu', '^': 'su', '↑': 'su'}
+CORSIA_ORIZZONTALE = {'>': 'destra', '→': 'destra', '<': 'sinistra', '←': 'sinistra'}
+
+# Come si legge una freccia ad alta voce (aria-label): il verso è informazione,
+# non decorazione — "risalendo × 2" non è "poi × 2".
+VERSO_PARLATO = {
+    'giu': 'poi', 'su': 'risalendo',
+    'destra': 'poi', 'sinistra': 'tornando indietro',
+}
+
+# Le corsie sono strette: la traccia si allarga solo se l'etichetta lo richiede.
+TRACCIA_CORSIA = 'minmax(2.6rem, auto)'
+
+# L'archetto. È un SVG stirato dal CSS sull'altezza (o sulla larghezza) della
+# freccia: `preserveAspectRatio="none"` lo fa aderire alla griglia senza che
+# nessuno debba misurare niente, e `vector-effect="non-scaling-stroke"` tiene
+# il tratto a spessore costante nonostante lo stiramento. `currentColor` lo
+# lascia al colore del testo, quindi ai token del tema.
+#
+# La curva è mezza ELLISSE (due cubiche, una per quarto): parte dal bordo della
+# tabella all'altezza di una riga, si gonfia verso l'esterno e torna sul bordo
+# all'altezza della riga successiva. Stirata resta mezza ellisse, cioè un arco
+# semplice, con la curvatura sempre dallo stesso lato: nessun flesso. Una curva
+# a S, invece, in catena si salda con quella sotto e le frecce si leggono come
+# un serpentone unico, non come tanti salti distinti.
+#
+# Le tangenti agli estremi sono ORIZZONTALI (verticali nelle corsie
+# orizzontali), ed è l'unica direzione che lo stiramento non cambia. Serve
+# perché la punta è un triangolo CSS, che non si può ruotare di un angolo
+# dipendente dall'altezza della riga: così punta e curva restano allineate a
+# ogni altezza, e la punta guarda DENTRO la tabella, verso la riga d'arrivo.
+def _arco(viewbox, d):
+    return (
+        f'<span class="tbl-arco"><svg viewBox="{viewbox}" '
+        'preserveAspectRatio="none" aria-hidden="true" focusable="false">'
+        f'<path d="{d}" fill="none" stroke="currentColor" stroke-width="2" '
+        'stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg></span>'
+    )
+
+
+# Gli estremi (3px fuori dal bordo della tabella) cadono DENTRO il triangolo
+# della punta, che è ancorato al bordo ed è profondo 7px: la curva ci finisce
+# sotto invece di sbucarne oltre il vertice.
+ARCO_VERTICALE = _arco(
+    '0 0 20 100', 'M6 0 C12.1 0, 17 22.4, 17 50 C17 77.6, 12.1 100, 6 100')
+ARCO_ORIZZONTALE = _arco(
+    '0 0 100 20', 'M0 6 C0 12.1, 22.4 17, 50 17 C77.6 17, 100 12.1, 100 6')
+
+
+def _celle_tabella(riga):
+    """
+    `| a | b |` → ['a', 'b'].
+
+    Divisore proprio invece di uno `split('|')`: dentro una cella può esserci
+    una scelta multipla `[[a|*b|c]]`, che una tabella markdown normale spezza in
+    tre celle (è il motivo per cui oggi le scelte multiple nelle tabelle non si
+    possono usare). `\\|` resta una pipe letterale.
+    """
+    riga = riga.strip()
+    if riga.startswith('|'):
+        riga = riga[1:]
+    if riga.endswith('|') and not riga.endswith('\\|'):
+        riga = riga[:-1]
+
+    celle, buf, dentro, i = [], [], 0, 0
+    while i < len(riga):
+        due = riga[i:i + 2]
+        if due == '\\|':
+            buf.append('|')
+            i += 2
+            continue
+        if due == '[[':
+            dentro += 1
+            buf.append(due)
+            i += 2
+            continue
+        if due == ']]' and dentro:
+            dentro -= 1
+            buf.append(due)
+            i += 2
+            continue
+        if riga[i] == '|' and dentro == 0:
+            celle.append(''.join(buf).strip())
+            buf = []
+        else:
+            buf.append(riga[i])
+        i += 1
+    celle.append(''.join(buf).strip())
+    return celle
+
+
+def _marcatore(cella, mappa):
+    """
+    ('giu', ': 2') se la cella è un marcatore di corsia, altrimenti None.
+
+    Il glifo deve stare da solo o essere seguito da uno spazio: `v` e `v : 2`
+    sono corsie, `valore` è un'intestazione come un'altra.
+    """
+    if not cella:
+        return None
+    verso = mappa.get(cella[0])
+    if verso is None:
+        return None
+    resto = cella[1:]
+    if resto and not resto[0].isspace():
+        return None
+    return verso, resto.strip()
+
+
+def _parlato(etichetta):
+    """
+    L'etichetta come si legge ad alta voce (aria-label).
+
+    La freccia è `role="img"`: il suo contenuto non arriva alla sintesi vocale,
+    ci arriva solo questa stringa. Senza ripulitura un'etichetta come `: $k$`
+    verrebbe letta con tutto il LaTeX addosso.
+    """
+    testo = re.sub(r'\\sqrt\{([^{}]*)\}', r'radice di \1', etichetta)
+    testo = re.sub(r'\\frac\{([^{}]*)\}\{([^{}]*)\}', r'\1 fratto \2', testo)
+    return testo.replace('$', '').strip()
+
+
+def _e_separatore(celle):
+    """La riga `| --- | :---: |` di una tabella markdown: facoltativa."""
+    return bool(celle) and all(re.fullmatch(r':?-+:?', c) for c in celle)
+
+
+def _catena(etichette, verso, default, dove, orientamento, numeri=None):
+    """
+    Le celle di una corsia → l'elenco delle frecce.
+
+    `etichette[i]` etichetta il salto dall'elemento i all'elemento i+1: l'ultima
+    cella non ha nulla sotto di sé e deve restare vuota. `-` rompe la catena,
+    `~` prolunga la freccia aperta invece di aprirne una nuova.
+    """
+    frecce, aperta = [], None
+    ultimo = 'colonna' if orientamento == 'orizzontale' else 'riga'
+
+    def dove_i(i):
+        return f'riga {numeri[i]}' if numeri else dove
+
+    for i, grezza in enumerate(etichette):
+        if i == len(etichette) - 1:
+            if grezza == '~':
+                raise ValueError(
+                    f"{dove_i(i)}: '~' sull'ultima {ultimo} della corsia: non "
+                    "c'è niente oltre, la freccia non avrebbe dove arrivare"
+                )
+            if grezza and grezza != '-':
+                raise ValueError(
+                    f"{dove_i(i)}: etichetta '{grezza}' sull'ultima {ultimo} "
+                    f'della corsia: il salto partirebbe dall\'ultima {ultimo} '
+                    'e la freccia non comparirebbe'
+                )
+            break
+
+        if grezza == '~':
+            if aperta is None:
+                raise ValueError(
+                    f"{dove_i(i)}: '~' senza una freccia da prolungare (serve "
+                    f'una freccia aperta nella {ultimo} precedente)'
+                )
+            aperta['a'] = i + 1
+            continue
+
+        if grezza == '-':
+            aperta = None
+            continue
+
+        etichetta = grezza or default
+        if not etichetta:
+            aperta = None
+            continue
+
+        aperta = {'da': i, 'a': i + 1, 'etichetta': etichetta, 'verso': verso}
+        frecce.append(aperta)
+
+    return frecce
+
+
+def _linee(tipi, dimezza):
+    """
+    Il numero di linea della griglia da cui comincia ogni riga (o colonna).
+
+    Una riga (o colonna) di DATI occupa due tracce invece di una quando esiste
+    una corsia nell'altro senso: è il trucco che permette a una freccia di
+    partire dal CENTRO di una riga e arrivare al CENTRO della successiva senza
+    misurare niente in JavaScript (metà bassa della prima + metà alta della
+    seconda). Le corsie occupano sempre una traccia sola.
+    """
+    linee, cur = [], 1
+    for t in tipi:
+        linee.append(cur)
+        cur += 2 if (t == 'dati' and dimezza) else 1
+    return linee
+
+
+def _stile(coppie):
+    """Le dichiarazioni CSS inline, compatte e in ordine stabile."""
+    return ';'.join(f'{k}:{v}' for k, v in coppie)
+
+
+def _render_tabella(corpo, riga0, render_text):
+    """
+    Il corpo di un blocco :::table → l'HTML della griglia. Vedi TABELLE.md.
+
+    `riga0` è il numero di riga della `:::table` nel file: serve solo a far
+    puntare gli errori al punto giusto.
+    """
+    rendi = render_text or (lambda t: html_lib.escape(t))
+    dove = f'riga {riga0}'
+
+    # (numero di riga NEL FILE, celle): gli errori devono indicare il punto in
+    # cui l'autore deve mettere le mani, non una posizione dentro al blocco.
+    righe = [(riga0 + n, testo.strip())
+             for n, testo in enumerate(corpo.split('\n'), start=1)
+             if testo.strip()]
+    if not righe:
+        raise ValueError(f'{dove}: blocco :::table vuoto')
+    for numero, testo in righe:
+        if not testo.startswith('|'):
+            raise ValueError(
+                f"riga {numero}: {testo!r} non comincia con '|': dentro "
+                ':::table ogni riga è una riga di tabella (o manca la riga '
+                '":::" che chiude il blocco?)'
+            )
+
+    numeri = [n for n, _ in righe]
+    grezze = [_celle_tabella(testo) for _, testo in righe]
+
+    # Classificazione delle righe. Una riga è una CORSIA se la sua prima cella
+    # è un marcatore orizzontale: la corsia non contiene dati, solo frecce.
+    tipi_riga = []
+    for celle in grezze:
+        if _e_separatore(celle):
+            tipi_riga.append('sep')
+        elif _marcatore(celle[0], CORSIA_ORIZZONTALE):
+            tipi_riga.append('corsia')
+        else:
+            tipi_riga.append('dati')
+
+    if 'dati' not in tipi_riga:
+        raise ValueError(f'{dove}: la tabella non ha nessuna riga di dati')
+
+    # La prima riga di dati dichiara i tipi delle colonne; è anche
+    # l'INTESTAZIONE se subito dopo c'è la riga separatrice `| --- |`, come in
+    # markdown. Senza separatore è una riga di dati come le altre.
+    i_dich = tipi_riga.index('dati')
+    dopo = tipi_riga[i_dich + 1:i_dich + 2]
+    ha_intestazione = dopo == ['sep']
+
+    tipi_col, versi_col, default_col = [], [], []
+    for cella in grezze[i_dich]:
+        m = _marcatore(cella, CORSIA_VERTICALE)
+        if m:
+            tipi_col.append('corsia')
+            versi_col.append(m[0])
+            default_col.append(m[1])
+        else:
+            tipi_col.append('dati')
+            versi_col.append(None)
+            default_col.append('')
+
+    n_col = len(tipi_col)
+    idx_col_dati = [c for c, t in enumerate(tipi_col) if t == 'dati']
+    if not idx_col_dati:
+        raise ValueError(f'{dove}: la tabella è fatta di sole corsie')
+
+    def allinea(celle, numero, tipo):
+        """
+        Pareggia una riga a n_col celle.
+
+        In una riga di dati si possono omettere solo le celle di corsia finali
+        (una cella di dati mancante è quasi sempre una pipe dimenticata); in una
+        riga di corsia le celle sono etichette, e le ultime possono mancare
+        semplicemente perché quei salti non hanno etichetta.
+        """
+        if len(celle) > n_col:
+            raise ValueError(
+                f'riga {numero}: {len(celle)} celle contro le {n_col} della '
+                'prima riga della tabella'
+            )
+        if tipo == 'dati' and any(t != 'corsia' for t in tipi_col[len(celle):]):
+            raise ValueError(
+                f'riga {numero}: {len(celle)} celle contro le {n_col} della '
+                'prima riga della tabella (in una riga di dati si possono '
+                'omettere solo le corsie finali)'
+            )
+        return celle + [''] * (n_col - len(celle))
+
+    # La sequenza delle righe della griglia (via i separatori), e i valori delle
+    # sole righe di dati. Nella riga che dichiara le colonne le celle di corsia
+    # sono occupate dal marcatore: per le catene contano come vuote.
+    sequenza, valori, numeri_dati = [], [], []
+    for i, (celle, tipo) in enumerate(zip(grezze, tipi_riga)):
+        if tipo == 'sep':
+            continue
+        n = numeri[i]
+        piena = allinea(celle, n, tipo)
+        if tipo == 'corsia':
+            sequenza.append({'tipo': 'corsia', 'celle': piena, 'numero': n})
+            continue
+        if i == i_dich:
+            piena = [
+                '' if tipi_col[c] == 'corsia' else v for c, v in enumerate(piena)
+            ]
+            if ha_intestazione:
+                sequenza.append({'tipo': 'intestazione', 'celle': piena,
+                                 'numero': n})
+                continue
+        sequenza.append({'tipo': 'dati', 'celle': piena, 'numero': n,
+                         'i': len(valori)})
+        valori.append(piena)
+        numeri_dati.append(n)
+
+    n_righe_dati = len(valori)
+    corsie_v = [c for c, t in enumerate(tipi_col) if t == 'corsia']
+    corsie_h = [r for r in sequenza if r['tipo'] == 'corsia']
+
+    if corsie_v and n_righe_dati < 2:
+        raise ValueError(
+            f'{dove}: una corsia verticale ha bisogno di almeno due righe di '
+            'dati (una freccia collega due righe)'
+        )
+    if corsie_h and len(idx_col_dati) < 2:
+        raise ValueError(
+            f'{dove}: una corsia orizzontale ha bisogno di almeno due colonne '
+            'di dati (una freccia collega due colonne)'
+        )
+
+    # Le frecce verticali: una catena per corsia, sulle righe di dati.
+    frecce = []
+    for c in corsie_v:
+        for f in _catena([v[c] for v in valori], versi_col[c], default_col[c],
+                         dove, 'verticale', numeri_dati):
+            frecce.append({**f, 'orientamento': 'verticale', 'corsia': c})
+
+    # Le frecce orizzontali: la prima cella della riga è occupata dal marcatore,
+    # quindi il primo salto può essere etichettato solo dal default.
+    for r in corsie_h:
+        verso, default = _marcatore(r['celle'][0], CORSIA_ORIZZONTALE)
+        for c in corsie_v:
+            if r['celle'][c] and c != 0:
+                raise ValueError(
+                    f"riga {r['numero']}: la cella all'incrocio fra una corsia "
+                    'orizzontale e una verticale non ha significato'
+                )
+        etichette = [r['celle'][c] for c in idx_col_dati]
+        if idx_col_dati[0] == 0:
+            etichette[0] = ''
+        for f in _catena(etichette, verso, default, f"riga {r['numero']}",
+                         'orizzontale'):
+            frecce.append({**f, 'orientamento': 'orizzontale', 'corsia': r})
+
+    # Geometria della griglia. Le righe (colonne) di dati si sdoppiano solo se
+    # esiste una corsia che le attraversa: senza frecce niente tracce inutili.
+    dimezza_righe = bool(corsie_v)
+    dimezza_col = bool(corsie_h)
+    R = _linee(
+        [('dati' if r['tipo'] == 'dati' else 'corsia') for r in sequenza],
+        dimezza_righe,
+    )
+    C = _linee(tipi_col, dimezza_col)
+    passo_riga = 2 if dimezza_righe else 1
+    passo_col = 2 if dimezza_col else 1
+
+    tracce = [
+        TRACCIA_CORSIA if t == 'corsia' else ('auto ' * passo_col).strip()
+        for t in tipi_col
+    ]
+
+    # Il riquadro: un solo elemento dietro le celle, così il bordo arrotondato
+    # non va ricomposto cella per cella. Copre l'area dei dati; le corsie
+    # esterne restano nel margine.
+    righe_riquadro = [i for i, r in enumerate(sequenza) if r['tipo'] != 'corsia']
+    r0, r1 = righe_riquadro[0], righe_riquadro[-1]
+    fine_r1 = R[r1] + (passo_riga if sequenza[r1]['tipo'] == 'dati' else 1)
+    c0, c1 = idx_col_dati[0], idx_col_dati[-1]
+    parti = [
+        '<div class="tbl-riquadro" aria-hidden="true" style="{}"></div>'.format(
+            _stile([
+                ('grid-row', f'{R[r0]}/{fine_r1}'),
+                ('grid-column', f'{C[c0]}/{C[c1] + passo_col}'),
+            ])
+        )
+    ]
+
+    # Celle e frecce nell'ordine di lettura: le frecce che partono da una riga
+    # subito dopo le celle di quella riga (la posizione sulla griglia è
+    # esplicita, quindi l'ordine nel DOM serve solo a chi legge l'HTML).
+    for i, riga in enumerate(sequenza):
+        if riga['tipo'] != 'corsia':
+            ultima = (i == r1)
+            for c in idx_col_dati:
+                classi = ['tbl-cella']
+                if riga['tipo'] == 'intestazione':
+                    classi.append('tbl-cella--intestazione')
+                    if c == c0:
+                        classi.append('tbl-cella--angolo-sx')
+                    if c == c1:
+                        classi.append('tbl-cella--angolo-dx')
+                elif ultima:
+                    classi.append('tbl-cella--ultima')
+                span_r = passo_riga if riga['tipo'] == 'dati' else 1
+                parti.append('<div class="{}" style="{}">{}</div>'.format(
+                    ' '.join(classi),
+                    _stile([
+                        ('grid-row', f'{R[i]}/span {span_r}'),
+                        ('grid-column', f'{C[c]}/span {passo_col}'),
+                    ]),
+                    rendi(riga['celle'][c]),
+                ))
+
+        for f in frecce:
+            if f['orientamento'] == 'verticale':
+                if riga['tipo'] != 'dati' or f['da'] != riga['i']:
+                    continue
+                r_da = next(j for j, s in enumerate(sequenza)
+                            if s['tipo'] == 'dati' and s['i'] == f['da'])
+                r_a = next(j for j, s in enumerate(sequenza)
+                           if s['tipo'] == 'dati' and s['i'] == f['a'])
+                posizione = [
+                    ('grid-row', f'{R[r_da] + 1}/{R[r_a] + 1}'),
+                    ('grid-column', str(C[f['corsia']])),
+                ]
+                # L'archetto si incurva verso l'ESTERNO della tabella: una
+                # corsia a sinistra lo vuole specchiato.
+                specchio = f['corsia'] < c0
+            else:
+                if f['corsia'] is not riga:
+                    continue
+                posizione = [
+                    ('grid-row', str(R[i])),
+                    ('grid-column',
+                     f"{C[idx_col_dati[f['da']]] + 1}/{C[idx_col_dati[f['a']]] + 1}"),
+                ]
+                specchio = i < r0
+            classi = f"tbl-freccia tbl-freccia--{f['verso']}"
+            if specchio:
+                classi += ' tbl-freccia--specchio'
+            parti.append(
+                '<div class="{}" role="img" aria-label="{}" style="{}">'
+                '{}<span class="tbl-etichetta">{}</span></div>'.format(
+                    classi,
+                    html_lib.escape(
+                        f"{VERSO_PARLATO[f['verso']]} {_parlato(f['etichetta'])}",
+                        quote=True,
+                    ),
+                    _stile(posizione),
+                    ARCO_ORIZZONTALE if f['orientamento'] == 'orizzontale'
+                    else ARCO_VERTICALE,
+                    rendi(f['etichetta']),
+                )
+            )
+
+    return (
+        '<div class="tbl-scroll"><div class="tbl" style="{}">{}</div></div>'
+    ).format(
+        _stile([('grid-template-columns', ' '.join(tracce))]),
+        ''.join(parti),
+    )
+
+
+def process_tables(content, table_counter, render_text=None):
+    """
+    Converte blocchi :::table ... ::: in una griglia con frecce etichettate.
+
+    Sintassi (vedi TABELLE.md per il riferimento completo):
+
+        :::table
+        | Potenza  | Valore  | v : 2 |
+        | -------- | ------- | ----- |
+        | $2^1$    | 2       |
+        | $2^0$    | [[1]]   |
+        | $2^{-1}$ | [[1/2]] |
+        :::
+
+    Il glifo al posto dell'intestazione dichiara una CORSIA: `v`/`^` una colonna
+    di frecce verticali, `>`/`<` (in prima cella di riga) una riga di frecce
+    orizzontali. L'etichetta dopo il glifo vale per tutti i salti; una cella la
+    sovrascrive per il proprio salto; `-` rompe la catena e `~` prolunga la
+    freccia aperta sopra.
+
+    Il contenuto delle celle è markdown normale e viene renderizzato da
+    `render_text` (il callback del parser, che condivide i contatori): dentro
+    una cella `[[1/2]]` è un blank vero, e finisce nei goal dello step senza
+    che qui ci sia niente da fare.
+
+    Il blocco viene estratto in un marker e reinserito DOPO il rendering
+    markdown, come :::p5 e :::theorem: le pipe non devono arrivare a mistune,
+    che spezzerebbe le scelte multiple e non capirebbe le corsie.
+
+    Args:
+        content: Contenuto markdown
+        table_counter: Contatore per marker univoci
+        render_text: Callback markdown-inline per il contenuto delle celle
+
+    Returns:
+        Tuple (contenuto con marker, dict marker→HTML, nuovo valore counter)
+    """
+    pattern = re.compile(r'^:::table[ \t]*\n(.*?)\n:::[ \t]*$',
+                         re.DOTALL | re.MULTILINE)
+    replacements = {}
+
+    def replace_table(match):
+        nonlocal table_counter
+        riga0 = content[:match.start()].count('\n') + 1
+        marker = f'XTABLEBLOCK{table_counter}X'
+        replacements[marker] = _render_tabella(match.group(1), riga0, render_text)
+        table_counter += 1
+        return marker
+
+    processed = pattern.sub(replace_table, content)
+
+    # Un :::table rimasto è un blocco non chiuso: senza questo controllo lo
+    # raccoglierebbe process_blocks, che lo trasformerebbe in un <table> aperto
+    # e mai chiuso — in silenzio, e con mezza lezione dentro.
+    resto = re.search(r'^:::table\b', processed, re.MULTILINE)
+    if resto:
+        riga = processed[:resto.start()].count('\n') + 1
+        raise ValueError(
+            f'riga {riga}: blocco :::table senza la riga ":::" che lo chiude'
+        )
+
+    return processed, replacements, table_counter
+
+
 def process_p5(content, p5_counter):
     """
     Converte blocchi :::p5 ... ::: in <x-p5> web component (sketch p5.js).

@@ -921,6 +921,224 @@ x-p5 {
     width: 56px;
 }
 
+/* ========== Tabelle con frecce (:::table) ========== */
+/* Il layout è tutto qui: nessun JavaScript. Le frecce sono elementi della
+   griglia posizionati per linee, e ogni riga di dati occupa DUE tracce — così
+   una freccia va dal centro di una riga al centro della successiva senza che
+   nessuno debba misurare niente. Quando MathJax compone le formule e le righe
+   si alzano, la griglia rifluisce e le frecce restano agganciate da sole. */
+
+.tbl-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 1.5rem 0;
+    /* il riquadro è disegnato con un'ombra di 2px: senza questo padding
+       l'overflow la taglierebbe */
+    padding: 2px;
+}
+
+.tbl {
+    display: grid;
+    align-items: center;
+    width: max-content;
+    max-width: 100%;
+    font-size: 0.95em;
+}
+
+/* Il riquadro è UN elemento dietro le celle: il bordo arrotondato non va
+   ricomposto cella per cella. È un'ombra e non un bordo perché le celle
+   occupano la stessa area della griglia e ne coprirebbero il tratto. */
+.tbl-riquadro {
+    align-self: stretch;
+    justify-self: stretch;
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: 0 0 0 2px var(--ink);
+}
+
+/* `align-self: stretch` (non il `center` della griglia) per due motivi: la
+   riga di separazione deve cadere sul confine della riga e non sotto il testo,
+   e la cella deve restare un contenitore a flusso NORMALE — con `display:flex`
+   il testo e gli `<x-blank>` di una stessa cella diventerebbero item separati
+   e andrebbero a capo l'uno dall'altro. */
+.tbl-cella {
+    position: relative;              /* sopra il riquadro */
+    align-self: stretch;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+}
+
+.tbl-cella--ultima {
+    border-bottom: 0;
+}
+
+.tbl-cella--intestazione {
+    background: var(--ink);
+    color: var(--carta);
+    font-family: var(--font-disp);
+    font-weight: 600;
+    border-bottom: 0;
+}
+
+.tbl-cella--angolo-sx { border-top-left-radius: var(--radius); }
+.tbl-cella--angolo-dx { border-top-right-radius: var(--radius); }
+
+/* La freccia è [arco][etichetta]: l'arco resta appoggiato alla tabella e
+   l'etichetta gli sta accanto, all'esterno. Nelle corsie a sinistra (o sopra)
+   l'ordine si rovescia, così l'arco resta comunque il pezzo più vicino ai
+   dati che collega. */
+.tbl-freccia {
+    position: relative;
+    align-self: stretch;
+    justify-self: stretch;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 4px;
+    padding: 0 4px;
+    color: var(--ink-soft);
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    line-height: 1;
+}
+
+.tbl-freccia--specchio {
+    flex-direction: row-reverse;
+}
+
+.tbl-freccia--destra,
+.tbl-freccia--sinistra {
+    flex-direction: column;
+    padding: 4px 0;
+}
+
+.tbl-freccia--destra.tbl-freccia--specchio,
+.tbl-freccia--sinistra.tbl-freccia--specchio {
+    flex-direction: column-reverse;
+}
+
+/* L'archetto: mezza ellisse che il CSS stira sull'altezza (o sulla larghezza)
+   della freccia. Si gonfia sempre verso l'esterno della tabella — è
+   `--specchio` a girarlo — perché una linea dritta si legge come un bordo,
+   mentre una curva si legge come un movimento. L'arco sta ACCANTO alla tabella
+   e l'etichetta fuori: interrompere la curva per farci stare l'etichetta la
+   spezzava in due tronconi che non si leggevano più come una freccia sola. */
+/* Il margine è lo stacco fra un archetto e il successivo, e sta sull'arco (non
+   sull'SVG) perché `align-self: stretch` lo sottrae dall'altezza: l'SVG resta
+   così com'era, un riempitivo del suo contenitore. Le frecce di una corsia
+   sono attaccate l'una all'altra — ognuna va dal centro di una riga al centro
+   della successiva — e senza questo respiro la punta di una tocca la partenza
+   di quella dopo: la catena si rilegge come una linea sola. */
+.tbl-arco {
+    position: relative;              /* ancora la punta */
+    flex: 0 0 20px;
+    align-self: stretch;
+    width: 20px;
+    margin: 5px 0;
+}
+
+/* L'SVG è FUORI DAL FLUSSO. Non è un dettaglio: con un viewBox 16×100 ha un
+   rapporto d'aspetto intrinseco, quindi in flusso pretenderebbe 125px di
+   altezza per 20px di larghezza e allargherebbe le tracce della griglia — le
+   righe della tabella diventerebbero altissime. Fuori dal flusso non misura
+   niente e si limita a riempire l'arco, che è alto quanto il salto. */
+.tbl-arco > svg {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+
+.tbl-freccia--destra .tbl-arco,
+.tbl-freccia--sinistra .tbl-arco {
+    width: auto;
+    height: 20px;
+    margin: 0 5px;
+}
+
+/* Lo specchio gira l'ARCO INTERO, non solo l'SVG: così la punta, che è un
+   figlio dell'arco, segue la curva senza che serva una regola per ogni
+   combinazione di verso e lato. */
+.tbl-freccia--specchio .tbl-arco { scale: -1 1; }
+
+.tbl-freccia--destra.tbl-freccia--specchio .tbl-arco,
+.tbl-freccia--sinistra.tbl-freccia--specchio .tbl-arco { scale: 1 -1; }
+
+/* La punta: un triangolo di bordi, nitido a ogni zoom e presente in stampa
+   (un glifo ▼ dipenderebbe dal font, un SVG andrebbe misurato). Sta sull'ultimo
+   punto della curva e guarda dentro la tabella, nella stessa direzione in cui
+   l'arco arriva: mezza ellisse arriva agli estremi con la tangente
+   perpendicolare al lato della tabella, ed è l'unica direzione che lo
+   stiramento non cambia. Vedi ARCO_VERTICALE in parser/preprocessors.py. */
+.tbl-arco::after {
+    content: "";
+    position: absolute;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-right: 7px solid currentColor;   /* punta verso la tabella */
+    left: 3px;                              /* il vertice, sul bordo */
+    translate: 0 50%;
+}
+
+.tbl-freccia--giu .tbl-arco::after { bottom: 0; }
+
+.tbl-freccia--su .tbl-arco::after {
+    top: 0;
+    translate: 0 -50%;
+}
+
+/* Le punte orizzontali: la stessa cosa ruotata di un quarto */
+.tbl-freccia--destra .tbl-arco::after,
+.tbl-freccia--sinistra .tbl-arco::after {
+    top: 3px;
+    left: auto;
+    border-top: 0;
+    border-bottom: 7px solid currentColor;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+}
+
+.tbl-freccia--destra .tbl-arco::after {
+    right: 0;
+    translate: 50% 0;
+}
+
+.tbl-freccia--sinistra .tbl-arco::after {
+    left: 0;
+    translate: -50% 0;
+}
+
+.tbl-etichetta {
+    white-space: nowrap;
+}
+
+/* Blank compatti nelle celle, come già nelle celle di tabella markdown */
+.tbl-cella x-blank {
+    display: inline-flex;
+    align-items: center;
+}
+
+.tbl-cella .blank-wrapper,
+.tbl-cella .blank-select-wrapper {
+    margin: 0;
+    gap: 4px;
+}
+
+.tbl-cella .blank-input,
+.tbl-cella .blank-select {
+    padding: 4px 8px;
+}
+
+.tbl-cella .blank-input {
+    min-width: 60px;
+}
+
+.tbl-cella .variable-input {
+    width: 56px;
+}
+
 /* ========== Dimostrazioni (<x-theorem>) ========== */
 x-theorem {
     display: block;
@@ -1562,6 +1780,36 @@ x-theorem {
     }
 
     .course-content td .variable-input {
+        width: 48px;
+    }
+
+    /* Tabelle con frecce: si stringono, e se non bastasse scorrono. Niente
+       layout "a schede": una scala di potenze CON le frecce è una tabella, e
+       spezzarla in card ne distruggerebbe il senso. */
+    .tbl {
+        font-size: 0.85em;
+    }
+
+    .tbl-cella {
+        padding: 8px 10px;
+        word-break: break-word;
+    }
+
+    .tbl-freccia {
+        padding: 0 2px;
+    }
+
+    .tbl-cella .blank-input,
+    .tbl-cella .blank-select {
+        min-width: 0;
+        width: 64px;
+    }
+
+    .tbl-cella .blank-wrapper {
+        flex-wrap: wrap;
+    }
+
+    .tbl-cella .variable-input {
         width: 48px;
     }
 

@@ -3,7 +3,7 @@ import re
 import mistune
 import yaml
 from pathlib import Path
-from parser.preprocessors import process_blanks, process_variables, process_blocks, process_math, process_images, process_checks, process_graphs, process_p5, process_expr, process_theorem
+from parser.preprocessors import process_blanks, process_variables, process_blocks, process_math, process_images, process_checks, process_graphs, process_p5, process_expr, process_theorem, process_tables
 
 
 class CourseParser:
@@ -31,6 +31,7 @@ class CourseParser:
         self.p5_counter = 0
         self.expr_counter = 0
         self.theorem_counter = 0
+        self.table_counter = 0
 
     def set_course_theory(self, teoria, course_theorems=None):
         """
@@ -78,6 +79,7 @@ class CourseParser:
         self.p5_counter = 0
         self.expr_counter = 0
         self.theorem_counter = 0
+        self.table_counter = 0
 
         # Estrai i code fence ``` a livello di FILE, prima dello split degli
         # step: un fence che mostra un esempio contenente '---' non deve generare
@@ -169,7 +171,7 @@ class CourseParser:
         theorems = []
         processed, _replacements, self.theorem_counter = process_theorem(
             content, self.theorem_counter,
-            render_text=self._render_theorem_text,
+            render_text=self._render_inline,
             teoria=self.teoria,
             course_theorems=self.course_theorems,
             collect=theorems,
@@ -322,12 +324,20 @@ class CourseParser:
         # :::theorem ... ::: → marker (ripristinato a fine render). Il corpo ha
         # heading, liste e annotazioni tra graffe: va estratto prima che mistune
         # o gli altri preprocessori lo interpretino. Il testo dei singoli passi
-        # è markdown inline e viene renderizzato da _render_theorem_text.
+        # è markdown inline e viene renderizzato da _render_inline.
         content, theorem_replacements, self.theorem_counter = process_theorem(
             content, self.theorem_counter,
-            render_text=self._render_theorem_text,
+            render_text=self._render_inline,
             teoria=self.teoria,
             course_theorems=self.course_theorems,
+        )
+
+        # :::table ... ::: → marker (ripristinato a fine render). Il corpo è una
+        # tabella a pipe: non deve arrivare a mistune, che spezzerebbe le scelte
+        # multiple `[[a|*b|c]]` sulle pipe e non capirebbe le corsie di frecce.
+        # Il contenuto delle celle è markdown e viene reso qui via callback.
+        content, table_replacements, self.table_counter = process_tables(
+            content, self.table_counter, render_text=self._render_inline
         )
 
         # ![alt|400](src) → <img style="width:400px">
@@ -368,20 +378,28 @@ class CourseParser:
         block_replacements.update(p5_replacements)
         block_replacements.update(expr_replacements)
         block_replacements.update(theorem_replacements)
+        block_replacements.update(table_replacements)
 
         return content, block_replacements
 
-    def _render_theorem_text(self, text):
+    def _render_inline(self, text):
         """
-        Renderizza il testo di un passo di dimostrazione: markdown inline.
+        Renderizza un frammento di markdown inline ($…$, grassetto, [[blank]]).
 
-        Il corpo di ogni riga di :::theorem è markdown normale ($…$, grassetto,
-        [[blank]]), ma finisce in un attributo JSON, non nel flusso della
-        pagina: va quindi renderizzato qui, e il <p> che mistune avvolge
-        attorno al paragrafo va tolto.
+        Serve ai blocchi che si prendono il proprio corpo prima di mistune e
+        devono comunque renderlo: il testo di un passo di :::theorem (che
+        finisce in un attributo JSON) e il contenuto di una cella di :::table.
+        I contatori sono quelli dell'istanza, quindi gli id restano unici; il
+        <p> con cui mistune avvolge il paragrafo va tolto.
         """
         if not text:
             return text
+
+        # Un frammento non è un blocco: un'etichetta come `+ 1` o `- 3` deve
+        # restare quello che è, non diventare un elenco puntato (e `# 2` non
+        # deve diventare un titolo). Si protegge solo il primo carattere.
+        text = re.sub(r'^([-+*>#])(\s)', r'\\\1\2', text, count=1)
+        text = re.sub(r'^(\d+)([.)])(\s)', r'\1\\\2\3', text, count=1)
 
         if self.math_backticks:
             text = process_math(text)
