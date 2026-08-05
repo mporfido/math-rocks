@@ -126,13 +126,62 @@ def _course_stats(course_data):
     return len(lessons), total_steps
 
 
+def _riepilogo(costruiti, falliti, saltati, corpora_built, corpora_failed):
+    """
+    Stampa il riepilogo finale della build. Restituisce True se è andato tutto bene.
+
+    Il riepilogo è l'unica parte che si legge davvero: la riga d'errore di un
+    corso scorre via in mezzo alle altre, e un corso fallito NON riscrive il suo
+    JSON — il sito continua a servire la versione precedente, cioè sembra che
+    non sia successo niente. Qui quindi gli errori vengono ripetuti in fondo, e
+    detto a chiare lettere che cosa vedrà chi apre il sito.
+    """
+    print('\n' + '-' * 60)
+    print('Riepilogo build')
+
+    def conta(n_ok, n_ko):
+        parti = [f'{n_ok} compilat{"o" if n_ok == 1 else "i"}']
+        if n_ko:
+            parti.append(f'{n_ko} FALLIT{"O" if n_ko == 1 else "I"}')
+        return ', '.join(parti)
+
+    print(f'   Corsi:   {conta(costruiti, len(falliti))}')
+    if corpora_built or corpora_failed:
+        print(f'   Corpora: {conta(corpora_built, corpora_failed)}')
+    for nome, motivo in saltati:
+        print(f'   [!] Saltato {nome}: {motivo}')
+
+    for nome, errore, json_vecchio in falliti:
+        print(f'\n[X] {nome}')
+        print(f'    {errore}')
+        if json_vecchio:
+            print(f'    Il JSON compilato non è stato riscritto: il sito continua '
+                  f'a servire\n    la versione PRECEDENTE di "{nome}".')
+        else:
+            print(f'    Nessun JSON compilato: il corso "{nome}" non comparirà nel sito.')
+
+    if falliti or corpora_failed:
+        print('\nBuild FALLITA.')
+        return False
+
+    print('\nBuild completata.')
+    return True
+
+
 def build_all_courses(content_dir='content', output_dir='courses_data'):
     """
     Parsa tutti i corsi nella directory content/ e genera JSON in courses_data/
 
+    Un corso rotto non ferma gli altri (li si vuole vedere tutti in un giro
+    solo), ma la funzione restituisce False: chi chiama decide, e il main esce
+    con codice != 0 perché la CI non pubblichi una build a metà.
+
     Args:
         content_dir: Directory contenente i corsi sorgente
         output_dir: Directory di output per i JSON generati
+
+    Returns:
+        True se corsi e corpora sono stati compilati tutti, False altrimenti
     """
     content_path = Path(content_dir)
     output_path = Path(output_dir)
@@ -143,7 +192,8 @@ def build_all_courses(content_dir='content', output_dir='courses_data'):
     parser = CourseParser()
     math_default = bool(load_site_config().get('math', False))
     courses_built = 0
-    courses_failed = 0
+    falliti = []   # (nome, messaggio d'errore, aveva già un JSON compilato)
+    saltati = []   # (nome, motivo)
 
     print('Build corsi iniziato...\n')
 
@@ -158,15 +208,16 @@ def build_all_courses(content_dir='content', output_dir='courses_data'):
 
         if not _find_lesson_files(course_dir):
             print(f'[!] Saltato {course_dir.name}: nessun file lezione trovato')
+            saltati.append((course_dir.name, 'nessun file lezione trovato'))
             continue
 
         print(f'Parsing {course_dir.name}...', end=' ')
+        output_file = output_path / f'{course_dir.name}.json'
 
         try:
             course_data = _build_course(course_dir, parser, math_default)
 
             # Salva JSON
-            output_file = output_path / f'{course_dir.name}.json'
             with open(output_file, 'w', encoding='utf-8') as f:
                 json.dump(course_data, f, ensure_ascii=False, indent=2)
 
@@ -176,20 +227,13 @@ def build_all_courses(content_dir='content', output_dir='courses_data'):
 
         except Exception as e:
             print(f'ERRORE: {e}')
-            courses_failed += 1
-
-    print(f'\nBuild completato!')
-    print(f'   Corsi generati: {courses_built}')
-    if courses_failed > 0:
-        print(f'   Corsi falliti: {courses_failed}')
+            falliti.append((course_dir.name, str(e), output_file.exists()))
 
     # I corpora sono contenuti quanto i corsi: un solo comando li compila
     # entrambi, altrimenti si pubblica un sito con la mappa vecchia.
     corpora_built, corpora_failed = build_all_corpora(content_dir)
-    if corpora_built or corpora_failed:
-        print(f'   Corpora generati: {corpora_built}')
-        if corpora_failed:
-            print(f'   Corpora falliti: {corpora_failed}')
+
+    return _riepilogo(courses_built, falliti, saltati, corpora_built, corpora_failed)
 
 
 def build_single_course(course_id, content_dir='content', output_dir='courses_data'):
@@ -215,12 +259,12 @@ def build_single_course(course_id, content_dir='content', output_dir='courses_da
     math_default = bool(load_site_config().get('math', False))
 
     print(f'Parsing {course_id}...')
+    output_file = output_path / f'{course_id}.json'
 
     try:
         course_data = _build_course(course_dir, parser, math_default)
 
         # Salva JSON
-        output_file = output_path / f'{course_id}.json'
         with open(output_file, 'w', encoding='utf-8') as f:
             json.dump(course_data, f, ensure_ascii=False, indent=2)
 
@@ -235,16 +279,30 @@ def build_single_course(course_id, content_dir='content', output_dir='courses_da
         print(f'[X] Errore durante il parsing: {e}')
         import traceback
         traceback.print_exc()
+        if output_file.exists():
+            print(f'\n    Il JSON compilato non è stato riscritto: il sito continua '
+                  f'a servire\n    la versione PRECEDENTE di "{course_id}".')
         return False
 
 
 if __name__ == '__main__':
     import sys
 
+    # Gli errori di parsing sono in italiano, con accenti e virgolette tipografiche.
+    # Quando l'output finisce in una pipe (CI, tee, editor) Python userebbe la
+    # codifica locale — su Windows cp1252 — e il messaggio arriverebbe illeggibile
+    # proprio nel momento in cui va letto.
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, 'reconfigure'):
+            stream.reconfigure(encoding='utf-8', errors='replace')
+
     if len(sys.argv) > 1:
         # Build singolo corso
-        course_id = sys.argv[1]
-        build_single_course(course_id)
+        ok = build_single_course(sys.argv[1])
     else:
         # Build tutti i corsi
-        build_all_courses()
+        ok = build_all_courses()
+
+    # Exit code != 0: senza, la CI pubblica felicemente un sito in cui il corso
+    # rotto è rimasto alla versione precedente.
+    raise SystemExit(0 if ok else 1)

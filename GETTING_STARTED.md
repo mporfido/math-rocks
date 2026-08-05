@@ -166,6 +166,11 @@ python app.py
 python parser/markdown_parser.py content/corso/content.md
 ```
 
+Un corso che non compila non ferma gli altri, ma la build **esce con codice
+diverso da zero** e lo ripete nel riepilogo finale: il suo JSON non viene
+riscritto, quindi senza avviso il sito continuerebbe a servire la versione
+precedente e sembrerebbe che la modifica non sia mai arrivata.
+
 ## 🎯 Prossimi Passi
 
 ### Personalizza il Corso Esempio
