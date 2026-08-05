@@ -9,7 +9,7 @@
 
 # La calcolatrice sa una cosa che noi non sappiamo
 
-Digita sulla calcolatrice $2^{3,14}$. Risponde: **8,82**.
+Digita sulla calcolatrice $2^{3,14}$. Risponde: **8,8152409...**.
 
 Ma $2^3$ vuol dire "2 moltiplicato per sé stesso 3 volte". E allora $2^{3,14}$ che cosa sarebbe? 2 moltiplicato per sé stesso **tre virgola quattordici volte**? Non ha senso — eppure la calcolatrice una risposta ce l'ha, e non è a caso.
 
@@ -63,11 +63,13 @@ Tieni a mente questo criterio, perché lo useremo per tutto il resto della lezio
 
 # La scala non è una proprietà del 2
 
-Se la storia funziona solo con la base 2, è un trucco. Proviamo a rifarla con altre basi.
+Se questa cosa funziona solo con la base 2, allora non è molto interessante. Proviamo a vedere con altre basi.
 
 ## Base 3
 
 Qui, scendendo di un gradino, il valore si divide per [[3]].
+
+*(Scrivi sempre i valori come frazione, per esempio `1/8`.)*
 
 :::table
 | Potenza  | Valore  | v : 3 |
@@ -102,13 +104,27 @@ Guarda le frecce delle tre tabelle: portano sempre **la base**. Scendere di un g
 :::div.reveal
 **Due cose da portare via.**
 
-1. Qualunque sia la base $a$ (purché non sia zero), $a^0 = 1$ e $a^{-n} = \dfrac{1}{a^n}$. Non è una convenzione arbitraria: è l'unico modo di far tornare la scala.
+1. La scala di $\frac{1}{2}$ è **la scala di 2 capovolta**: dove una sale, l'altra scende. In formula:
 
-2. La scala di $\frac{1}{2}$ è **la scala di 2 capovolta**: dove una sale, l'altra scende. In formula:
+:::formula
+@b1{2}^{@e1{-n}} = \left(@b2{\tfrac{1}{2}}\right)^{@e2{n}}
 
-$$\left(\frac{1}{2}\right)^{n} = \frac{1}{2^n} = 2^{-n}$$
+b1 -> b2 : reciproco
+e1 -> e2 : cambia segno
+:::
 
-Cambiare la base nel suo reciproco equivale a cambiare segno all'esponente. Ce ne ricorderemo alla fine, quando queste scale diventeranno curve.
+2. Qualunque sia la base $a$ (purché non sia zero), $a^0 = 1$ e 
+
+:::formula
+@b1{a}^{@e1{-n}} = \left(@b2{\tfrac{1}{a}}\right)^{@e2{n}}
+
+b1 -> b2 : reciproco
+e1 -> e2 : cambia segno
+:::
+
+Non l'ha deciso nessuno: è l'unico modo di far funzionare la scala.
+
+Cambiare la base con il suo reciproco equivale a cambiare segno all'esponente. Ce ne ricorderemo alla fine, quando queste scale diventeranno delle curve.
 :::
 
 ---
@@ -196,18 +212,32 @@ Il gradino a metà tra $2^0$ e $2^{\frac12}$ porta l'etichetta $2^{\frac14}$, e 
 
 Con lo stesso ragionamento, per un esponente frazionario qualsiasi:
 
-$$a^{\frac{m}{n}} = \sqrt[n]{a^m}$$
+:::formula
+@b1{a}^{\frac{@n1{m}}{@d1{n}}} = \sqrt[@d2{n}]{@b2{a}^{@n2{m}}}
+
+b1 -> b2 : base
+n1 -> n2 : numeratore | sopra
+d1 -> d2 : denominatore
+:::
 
 ## Prova a usarla
 
 Il denominatore dell'esponente dice **che radice**, il numeratore dice **che potenza**. E gli esponenti negativi continuano a significare "reciproco".
 
+:::formula
+@b1{2}^{\frac{@n1{3}}{@d1{2}}} = \sqrt[@d2{\,}]{@b2{2}^{@n2{3}}}
+
+b1 -> b2 : base
+n1 -> n2 : numeratore | sopra
+d1 -> d2 : denominatore
+:::
+
 | Potenza | Vale |
 | ------- | ---- |
-| $2^{\frac{3}{2}}$ | [[*$2\sqrt{2}$|$\sqrt{3}$|$3\sqrt{2}$]] |
-| $2^{-\frac{1}{2}}$ | [[$-\sqrt{2}$|*$\frac{1}{\sqrt{2}}$|$\sqrt{-2}$]] |
+| $2^{\frac{3}{2}}$ | [[*$\sqrt{8}$|$\sqrt{3}$|$3\sqrt{2}$]] |
 | $9^{\frac{1}{2}}$ | [[9|*3|4,5|81]] |
 | $8^{\frac{1}{3}}$ | [[8/3|*2|4|24]] |
+| $2^{-\frac{1}{2}}$ | [[$-\sqrt{2}$|*$\frac{1}{\sqrt{2}}$|$\sqrt{-2}$]] |
 
 :::div.reveal
 **La scala adesso è fitta.**
