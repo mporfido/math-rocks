@@ -15,6 +15,10 @@ sections:
     title: Geometria
     courses:
       - fondamenti-geometria-euclidea
+  - id: funzioni
+    title: Funzioni
+    courses:
+      - funzione-esponenziale
   - id: esempi
     title: Corsi di esempio
     courses:
