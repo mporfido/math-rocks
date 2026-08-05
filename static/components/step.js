@@ -201,11 +201,11 @@ class XStep extends HTMLElement {
   }
 
   saveTemplates() {
-    // Salva il contenuto originale di elementi che contengono marker {{VAR:...}}
-    // Questi saranno usati come template per aggiornamenti dinamici
+    // Salva il contenuto originale di elementi che contengono marker
+    // {{VAR:...}} o {{CALC:...}}: saranno i template degli aggiornamenti dinamici
     this.templates = new Map();
 
-    const varPattern = /\{\{VAR:([^:]+):([^}]+)\}\}/;
+    const varPattern = /\{\{(VAR|CALC):[^}]+\}\}/;
 
     this.querySelectorAll('p, div, span, li, td, th').forEach((el, index) => {
       const html = el.innerHTML;
@@ -220,31 +220,101 @@ class XStep extends HTMLElement {
   }
 
   initializeVariableDisplays() {
-    // Sostituisce tutti i marker {{VAR:name:initial}} con i valori iniziali
+    // Sostituisce tutti i marker con i valori iniziali del modello
     // prima del primo rendering di MathJax
     this.querySelectorAll('[data-template-id]').forEach(el => {
       const templateId = el.getAttribute('data-template-id');
       const template = this.templates.get(templateId);
 
       if (template) {
-        // Sostituisci ogni marker con il suo valore iniziale (formattato)
-        let newHtml = template.replace(
-          /\{\{VAR:([^:]+):([^}]+)\}\}/g,
-          (match, varName, initialValue) => {
-            // Usa il valore dal modello se disponibile, altrimenti usa il valore iniziale dal marker
-            const value = this.model[varName] !== undefined ? this.model[varName] : initialValue;
-            return this.formatValueForMath(value);
-          }
-        );
-
-        // Semplifica la formula (rimuove parentesi non necessarie, normalizza segni)
-        newHtml = this.simplifyFormula(newHtml);
-
-        el.innerHTML = newHtml;
+        el.innerHTML = this.renderTemplate(template);
       }
     });
 
     console.log('Variable displays initialized with initial values');
+  }
+
+  /**
+   * Espande i marker di un template con i valori correnti del modello:
+   * {{VAR:nome:iniziale}} → valore, {{CALC:espressione}} → risultato del calcolo.
+   * @param {string} template - HTML originale dell'elemento
+   * @returns {string} - HTML con i marker sostituiti e la formula semplificata
+   */
+  renderTemplate(template) {
+    let html = template.replace(
+      /\{\{VAR:([^:]+):([^}]+)\}\}/g,
+      (match, varName, initialValue) => {
+        // Usa il valore dal modello se disponibile, altrimenti quello del marker
+        const value = this.model[varName] !== undefined ? this.model[varName] : initialValue;
+        return this.formatValueForMath(value);
+      }
+    );
+
+    html = html.replace(
+      /\{\{CALC:([^}]+)\}\}/g,
+      (match, encodedExpression) => this.evaluateExpression(encodedExpression)
+    );
+
+    // Semplifica la formula (rimuove parentesi non necessarie, normalizza segni)
+    return this.simplifyFormula(html);
+  }
+
+  /**
+   * Calcola un'espressione ${= ...} sulle variabili del modello.
+   * L'espressione arriva percent-encoded dal preprocessore (vedi
+   * process_variables): così `*` e `_` attraversano il markdown senza
+   * diventare corsivo.
+   * @param {string} encodedExpression - Espressione percent-encoded
+   * @returns {string} - Il risultato formattato, o \square se non calcolabile
+   */
+  evaluateExpression(encodedExpression) {
+    let expression;
+    try {
+      expression = decodeURIComponent(encodedExpression);
+    } catch (e) {
+      expression = encodedExpression;
+    }
+
+    const model = { ...this.model };
+
+    // Un campo svuotato mette NaN nel modello: meglio la casella vuota di un
+    // "NaN" stampato dentro la formula.
+    if (Object.values(model).some(value => typeof value === 'number' && isNaN(value))) {
+      return '\\square';
+    }
+
+    try {
+      let result;
+      if (window.math && typeof window.math.evaluate === 'function') {
+        result = window.math.evaluate(expression, model);
+      } else {
+        // Fallback: l'espressione vede solo le variabili del modello
+        const varNames = Object.keys(model);
+        const varValues = varNames.map(name => model[name]);
+        // eslint-disable-next-line no-new-func
+        result = new Function(...varNames, `return (${expression});`)(...varValues);
+      }
+      return this.formatComputedValue(result);
+    } catch (e) {
+      console.error('x-step: errore nel calcolo di', expression, e);
+      return '\\square';
+    }
+  }
+
+  /**
+   * Formatta il risultato di un calcolo: arrotonda alla sesta cifra decimale
+   * (0.1*0.1 non deve stampare 0.010000000000000002) senza lasciare zeri finali.
+   * @param {*} value - Risultato della valutazione
+   * @returns {string} - Numero formattato, o \square se non è un numero
+   */
+  formatComputedValue(value) {
+    const numValue = typeof value === 'number' ? value : parseFloat(value);
+
+    if (!isFinite(numValue)) {
+      return '\\square';
+    }
+
+    return String(parseFloat(numValue.toFixed(6)));
   }
 
   formatValueForMath(value) {
@@ -266,10 +336,11 @@ class XStep extends HTMLElement {
   }
 
   updateVariableDisplays(varName, value) {
-    // Aggiorna gli elementi che contengono marker per questa variabile.
+    // Aggiorna gli elementi che contengono marker per questa variabile, più
+    // quelli con un calcolo (che può dipendere da qualsiasi variabile).
     // NB: niente flag 'g' — il pattern è usato con .test() dentro un forEach e
     // con 'g' .test() è stateful (lastIndex avanza), saltando elementi alternati.
-    const varPattern = new RegExp(`\\{\\{VAR:${varName}:[^}]+\\}\\}`);
+    const varPattern = new RegExp(`\\{\\{VAR:${varName}:[^}]+\\}\\}|\\{\\{CALC:`);
     const elementsToUpdate = [];
 
     // Trova tutti gli elementi con template che contengono questa variabile
@@ -281,21 +352,7 @@ class XStep extends HTMLElement {
       if (template && varPattern.test(template)) {
         // Sostituisci TUTTI i marker nel template (non solo quello corrente)
         // usando i valori aggiornati dal modello
-        let newHtml = template.replace(
-          /\{\{VAR:([^:]+):([^}]+)\}\}/g,
-          (match, otherVarName, initialValue) => {
-            // Usa il valore dal modello se disponibile, altrimenti usa il valore iniziale
-            const value = this.model[otherVarName] !== undefined
-              ? this.model[otherVarName]
-              : initialValue;
-            return this.formatValueForMath(value);
-          }
-        );
-
-        // Semplifica la formula (gestisce segni algebrici)
-        newHtml = this.simplifyFormula(newHtml);
-
-        el.innerHTML = newHtml;
+        el.innerHTML = this.renderTemplate(template);
         elementsToUpdate.push(el);
       }
     });

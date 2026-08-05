@@ -215,6 +215,27 @@ Sintassi: ${display}{bind|initial|input}
 
 L'input scrive nel modello e aggiorna i grafici collegati esattamente come lo slider.
 
+**Calcolo live sulle variabili:**
+
+Un riferimento che comincia per `=` non stampa una variabile ma il **risultato di
+un'espressione** su di esse, ricalcolato a ogni modifica di slider e input — senza
+bottoni di verifica.
+
+```markdown
+Sintassi: ${= espressione}
+
+Il mio fattore: ${k}{k|1|input}
+
+$$k \cdot k = ${k} \cdot ${k} = ${= k*k}$$
+```
+
+- Il risultato è arrotondato alla sesta cifra decimale (niente `0.010000000000000002`).
+- Finché un campo è vuoto — o l'espressione non è calcolabile — al suo posto
+  compare la casella `\square`.
+- Le funzioni matematiche (`sqrt`, `sin`, …) richiedono mathjs sulla pagina: senza,
+  l'espressione è valutata in JavaScript puro e vede solo le variabili del modello
+  e gli operatori aritmetici.
+
 ### 3. Check (Verifica Condizioni)
 
 Sintassi: `[Etichetta]{check: condizione}`

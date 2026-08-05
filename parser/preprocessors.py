@@ -2,6 +2,7 @@
 import re
 import json
 import html as html_lib
+from urllib.parse import quote as url_quote
 import yaml
 
 
@@ -1445,6 +1446,12 @@ def process_variables(content, variable_counter):
 
     Formato: ${display}{bind|initial|min,max,step}
 
+    Un riferimento che comincia per `=` è un **calcolo** sulle variabili del
+    modello — ${= k*k} — e diventa il placeholder {{CALC:...}}, ricalcolato da
+    x-step a ogni variable-change. L'espressione viene percent-encoded: nel
+    marker resta testo che attraversa mistune senza che `*` o `_` diventino
+    corsivo (x-step la decodifica con decodeURIComponent).
+
     Args:
         content: Contenuto markdown
         variable_counter: Contatore per ID univoci
@@ -1513,7 +1520,13 @@ def process_variables(content, variable_counter):
     reference_pattern = r'\$\{([^}]+)\}(?!\{)'
 
     def replace_variable_reference(match):
-        var_name = match.group(1)
+        var_name = match.group(1).strip()
+
+        # ${= espressione} → calcolo live sulle variabili del modello
+        if var_name.startswith('='):
+            expression = var_name[1:].strip()
+            return f'{{{{CALC:{url_quote(expression, safe="")}}}}}'
+
         # Usa il valore iniziale se disponibile, altrimenti 0
         initial_value = variables.get(var_name, '0')
         # Usa un marker speciale che JavaScript sostituirà dinamicamente
