@@ -11,14 +11,11 @@
  * attributi data-*, prodotti da process_theorem().
  *
  * Attributi (tutti generati da parser/preprocessors.py):
- *   data-passi        JSON: [{id, testo, statuto, da, perche, fig, scope}] — lista
- *                     piatta. `statuto`: ipotesi | costruzione | dedotto | tesi |
- *                     assunzione | assurdo | analogo. La costruzione non asserisce,
- *                     introduce un oggetto: sta nella catena (si può usare come
- *                     premessa) ma vale "per costruzione" se non dichiara una
- *                     garanzia. `scope` è l'id dell'assunzione che governa il
- *                     passo, `null` al livello esterno (DIMOSTRAZIONI.md §8): la
- *                     lista resta piatta, il rientro si ricostruisce da qui
+ *   data-passi        JSON: [{id, testo, statuto, da, perche, fig}] — lista piatta.
+ *                     `statuto`: ipotesi | costruzione | dedotto | tesi. La
+ *                     costruzione non asserisce, introduce un oggetto: sta nella
+ *                     catena (si può usare come premessa) ma vale "per
+ *                     costruzione" se non dichiara una garanzia
  *   data-tesi         JSON: id delle tesi, in ordine di dichiarazione
  *   data-distrattori  JSON: [{id, testo, perche, tipo}] (opzionale)
  *   data-teoria       JSON: {id: {nome, enunciato, tipo}} — le garanzie citate
@@ -332,87 +329,14 @@ class XTheorem extends HTMLElement {
 
   // -- Render ----------------------------------------------------------------
 
-  /**
-   * Gli scope che contengono un passo, dal più esterno al più interno
-   * (DIMOSTRAZIONI.md §8.5). La lista dei passi resta piatta: il rientro a
-   * schermo è ricostruito da qui, non è un dato in più da tenere in sincrono.
-   */
-  catenaScope(scope) {
-    const out = [];
-    while (scope) {
-      out.unshift(scope);
-      scope = (this.perId[scope] || {}).scope || null;
-    }
-    return out;
-  }
-
-  /**
-   * Il testo della riga «perché…» quando non c'è nessuna garanzia da scegliere.
-   *
-   * Un'assunzione, una contraddizione e un ramo chiuso per analogia non hanno
-   * un teorema che li autorizzi: non sono caselle vuote da riempire, esattamente
-   * come una costruzione (§2.5, §8.7). Mostrare lì un menu insegnerebbe la cosa
-   * sbagliata, cioè che ogni riga di una dimostrazione invoca un teorema.
-   */
-  garanziaImplicita(p) {
-    if (p.statuto === 'ipotesi') return 'per ipotesi';
-    if (p.statuto === 'assunzione') {
-      return p.sotto === 'assurdo'
-        ? 'si suppone, per vedere dove porta'
-        : 'si suppone che valga questo caso';
-    }
-    if (p.statuto === 'analogo') {
-      const caso = this.perId[p.analogo];
-      return caso ? `per analogia col caso ${caso.testo}` : 'per analogia';
-    }
-    if (p.perche) return null;
-    if (p.statuto === 'costruzione') return 'per costruzione';
-    if (p.statuto === 'assurdo') return 'le due cose non possono valere insieme';
-    return null;
-  }
-
-  /**
-   * L'occhiello di una riga che non è una deduzione. Un passo ipotetico va
-   * riconosciuto PRIMA di leggerlo: senza, «i due triangoli non sono
-   * congruenti» si legge come un'affermazione del teorema, cioè al contrario.
-   */
-  etichettaStatuto(p) {
-    if (p.statuto === 'assunzione') {
-      return p.sotto === 'assurdo' ? 'per assurdo' : 'caso';
-    }
-    if (p.statuto === 'analogo') return 'analogo';
-    return '';   // la costruzione si riconosce dal bordo e dal «per costruzione»
-  }
-
   render() {
     const evidenziato = this.evidenziato;
     const passoEvidenziato = evidenziato !== null ? this.perId[evidenziato] : null;
 
     this.elCatena.innerHTML = '<svg class="thm-fili" aria-hidden="true"></svg>';
 
-    // Le scatole degli scope aperti, dall'esterno: una riga entra nell'ultima.
-    const pila = [];
-    const scatole = {};
-
     this.catena.forEach((id, i) => {
       const p = this.perId[id];
-
-      // Un'assunzione sta FUORI dalla scatola che apre: «supponiamo che…» si
-      // legge al livello di prima, e il rientro comincia dopo.
-      const voluti = this.catenaScope(p.scope || null);
-      let k = 0;
-      while (k < pila.length && k < voluti.length && pila[k] === voluti[k]) k++;
-      pila.length = k;
-      while (pila.length < voluti.length) {
-        const s = voluti[pila.length];
-        const box = document.createElement('div');
-        box.className = 'thm-scope';
-        box.dataset.scope = s;
-        (pila.length ? scatole[pila[pila.length - 1]] : this.elCatena).appendChild(box);
-        scatole[s] = box;
-        pila.push(s);
-      }
-
       const riga = document.createElement('div');
       riga.className = 'thm-riga';
       riga.dataset.pos = i;
@@ -420,9 +344,6 @@ class XTheorem extends HTMLElement {
       if (p.statuto === 'ipotesi') riga.classList.add('thm-riga--ipotesi');
       if (p.statuto === 'costruzione') riga.classList.add('thm-riga--costruzione');
       if (p.statuto === 'tesi') riga.classList.add('thm-riga--tesi');
-      if (p.statuto === 'assunzione') riga.classList.add('thm-riga--assunzione');
-      if (p.statuto === 'assurdo') riga.classList.add('thm-riga--assurdo');
-      if (p.statuto === 'analogo') riga.classList.add('thm-riga--analogo');
       if (this.errori.includes(i)) riga.classList.add('thm-riga--errore');
 
       // Evidenziazione bidirezionale: dal passo alle sue premesse, e da un
@@ -442,9 +363,12 @@ class XTheorem extends HTMLElement {
       }
 
       let perche;
-      const implicita = this.garanziaImplicita(p);
-      if (implicita) {
-        perche = `<div class="thm-perche">${implicita}</div>`;
+      if (p.statuto === 'ipotesi') {
+        perche = '<div class="thm-perche">per ipotesi</div>';
+      } else if (p.statuto === 'costruzione' && !p.perche) {
+        // Una costruzione senza garanzia dichiarata non ha una casella vuota da
+        // riempire: non c'è un teorema che la autorizzi, la si fa e basta.
+        perche = '<div class="thm-perche">per costruzione</div>';
       } else if (this.modo.garanzieVisibili) {
         const t = this.teoria[p.perche];
         perche = t
@@ -471,21 +395,13 @@ class XTheorem extends HTMLElement {
       const spia = (this.elFigura && p.fig)
         ? '<span class="thm-spia-fig" aria-hidden="true"></span>' : '';
 
-      // Una contraddizione non ha testo d'autore: la conclusione è ⊥, e
-      // scriverla ogni volta sarebbe copiare a mano quello che lo statuto
-      // già dice.
-      const testo = p.testo || (p.statuto === 'assurdo' ? 'Assurdo.' : '');
-      const etichetta = this.etichettaStatuto(p);
-      const tag = etichetta ? `<span class="thm-tag">${etichetta}</span>` : '';
-
       riga.innerHTML = `<span class="thm-n">${i + 1}</span>
         <div class="thm-corpo-riga">
-          ${tag}
           <button type="button" class="thm-testo" aria-expanded="${id === evidenziato}"${
-            p.fig ? ' title="Si vede nella figura"' : ''}>${testo}${spia}</button>
+            p.fig ? ' title="Si vede nella figura"' : ''}>${p.testo}${spia}</button>
           ${perche}
         </div>${comandi}`;
-      (pila.length ? scatole[pila[pila.length - 1]] : this.elCatena).appendChild(riga);
+      this.elCatena.appendChild(riga);
     });
 
     // Il banco sparisce quando non c'è (e non può tornarci) nulla da collocare:
