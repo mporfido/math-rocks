@@ -837,6 +837,204 @@ def process_expr(content, expr_counter):
     return processed, replacements, expr_counter
 
 
+def expand_formula_anchors(tex):
+    """
+    Riscrive gli ancoraggi `@nome{...}` in `\\class{fx-nome}{...}`.
+
+    `\\class` è l'estensione html di MathJax (caricata in _assets.html): la
+    classe finisce sull'elemento composto, quindi il componente può misurarne
+    il rettangolo e agganciarci una freccia. `@nome{...}` è solo zucchero: chi
+    scrive la lezione non deve sapere come MathJax marca le sotto-espressioni.
+
+    Lo scanner conta le graffe invece di usare una regex: il corpo di un
+    ancoraggio ne contiene spesso di annidate (`@b{\\frac{1}{2}}`).
+
+    Args:
+        tex: Sorgente LaTeX con gli ancoraggi dell'autore
+
+    Returns:
+        Tuple (tex espanso, lista dei nomi nell'ordine in cui compaiono)
+
+    Raises:
+        ValueError: se una graffa non viene mai chiusa o un nome è ripetuto
+    """
+    pattern = re.compile(r'@([A-Za-z][A-Za-z0-9_-]*)\{')
+    out = []
+    names = []
+    pos = 0
+
+    while True:
+        match = pattern.search(tex, pos)
+        if not match:
+            out.append(tex[pos:])
+            break
+
+        name = match.group(1)
+        if name in names:
+            raise ValueError(f":::formula: l'ancoraggio '@{name}' è ripetuto")
+
+        # Scansione a graffe bilanciate dal `{` di apertura. `\{` e `\}` sono
+        # graffe letterali in LaTeX: non contano.
+        depth = 1
+        i = match.end()
+        while i < len(tex) and depth > 0:
+            ch = tex[i]
+            if ch == '\\':
+                i += 2
+                continue
+            if ch == '{':
+                depth += 1
+            elif ch == '}':
+                depth -= 1
+            i += 1
+        if depth != 0:
+            raise ValueError(f":::formula: graffa non chiusa dopo '@{name}{{'")
+
+        body = tex[match.end():i - 1]
+        out.append(tex[pos:match.start()])
+        out.append(f'\\class{{fx-{name}}}{{{body}}}')
+        names.append(name)
+        pos = i
+
+    return ''.join(out), names
+
+
+# Una riga freccia di un blocco :::formula: `da -> a : commento [| lato]`.
+FORMULA_ARROW_RE = re.compile(
+    r'^(?P<da>[A-Za-z][A-Za-z0-9_-]*)\s*->\s*(?P<a>[A-Za-z][A-Za-z0-9_-]*)'
+    r'\s*:\s*(?P<resto>.+)$'
+)
+
+
+def parse_formula_arrows(lines, names):
+    """
+    Legge le righe `da -> a : commento [| sopra|sotto]` di un blocco :::formula.
+
+    Args:
+        lines: Righe non vuote sotto la formula
+        names: Ancoraggi dichiarati nella formula (per la validazione)
+
+    Returns:
+        Lista di dict {da, a, testo, lato} (lato: 'sopra' | 'sotto' | 'auto')
+
+    Raises:
+        ValueError: riga malformata, ancoraggio inesistente o lato sconosciuto
+    """
+    arrows = []
+
+    for line in lines:
+        match = FORMULA_ARROW_RE.match(line.strip())
+        if not match:
+            raise ValueError(
+                f":::formula: riga freccia non valida: {line.strip()!r}. "
+                "Forma attesa: `da -> a : commento` (opzionale `| sopra` o `| sotto`)"
+            )
+
+        resto = match.group('resto')
+        lato = 'auto'
+        if '|' in resto:
+            resto, _, lato_raw = resto.rpartition('|')
+            lato = lato_raw.strip().lower()
+            if lato not in ('sopra', 'sotto'):
+                raise ValueError(
+                    f":::formula: lato sconosciuto {lato!r} (usa `sopra` o `sotto`)"
+                )
+
+        for nome in (match.group('da'), match.group('a')):
+            if nome not in names:
+                raise ValueError(
+                    f":::formula: la freccia cita '{nome}', che non è un "
+                    f"ancoraggio della formula (dichiarati: {', '.join(names) or 'nessuno'})"
+                )
+
+        arrows.append({
+            'da': match.group('da'),
+            'a': match.group('a'),
+            'testo': resto.strip(),
+            'lato': lato,
+        })
+
+    if not arrows:
+        raise ValueError(':::formula: nessuna freccia (una formula senza commenti è solo una formula)')
+
+    return arrows
+
+
+def process_formula(content, formula_counter):
+    """
+    Converte blocchi :::formula ... ::: in <x-formula> web component
+    (una formula grande con frecce commentate fra sue sotto-parti).
+
+    Sintassi:
+        :::formula
+        @b1{2}^{@e1{-2}} = \\left(@b2{\\tfrac{1}{2}}\\right)^{@e2{2}}
+
+        b1 -> b2 : reciproco
+        e1 -> e2 : cambia segno
+        :::
+
+    Il corpo è diviso dalla PRIMA RIGA VUOTA: sopra la formula (una o più
+    righe, concatenate con uno spazio), sotto le frecce, una per riga.
+    Attenzione: nel corpo non può comparire una riga `---`, che separa gli
+    step della lezione.
+
+    Come :::expr, il corpo è LaTeX pieno di `\\`, `{`, `_`, `*`: viene estratto
+    in un marker e l'HTML finale è restituito come replacement da applicare
+    DOPO il rendering markdown. Il componente NON riceve id: è espositivo, non
+    è un goal.
+
+    Args:
+        content: Contenuto markdown
+        formula_counter: Contatore per ID univoci
+
+    Returns:
+        Tuple (contenuto con marker, dict marker→HTML, nuovo valore counter)
+
+    Raises:
+        ValueError: formula mancante, ancoraggi malformati o frecce non valide
+    """
+    pattern = re.compile(
+        r'^:::formula[ \t]*[^\n]*\n(?P<body>.*?)\n:::[ \t]*$',
+        re.DOTALL | re.MULTILINE,
+    )
+    replacements = {}
+
+    def replace_formula(match):
+        nonlocal formula_counter
+        body = match.group('body').strip('\n')
+
+        # Prima riga vuota = confine fra formula e frecce.
+        parts = re.split(r'\n[ \t]*\n', body, maxsplit=1)
+        tex_lines = [l.strip() for l in parts[0].strip().splitlines() if l.strip()]
+        arrow_lines = [l for l in parts[1].splitlines() if l.strip()] if len(parts) > 1 else []
+
+        # Dimenticare la riga vuota è l'errore di distrazione più facile: senza
+        # questo controllo le frecce finirebbero dentro la formula, in silenzio.
+        if not arrow_lines and any(FORMULA_ARROW_RE.match(l) for l in tex_lines):
+            raise ValueError(
+                ':::formula: manca la riga vuota fra la formula e le frecce'
+            )
+
+        tex_src = ' '.join(tex_lines)
+        if not tex_src:
+            raise ValueError(':::formula: manca la formula')
+
+        tex, names = expand_formula_anchors(tex_src)
+        arrows = parse_formula_arrows(arrow_lines, names)
+
+        marker = f'XFORMULABLOCK{formula_counter}X'
+        replacements[marker] = (
+            f'<x-formula data-tex="{html_lib.escape(tex, quote=True)}"'
+            f' data-arrows="{html_lib.escape(json.dumps(arrows, ensure_ascii=False), quote=True)}">'
+            f'</x-formula>'
+        )
+        formula_counter += 1
+        return marker
+
+    processed = pattern.sub(replace_formula, content)
+    return processed, replacements, formula_counter
+
+
 # Sezione del blocco :::theorem → statuto dei passi che contiene.
 # I nomi delle sezioni sono SINTASSI (fissi); le etichette mostrate a schermo
 # sono invece attributi con default (vedi DIMOSTRAZIONI.md §3).

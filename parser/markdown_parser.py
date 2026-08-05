@@ -3,7 +3,7 @@ import re
 import mistune
 import yaml
 from pathlib import Path
-from parser.preprocessors import process_blanks, process_variables, process_blocks, process_math, process_images, process_checks, process_graphs, process_p5, process_expr, process_theorem, process_tables
+from parser.preprocessors import process_blanks, process_variables, process_blocks, process_math, process_images, process_checks, process_graphs, process_p5, process_expr, process_formula, process_theorem, process_tables
 
 
 class CourseParser:
@@ -30,6 +30,7 @@ class CourseParser:
         self.graph_counter = 0
         self.p5_counter = 0
         self.expr_counter = 0
+        self.formula_counter = 0
         self.theorem_counter = 0
         self.table_counter = 0
 
@@ -78,6 +79,7 @@ class CourseParser:
         self.graph_counter = 0
         self.p5_counter = 0
         self.expr_counter = 0
+        self.formula_counter = 0
         self.theorem_counter = 0
         self.table_counter = 0
 
@@ -321,6 +323,13 @@ class CourseParser:
         # toccato dagli altri preprocessori né da mistune.
         content, expr_replacements, self.expr_counter = process_expr(content, self.expr_counter)
 
+        # :::formula ... ::: → marker (ripristinato a fine render). Il corpo è
+        # LaTeX: `\`, `{`, `_`, `*` non devono passare né da process_math né da
+        # mistune, che li leggerebbe come enfasi o graffe di variabile.
+        content, formula_replacements, self.formula_counter = process_formula(
+            content, self.formula_counter
+        )
+
         # :::theorem ... ::: → marker (ripristinato a fine render). Il corpo ha
         # heading, liste e annotazioni tra graffe: va estratto prima che mistune
         # o gli altri preprocessori lo interpretino. Il testo dei singoli passi
@@ -377,6 +386,7 @@ class CourseParser:
         # i blocchi div: i marker (alfanumerici) sopravvivono a mistune intatti.
         block_replacements.update(p5_replacements)
         block_replacements.update(expr_replacements)
+        block_replacements.update(formula_replacements)
         block_replacements.update(theorem_replacements)
         block_replacements.update(table_replacements)
 

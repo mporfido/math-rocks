@@ -625,6 +625,46 @@ multipla `[[a|*b|c]]` funziona qui e **non** in una tabella markdown normale
 📖 **Documentazione completa**: vedi [TABELLE.md](TABELLE.md) per tutti i
 marcatori, gli esempi e gli errori di build.
 
+### 10. Formula commentata
+
+Sintassi: blocco `:::formula` con una formula LaTeX in cui `@nome{…}` marca i
+pezzi da collegare, una riga vuota, e poi una riga per freccia. Serve quando una
+formula non si spiega leggendola da sinistra a destra, ma mostrando **che cosa
+corrisponde a che cosa** fra i due lati dell'uguale.
+
+```markdown
+:::formula
+@b1{2}^{@e1{-n}} = \left(@b2{\tfrac{1}{2}}\right)^{@e2{n}}
+
+b1 -> b2 : reciproco
+e1 -> e2 : cambia segno
+:::
+```
+
+A riposo le frecce e i commenti si vedono tutti, tenui. Toccandone uno (o
+passandoci sopra, o arrivandoci col TAB) restano a fuoco solo quella freccia, il
+suo commento e i suoi due estremi nella formula; gli altri si smorzano. Funziona
+anche al contrario: si può passare su un simbolo della formula.
+
+| Pezzo | Significato |
+| ----- | ----------- |
+| `@nome{…}` | marca una sotto-espressione: è un estremo di freccia. Le graffe possono essere annidate (`@b{\frac{1}{2}}`) |
+| `da -> a : commento` | una freccia dall'ancoraggio `da` a quello `a`, con la sua etichetta |
+| `… \| sopra` / `… \| sotto` | forza il lato da cui passa la freccia |
+
+Senza indicazione il lato è automatico: la freccia passa **sopra** solo se
+entrambi gli estremi stanno nella metà alta della formula (cioè se sono
+esponenti), altrimenti **sotto**. Frecce dello stesso lato che si sovrappongono
+finiscono su corsie diverse, distanziate quanto basta ai loro commenti.
+
+Non è un esercizio: non ha id e non conta come goal dello step.
+
+> ⚠️ Nel blocco non può comparire una riga `---` (separa gli step), e la riga
+> vuota fra formula e frecce è obbligatoria: senza, la build si ferma. Si ferma
+> anche se una freccia cita un ancoraggio che non esiste o se due ancoraggi
+> hanno lo stesso nome — sono i modi tipici di ritrovarsi una freccia mancante
+> senza accorgersene.
+
 ## Formule Matematiche
 
 ### Inline Math

@@ -59,6 +59,8 @@ math-rocks/
 │   │   ├── blank.js            # <x-blank>: input/scelta multipla
 │   │   ├── step.js             # <x-step>: container step con goal tracking
 │   │   ├── variable.js         # <x-variable>: slider interattivo
+│   │   ├── formula.js          # <x-formula>: formula LaTeX con frecce commentate
+│   │   │                       # fra sue sotto-parti (SVG in overlay su MathJax)
 │   │   └── p5.js               # <x-p5>: sketch p5.js (inline o riusabile, lazy-load)
 │   ├── sketches/               # Sketch p5 riusabili: un file per sketch, caricati
 │   │                           # on-demand da <x-p5> (window.P5Sketches['<nome>'])
@@ -120,6 +122,8 @@ math-rocks/
   - `${var}{config}` → `<x-variable>` (slider)
   - `:::table` → tabella con frecce etichettate fra le righe (CSS Grid, niente
     JS: vedi TABELLE.md)
+  - `:::formula` → `<x-formula>` (formula commentata: `@nome{…}` diventa
+    `\class{fx-nome}{…}`, le righe `da -> a : commento` diventano frecce)
   - `:::div.class` → `<div class="class">` (blocchi custom)
 
 ### Frontend (JavaScript)
@@ -131,6 +135,12 @@ math-rocks/
 
 - **static/components/variable.js**: Web Component per slider interattivi
   - Sintassi: `${display}{bind|initial|min,max,step}`
+
+- **static/components/formula.js**: Formula grande con frecce commentate fra sue
+  sotto-parti (base → base "reciproco", esponente → esponente "cambia segno").
+  Misura i pezzi composti da MathJax e ci disegna sopra le staffe in SVG; toccare
+  una freccia mette a fuoco lei e i suoi due estremi. Espositivo, non è un goal.
+  - Sintassi: `:::formula` con `@nome{…}` e righe `da -> a : commento`
 
 - **static/components/step.js**: Container step con:
   - Goal tracking (monitora completamento elementi interattivi)

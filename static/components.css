@@ -1660,9 +1660,150 @@ x-theorem {
     color: var(--ink-soft);
 }
 
+/* ========== Formula commentata (<x-formula>) ========== */
+
+/* Le frecce sfondano il riquadro della formula: la scena si allarga da sola
+   (padding calcolato in JS) e nessuno taglia l'overflow. */
+x-formula {
+    display: block;
+    margin: 2rem 0;
+}
+
+.fx-scena {
+    position: relative;
+    overflow: visible;
+}
+
+.fx-math {
+    position: relative;
+    text-align: center;
+    font-size: clamp(1.3rem, 5vw, 1.9rem);
+    color: var(--ink);
+}
+
+/* La formula è già staccata dal testo dal margine di x-formula: quello di
+   MathJax raddoppierebbe lo spazio e sballerebbe le coordinate degli archi. */
+.fx-math mjx-container[display="true"] {
+    margin: 0;
+}
+
+.fx-archi {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+}
+
+.fx-arco {
+    stroke: var(--ink-soft);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    opacity: 0.5;
+    transition: opacity 0.15s ease, stroke 0.15s ease;
+}
+
+.fx-punta {
+    fill: var(--ink-soft);
+    opacity: 0.5;
+    transition: opacity 0.15s ease, fill 0.15s ease;
+}
+
+/* Bersaglio del dito: invisibile, largo, sopra a tutto. */
+.fx-tocco {
+    stroke: transparent;
+    stroke-width: 18;
+    pointer-events: stroke;
+    cursor: pointer;
+}
+
+.fx-etichette {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.fx-label {
+    position: absolute;
+    pointer-events: auto;
+    max-width: 11rem;
+    padding: 0.1rem 0.45rem;
+    border: none;
+    /* Trasparente, non color carta: il commento deve stare bene anche dentro un
+       riquadro colorato (un reveal, un box). Le corsie garantiscono già che
+       nessuna staffa gli passi attraverso. */
+    background: transparent;
+    color: var(--ink-soft);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    line-height: 1.25;
+    letter-spacing: 0.02em;
+    text-align: center;
+    cursor: pointer;
+    opacity: 0.75;
+    transition: color 0.15s ease, opacity 0.15s ease;
+}
+
+.fx-label:focus-visible {
+    outline: 2px solid var(--rossa);
+    outline-offset: 2px;
+}
+
+/* Con una freccia a fuoco restano leggibili solo lei e i suoi due estremi:
+   le altre quasi spariscono, invece di sommarsi in un groviglio. */
+x-formula[data-attivo] .fx-arco,
+x-formula[data-attivo] .fx-punta,
+x-formula[data-attivo] .fx-label {
+    opacity: 0.12;
+}
+
+x-formula[data-attivo] .fx-arco.is-attivo {
+    stroke: var(--rossa);
+    stroke-width: 2.2;
+    opacity: 1;
+}
+
+x-formula[data-attivo] .fx-punta.is-attivo {
+    fill: var(--rossa);
+    opacity: 1;
+}
+
+x-formula[data-attivo] .fx-label.is-attivo {
+    color: var(--rossa);
+    opacity: 1;
+    font-weight: 600;
+}
+
+/* Gli estremi nella formula: sensibili al passaggio, accesi quando la loro
+   freccia è a fuoco. */
+.fx-ancora {
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.fx-acceso {
+    background: var(--ink-wash-1);
+    color: var(--rossa);
+}
+
+/* La linea di frazione è un bordo, non un glifo: senza questo resterebbe
+   dell'inchiostro di prima mentre numeratore e denominatore si accendono. */
+.fx-acceso mjx-line {
+    border-color: currentColor;
+}
+
 /* ========== Responsive ========== */
 
 @media (max-width: 768px) {
+    /* Su schermo stretto i commenti vanno a capo prima e le frecce si stringono:
+       il tocco resta comodo (il bersaglio invisibile non si tocca). */
+    .fx-label {
+        max-width: 7.5rem;
+        font-size: 0.66rem;
+    }
+
     /* A colonna unica la figura va SOPRA i passi — è quello che si guarda
        mentre si legge — e la cassetta degli attrezzi resta in fondo. Per
        separarle il riquadro della colonna si dissolve (`display: contents`) e
