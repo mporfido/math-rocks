@@ -160,8 +160,14 @@ class XGraph extends HTMLElement {
     const pointsData = JSON.parse(this.dataset.boundpoints || '[]');
     const connect = this.dataset.connect === 'true';
 
-    const readVar = (name) => {
-      const v = parseFloat(this.liveModel()[name]);
+    // Una coordinata è un numero fisso (ascisse decise dall'autore) oppure il
+    // nome di una variabile del modello. I nomi non sono mai numeri, quindi
+    // non c'è ambiguità fra i due casi.
+    const readVar = (coord) => {
+      if (typeof coord === 'number') return coord;
+      const fisso = parseFloat(coord);
+      if (!isNaN(fisso) && String(coord).trim() === String(fisso)) return fisso;
+      const v = parseFloat(this.liveModel()[coord]);
       return isNaN(v) ? NaN : v;
     };
 
@@ -175,6 +181,10 @@ class XGraph extends HTMLElement {
         color: '#3498db',
         size: 5,
         fixed: true,         // guidati dagli input, non trascinabili
+        // Un campo ancora vuoto vale NaN: il punto non esiste finché non c'è
+        // un numero, invece di finire chissà dove (o in (0,0), che sarebbe una
+        // risposta suggerita).
+        visible: () => Number.isFinite(readVar(cfg.x)) && Number.isFinite(readVar(cfg.y)),
         label: { offset: [10, 10] }
       });
     });

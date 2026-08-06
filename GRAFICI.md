@@ -175,9 +175,17 @@ Punti le cui coordinate provengono da variabili dello step (es. input editabili 
 
 | Chiave  | Tipo    | Obbligatorio | Descrizione |
 |---------|---------|:------------:|-------------|
-| `x`     | stringa | sì           | Nome della variabile per l'ascissa |
-| `y`     | stringa | sì           | Nome della variabile per l'ordinata |
+| `x`     | stringa o numero | sì  | Nome della variabile per l'ascissa, **oppure** un numero fisso |
+| `y`     | stringa o numero | sì  | Nome della variabile per l'ordinata, **oppure** un numero fisso |
 | `label` | stringa | no           | Etichetta del punto (default: A, B, C, …) |
+
+Una coordinata fissa serve quando è l'autore a decidere dove sta il punto su un
+asse e lo studente riempie solo l'altro: una tabella "esponente → valore" ha le
+ascisse già scritte nella prima colonna.
+
+Finché la variabile è vuota (`${y}{y||input}`, campo mai compilato) il punto
+**non viene disegnato**: non finisce in $(x, 0)$, che sarebbe una risposta
+suggerita.
 
 **Attributi top-level collegati:**
 
