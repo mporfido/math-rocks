@@ -223,6 +223,35 @@ def test_scelta_multipla_dentro_una_cella():
     assert 'data-choices="[&quot;dimezza&quot;, &quot;raddoppia&quot;]"' in html
 
 
+def test_variabile_dentro_una_cella():
+    """Anche le pipe della config di `${…}{…}` sono sintassi, non divisori:
+    servono per le tabelle x-y i cui valori diventano punti su un grafico."""
+    html = rendi(""":::table
+| Esponente | Valore             |
+| --------- | ------------------ |
+| $3$       | ${y3}{y3||input}   |
+| $-1$      | ${ym1}{ym1|0.5|input} |
+:::""")
+
+    assert html.count('<x-variable') == 2
+    assert 'data-bind="y3" data-initial=""' in html
+    assert 'data-bind="ym1" data-initial="0.5"' in html
+    # Due colonne: se le pipe avessero spezzato le celle sarebbero di più
+    assert 'grid-template-columns:auto auto"' in html
+
+
+def test_variabile_e_scelta_multipla_nella_stessa_riga():
+    html = rendi(""":::table
+| Vuol dire                    | Valore           |
+| ---------------------------- | ---------------- |
+| [[*$\\sqrt{2}$|$1$]]          | ${yh}{yh||input} |
+:::""")
+
+    assert html.count('<x-blank') == 1
+    assert html.count('<x-variable') == 1
+    assert 'grid-template-columns:auto auto"' in html
+
+
 def test_l_etichetta_letta_ad_alta_voce_non_ha_il_latex_addosso():
     """La freccia è role="img": alla sintesi vocale arriva solo l'aria-label."""
     html = rendi(VALIDA.replace('v : 2', r'v : $\sqrt{2}$'))

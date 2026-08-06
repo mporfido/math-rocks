@@ -65,11 +65,22 @@ funzionano le formule e **tutti gli elementi interattivi**:
 ```markdown
 | $2^0$ | [[1]] | | ← una casella da completare, contata come goal dello step
 | $x$   | [[*sale|scende]] | | ← una scelta multipla
+| $3$   | ${y}{y||input} | | ← un campo numerico legato al modello dello step
 ```
 
-> Una scelta multipla `[[a|*b|c]]` **funziona** dentro `:::table`, mentre in
-> una tabella markdown normale no: lì le sue pipe verrebbero lette come
-> divisori di cella.
+> Una scelta multipla `[[a|*b|c]]` e la config di una variabile
+> `${y}{y|1|input}` **funzionano** dentro `:::table`, mentre in una tabella
+> markdown normale la prima no: lì le sue pipe verrebbero lette come divisori
+> di cella. Dentro `[[…]]` e dentro `${…}{…}` le pipe sono sintassi; altrove
+> in una cella, una pipe letterale si scrive `\|`.
+
+Un campo con iniziale **vuoto** (`${y}{y||input}`) parte vuoto e mette `NaN`
+nel modello: "non ancora inserito" non è zero. Serve per le tabelle x-y i cui
+valori diventano punti su un grafico (vedi `boundpoints` in `GRAFICI.md`), dove
+un punto in $(x, 0)$ sarebbe una risposta suggerita.
+
+> **Attenzione:** dentro `[[…]]` non può esserci una parentesi quadra chiusa,
+> quindi niente `\sqrt[4]{2}` fra le opzioni di una scelta multipla.
 
 ## L'intestazione
 

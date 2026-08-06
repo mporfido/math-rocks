@@ -16,7 +16,13 @@
 class XVariable extends HTMLElement {
   connectedCallback() {
     const bind = this.dataset.bind;
-    let initial = parseFloat(this.dataset.initial || 0);
+    // Iniziale vuoto = "da inserire": il campo parte vuoto (vedi x-step, che
+    // mette lo stesso NaN nel modello). Per lo slider non cambia nulla, ha
+    // sempre un iniziale esplicito.
+    const rawInitial = this.dataset.initial;
+    let initial = (rawInitial === undefined || rawInitial.trim() === '')
+      ? NaN
+      : parseFloat(rawInitial);
     const min = parseFloat(this.dataset.min || -10);
     const max = parseFloat(this.dataset.max || 10);
     const step = parseFloat(this.dataset.step || 1);
@@ -38,6 +44,9 @@ class XVariable extends HTMLElement {
       this.renderNumberInput(bind, initial, savedDone);
       return;
     }
+
+    // Uno slider deve stare da qualche parte: senza iniziale valido parte da 0.
+    if (!Number.isFinite(initial)) initial = 0;
 
     this.innerHTML = `
       <span class="variable-control">
@@ -95,8 +104,9 @@ class XVariable extends HTMLElement {
   // Campo numerico editabile a mano: stessa logica di model/evento/persistenza
   // dello slider, cambia solo il markup (utile nelle celle di tabella x-y).
   renderNumberInput(bind, initial, savedDone) {
+    const valore = Number.isFinite(initial) ? initial : '';
     this.innerHTML = `
-      <input type="number" class="variable-input" value="${initial}" step="any">
+      <input type="number" class="variable-input" value="${valore}" step="any">
     `;
 
     const input = this.querySelector('input');

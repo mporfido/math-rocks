@@ -96,7 +96,11 @@ class XStep extends HTMLElement {
     // Trova tutte le variabili e popola il modello con i valori iniziali
     this.querySelectorAll('x-variable').forEach(variable => {
       const bind = variable.dataset.bind;
-      const initial = parseFloat(variable.dataset.initial || 0);
+      // Iniziale vuoto (`${y}{y||input}`) = "valore non ancora inserito", non
+      // zero: il campo parte vuoto e il modello deve dire la stessa cosa, o un
+      // grafico legato a quella variabile disegnerebbe un punto mai chiesto.
+      const raw = variable.dataset.initial;
+      const initial = (raw === undefined || raw.trim() === '') ? NaN : parseFloat(raw);
       if (bind) {
         this.model[bind] = initial;
       }

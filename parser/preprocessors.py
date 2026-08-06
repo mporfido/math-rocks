@@ -168,7 +168,9 @@ def _celle_tabella(riga):
     Divisore proprio invece di uno `split('|')`: dentro una cella può esserci
     una scelta multipla `[[a|*b|c]]`, che una tabella markdown normale spezza in
     tre celle (è il motivo per cui oggi le scelte multiple nelle tabelle non si
-    possono usare). `\\|` resta una pipe letterale.
+    possono usare). Stesso discorso per la config di una variabile
+    `${a}{a|1|input}`: le sue pipe sono sintassi, non divisori. `\\|` resta una
+    pipe letterale.
     """
     riga = riga.strip()
     if riga.startswith('|'):
@@ -177,11 +179,35 @@ def _celle_tabella(riga):
         riga = riga[:-1]
 
     celle, buf, dentro, i = [], [], 0, 0
+    # Graffe aperte di una variabile `${…}{…}`: finché sono aperte le pipe sono
+    # sintassi della config. Le due coppie di graffe sono consecutive, quindi
+    # basta riaprire il conteggio se dopo la chiusura arriva subito un `{`.
+    graffe = 0
     while i < len(riga):
         due = riga[i:i + 2]
         if due == '\\|':
             buf.append('|')
             i += 2
+            continue
+        if due == '${':
+            graffe += 1
+            buf.append(due)
+            i += 2
+            continue
+        if riga[i] == '{' and graffe:
+            graffe += 1
+            buf.append(riga[i])
+            i += 1
+            continue
+        if riga[i] == '}' and graffe:
+            graffe -= 1
+            buf.append(riga[i])
+            i += 1
+            # `${display}{config}`: la seconda graffa riapre subito dopo la prima
+            if graffe == 0 and i < len(riga) and riga[i] == '{':
+                graffe += 1
+                buf.append(riga[i])
+                i += 1
             continue
         if due == '[[':
             dentro += 1
@@ -193,7 +219,7 @@ def _celle_tabella(riga):
             buf.append(due)
             i += 2
             continue
-        if riga[i] == '|' and dentro == 0:
+        if riga[i] == '|' and dentro == 0 and graffe == 0:
             celle.append(''.join(buf).strip())
             buf = []
         else:
