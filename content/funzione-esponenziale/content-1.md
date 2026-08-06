@@ -9,7 +9,7 @@
 
 # La calcolatrice sa una cosa che noi non sappiamo
 
-Digita sulla calcolatrice $2^{3,14}$. Risponde: **8,8152409...**.
+Digita sulla calcolatrice scientifica $2^{\pi}$. Risponde: **8,82497782...**.
 
 Ma $2^3$ vuol dire "2 moltiplicato per sé stesso 3 volte". E allora $2^{3,14}$ che cosa sarebbe? 2 moltiplicato per sé stesso **tre virgola quattordici volte**? Non ha senso — eppure la calcolatrice una risposta ce l'ha, e non è a caso.
 
@@ -116,7 +116,7 @@ e1 -> e2 : cambia segno
 2. Qualunque sia la base $a$ (purché non sia zero), $a^0 = 1$ e 
 
 :::formula
-@b1{a}^{@e1{-n}} = \left(@b2{\tfrac{1}{a}}\right)^{@e2{n}}
+@b1{a}^{@e1{-n}} = \left(@b2{\tfrac{1}{a}}\right)^{@e2{n}} = \frac{1}{a^n}
 
 b1 -> b2 : reciproco
 e1 -> e2 : cambia segno
@@ -209,6 +209,7 @@ La regola delle potenze — "si moltiplica, si sommano gli esponenti" — contin
 Se ha funzionato una volta, funziona sempre: infiliamo un gradino a metà tra $2^0$ e $2^{\frac12}$, poi a metà ancora, e la scala si infittisce.
 
 Il gradino a metà tra $2^0$ e $2^{\frac12}$ porta l'etichetta $2^{\frac14}$, e il suo valore è [[$\sqrt{2}$|*$\sqrt{\sqrt{2}}$|$\frac{\sqrt{2}}{2}$]]
+cioè $\sqrt[4]{2}$
 
 Con lo stesso ragionamento, per un esponente frazionario qualsiasi:
 
@@ -291,15 +292,15 @@ Qui la risposta è sì. Restano fuori due casi, e ce ne occupiamo tra poco.
 
 $\sqrt{2}$ non è una frazione: il suo sviluppo decimale $1{,}41421356\ldots$ non finisce e non si ripete. Nessuna delle regole di prima ci dice quanto vale $2^{\sqrt{2}}$: non c'è una radice da estrarre, non c'è una potenza da fare.
 
-Però possiamo **avvicinarci**. Ognuno di questi esponenti è un decimale finito, quindi una frazione, quindi lo sappiamo calcolare:
+Però possiamo **avvicinarci approssimando**. Ognuno di questi esponenti è un decimale finito, quindi una frazione, quindi lo sappiamo calcolare:
 
 | Potenza | Valore |
 | ------- | ------ |
-| $2^{1{,}4} = 2^{\frac{14}{10}}$ | 2,63901… |
-| $2^{1{,}41}$ | 2,65737… |
-| $2^{1{,}414}$ | 2,66474… |
-| $2^{1{,}4142}$ | 2,66511… |
-| $2^{1{,}41421}$ | 2,665137… |
+| $2^{1{,}4} = 2^{\frac{14}{10}} = \sqrt[10]{2^14}$ | 2,63901… |
+| $2^{1{,}41} = 2^{\frac{141}{100}} = \sqrt[100]{2^141}$ | 2,65737… |
+| $2^{1{,}414} = 2^{\frac{1414}{1000}} = \ldots$ | 2,66474… |
+| $2^{1{,}4142} = \ldots$ | 2,66511… |
+| $2^{1{,}41421} = \ldots$ | 2,665137… |
 
 I valori sono in ordine [[*crescente|decrescente|casuale]], e si stringono attorno a un unico numero.
 
@@ -313,12 +314,12 @@ Ora la domanda dell'inizio. $\pi = 3{,}14159\ldots$, e sappiamo che $3 < \pi < 4
 
 Quindi $2^{\pi}$ è compreso tra $2^3 =$ [[8]] e $2^4 =$ [[16]].
 
-Stringendo con $2^{3{,}14}$ e $2^{3{,}1416}$ si arriva a $2^{\pi} = 8{,}82497\ldots$ — proprio l'8,82 della calcolatrice.
+Continuando ad approssimare sempre più precisamente con $2^{3{,}14}$, $2^{3{,}141}$ e $2^{3{,}1416}$ si arriva a $2^{\pi} = 8{,}82497\ldots$ — proprio il valore che ci restituisce la calcolatrice.
 
 :::div.reveal
 **Che cos'è, allora, $2^{\sqrt{2}}$?**
 
-Non è il risultato di una moltiplicazione ripetuta, e non è nemmeno una radice. È **il numero verso cui si stringono le potenze a esponente razionale** man mano che l'esponente si avvicina a $\sqrt{2}$.
+Non è il risultato di una moltiplicazione ripetuta, e non è nemmeno una radice. È **il numero a cui si avvicinano le potenze a esponente razionale** man mano che l'esponente si avvicina a $\sqrt{2}$.
 
 Questa è l'idea più importante della lezione, e la ritroverai identica in analisi: quando una definizione non si può *estendere* per calcolo diretto, la si estende **per approssimazione**, chiedendo che il risultato non faccia salti.
 
@@ -341,7 +342,7 @@ Prendiamo $a = -8$.
 - $(-8)^{\frac{1}{3}} = \sqrt[3]{-8} =$ [[-2]] ← questa sembra funzionare
 - $(-8)^{\frac{1}{2}} = \sqrt{-8}$: nessun numero reale al quadrato dà $-8$. [[*Non esiste|Fa -4|Fa 4]]
 
-Già così è un disastro: la scala avrebbe dei **buchi**, gradini presenti su alcuni esponenti e assenti su altri. Ma c'è di peggio. La frazione $\frac13$ si può scrivere anche $\frac{2}{6}$, e le due strade devono dare lo stesso risultato:
+Già così è un disastro: la scala con base $-8$ avrebbe dei **buchi**, gradini presenti su alcuni esponenti e assenti su altri. Ma c'è di peggio. La frazione $\frac13$ si può scrivere anche $\frac{2}{6}$, e le due strade devono dare lo stesso risultato:
 
 $$(-8)^{\frac{2}{6}} = \sqrt[6]{(-8)^2} = \sqrt[6]{64} = 2 \qquad \text{ma} \qquad (-8)^{\frac{1}{3}} = -2$$
 
@@ -353,97 +354,14 @@ Stesso esponente, due risultati diversi: [[select: è solo un caso strano|*la de
 - Con $a = 0$: $0^{-1}$ vorrebbe dire $\frac{1}{0}$, e $0^0$ non ha nemmeno un valore sensato.
 
 :::div.reveal
-**Ecco perché la definizione porta delle condizioni.**
+Ecco perché la **definizione di esponenziale** porta delle condizioni.
 
 $$y = a^x \qquad \text{con } a > 0 \text{ e } a \neq 1$$
 
-Quelle condizioni non sono un capriccio del libro di testo: sono **le cicatrici dei casi che abbiamo appena visto rompersi**.
+Quelle condizioni non sono messe lì per complicare le cose: sono **le garanzie per evitare che si rompa qualcosa**.
 
-- $a > 0$ perché con base negativa la definizione si contraddice da sola;
+- $a > 0$ la base deve essere positiva perché con base negativa la definizione si contraddice da sola;
 - $a \neq 1$ perché la base 1 dà una funzione costante, che non ha niente di esponenziale.
 
 E il caso $a = 0$ non serve nemmeno escluderlo a parte: è già fuori da $a > 0$.
-:::
-
----
-
-> id: la-curva
-> title: Una curva senza buchi
-
-# Da scala a curva
-
-Ricapitoliamo che cosa abbiamo fatto: siamo partiti da quattro gradini interi, li abbiamo prolungati sotto lo zero, poi ne abbiamo infilati altri a metà, a un quarto, su ogni razionale, e infine anche sugli irrazionali.
-
-Su un piano cartesiano, con l'esponente sulle $x$ e il valore sulle $y$, i gradini sono diventati **punti**. E i punti, ormai fitti su ogni numero reale, sono diventati una **curva senza buchi**.
-
-## Prima previsione
-
-Posiziona i punti della scala di $2^x$ per $x = -1, 0, 1, 2, 3$, poi clicca *Verifica*.
-
-:::graph
-xrange: "-3,4"
-yrange: "-1,9"
-snap: 0.5
-verify: true
-coords: true
-points:
-  - target: "-1,0.5"
-  - target: "0,1"
-  - target: "1,2"
-  - target: "2,4"
-  - target: "3,8"
-:::
-
-:::div.reveal
-**Erano i tuoi gradini, disegnati.**
-
-Ecco la curva che li unisce tutti: è il grafico di $y = 2^x$.
-
-:::graph
-expr: "2^x"
-xrange: "-3,4"
-yrange: "-1,9"
-:::
-
-Tra un gradino intero e l'altro non c'è nessuno strappo: la curva passa da tutti i punti che hai messo, e anche da tutti quelli che non hai messo.
-:::
-
-## Cambia la base
-
-Muovi la base e osserva la famiglia intera. Ricorda le condizioni: $a > 0$, $a \neq 1$.
-
-Base: ${a}{a|2|0.2,4,0.1}
-
-$$y = ${a}^{x}$$
-
-:::graph
-expr: "a^x"
-bind: a
-xrange: "-3,4"
-yrange: "-1,9"
-:::
-
-Rispondi guardando il grafico.
-
-- Tutte le curve passano per lo stesso punto. Quale? [[*$(0;1)$|$(1;0)$|$(1;1)$]]
-- Con base $a$ maggiore di 1 la curva [[*cresce|decresce|resta piatta]]; con base tra 0 e 1 [[cresce|*decresce|resta piatta]].
-- Quando la base è $\frac12$ il grafico è quello di base 2 [[*ribaltato a specchio|traslato in alto|identico]] — proprio come le due scale capovolte del secondo step.
-- La curva tocca l'asse delle $x$? [[Sì, in x=0|*No, mai: $a^x$ è sempre positivo|Sì, per x molto grandi]]
-
-:::div.reveal
-# 🎉 Hai costruito la funzione esponenziale
-
-Non l'hai ricevuta come definizione: l'hai ottenuta **allargando** una scala di potenze finché non ha più avuto buchi, e tenendo ferme le regole a ogni allargamento.
-
-Riepilogo di quello che ora sai giustificare, non solo ricordare:
-
-| Passaggio | Perché |
-| --------- | ------ |
-| $a^0 = 1$ | è l'unico valore che continua la scala |
-| $a^{-n} = \frac{1}{a^n}$ | scendere di un gradino vuol dire dividere per $a$ |
-| $a^{\frac{m}{n}} = \sqrt[n]{a^m}$ | il gradino di mezzo va moltiplicato per sé stesso $n$ volte |
-| $a^x$ con $x$ irrazionale | è il numero verso cui si stringono i gradini razionali vicini |
-| $a > 0$, $a \neq 1$ | senza queste, la definizione si contraddice o si appiattisce |
-
-**Nella prossima lezione:** questa curva non torna mai indietro e non si ripete mai — quindi si può *invertire*. Chiedersi "a quale esponente devo elevare 2 per ottenere 8?" è la domanda che apre i **logaritmi**.
 :::
