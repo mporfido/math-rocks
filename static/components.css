@@ -271,8 +271,13 @@ x-variable {
 }
 
 /* Campo numerico editabile a mano (data-display="input") */
+/* La larghezza si misura in CIFRE, non in pixel: il font è mono, quindi `Nch`
+   sono esattamente N caratteri. I 20px sono la cornice (padding 8px + bordo 2px
+   per lato) che con box-sizing: border-box rientra dentro width — senza,
+   un valore come 1.4142 verrebbe tagliato dopo la prima cifra. */
 .variable-input {
-    width: 64px;
+    --campo-cifre: 8;
+    width: calc(var(--campo-cifre) * 1ch + 20px);
     padding: 4px 8px;
     border: 2px solid var(--ink);
     border-radius: 6px;
@@ -281,6 +286,16 @@ x-variable {
     text-align: center;
     outline: none;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    /* Gli spinner di type="number" rubano larghezza proprio quando il campo è a
+       fuoco, cioè quando servono le cifre. Le frecce da tastiera restano. */
+    appearance: textfield;
+    -moz-appearance: textfield;
+}
+
+.variable-input::-webkit-outer-spin-button,
+.variable-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
 }
 
 .variable-input:focus {
@@ -918,7 +933,7 @@ x-p5 {
 }
 
 .course-content td .variable-input {
-    width: 56px;
+    --campo-cifre: 7;
 }
 
 /* ========== Tabelle con frecce (:::table) ========== */
@@ -1136,7 +1151,7 @@ x-p5 {
 }
 
 .tbl-cella .variable-input {
-    width: 56px;
+    --campo-cifre: 7;
 }
 
 /* ========== Dimostrazioni (<x-theorem>) ========== */
@@ -1858,15 +1873,18 @@ x-formula[data-attivo] .fx-label.is-attivo {
     .course-content td .blank-input,
     .course-content td .blank-select {
         min-width: 0;
-        width: 64px;
+        width: calc(7ch + 20px);
     }
 
     .course-content td .blank-wrapper {
         flex-wrap: wrap;
     }
 
+    /* Le cifre restano quelle delle celle (7): il font qui sale a 16px per
+       l'anti-zoom iOS, quindi stringere ancora taglierebbe proprio i decimali.
+       Se la colonna non ci sta, è la tabella a scorrere. */
     .course-content td .variable-input {
-        width: 48px;
+        min-width: 0;
     }
 
     /* Tabelle con frecce: si stringono, e se non bastasse scorrono. Niente
@@ -1888,7 +1906,7 @@ x-formula[data-attivo] .fx-label.is-attivo {
     .tbl-cella .blank-input,
     .tbl-cella .blank-select {
         min-width: 0;
-        width: 64px;
+        width: calc(7ch + 20px);
     }
 
     .tbl-cella .blank-wrapper {
@@ -1896,7 +1914,7 @@ x-formula[data-attivo] .fx-label.is-attivo {
     }
 
     .tbl-cella .variable-input {
-        width: 48px;
+        min-width: 0;
     }
 
     .choice-btn {
