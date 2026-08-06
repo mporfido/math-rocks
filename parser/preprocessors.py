@@ -1632,7 +1632,11 @@ def process_blanks(content, blank_counter):
             solution_attr = html_lib.escape(answer, quote=True)
             return f'<x-blank id="{blank_id}" data-solution="{solution_attr}"></x-blank>'
 
-    processed = re.sub(r'\[\[([^\]]+)\]\]', replace_blank, content)
+    # Dentro un blank ci può stare del LaTeX con le sue parentesi quadre
+    # (`$\sqrt[4]{2}$`): il corpo accetta quindi anche un `]`, purché non sia il
+    # primo dei due che chiudono. Con un semplice `[^\]]+` la radice quarta
+    # faceva fallire l'intero match e il `[[...]]` restava a video com'era.
+    processed = re.sub(r'\[\[((?:[^\]]|\](?!\]))+)\]\]', replace_blank, content)
     return processed, blank_counter
 
 
