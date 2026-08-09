@@ -245,22 +245,56 @@ class XStep extends HTMLElement {
    * @returns {string} - HTML con i marker sostituiti e la formula semplificata
    */
   renderTemplate(template) {
-    let html = template.replace(
-      /\{\{VAR:([^:]+):([^}]+)\}\}/g,
-      (match, varName, initialValue) => {
+    // Un solo passaggio per VAR e CALC: gli offset dei marker vanno confrontati
+    // con le zone matematiche del template ORIGINALE, e una prima sostituzione
+    // le sposterebbe.
+    const mathRanges = this.mathRanges(template);
+
+    const html = template.replace(
+      /\{\{VAR:([^:]+):([^}]+)\}\}|\{\{CALC:([^}]+)\}\}/g,
+      (match, varName, initialValue, encodedExpression, offset) => {
+        const inMath = mathRanges.some(([start, end]) => offset >= start && offset < end);
+
+        if (encodedExpression !== undefined) {
+          return this.toDecimalComma(this.evaluateExpression(encodedExpression), inMath);
+        }
+
         // Usa il valore dal modello se disponibile, altrimenti quello del marker
         const value = this.model[varName] !== undefined ? this.model[varName] : initialValue;
-        return this.formatValueForMath(value);
+        return this.toDecimalComma(this.formatValueForMath(value), inMath);
       }
-    );
-
-    html = html.replace(
-      /\{\{CALC:([^}]+)\}\}/g,
-      (match, encodedExpression) => this.evaluateExpression(encodedExpression)
     );
 
     // Semplifica la formula (rimuove parentesi non necessarie, normalizza segni)
     return this.simplifyFormula(html);
+  }
+
+  /**
+   * Intervalli [inizio, fine) del testo racchiusi fra delimitatori LaTeX.
+   * @param {string} text - HTML del template
+   * @returns {Array<[number, number]>} - Zone matematiche
+   */
+  mathRanges(text) {
+    const ranges = [];
+    const pattern = /\$\$[\s\S]*?\$\$|\$[^$\n]*\$/g;
+    let match;
+    while ((match = pattern.exec(text)) !== null) {
+      ranges.push([match.index, match.index + match[0].length]);
+    }
+    return ranges;
+  }
+
+  /**
+   * Separatore decimale all'italiana. In matematica si scrive `{,}`: una
+   * virgola nuda in LaTeX è un separatore di lista e si porta dietro uno spazio
+   * sottile ($2,6$ verrebbe composto come "2, 6"). Fuori dai delimitatori il
+   * valore è testo normale, e lì la virgola si scrive com'è.
+   * @param {string} rendered - Valore già formattato (può essere \square)
+   * @param {boolean} inMath - true se il marker sta dentro $...$ o $$...$$
+   * @returns {string} - Valore con la virgola al posto del punto decimale
+   */
+  toDecimalComma(rendered, inMath) {
+    return rendered.replace(/(\d)\.(\d)/g, inMath ? '$1{,}$2' : '$1,$2');
   }
 
   /**

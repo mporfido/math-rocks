@@ -13,6 +13,13 @@
  *   variable-change: quando l'utente cambia il valore
  *   goal-complete: al primo cambiamento (segna come completato)
  */
+// Il valore mostrato accanto allo slider è testo italiano, non un campo di
+// input: il separatore decimale è la virgola (il <input type="number"> qui
+// sotto resta col punto, lì il formato lo detta il browser).
+function formatDecimal(value) {
+  return String(value).replace(/(\d)\.(\d)/g, '$1,$2');
+}
+
 class XVariable extends HTMLElement {
   connectedCallback() {
     const bind = this.dataset.bind;
@@ -50,7 +57,7 @@ class XVariable extends HTMLElement {
 
     this.innerHTML = `
       <span class="variable-control">
-        <span class="variable-value">${initial}</span>
+        <span class="variable-value">${formatDecimal(initial)}</span>
         <input type="range"
                class="variable-slider"
                value="${initial}"
@@ -72,7 +79,7 @@ class XVariable extends HTMLElement {
     // Update display e model
     slider.addEventListener('input', () => {
       const value = parseFloat(slider.value);
-      display.textContent = value;
+      display.textContent = formatDecimal(value);
 
       // Aggiorna modello dello step
       const step = this.closest('x-step');
