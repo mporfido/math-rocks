@@ -177,15 +177,24 @@ class XGraph extends HTMLElement {
     const pointsData = JSON.parse(this.dataset.boundpoints || '[]');
     const connect = this.dataset.connect === 'true';
 
-    // Una coordinata è un numero fisso (ascisse decise dall'autore) oppure il
-    // nome di una variabile del modello. I nomi non sono mai numeri, quindi
-    // non c'è ambiguità fra i due casi.
+    // Una coordinata è un numero fisso (ascisse decise dall'autore), il nome di
+    // una variabile del modello, oppure un'espressione in quelle variabili
+    // (es. "2^a": il punto che scorre sulla curva mentre lo slider si muove).
+    // I nomi non sono mai numeri, quindi non c'è ambiguità fra i primi due casi.
     const readVar = (coord) => {
       if (typeof coord === 'number') return coord;
-      const fisso = parseFloat(coord);
-      if (!isNaN(fisso) && String(coord).trim() === String(fisso)) return fisso;
-      const v = parseFloat(this.liveModel()[coord]);
-      return isNaN(v) ? NaN : v;
+      const testo = String(coord).trim();
+      const fisso = parseFloat(testo);
+      if (!isNaN(fisso) && testo === String(fisso)) return fisso;
+      if (/^[A-Za-z_]\w*$/.test(testo)) {
+        const v = parseFloat(this.liveModel()[testo]);
+        return isNaN(v) ? NaN : v;
+      }
+      // Espressione: la valutiamo col modello corrente. Se una variabile non è
+      // ancora definita resta un nome nudo nel codice e evalExpr rende NaN,
+      // cioè il punto non esiste — esattamente come per un campo vuoto.
+      const v = this.evalExpr(testo, NaN);
+      return typeof v === 'number' ? v : NaN;
     };
 
     const jxgPoints = pointsData.map((cfg, index) => {

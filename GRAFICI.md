@@ -178,13 +178,31 @@ Punti le cui coordinate provengono da variabili dello step (es. input editabili 
 
 | Chiave  | Tipo    | Obbligatorio | Descrizione |
 |---------|---------|:------------:|-------------|
-| `x`     | stringa o numero | sì  | Nome della variabile per l'ascissa, **oppure** un numero fisso |
-| `y`     | stringa o numero | sì  | Nome della variabile per l'ordinata, **oppure** un numero fisso |
+| `x`     | stringa o numero | sì  | Nome della variabile per l'ascissa, un numero fisso, **oppure** un'espressione |
+| `y`     | stringa o numero | sì  | Nome della variabile per l'ordinata, un numero fisso, **oppure** un'espressione |
 | `label` | stringa | no           | Etichetta del punto (default: A, B, C, …) |
 
 Una coordinata fissa serve quando è l'autore a decidere dove sta il punto su un
 asse e lo studente riempie solo l'altro: una tabella "esponente → valore" ha le
 ascisse già scritte nella prima colonna.
+
+Un'**espressione** (stessa sintassi di `expr`: `^`, `sqrt`, `sin`, …) serve
+quando una coordinata si calcola dall'altra, tipicamente per far scorrere un
+punto lungo una curva al muoversi di uno slider:
+
+```
+${a}{a|-2|-3,3,0.01}
+
+:::graph
+functions:
+  - expr: "2^x"
+boundpoints:
+  - {x: a, y: "2^a", label: "il tuo punto"}
+:::
+```
+
+Attenzione a scrivere l'espressione **fra virgolette**: `2^a` senza virgolette
+è comunque letto come stringa, ma per esempio `{y: 1/n}` no.
 
 Finché la variabile è vuota (`${y}{y||input}`, campo mai compilato) il punto
 **non viene disegnato**: non finisce in $(x, 0)$, che sarebbe una risposta
