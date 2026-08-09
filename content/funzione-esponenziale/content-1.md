@@ -5,7 +5,7 @@
 ---
 
 > id: la-scala
-> title: La scala che scende
+> title: Esponenti negativi
 
 # La calcolatrice sa una cosa che noi non sappiamo
 
@@ -51,7 +51,7 @@ Nessuno ha *deciso* che $2^0 = 1$: è l'unico valore che permette alla regola di
 
 $$2^{-n} = \frac{1}{2^n}$$
 
-Un esponente negativo non è un mostro: è semplicemente il posto che quel gradino occupa **sotto** $2^0$, se vogliamo che la scala scenda sempre con lo stesso passo.
+Un **esponente negativo** non è un mostro: è semplicemente il posto che quel gradino occupa **sotto** $2^0$, se vogliamo che la scala scenda sempre con lo stesso passo.
 
 Tieni a mente questo criterio, perché lo useremo per tutto il resto della lezione: *ogni nuovo esponente prende il valore che tiene in piedi la regola*.
 :::
@@ -59,7 +59,7 @@ Tieni a mente questo criterio, perché lo useremo per tutto il resto della lezio
 ---
 
 > id: altre-basi
-> title: Altre basi, stessa scala
+> title: Cambiamo la base
 
 # La scala non è una proprietà del 2
 
@@ -130,7 +130,7 @@ Cambiare la base con il suo reciproco equivale a cambiare segno all'esponente. C
 ---
 
 > id: mezzo-gradino
-> title: Mezzo gradino
+> title: Esponenti razionali
 
 # Infilare un gradino in mezzo
 
@@ -296,8 +296,8 @@ Però possiamo **avvicinarci approssimando**. Ognuno di questi esponenti è un d
 
 | Potenza | Valore |
 | ------- | ------ |
-| $2^{1{,}4} = 2^{\frac{14}{10}} = \sqrt[10]{2^14}$ | 2,63901… |
-| $2^{1{,}41} = 2^{\frac{141}{100}} = \sqrt[100]{2^141}$ | 2,65737… |
+| $2^{1{,}4} = 2^{\frac{14}{10}} = \sqrt[10]{2^{14}}$ | 2,63901… |
+| $2^{1{,}41} = 2^{\frac{141}{100}} = \sqrt[100]{2^{141}}$ | 2,65737… |
 | $2^{1{,}414} = 2^{\frac{1414}{1000}} = \ldots$ | 2,66474… |
 | $2^{1{,}4142} = \ldots$ | 2,66511… |
 | $2^{1{,}41421} = \ldots$ | 2,665137… |
@@ -310,11 +310,29 @@ Fissiamo un valore per $2^{\sqrt{2}}$: quale, tra questi, è l'unico compatibile
 
 ## Torniamo alla calcolatrice
 
-Ora la domanda dell'inizio. $\pi = 3{,}14159\ldots$, e sappiamo che $3 < \pi < 4$.
+Ora la domanda dell'inizio: quanto vale $2^{\pi}$? Non c'è modo di calcolarlo di colpo, ma possiamo **incastrarlo**. Di $\pi = 3{,}14159\ldots$ conosciamo quante cifre vogliamo, e ogni troncatura è un decimale finito: una potenza che sappiamo fare.
 
-Quindi $2^{\pi}$ è compreso tra $2^3 =$ [[8]] e $2^4 =$ [[16]].
+Siccome le potenze di base 2 crescono, se $\pi$ sta fra due esponenti allora $2^{\pi}$ sta fra le due potenze corrispondenti. Stringiamo l'intervallo un decimale alla volta: con la calcolatrice, riga per riga.
 
-Continuando ad approssimare sempre più precisamente con $2^{3{,}14}$, $2^{3{,}141}$ e $2^{3{,}1416}$ si arriva a $2^{\pi} = 8{,}82497\ldots$ — proprio il valore che ci restituisce la calcolatrice.
+:::div.highlight
+**Come scrivere i valori:** sempre con **quattro cifre dopo la virgola**, in tutte le caselle. Per esempio `8,5742`. La prima riga è l'unica con risultati interi.
+:::
+
+:::table
+| $\pi$ è compreso fra    | $2^{\pi}$ è più di…                                                  | …ed è meno di                                                        |
+| ----------------------- | -------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| $3$ e $4$               | $2^{3} =$ [[8]]                                                      | $2^{4} =$ [[16]]                                                     |
+| $3{,}1$ e $3{,}2$       | $2^{3{,}1} \approx$ [[8,5742 || 8.5742 || 8,5741 || 8.5741]]          | $2^{3{,}2} \approx$ [[9,1896 || 9.1896 || 9,1895 || 9.1895]]          |
+| $3{,}14$ e $3{,}15$     | $2^{3{,}14} \approx$ [[8,8152 || 8.8152]]                            | $2^{3{,}15} \approx$ [[8,8766 || 8.8766 || 8,8765 || 8.8765]]         |
+| $3{,}141$ e $3{,}142$   | $2^{3{,}141} \approx$ [[8,8214 || 8.8214 || 8,8213 || 8.8213]]        | $2^{3{,}142} \approx$ [[8,8275 || 8.8275 || 8,8274 || 8.8274]]        |
+| $3{,}1415$ e $3{,}1416$ | $2^{3{,}1415} \approx$ [[8,8244 || 8.8244]]                          | $2^{3{,}1416} \approx$ [[8,8250 || 8.8250 || 8,825 || 8.825]]         |
+:::
+
+La colonna di sinistra [[select: *sale|scende|resta ferma]], quella di destra [[select: sale|*scende|resta ferma]], e la forbice si chiude.
+
+Dopo l'ultima riga sappiamo che $8{,}8244 < 2^{\pi} < 8{,}8250$: le cifre che le due colonne hanno ormai in comune, e che nessuna riga successiva potrà più cambiare, sono [[8,8|*8,82|8,824|8,8249]].
+
+E la calcolatrice, all'inizio, che cosa aveva risposto? $2^{\pi} = 8{,}82497\ldots$ — un numero che cade [[select: *dentro l'ultimo intervallo|sopra l'ultimo intervallo|sotto l'ultimo intervallo]]. Non è una coincidenza: la calcolatrice non conosce nessun trucco che noi non abbiamo usato. Fa esattamente questo, solo con più cifre.
 
 :::div.reveal
 **Che cos'è, allora, $2^{\sqrt{2}}$?**
@@ -364,4 +382,14 @@ Quelle condizioni non sono messe lì per complicare le cose: sono **le garanzie 
 - $a \neq 1$ perché la base 1 dà una funzione costante, che non ha niente di esponenziale.
 
 E il caso $a = 0$ non serve nemmeno escluderlo a parte: è già fuori da $a > 0$.
+
+Riepilogo di quello che ora sai giustificare, non solo ricordare:
+
+| Passaggio | Perché |
+| --------- | ------ |
+| $a^0 = 1$ | è l'unico valore che continua la scala |
+| $a^{-n} = \frac{1}{a^n}$ | scendere di un gradino vuol dire dividere per $a$ |
+| $a^{\frac{m}{n}} = \sqrt[n]{a^m}$ | il gradino di mezzo va moltiplicato per sé stesso $n$ volte |
+| $a^x$ con $x$ irrazionale | è il numero verso cui si stringono i gradini razionali vicini |
+| $a > 0$, $a \neq 1$ | senza queste, la definizione si contraddice o si appiattisce |
 :::
