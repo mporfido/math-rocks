@@ -211,13 +211,31 @@ class XStep extends HTMLElement {
 
     const varPattern = /\{\{(VAR|CALC):[^}]+\}\}/;
 
-    this.querySelectorAll('p, div, span, li, td, th').forEach((el, index) => {
-      const html = el.innerHTML;
-      if (varPattern.test(html)) {
-        const templateId = `template-${index}`;
-        el.setAttribute('data-template-id', templateId);
-        this.templates.set(templateId, html);
+    // Solo l'elemento PIÙ INTERNO che contiene un marker diventa template. Un
+    // contenitore (per esempio un `:::div.reveal` che ospita sia una formula
+    // con variabile sia un grafico) contiene il marker dei suoi figli, ma
+    // rigenerarne l'innerHTML distruggerebbe i componenti vivi che ci stanno
+    // dentro: un <x-graph> già inizializzato tornerebbe in pagina come stringa
+    // congelata, e il suo contenitore JSXGraph resterebbe lì vuoto accanto al
+    // grafico vero.
+    const candidates = [...this.querySelectorAll('p, div, span, li, td, th')];
+    const matching = candidates.filter(el => varPattern.test(el.innerHTML));
+
+    matching.forEach((el, index) => {
+      // Salta se ogni marker sta dentro un discendente che è già un template:
+      // via i sottoalberi coperti, se non resta nessun marker "proprio" allora
+      // qui non c'è niente da rigenerare.
+      if (matching.some(other => other !== el && el.contains(other))) {
+        const own = el.cloneNode(true);
+        own.querySelectorAll('p, div, span, li, td, th').forEach(node => {
+          if (varPattern.test(node.innerHTML)) node.remove();
+        });
+        if (!varPattern.test(own.innerHTML)) return;
       }
+
+      const templateId = `template-${index}`;
+      el.setAttribute('data-template-id', templateId);
+      this.templates.set(templateId, el.innerHTML);
     });
 
     console.log(`Saved ${this.templates.size} templates with dynamic variables`);
