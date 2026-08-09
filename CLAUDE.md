@@ -161,7 +161,11 @@ Vedi `MARKDOWN_SYNTAX.md` per la struttura completa corso → lezioni → step.
 
 1. **Creazione contenuto**: Scrivi `content/[corso-id]/content-N.md` (una lezione per file) usando la sintassi custom
 2. **Build**: Esegui `python build_courses.py` per compilare markdown → JSON
-3. **Sviluppo**: `python app.py` avvia server Flask su http://localhost:5000
+3. **Sviluppo**: `python app.py` avvia server Flask su http://localhost:5000.
+   In sviluppo la build è automatica e selettiva (`dev_rebuild.py`): aprendo un
+   corso, se i sorgenti sono più recenti del JSON viene ricompilato **solo quel
+   corso** (idem per i corpora). Il passo 2 serve solo per la build completa /
+   il deploy. Si disattiva con `AUTO_REBUILD=0`.
 4. **Test**: `python -m pytest tests/`
 5. **Produzione**: Deploy su Heroku/Render/altro con gunicorn
 

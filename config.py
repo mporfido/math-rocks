@@ -36,6 +36,11 @@ class Config:
     # chiave per l'auto-detect delle formule nei backtick.
     MATH_DEFAULT = bool(_site.get('math', False))
 
+    # Rebuild automatico dei contenuti a runtime: vedi dev_rebuild.py. Default
+    # spento — fuori dallo sviluppo i JSON compilati sono un artefatto di build,
+    # e rigenerarli servendo una pagina sarebbe scrivere su disco in produzione.
+    AUTO_REBUILD = False
+
     THEME_FILE = _site.get('theme_file') or 'theme.css'
     THEME_COLOR = _site.get('theme_color') or '#FFFFFF'
     PRELOAD_FONTS = _site.get('preload_fonts') or []
@@ -44,6 +49,9 @@ class DevelopmentConfig(Config):
     """Configurazione per ambiente di sviluppo"""
     DEBUG = True
     FLASK_ENV = 'development'
+    # Si salva il markdown, si ricarica la pagina: niente build a mano.
+    # Disattivabile con AUTO_REBUILD=0 per lavorare sui JSON già compilati.
+    AUTO_REBUILD = os.environ.get('AUTO_REBUILD', '1') not in ('0', 'false', 'False')
 
 class ProductionConfig(Config):
     """Configurazione per ambiente di produzione"""

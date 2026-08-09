@@ -1,13 +1,24 @@
 """Blueprint per le routes dei corsi"""
-from flask import Blueprint, render_template, redirect, url_for, abort
+from flask import Blueprint, render_template, redirect, url_for, abort, current_app
 import json
 from pathlib import Path
 
 courses_bp = Blueprint('courses', __name__)
 
 def load_course(course_id):
-    """Carica un corso dal file JSON generato"""
-    course_file = Path('courses_data') / f'{course_id}.json'
+    """Carica un corso dal file JSON generato.
+
+    In sviluppo (AUTO_REBUILD) il corso viene prima ricompilato se il markdown
+    è più recente del JSON: si salva il file e si ricarica la pagina, senza
+    passare da `python build_courses.py`. Vedi dev_rebuild.py.
+    """
+    if current_app.config.get('AUTO_REBUILD'):
+        from dev_rebuild import rebuild_course_if_stale
+        rebuild_course_if_stale(course_id,
+                                current_app.config['CONTENT_DIR'],
+                                current_app.config['COURSES_DATA_DIR'])
+
+    course_file = Path(current_app.config['COURSES_DATA_DIR']) / f'{course_id}.json'
 
     if not course_file.exists():
         return None

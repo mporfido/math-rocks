@@ -56,6 +56,15 @@ def load_corpus(tool):
     """
     if not tool or not tool.get('corpus'):
         return None
+
+    # In sviluppo il corpus si ricompila da solo quando le dimostrazioni sono
+    # più recenti del JSON: vedi dev_rebuild.py.
+    if current_app.config.get('AUTO_REBUILD'):
+        from dev_rebuild import rebuild_corpus_if_stale
+        rebuild_corpus_if_stale(tool['corpus'],
+                                current_app.config['CONTENT_DIR'],
+                                current_app.config['TOOLS_DATA_DIR'])
+
     corpus_file = Path(current_app.config['TOOLS_DATA_DIR']) / f"{tool['corpus']}.json"
     if not corpus_file.exists():
         return None
