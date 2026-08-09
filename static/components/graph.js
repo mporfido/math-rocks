@@ -8,6 +8,8 @@
  *   data-xrange: "min,max" (default "-10,10")
  *   data-yrange: "min,max" (default "-7,7")
  *   data-ticks: passo delle tacche sugli assi
+ *   data-xticks / data-yticks: passo per singolo asse (vince su data-ticks)
+ *   data-aspect: "free" per assi con scale indipendenti (default: equiscalati)
  *   data-bind: variabili che ridisegnano le curve, separate da virgola
  *
  * Layer curve:
@@ -54,20 +56,35 @@ class XGraph extends HTMLElement {
     // JSXGraph chiami la funzione per disegnare la curva.
     requestAnimationFrame(() => {
       const tickStep = parseFloat(this.dataset.ticks || 1);
+      const xTick = parseFloat(this.dataset.xticks || tickStep);
+      const yTick = parseFloat(this.dataset.yticks || tickStep);
+
+      // Di default le unità dei due assi hanno la stessa lunghezza in pixel: le
+      // forme sono oneste (un cerchio è rotondo, una pendenza è quella che
+      // sembra), ma JSXGraph allarga la boundingbox richiesta pur di ottenerlo.
+      // Con grandezze non omogenee sui due assi (mesi ed euro, anni e abitanti)
+      // questo schiaccia il grafico: lì l'autore scrive `aspect: free` e la
+      // boundingbox viene rispettata alla lettera.
+      // Attenzione: con `aspect: free` le distanze sui due assi non sono più
+      // confrontabili, quindi la tolleranza di default dei punti trascinabili
+      // (soglia unica in unità del modello, vedi initPoints) diventa anisotropa:
+      // chi combina `aspect: free` e `points` indichi una `tolerance` esplicita.
+      const keepAspect = this.dataset.aspect !== 'free';
+
       this.board = JXG.JSXGraph.initBoard(containerId, {
         boundingbox: [xmin, ymax, xmax, ymin],
         axis: true,
         showNavigation: true,
         showCopyright: false,
-        keepaspectratio: true,
+        keepaspectratio: keepAspect,
         // Ridisegna la board quando il contenitore cambia dimensione
         // (resize della finestra, rotazione del dispositivo su mobile).
         resize: { enabled: true, throttle: 200 },
         pan: { enabled: true },
         zoom: { enabled: true },
         defaultAxes: {
-          x: { ticks: { ticksDistance: tickStep, insertTicks: false, minorTicks: 0 } },
-          y: { ticks: { ticksDistance: tickStep, insertTicks: false, minorTicks: 0 } }
+          x: { ticks: { ticksDistance: xTick, insertTicks: false, minorTicks: 0 } },
+          y: { ticks: { ticksDistance: yTick, insertTicks: false, minorTicks: 0 } }
         }
       });
 

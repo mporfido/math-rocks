@@ -273,6 +273,12 @@ sono **layer componibili**, attivati dalla presenza delle rispettive chiavi
 I layer possono coesistere nello stesso grafico. I grafici con almeno un
 `target` generano automaticamente un goal per il tracking.
 
+Il piano è configurato da `xrange` / `yrange` e dal passo delle tacche (`ticks`,
+oppure `xticks` / `yticks` per asse). Di default le unità dei due assi hanno la
+stessa lunghezza in pixel: quando le due grandezze non sono omogenee (mesi ed
+euro) serve `aspect: free`, altrimenti il grafico si schiaccia. Vedi
+[GRAFICI.md](GRAFICI.md) per il riferimento completo.
+
 ```markdown
 :::graph
 xrange: "-7,7"

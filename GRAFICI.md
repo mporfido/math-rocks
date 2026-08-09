@@ -11,6 +11,9 @@ Le capacità del grafico sono **layer componibili**: ogni layer si attiva con la
 xrange: "-10,10"      # asse X (default: -10,10)
 yrange: "-7,7"        # asse Y (default: -7,7)
 ticks: 1              # passo delle tacche sugli assi (default: 1)
+xticks: 1             # passo solo sull'asse X (vince su ticks)
+yticks: 100           # passo solo sull'asse Y (vince su ticks)
+aspect: free          # assi con scale indipendenti (default: equiscalati)
 bind: a               # variabili slider che ridisegnano le curve
 
 functions:            # layer curve
@@ -268,8 +271,48 @@ Tutti i grafici supportano:
 
 - **Pan**: trascina il piano per spostarlo.
 - **Zoom**: usa la rotella del mouse o i controlli di navigazione.
-- Gli assi e la griglia sono sempre visibili; `ticks` regola il passo delle tacche.
+- Gli assi e la griglia sono sempre visibili.
 - Il copyright JSXGraph è nascosto automaticamente.
+
+| Attributo | Tipo | Default | Descrizione |
+|-----------|------|---------|-------------|
+| `ticks`   | numero | `1` | Passo delle tacche su entrambi gli assi |
+| `xticks`  | numero | valore di `ticks` | Passo solo sull'asse X |
+| `yticks`  | numero | valore di `ticks` | Passo solo sull'asse Y |
+| `aspect`  | `free` | assi equiscalati | `free` libera le scale dei due assi |
+
+### Quando serve `aspect: free`
+
+Di default l'unità sull'asse $x$ e l'unità sull'asse $y$ hanno la **stessa
+lunghezza in pixel**: un cerchio è rotondo e una pendenza è quella che sembra.
+Per ottenerlo JSXGraph non si limita a usare la boundingbox richiesta, la
+**allarga** finché le proporzioni tornano.
+
+Va benissimo finché le due grandezze sono omogenee. Non va più bene quando sui
+due assi ci sono cose diverse — mesi ed euro, anni e abitanti: chiedere
+`xrange: "-0.5,5"` con `yrange: "-1,1100"` significa chiedere un rapporto di
+1 a 200, e il grafico si schiaccia in una linea piatta contro l'asse.
+
+In quel caso si dichiara `aspect: free`: la boundingbox viene rispettata alla
+lettera. Quasi sempre serve anche un passo di tacche diverso per asse,
+altrimenti un asse $y$ da 0 a 1100 con passo 1 produce un migliaio di etichette.
+
+```
+:::graph
+expr: "1000+10*x"     # interesse semplice: +10 € al mese
+xrange: "-0.5,5"      # i mesi
+yrange: "-1,1100"     # gli euro
+aspect: free
+xticks: 1
+yticks: 100
+:::
+```
+
+**Attenzione con il layer `points`:** con `aspect: free` una distanza sull'asse
+$x$ e la stessa distanza sull'asse $y$ non si somigliano più, quindi la
+`tolerance` di default (una soglia unica, espressa in unità del modello) risulta
+generosa su un asse e severa sull'altro. Se combini `aspect: free` e punti
+trascinabili, indica una `tolerance` esplicita.
 
 ---
 
