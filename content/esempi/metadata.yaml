@@ -1,5 +1,8 @@
 title: Esempi
-description: Raccolta di lezioni dimostrative sui componenti interattivi della piattaforma.
+description: >-
+  La vetrina eseguibile della piattaforma: ogni componente e ogni costrutto di
+  sintassi mostrato dal vivo, con il suo codice accanto. Il riferimento scritto
+  è in docs/.
 level: beginner
 # progression: free  → le lezioni sono fruibili in qualsiasi ordine
 # progression: sequential → ogni lezione si sblocca completando la precedente

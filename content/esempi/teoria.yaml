@@ -1,0 +1,43 @@
+# La cassetta degli attrezzi del corso "esempi": le garanzie che i passi delle
+# dimostrazioni possono citare in `per:`. È un'entità DI CORSO, non del singolo
+# teorema. Un teorema dimostrato con `id=...` entra automaticamente in questa
+# cassetta e può essere citato dalle dimostrazioni successive.
+# Vedi DIMOSTRAZIONI.md §2.1.
+#
+# Qui c'è il minimo indispensabile per la lezione 6 (i due teoremi sugli
+# angoli). La teoria completa di geometria sta in content/geometria/teoria.yaml.
+
+definizione-angoli-opposti-al-vertice:
+  nome: Definizione di angoli opposti al vertice
+  enunciato: due angoli i cui lati sono uno il prolungamento dell'altro
+  tipo: definizione
+
+definizione-angoli-supplementari:
+  nome: Definizione di angoli supplementari
+  enunciato: due angoli la cui somma è un angolo piatto ($\pi$)
+  tipo: definizione
+
+assioma-angolo-piatto:
+  nome: Somma di angoli adiacenti
+  enunciato: due angoli adiacenti i cui lati esterni sono uno il prolungamento dell'altro formano insieme un angolo piatto
+  tipo: assioma
+
+differenze-congruenti:
+  nome: Differenze di grandezze congruenti
+  enunciato: sottraendo da grandezze congruenti grandezze congruenti si ottengono grandezze congruenti
+  tipo: assioma
+
+proprieta-riflessiva:
+  nome: Proprietà riflessiva
+  enunciato: ogni figura è congruente a se stessa
+  tipo: assioma
+
+proprieta-transitiva:
+  nome: Proprietà transitiva
+  enunciato: due grandezze congruenti a una terza sono congruenti fra loro
+  tipo: assioma
+
+sostituzione:
+  nome: Sostituzione
+  enunciato: grandezze congruenti possono essere sostituite l'una all'altra
+  tipo: assioma

@@ -40,6 +40,8 @@ Cliccando l'**esponente** di una singola potenza la si può comunque
 **valutare** (es. `2^3` → `8`): è il percorso per i casi in cui nessuna
 proprietà si applica.
 
+📖 Riferimento: `docs/espressioni.md`
+
 :::
 
 ---
@@ -82,6 +84,8 @@ La validazione è per **insieme di risultati validi**: dove più proprietà si
 applicano, ogni forma corretta è accettata e il nodo collassa nella forma
 digitata.
 
+📖 Riferimento: `docs/espressioni.md`
+
 :::
 
 ---
@@ -117,6 +121,8 @@ riscritte, le proprietà fanno il resto.
 Il click sull'esponente di una potenza accetta **sia** il valore calcolato
 **sia** una potenza equivalente con altra base (es. `9^3` → `3^6`, validata
 strutturalmente: niente riscritture "a caso").
+
+📖 Riferimento: `docs/espressioni.md`
 
 :::
 
@@ -154,6 +160,8 @@ Basi diverse, esponente uguale: `2^3 · 5^3 = 10^3`.
 :::
 ```
 
+📖 Riferimento: `docs/espressioni.md`
+
 :::
 
 ---
@@ -181,6 +189,8 @@ da una proprietà, cliccando la sua etichetta nell'albero.
 :::
 ```
 
+📖 Riferimento: `docs/espressioni.md`
+
 :::
 
 # Il flag `no-eval`
@@ -202,5 +212,7 @@ sbaglio.
 5^9 : 5^6
 :::
 ```
+
+📖 Riferimento: `docs/espressioni.md` — flag `no-eval`
 
 :::

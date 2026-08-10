@@ -36,6 +36,8 @@ yrange: "-2,2"
 
 `bind` collega il grafico alla variabile dello slider: la curva si ridisegna a ogni movimento. `expr` a livello top è la scorciatoia per una singola curva (equivale a una voce in `functions`).
 
+📖 Riferimento: `docs/grafici.md` · `docs/variabili.md`
+
 :::
 
 :::div.highlight
@@ -88,6 +90,8 @@ points:
 
 Ogni voce di `points` con un `target` crea un punto trascinabile e un goal da completare. `snap` arrotonda alla griglia (sovrascrivibile per singolo punto), `verify` attiva il controllo automatico, `coords: false` nasconde le coordinate.
 
+📖 Riferimento: `docs/grafici.md` — layer `points`
+
 :::
 
 :::div.reveal
@@ -133,6 +137,8 @@ points:
 ```
 
 I layer si combinano: qui una curva (`expr` con `xclip` che ne limita il disegno a un intervallo) convive con i punti da posizionare.
+
+📖 Riferimento: `docs/grafici.md` · `docs/grafici-esempi.md` §5
 
 :::
 
@@ -185,6 +191,8 @@ functions:
 ```
 
 Il layer `functions` accetta più curve; `bind` può elencare più variabili separate da virgola. Il bottone di verifica valuta una condizione sulle variabili dello step.
+
+📖 Riferimento: `docs/grafici.md` · `docs/variabili.md` per `check`
 
 :::
 
@@ -239,6 +247,8 @@ boundpoints:
 ```
 
 La modalità **input** al posto del range crea un campo numerico editabile invece dello slider. Il layer `boundpoints` aggancia ogni punto a una coppia di variabili; `connect: true` unisce i punti con una spezzata.
+
+📖 Riferimento: `docs/grafici.md` — layer `boundpoints`
 
 :::
 
@@ -304,6 +314,8 @@ boundpoints:
 
 Tutti i layer convivono nello stesso piano: `functions` animato dallo slider, `boundpoints` legato alla tabella e la verifica finale sulle variabili.
 
+📖 Riferimento: `docs/grafici-esempi.md` §6
+
 :::
 
 :::div.reveal
@@ -365,6 +377,8 @@ p.draw = () => {
 ```
 
 Le opzioni vanno sulla riga di apertura: `goal` rende lo sketch un goal, `height`/`width` dimensionano il canvas, `bind` elenca le variabili da osservare. Lo sketch riceve `p` (istanza p5) e `ctx` (`ctx.model`, `ctx.complete()`, `ctx.onChange()`).
+
+📖 Riferimento: `docs/p5.md`
 
 :::
 

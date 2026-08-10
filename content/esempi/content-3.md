@@ -42,6 +42,30 @@ classico passo-passo.
 (4 + 5) * 4 - 8 : (2 + 6)
 :::
 
+:::details.syntax-doc
+<summary>📝 Mostra la sintassi</summary>
+
+```md
+:::expr show-steps
+(4 + 5) * 4 - 8 : (2 + 6)
+:::
+```
+
+Il blocco contiene **una sola espressione**, scritta dall'autore. Il flag
+`show-steps` aggiunge sotto l'albero lo svolgimento classico, con il `=`
+incolonnato come sul quaderno.
+
+Attenzione a due simboli: `:` è la **divisione**, mentre `4/3` è un **letterale
+frazione** (un numero atomico, non una divisione). Le parentesi `( )`, `[ ]` e
+`{ }` sono equivalenti e annidabili.
+
+Un `:::expr` è **sempre** un goal: lo step si completa quando l'espressione è
+risolta.
+
+📖 Riferimento: `docs/espressioni.md`
+
+:::
+
 :::div.reveal
 **Bravo!** Hai sciolto tutti i nodi. Nota come la struttura ad albero rende visibile
 l'ordine in cui le operazioni "scendono" fino al risultato.
@@ -107,6 +131,23 @@ frazione (es. `7/4`) oppure come intero quando il risultato è intero.
 
 :::expr
 4/3 + 5/2 * (4/3 - (8/3 : 2/3) + 6/5)
+:::
+
+:::details.syntax-doc
+<summary>📝 Mostra la sintassi</summary>
+
+```md
+:::expr
+4/3 + 5/2 * (4/3 - (8/3 : 2/3) + 6/5)
+:::
+```
+
+L'aritmetica è **esatta**: le frazioni non vengono mai convertite in decimali.
+Qui `8/3 : 2/3` è la divisione fra due frazioni — la barra fa parte del numero,
+i due punti sono l'operazione.
+
+📖 Riferimento: `docs/espressioni.md`
+
 :::
 
 :::div.reveal

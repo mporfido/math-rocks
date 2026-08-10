@@ -32,6 +32,8 @@ Questo contenuto appare quando tutti i goal dello step sono completati.
 :::
 ```
 
+📖 Riferimento: `docs/blanks.md` · `docs/blocchi.md`
+
 :::
 
 ---
@@ -56,6 +58,8 @@ Soluzione: `x =` [[5]]
 Soluzione: `x =` [[5]]
 ```
 
+📖 Riferimento: `docs/blanks.md`
+
 :::
 
 ## Esercizio 2: Sottrazione
@@ -79,6 +83,8 @@ Quale operazione useresti per risolvere `3x = 15`?
 
 La risposta corretta è indicata con `*`; senza asterisco vale la prima opzione.
 
+📖 Riferimento: `docs/blanks.md`
+
 :::
 
 ## Esercizio 4: Completamento inline (menu a tendina)
@@ -93,6 +99,8 @@ Completa la frase scegliendo dal menu: per isolare `x` in `x + 3 = 10` devi [[se
 ```
 
 Il prefisso `select:` rende la scelta multipla come **menu a tendina inline** nel testo, invece dei bottoni. La corretta si marca con `*` come al solito. Le opzioni sono testo semplice (niente formule LaTeX dentro il menu).
+
+📖 Riferimento: `docs/blanks.md`
 
 :::
 
@@ -130,6 +138,8 @@ Valore di `a`: ${a}{a|2|-5,5,1}
 
 Formato slider: `${display}{bind|iniziale|min,max,step}`. Un semplice `${a}` nel testo è un riferimento che si aggiorna in tempo reale.
 
+📖 Riferimento: `docs/variabili.md`
+
 :::
 
 :::div.highlight
@@ -144,6 +154,8 @@ Formato slider: `${display}{bind|iniziale|min,max,step}`. Un semplice `${a}` nel
 💡 **Suggerimento**: Questa è un'equazione quadratica. Le soluzioni dipendono dal valore di `a`!
 :::
 ```
+
+📖 Riferimento: `docs/blocchi.md`
 
 :::
 
@@ -165,6 +177,8 @@ L'equazione lineare è: `2x + ${b} = 10`
 ```
 
 Lo step dello slider può essere decimale (qui `0.5`).
+
+📖 Riferimento: `docs/variabili.md`
 
 :::
 
@@ -209,6 +223,8 @@ Risposta: `x =` [[4]]
 
 Valore di `k`: ${k}{k|0|0,10,1}
 ```
+
+📖 Riferimento: `docs/blanks.md` · `docs/variabili.md`
 
 :::
 
@@ -256,6 +272,8 @@ Frazione con latex: $\frac{${n}}{${d}}$
 ```
 
 Il metadato **use-mathjs: true** abilita la valutazione delle espressioni con mathjs; i riferimenti `${n}` funzionano anche dentro le formule LaTeX.
+
+📖 Riferimento: `docs/matematica.md` · `docs/variabili.md`
 
 :::
 
