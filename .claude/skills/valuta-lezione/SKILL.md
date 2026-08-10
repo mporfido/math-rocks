@@ -7,7 +7,7 @@ description: Valuta la qualità didattica e tecnica di una o più lezioni (conte
 
 Applica questa griglia leggendo direttamente il file `content-N.md` della
 lezione (nessuno script di supporto: i conteggi richiesti sono semplici
-abbastanza da farli leggendo il testo). Riferimento sintassi: `MARKDOWN_SYNTAX.md`.
+abbastanza da farli leggendo il testo). Riferimento sintassi: `docs/` (indice in `docs/README.md`).
 
 Una lezione è una sequenza di **step** separati da `---`, ciascuno introdotto
 da righe di metadata `> id: ...`, `> title: ...`. Il primo blocco `>` in cima

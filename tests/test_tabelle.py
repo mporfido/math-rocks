@@ -1,4 +1,4 @@
-"""Le tabelle con frecce (:::table, vedi TABELLE.md).
+"""Le tabelle con frecce (:::table, vedi docs/tabelle.md).
 
 Come per le dimostrazioni, la maggior parte di questi test guarda la
 **validazione in build**: una freccia che non compare — o che compare fra le

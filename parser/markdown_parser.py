@@ -257,6 +257,14 @@ class CourseParser:
         vedono il contenuto dei fence, che viene ripristinato prima del
         rendering markdown.
 
+        Il delimitatore è di TRE O PIÙ backtick, e la chiusura deve essere
+        lunga quanto l'apertura: un esempio che contiene a sua volta un fence
+        (documentare la sintassi di :::details.syntax-doc, che di fence ne ha
+        uno dentro) si scrive con quattro o cinque backtick, e deve restare
+        letterale come tutti gli altri. Con un pattern a tre backtick fissi,
+        l'apertura ```` non veniva riconosciuta e i preprocessori vedevano il
+        :::theorem dell'esempio come un blocco vero.
+
         Args:
             content: Contenuto markdown
 
@@ -273,7 +281,7 @@ class CourseParser:
             counter += 1
             return marker
 
-        pattern = re.compile(r'^```[^\n]*\n.*?^```[ \t]*$', re.MULTILINE | re.DOTALL)
+        pattern = re.compile(r'^(`{3,})[^\n]*\n.*?^\1[ \t]*$', re.MULTILINE | re.DOTALL)
         return pattern.sub(replace_fence, content), fences
 
     def _extract_inline_code(self, content):

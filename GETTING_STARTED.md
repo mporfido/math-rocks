@@ -136,7 +136,10 @@ Box evidenziato
 :::
 ```
 
-Per la sintassi completa: **[MARKDOWN_SYNTAX.md](MARKDOWN_SYNTAX.md)**
+Per la sintassi completa: **[docs/](docs/README.md)** — un file per argomento
+(blanks, variabili, grafici, tabelle, p5, …), così apri solo quello che ti
+serve. E apri il corso `esempi` nel browser: ogni componente è mostrato dal vivo
+con la sua sintassi accanto.
 
 ## 📂 Struttura File
 
@@ -163,7 +166,7 @@ python build_courses.py nome-corso
 python app.py
 
 # Test parser
-python parser/markdown_parser.py content/corso/content.md
+python parser/markdown_parser.py content/esempi/content-1.md
 ```
 
 Un corso che non compila non ferma gli altri, ma la build **esce con codice
@@ -175,8 +178,8 @@ precedente e sembrerebbe che la modifica non sia mai arrivata.
 
 ### Personalizza il Corso Esempio
 
-1. Modifica `content/esempio-algebra/content.md`
-2. Rigenera: `python build_courses.py esempio-algebra`
+1. Modifica `content/esempi/content-1.md`
+2. Rigenera: `python build_courses.py esempi`
 3. Ricarica pagina
 
 ### Crea il Tuo Primo Corso
@@ -187,7 +190,7 @@ precedente e sembrerebbe che la modifica non sia mai arrivata.
 
 ### Esplora Funzionalità Avanzate
 
-- Leggi [MARKDOWN_SYNTAX.md](MARKDOWN_SYNTAX.md) per sintassi completa
+- Leggi [docs/](docs/README.md) per la sintassi completa
 - Leggi [README.md](README.md) per documentazione dettagliata
 - Personalizza stili in `static/style.css`
 
@@ -227,10 +230,11 @@ ls courses_data/
 
 ## 📚 Risorse
 
-- **README.md** - Documentazione completa
-- **MARKDOWN_SYNTAX.md** - Guida sintassi
-- **CLAUDE.md** - Istruzioni progetto
-- **GUIDA_PRATICA_PYTHON.md** - Guida tecnica dettagliata
+- **README.md** — Documentazione completa e direzione del progetto
+- **docs/** — Sintassi dei corsi, un file per argomento ([indice](docs/README.md))
+- **DIMOSTRAZIONI.md** — Il blocco `:::theorem`: modello dati e sintassi
+- **TEORIA.md** — Un corpus di teoria come strumento a pagina intera
+- **CLAUDE.md** — Istruzioni progetto
 
 ## 💡 Suggerimenti
 

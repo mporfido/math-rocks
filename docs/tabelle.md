@@ -1,7 +1,7 @@
-# Tabelle con frecce — Sintassi e Riferimento
+# Tabelle con frecce — `:::table`
 
-Il blocco `:::table` disegna una tabella in cui, fra una riga e l'altra (o fra
-una colonna e l'altra), corrono **frecce etichettate**.
+Una tabella in cui, fra una riga e l'altra (o fra una colonna e l'altra),
+corrono **frecce etichettate**.
 
 Serve quando quello che conta non è una colonna in più, ma **l'operazione che
 porta da un passaggio al successivo**: sta *fra* due righe, non dentro una.
@@ -21,19 +21,15 @@ Il corpo è una normale tabella a pipe. L'unica cosa nuova è il **glifo di
 verso** al posto di un'intestazione: dichiara che quella colonna non contiene
 dati ma frecce.
 
----
-
 ## La regola, in una riga
 
 > Una **corsia** è una colonna (o una riga) marcata da un glifo di verso.
 > L'etichetta di un salto si scrive nella cella da cui il salto **parte**.
 
----
-
 ## I marcatori
 
 | Scrivi | Dove | Ottieni |
-|---|---|---|
+| --- | --- | --- |
 | `v` (o `↓`) | come intestazione di colonna | corsia di frecce verso il **basso** |
 | `^` (o `↑`) | come intestazione di colonna | corsia di frecce verso l'**alto** |
 | `>` (o `→`) | come **prima cella** di una riga | corsia di frecce verso **destra** |
@@ -48,7 +44,7 @@ sono indipendenti fra loro.
 ## Le etichette
 
 | Scrivi | Significato |
-|---|---|
+| --- | --- |
 | `v : 2` | etichetta di **default**: vale per tutti i salti della corsia |
 | `× 3` in una cella | etichetta di **quel** salto (vince sul default) |
 | cella vuota | usa il default; se non c'è default, nessuna freccia |
@@ -76,8 +72,9 @@ funzionano le formule e **tutti gli elementi interattivi**:
 
 Un campo con iniziale **vuoto** (`${y}{y||input}`) parte vuoto e mette `NaN`
 nel modello: "non ancora inserito" non è zero. Serve per le tabelle x-y i cui
-valori diventano punti su un grafico (vedi `boundpoints` in `GRAFICI.md`), dove
-un punto in $(x, 0)$ sarebbe una risposta suggerita.
+valori diventano punti su un grafico (vedi `boundpoints` in
+[grafici.md](grafici.md)), dove un punto in $(x, 0)$ sarebbe una risposta
+suggerita.
 
 > **Attenzione:** dentro `[[…]]` non può esserci una parentesi quadra chiusa,
 > quindi niente `\sqrt[4]{2}` fra le opzioni di una scelta multipla.
@@ -98,8 +95,6 @@ In una riga di **dati** si possono omettere le celle di corsia finali:
 
 In una riga di **corsia** si possono omettere le ultime celle: sono etichette, e
 quei salti semplicemente non ne hanno.
-
----
 
 ## Esempi
 
@@ -160,8 +155,6 @@ etichettato solo dal default:
 Una `:::table` senza corsie è una tabella normale: si può usare per uniformare
 l'aspetto delle tabelle di uno step in cui ce n'è una con le frecce.
 
----
-
 ## Errori di build
 
 Il blocco fallisce **rumorosamente**, indicando la riga del file: una freccia
@@ -169,7 +162,7 @@ che non compare (o che collega le righe sbagliate) è una scheda che lo studente
 non può leggere, e in silenzio non se ne accorgerebbe nessuno.
 
 | Errore | Perché |
-|---|---|
+| --- | --- |
 | riga con più celle della prima | quasi sempre una pipe di troppo |
 | riga di dati a cui manca una colonna di dati | si possono omettere solo le corsie finali |
 | etichetta sull'ultima riga (colonna) di una corsia | il salto partirebbe dall'ultima riga: la freccia non comparirebbe |
@@ -178,10 +171,8 @@ non può leggere, e in silenzio non se ne accorgerebbe nessuno.
 | corsia con meno di due righe (colonne) di dati | una freccia collega due righe |
 | cella non vuota all'incrocio fra due corsie | non ha significato |
 | tabella fatta di sole corsie | non ci sono dati da collegare |
-| riga che non comincia con `|` | dentro `:::table` ogni riga è una riga di tabella (o manca la chiusura) |
+| riga che non comincia con `\|` | dentro `:::table` ogni riga è una riga di tabella (o manca la chiusura) |
 | `:::table` senza `:::` | senza questo controllo diventerebbe un `<table>` aperto e mai chiuso |
-
----
 
 ## Note di implementazione
 
@@ -212,13 +203,10 @@ non può leggere, e in silenzio non se ne accorgerebbe nessuno.
   l'unica direzione che lo stiramento non cambia. Serve perché la punta è un
   triangolo CSS, che non si può ruotare di un angolo dipendente dall'altezza
   della riga: così punta e curva restano allineate a ogni altezza, e la punta
-  guarda dentro la tabella, verso la riga a cui la freccia arriva. Gli estremi
-  della curva cadono **dentro** il triangolo, che è ancorato al bordo: la
-  curva ci finisce sotto invece di sbucarne oltre il vertice.
+  guarda dentro la tabella, verso la riga a cui la freccia arriva.
 - Le celle sono renderizzate in build da `_render_inline` (lo stesso callback
   usato dai passi di `:::theorem`), che condivide i contatori del parser: gli id
-  dei blank restano unici e finiscono nei goal dello step senza codice
-  dedicato.
+  dei blank restano unici e finiscono nei goal dello step senza codice dedicato.
 - Su schermo stretto la tabella si stringe e, se non basta, **scorre in
   orizzontale**. Non diventa un elenco di schede: una scala con le frecce *è*
   una tabella, e spezzarla ne distruggerebbe il senso.
@@ -227,3 +215,12 @@ non può leggere, e in silenzio non se ne accorgerebbe nessuno.
   per una cosa: i progressi salvati nel browser sono indicizzati per id, quindi
   **aggiungere una tabella a uno step già usato dagli studenti ne azzera i
   progressi**. Vale già oggi per `:::theorem`.
+
+---
+
+**Vedi anche**: [blanks.md](blanks.md) per le caselle nelle celle ·
+[variabili.md](variabili.md) per i campi numerici · [grafici.md](grafici.md) per
+portare una tabella x-y sul piano cartesiano.
+
+**Nel corso demo**: `content/esempi/content-5.md` — step `tabella-scala`,
+`tabella-corsie`, `tabella-orizzontale`.

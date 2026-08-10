@@ -149,14 +149,17 @@ math-rocks/
 │   ├── style.css               # Stili globali
 │   └── components.css          # Stili componenti
 │
+├── docs/                       # Sintassi dei corsi, un file per argomento
+│   └── README.md               # Indice: "cosa cerchi → quale file"
+│
 ├── content/                    # Corsi sorgente (markdown)
 │   ├── tools.yaml              # Strumenti esposti dal sito (istanza)
-│   └── esempio-algebra/
-│       ├── content.md          # Contenuto corso
+│   └── esempi/
+│       ├── content-1.md        # Una lezione per file
 │       └── metadata.yaml       # Metadati
 │
 └── courses_data/               # JSON generati (auto-generated)
-    └── esempio-algebra.json
+    └── esempi.json
 ```
 
 ## Creare un Nuovo Corso
@@ -176,9 +179,9 @@ level: beginner
 duration: 30 minuti
 ```
 
-### 3. Crea content.md
+### 3. Crea content-1.md
 
-Vedi [MARKDOWN_SYNTAX.md](MARKDOWN_SYNTAX.md) per la sintassi completa.
+Vedi [docs/](docs/README.md) per la sintassi completa.
 
 **Esempio minimo:**
 
@@ -212,49 +215,38 @@ Vai su `http://localhost:5000` e apri il corso.
 
 ## Sintassi Markdown Custom
 
-### Blanks (Fill-in-the-blank)
-
-**Input testuale:**
-```markdown
-Risposta: x = [[5]]
-```
-
-**Scelta multipla:**
-```markdown
-Scegli: [[opzione1|opzione2|opzione3]]
-```
-
-### Variables (Sliders)
+Un assaggio:
 
 ```markdown
-${a}{a|2|-5,5,1}
-```
-Formato: `${display}{bind|initial|min,max,step}`
+Risposta: `x =` [[5]]                      <!-- casella da completare -->
+Scegli: [[opzione1|*corretta|opzione3]]    <!-- scelta multipla -->
+Muovi: ${a}{a|2|-5,5,1}                    <!-- slider, valore in ${a} -->
 
-### Blocchi Custom
-
-```markdown
-:::div.highlight
-Contenuto evidenziato
-:::
-```
-
-### Reveal Content
-
-```markdown
 :::div.reveal
-Questo appare solo quando tutti i goals sono completati!
+Appare quando tutti gli esercizi dello step sono completati.
 :::
 ```
 
-### Formule Matematiche
+**Il riferimento completo è in [`docs/`](docs/README.md)**: un file per
+argomento, tutti sotto le 300 righe, così si apre solo quello che serve.
 
-```markdown
-Inline: `x^2 + y^2 = r^2`
-Display: $$\int_0^1 f(x) dx$$
-```
+| | |
+| --- | --- |
+| [struttura](docs/struttura.md) | corso, lezione, step |
+| [blanks](docs/blanks.md) | caselle e scelte multiple |
+| [variabili](docs/variabili.md) | slider, campi numerici, calcoli live |
+| [grafici](docs/grafici.md) · [esempi](docs/grafici-esempi.md) | piano cartesiano |
+| [p5](docs/p5.md) | sketch e simulazioni |
+| [espressioni](docs/espressioni.md) | "Sciogliamo i nodi", proprietà delle potenze |
+| [tabelle](docs/tabelle.md) | tabelle con frecce |
+| [formula](docs/formula.md) | formula commentata |
+| [blocchi](docs/blocchi.md) | box, reveal, suggerimenti |
+| [matematica](docs/matematica.md) · [markdown](docs/markdown-base.md) | formule e testo |
+| [ricette](docs/ricette.md) | lezione completa, buone abitudini, troubleshooting |
 
-Per la sintassi completa, vedi [MARKDOWN_SYNTAX.md](MARKDOWN_SYNTAX.md).
+Il corso **`esempi`** (`/course/esempi`) è la vetrina eseguibile: ogni costrutto
+documentato ha almeno uno step che lo mostra dal vivo, con la sua sintassi in un
+pannello a scomparsa.
 
 ## Strumenti (componenti a pagina intera)
 

@@ -57,7 +57,7 @@ def process_graphs(content, graph_counter):
             raise ValueError(
                 f"Blocco :::graph con 'type: {config['type']}' non supportato: "
                 "usa le chiavi componibili functions/points/boundpoints "
-                "(vedi GRAFICI.md)"
+                "(vedi docs/grafici.md)"
             )
 
         # Scorciatoia: expr top-level = singola curva (con eventuale xclip)
@@ -109,7 +109,7 @@ def process_graphs(content, graph_counter):
 # L'etichetta di un salto si scrive nella cella da cui il salto PARTE; il glifo
 # può portare un'etichetta di default valida per tutti i salti della corsia.
 # `-` rompe la catena, `~` prolunga la freccia aperta sopra (freccia che
-# scavalca più righe). Vedi TABELLE.md.
+# scavalca più righe). Vedi docs/tabelle.md.
 
 # Glifo del marcatore → verso della freccia.
 CORSIA_VERTICALE = {'v': 'giu', '↓': 'giu', '^': 'su', '↑': 'su'}
@@ -342,7 +342,7 @@ def _stile(coppie):
 
 def _render_tabella(corpo, riga0, render_text):
     """
-    Il corpo di un blocco :::table → l'HTML della griglia. Vedi TABELLE.md.
+    Il corpo di un blocco :::table → l'HTML della griglia. Vedi docs/tabelle.md.
 
     `riga0` è il numero di riga della `:::table` nel file: serve solo a far
     puntare gli errori al punto giusto.
@@ -605,7 +605,7 @@ def process_tables(content, table_counter, render_text=None):
     """
     Converte blocchi :::table ... ::: in una griglia con frecce etichettate.
 
-    Sintassi (vedi TABELLE.md per il riferimento completo):
+    Sintassi (vedi docs/tabelle.md per il riferimento completo):
 
         :::table
         | Potenza  | Valore  | v : 2 |

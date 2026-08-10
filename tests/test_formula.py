@@ -1,4 +1,4 @@
-"""La formula commentata (:::formula, vedi MARKDOWN_SYNTAX.md §10).
+"""La formula commentata (:::formula, vedi docs/formula.md).
 
 Come per le tabelle e le dimostrazioni, quasi tutti i test guardano la
 **validazione in build**. Qui il modo tipico di sbagliare è un nome: si marca

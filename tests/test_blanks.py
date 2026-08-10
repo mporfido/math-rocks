@@ -1,4 +1,4 @@
-"""I blank `[[...]]` (vedi MARKDOWN_SYNTAX.md).
+"""I blank `[[...]]` (vedi docs/blanks.md).
 
 Il caso che questi test proteggono è quello che ha rotto la lezione sulla
 funzione esponenziale: dentro un blank c'era `$\\sqrt[4]{2}$`, e le parentesi

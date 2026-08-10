@@ -1,4 +1,4 @@
-"""I calcoli live `${= espressione}` (vedi MARKDOWN_SYNTAX.md).
+"""I calcoli live `${= espressione}` (vedi docs/variabili.md).
 
 Il marker `{{CALC:...}}` deve arrivare intatto fino al browser: è x-step che lo
 sostituisce col risultato a ogni battuta di tasto. Il pericolo è a monte, in

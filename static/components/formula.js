@@ -7,7 +7,7 @@
  * esponenti "cambia segno". Serve a dire quello che la formula da sola non
  * dice: che cosa corrisponde a che cosa fra i due lati dell'uguale.
  *
- * Sintassi d'autore (vedi MARKDOWN_SYNTAX.md):
+ * Sintassi d'autore (vedi docs/formula.md):
  *
  *     :::formula
  *     @b1{2}^{@e1{-2}} = \left(@b2{\tfrac{1}{2}}\right)^{@e2{2}}

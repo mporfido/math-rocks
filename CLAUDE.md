@@ -88,9 +88,14 @@ math-rocks/
 │                               # che compila in silenzio diventa una scheda che lo
 │                               # studente non può risolvere
 │
+├── docs/                       # Sintassi dei corsi: un file per argomento, tutti
+│                               # sotto le 300 righe. Indice in docs/README.md.
+│                               # Carica solo il file che ti serve (blanks.md,
+│                               # variabili.md, grafici.md, tabelle.md, p5.md,
+│                               # espressioni.md, formula.md, blocchi.md, …)
+│
 ├── README.md                   # Introduzione e setup
 ├── GETTING_STARTED.md          # Guida rapida per iniziare
-├── MARKDOWN_SYNTAX.md          # Sintassi markdown estesa
 └── LICENSE                     # Licenza MIT
 
 ```
@@ -121,7 +126,7 @@ math-rocks/
   - `[[answer]]` → `<x-blank>` (input/scelta multipla)
   - `${var}{config}` → `<x-variable>` (slider)
   - `:::table` → tabella con frecce etichettate fra le righe (CSS Grid, niente
-    JS: vedi TABELLE.md)
+    JS: vedi docs/tabelle.md)
   - `:::formula` → `<x-formula>` (formula commentata: `@nome{…}` diventa
     `\class{fx-nome}{…}`, le righe `da -> a : commento` diventano frecce)
   - `:::div.class` → `<div class="class">` (blocchi custom)
@@ -155,7 +160,7 @@ math-rocks/
   `progression: free|sequential`).
 - **courses_data/[corso-id].json**: Corso compilato (`{ id, metadata, lessons: [...] }`).
 
-Vedi `MARKDOWN_SYNTAX.md` per la struttura completa corso → lezioni → step.
+Vedi `docs/struttura.md` per la struttura completa corso → lezioni → step.
 
 ## Workflow
 
@@ -171,7 +176,13 @@ Vedi `MARKDOWN_SYNTAX.md` per la struttura completa corso → lezioni → step.
 
 ## Sintassi Custom
 
-Vedi `MARKDOWN_SYNTAX.md` per la documentazione completa. Esempi:
+La documentazione sta in `docs/`, **un file per argomento**: carica solo quello
+che ti serve, non tutta la cartella. L'indice `docs/README.md` mappa "cosa
+cerchi → quale file". Il corso `content/esempi/` è la vetrina eseguibile: ogni
+costrutto documentato ha almeno uno step che lo mostra dal vivo, e
+`tests/test_docs_coverage.py` verifica che sia ancora vero.
+
+Esempi:
 
 ```markdown
 # Input testuale
