@@ -94,7 +94,7 @@ boundpoints:
 
 Sono gli **stessi punti** che hai scritto tu, e stanno tutti sulla curva. Tra un gradino intero e l'altro non c'è nessuno strappo: la curva passa da tutti i punti che hai messo, e anche da tutti quelli che non hai messo: prova a cambiare la $x$:
 
-$x = $ ${a}{a|-2|-3,3,0.01}
+$x = $ ${a}{a|-2|-3,3,0.05}
 
 :::table
 |x|y|
@@ -111,7 +111,7 @@ $x = $ ${a}{a|-2|-3,3,0.01}
 
 # Cambia la base
 
-Muovi la base e osserva la famiglia intera. Ricorda le condizioni: $a > 0$, $a \neq 1$.
+Muovi la base e osserva come cambia la curva. Ricorda le condizioni: $a > 0$, $a \neq 1$.
 
 Base: ${a}{a|2|0.2,4,0.1}
 
@@ -410,4 +410,334 @@ yrange: "-1,9"
 Sta esattamente dove ti aspetti: fra $y = 2^x$ e $y = 3^x$, e passa per $(0;1)$ come
 tutte le altre. Non è una curva speciale per forma — lo diventerà per un altro motivo,
 quando studierai le derivate.
+:::
+
+---
+
+> id: equazioni-esponenziali
+> title: Equazioni esponenziali
+> use-mathjs: true
+
+# La domanda al contrario
+
+Finora abbiamo sempre chiesto la stessa cosa: *scelgo l'esponente, quanto vale la
+potenza?* Scegli $x$, leggi $y$. È il verso in cui abbiamo costruito la curva,
+gradino dopo gradino.
+
+Adesso giriamo la domanda:
+
+:::div.highlight
+Il capitale è arrivato a **8 volte** quello di partenza. **Dopo quanti raddoppi?**
+
+$$2^x = 8$$
+:::
+
+Sul grafico questa domanda ha una forma precisa. "Il valore vale 8" vuol dire
+"sono all'altezza 8", cioè sulla **retta orizzontale** $y = 8$. E allora la
+domanda diventa: *dove la retta incontra la curva?*
+
+## Cercalo a mano
+
+Muovi l'esponente e guarda il punto salire lungo la curva. Fermati quando atterra
+sulla retta.
+
+Esponente: ${t}{t|0|-1,4,0.25}
+
+:::graph
+xrange: "-1,4"
+yrange: "-1,10"
+bind: t
+functions:
+  - expr: "2^x"
+  - expr: "8"
+boundpoints:
+  - {x: t, y: "2^t", label: "il tuo punto"}
+:::
+
+[Verifica il punto di incontro]{check: abs(2^t - 8) < 0.01}
+
+Quante volte, in tutto, quella retta taglia la curva?
+
+[[*Una sola volta|Due volte|Nessuna]]
+
+Non poteva andare diversamente: la curva **sale sempre**, non torna mai indietro
+sui suoi passi. Una volta superata l'altezza 8, non ci ripassa più. Lo avevi già
+scritto due step fa: ogni valore positivo viene assunto **una volta sola**.
+
+## E senza grafico?
+
+Per confrontare i due membri serve la **stessa base** a destra e a sinistra.
+Scritto come potenza di 2, $8$ è [[$2^3$|$3^2$|$2^4$]]
+
+L'equazione diventa allora $2^x = 2^3$: due potenze con la stessa base sono
+uguali soltanto se hanno lo stesso esponente. Quindi $x =$ [[3]]
+
+:::div.reveal
+**Il grafico e il conto dicono la stessa cosa.**
+
+:::formula
+@a1{a}^{@f1{f(x)}} = @a2{a}^{@g1{g(x)}} \quad \Longrightarrow \quad @f2{f(x)} = @g2{g(x)}
+
+a1 -> a2 : deve essere la stessa base | sotto
+f1 -> f2 : primo esponente | sopra
+g1 -> g2 : secondo esponente | sopra
+:::
+
+Questo passaggio — buttare via la base e tenere gli esponenti — non è una
+scorciatoia: è esattamente la proprietà che hai letto sul grafico. Se a due
+esponenti diversi corrispondessero valori uguali, la curva dovrebbe tornare
+all'altezza da cui era partita, cioè scendere e risalire. Ma non lo fa mai.
+
+Ecco perché una retta orizzontale la taglia **al massimo in un punto**, e perché
+un'equazione esponenziale immediata ha **al massimo una soluzione**:
+
+:::graph
+xrange: "-1,4"
+yrange: "-1,10"
+functions:
+  - expr: "2^x"
+  - expr: "8"
+boundpoints:
+  - {x: 3, y: 8, label: "l'unica soluzione"}
+:::
+:::
+
+---
+
+> id: stessa-base
+> title: Ridurre alla stessa base
+
+# Una sola mossa, sempre quella
+
+Risolvere un'equazione esponenziale immediata vuol dire fare una cosa sola:
+**scrivere i due membri come potenze della stessa base**. Da lì in poi gli
+esponenti si confrontano da soli.
+
+Il bello è che gli strumenti per riscrivere li hai già tutti: esponenti negativi,
+esponente zero, esponenti frazionari, la scala capovolta.
+
+*(Dove serve, scrivi il risultato come frazione: per esempio `1/2`.)*
+
+| Equazione | La chiave per riscrivere | $x =$ |
+| --------- | ------------------------ | ----- |
+| $3^x = 81$ | $81 = 3^4$ | [[4]] |
+| $2^x = \frac{1}{8}$ | un esponente negativo | [[-3]] |
+| $5^x = 1$ | il gradino da cui parte ogni scala | [[0]] |
+| $9^x = 3$ | $9 = 3^2$, e l'esponente diventa una frazione | [[1/2]] |
+| $2^{x+1} = 16$ | l'esponente non deve essere per forza la sola $x$ | [[3]] |
+| $\left(\frac{1}{2}\right)^x = 8$ | la scala capovolta della prima lezione | [[-3]] |
+
+## Quando la retta non tocca mai
+
+Proviamo a chiedere qualcosa di diverso: $2^x = -4$. Traccia la retta $y = -4$ e
+guarda dove incontra la curva.
+
+:::graph
+xrange: "-1,4"
+yrange: "-5,10"
+functions:
+  - expr: "2^x"
+  - expr: "-4"
+:::
+
+La retta passa tutta [[select: *sotto la curva|sopra la curva|a cavallo della curva]],
+e allora l'equazione ha [[select: *nessuna soluzione|una soluzione|due soluzioni]].
+
+Stessa sorte per $2^x = 0$: lì la retta è l'asse delle $x$, e l'asse delle $x$ è
+l'**asintoto** — la curva ci si avvicina quanto vuoi ma non lo tocca mai.
+
+:::div.reveal
+**Non c'è niente da calcolare: basta guardare l'altezza.**
+
+L'esponenziale assume **tutti e soli** i valori positivi. Quindi:
+
+$$a^x = b \quad \text{ha soluzione se e solo se } b > 0 \quad \text{(e allora è unica)}$$
+
+Non è una regola in più da ricordare: è la stessa frase di prima — la curva sta
+tutta sopra l'asse — detta in forma di equazione.
+
+## Un caso che resta aperto
+
+E $2^x = 5$? Qui $5$ è positivo, quindi la retta la curva **la taglia**: la
+soluzione esiste, ed è una sola. Sta fra 2 e 3, perché $2^2 = 4$ e $2^3 = 8$.
+
+:::graph
+xrange: "-1,4"
+yrange: "-1,10"
+functions:
+  - expr: "2^x"
+  - expr: "5"
+boundpoints:
+  - {x: "log(5)/log(2)", y: 5, label: "esiste — ma come si scrive?"}
+:::
+
+Solo che $5$ non è una potenza comoda di $2$: per quanto lo rigiri, non c'è modo
+di riscrivere i due membri con la stessa base. Il punto sul grafico c'è, ma il
+suo esponente non sappiamo **nominarlo**.
+
+Ci vuole uno strumento nuovo, che serve esattamente a questo: dare un nome
+all'esponente. Si chiama **logaritmo**, ed è la prossima lezione.
+:::
+
+---
+
+> id: disequazioni-esponenziali
+> title: Disequazioni esponenziali
+> use-mathjs: true
+
+# Non "dove incontra", ma "dove sta sopra"
+
+Cambiamo di nuovo la domanda, di pochissimo:
+
+$$2^x > 8$$
+
+Non chiediamo più *dove* la curva incontra la retta $y = 8$, ma **per quali $x$
+le sta sopra**. La retta è la stessa, la curva è la stessa: cambia solo che cosa
+stiamo guardando.
+
+## Guarda il punto, non il conto
+
+Esponente: ${t}{t|0|-1,4,0.25}
+
+$$ 2^{${t}} = ${= 2^t} $$
+
+:::graph
+xrange: "-1,4"
+yrange: "-1,10"
+bind: t
+functions:
+  - expr: "2^x"
+  - expr: "8"
+boundpoints:
+  - {x: t, y: "2^t", label: "il tuo punto"}
+:::
+
+Il punto sta sopra la retta [[select: *quando l'esponente supera 3|quando l'esponente è minore di 3|sempre]].
+
+Quindi la soluzione della disequazione è $x >$ [[3]]
+
+## Le soluzioni, disegnate
+
+Il tratto in verde è la parte di curva che sta sopra la retta; sotto, sull'asse
+delle $x$, ci sono gli esponenti che la producono — cioè **l'insieme delle
+soluzioni**.
+
+:::graph
+xrange: "-1,4.5"
+yrange: "-1,10"
+functions:
+  - expr: "2^x"
+  - expr: "8"
+  - expr: "2^x"
+    xclip: "3,4.5"
+    color: "#2ecc71"
+  - expr: "0"
+    xclip: "3,4.5"
+    color: "#2ecc71"
+boundpoints:
+  - {x: 3, y: 8, label: "3"}
+:::
+
+Il punto di incontro fa da **confine**: prima la curva sta sotto, dopo sta sopra.
+Risolvere l'equazione e risolvere la disequazione sono lo stesso lavoro — la
+disequazione in più deve solo decidere **da che parte** del confine stare.
+
+## Prova tu
+
+- $3^x < 27$, cioè $3^x < 3^3$, quindi $x <$ [[3]]
+- $2^x \ge 1$, cioè $2^x \ge 2^0$, quindi $x \ge$ [[0]]
+
+E due casi in cui non c'è nessun confine da trovare:
+
+- $2^x > -1$ è [[select: *sempre vera|mai vera|vera solo per x maggiore di 0]]
+- $2^x < 0$ è [[select: sempre vera|*mai vera|vera solo per x minore di 0]]
+
+Ancora la stessa ragione di prima: la curva sta **tutta** sopra l'asse.
+
+:::div.reveal
+**Con la base maggiore di 1, il verso non cambia.**
+
+$$a^{f(x)} > a^{g(x)} \iff f(x) > g(x) \qquad \text{(per } a > 1\text{)}$$
+
+Su una curva che sale sempre, "stare più a destra" e "stare più in alto" sono la
+stessa cosa: a un esponente più grande corrisponde sempre un valore più grande,
+senza eccezioni. Passare dagli esponenziali agli esponenti conserva l'ordine.
+
+Sarà ancora vero se la curva, invece di salire, scende?
+:::
+
+---
+
+> id: verso-che-si-inverte
+> title: Il verso che si inverte
+
+# Quando la scala scende
+
+Stessa disequazione di prima, ma con la base minore di 1:
+
+$$\left(\frac{1}{2}\right)^x > 2$$
+
+Prima di rispondere, guarda. La curva è quella di base $\frac12$ — la scala
+capovolta — e la retta è $y = 2$.
+
+:::graph
+xrange: "-3,3"
+yrange: "-1,9"
+functions:
+  - expr: "(1/2)^x"
+  - expr: "2"
+boundpoints:
+  - {x: -1, y: 2, label: "-1"}
+:::
+
+La curva sta sopra la retta [[select: *a sinistra di -1|a destra di -1|dappertutto]],
+quindi la soluzione è $x <$ [[-1]]
+
+Attenzione a che cosa è appena successo: il confine si trova sempre allo stesso
+modo ($2 = \left(\frac12\right)^{-1}$, quindi il punto di incontro è $-1$), ma la
+disequazione era "maggiore" e la soluzione è venuta "minore". **Il verso si è
+capovolto.**
+
+## Le due curve insieme
+
+Ecco perché, in un colpo solo. Stessa retta $y = 2$, due curve: una che sale e
+una che scende.
+
+:::graph
+xrange: "-3,3"
+yrange: "-1,9"
+functions:
+  - expr: "2^x"
+  - expr: "(1/2)^x"
+  - expr: "2"
+:::
+
+Sopra la retta ci finiscono i punti a **destra** di 1 per la curva che sale, e
+quelli a **sinistra** di $-1$ per la curva che scende. Le due curve sono l'una il
+riflesso dell'altra: quello che una fa andando avanti, l'altra lo fa andando
+indietro.
+
+## Prova tu
+
+- $\left(\frac{1}{3}\right)^x < 3$: il confine è $-1$ (perché $3 = \left(\frac13\right)^{-1}$), quindi $x >$ [[-1]]
+- $\left(\frac{1}{2}\right)^x \le \frac{1}{4}$: il confine è $2$, quindi $x \ge$ [[2]]
+
+E una domanda di metodo: davanti a una disequazione esponenziale, la prima cosa
+da guardare è [[select: *se la base è maggiore o minore di 1|il segno dell'esponente|quanto è grande il numero a destra]].
+
+:::div.reveal
+**Solo due cose da ricordare.**
+
+| | $a^{f(x)} = a^{g(x)}$ | $a^{f(x)} > a^{g(x)}$ |
+| --- | --- | --- |
+| $a > 1$ — la curva sale | $f(x) = g(x)$ | $f(x) > g(x)$ — verso conservato |
+| $0 < a < 1$ — la curva scende | $f(x) = g(x)$ | $f(x) < g(x)$ — verso invertito |
+
+L'**equazione** non si accorge della base: non ha nessun verso da conservare, e
+il punto di incontro è uno solo comunque vada. È la **disequazione** che deve
+sapere in che direzione va la curva.
+
+Nelle prossime lezioni vedremo cosa succede quando i due membri **non** si
+riducono alla stessa base, come in $2^x = 5$. Lì la soluzione esiste, si vede sul
+grafico, ma per scriverla serve introdurre il concetto di logaritmo.
 :::
