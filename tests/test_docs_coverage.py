@@ -38,6 +38,7 @@ COPERTURA = [
     ('grafici.md', ':::graph'),
     ('grafici.md', 'boundpoints:'),
     ('grafici.md', 'points:'),
+    ('grafici.md', 'navigate: true'),
     ('grafici-esempi.md', 'xclip:'),
     ('p5.md', ':::p5'),
     ('p5.md', 'sketch='),

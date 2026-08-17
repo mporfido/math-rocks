@@ -18,6 +18,7 @@ expr: "sin(a*x)"
 bind: a
 xrange: "-7,7"
 yrange: "-2,2"
+navigate: true
 :::
 
 :::details.syntax-doc
@@ -31,10 +32,13 @@ expr: "sin(a*x)"
 bind: a
 xrange: "-7,7"
 yrange: "-2,2"
+navigate: true
 :::
 ```
 
 `bind` collega il grafico alla variabile dello slider: la curva si ridisegna a ogni movimento. `expr` a livello top è la scorciatoia per una singola curva (equivale a una voce in `functions`).
+
+`navigate: true` sblocca la vista (trascinamento, Shift+rotella, barra in basso a destra): qui serve per allargare la finestra e contare più oscillazioni. Senza questa chiave — il default — la vista resta ferma su `xrange`/`yrange` e su mobile lo swipe sul grafico scrolla la pagina.
 
 📖 Riferimento: `docs/grafici.md` · `docs/variabili.md`
 
