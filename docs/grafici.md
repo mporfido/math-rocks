@@ -198,8 +198,10 @@ I layer sono indipendenti e si usano insieme nello stesso blocco:
 
 ## Il piano cartesiano
 
-Pan (trascinando) e zoom (rotella) sono sempre attivi; assi e griglia sempre
-visibili.
+La vista è **ferma**: la finestra visibile è quella di `xrange`/`yrange`, e le
+domande possono contarci ("sopra $x = 0$ c'è un pezzo di curva?"). Assi e griglia
+sono sempre visibili. Su mobile uno swipe verticale che parte dal grafico scrolla
+la pagina; il trascinamento dei punti di `points` funziona comunque.
 
 | Chiave | Tipo | Default | Descrizione |
 | --- | --- | --- | --- |
@@ -207,6 +209,14 @@ visibili.
 | `xticks` | numero | come `ticks` | Passo solo sull'asse X |
 | `yticks` | numero | come `ticks` | Passo solo sull'asse Y |
 | `aspect` | `free` | equiscalati | Libera le scale dei due assi |
+| `navigate` | `true` | vista ferma | Riattiva pan (trascinando), zoom (Shift+rotella, pinch) e la barra di navigazione in basso a destra |
+
+### Quando serve `navigate: true`
+
+Solo se **esplorare la vista è il compito**: cercare un'intersezione fuori dalla
+finestra, zoomare per contare le oscillazioni. Il prezzo si paga su mobile,
+dove quel grafico ricomincia a catturare lo swipe verticale: se lo studente deve
+solo *leggere* il piano, lascialo fermo e scegli meglio `xrange`/`yrange`.
 
 ### Quando serve `aspect: free`
 
