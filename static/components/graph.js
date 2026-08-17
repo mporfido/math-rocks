@@ -19,9 +19,14 @@
  *     expr: espressione matematica (es: "sin(a*x)")
  *     xclip: "min,max" limita il dominio visualizzato della curva
  *
- * Layer punti obiettivo (trascinabili, goal tracking):
- *   data-points: JSON array di oggetti {target, snap?, tolerance?}
- *   data-snap: snap globale (sovrascritto dal valore per-punto)
+ * Layer punti obiettivo (inseriti col clic, goal tracking):
+ *   data-points: JSON array di oggetti {target, tolerance?}
+ *     Il piano parte vuoto: lo studente tocca per aggiungere un punto, lo
+ *     trascina per spostarlo, lo tocca di nuovo per toglierlo. I punti non
+ *     hanno etichetta e sono intercambiabili: conta l'insieme delle posizioni,
+ *     non l'ordine in cui sono stati messi.
+ *   data-snap: griglia di scatto dei punti
+ *   data-tolerance: raggio di tolleranza di default attorno ai target
  *   data-verify: "true" per il bottone Verifica (check esplicito)
  *   data-coords: "true" mostra le coordinate live accanto ai punti
  *   data-targets: "true" mostra i target in trasparenza
@@ -261,148 +266,306 @@ class XGraph extends HTMLElement {
     return btn;
   }
 
-  // Aggiunge un testo con le coordinate live accanto al punto
-  addCoordsDisplay(point, label = '') {
-    const prefix = label ? `${label} = ` : '';
-    this.board.create('text', [
+  // Aggiunge un testo con le coordinate live accanto al punto. Le coordinate
+  // sono l'unica cosa che distingue un punto da un altro: niente lettere.
+  addCoordsDisplay(point) {
+    return this.board.create('text', [
       () => point.X() + 0.3,
       () => point.Y() + 0.3,
-      () => `${prefix}(${point.X().toFixed(1)}, ${point.Y().toFixed(1)})`
+      () => `(${formatCoord(point.X())}; ${formatCoord(point.Y())})`
     ], { fontSize: 11, strokeColor: '#1f2937', highlight: false });
   }
 
   initPoints() {
     const pointsData = JSON.parse(this.dataset.points || '[]');
-    const globalSnap = this.dataset.snap ? parseFloat(this.dataset.snap) : null;
-    const showCoords = this.dataset.coords === 'true';
     const showTargets = this.dataset.targets === 'true';
     const verify = this.dataset.verify === 'true';
-    const totalTargets = pointsData.filter(p => p.target).length;
-    const completedSet = new Set();
+    const defaultTolerance = this.dataset.tolerance
+      ? parseFloat(this.dataset.tolerance)
+      : null;
 
-    // Stato salvato: se questo grafico era già stato completato, ripristiniamo
-    // i punti sui rispettivi target (le posizioni esatte coincidono coi target).
+    this.snapStep = this.dataset.snap ? parseFloat(this.dataset.snap) : null;
+    this.showCoords = this.dataset.coords === 'true';
+    this.userPoints = [];
+
+    // I target sono posizioni, non punti: nessuno di loro è "il punto A". Il
+    // controllo è sull'insieme (vedi matchPoints), quindi l'ordine della lista
+    // conta solo per l'autore della lezione.
+    this.targets = pointsData
+      .filter(cfg => cfg.target)
+      .map((cfg) => {
+        const [tx, ty] = String(cfg.target).split(',').map(Number);
+        const tolerance = cfg.tolerance !== undefined
+          ? parseFloat(cfg.tolerance)
+          : defaultTolerance !== null
+            ? defaultTolerance
+            // Soglia minima assoluta: con target nell'origine ("0,0") o vicino,
+            // la tolleranza proporzionale sarebbe ~0 e il goal risulterebbe di
+            // fatto incompletabile senza snap. 0.15 garantisce sempre un margine.
+            : Math.max(0.15, (Math.abs(tx) + Math.abs(ty)) * 0.01);
+        return { tx, ty, tolerance };
+      });
+
+    this.verifyMode = verify && this.targets.length > 0;
+
+    if (showTargets) {
+      this.targets.forEach(({ tx, ty }) => {
+        this.board.create('point', [tx, ty], {
+          name: '',
+          withLabel: false,
+          color: '#2ecc71',
+          size: 6,
+          fixed: true,
+          highlight: false,
+          opacity: 0.35
+        });
+      });
+    }
+
+    this.hint = document.createElement('p');
+    this.hint.className = 'graph-hint';
+    this.appendChild(this.hint);
+
+    if (this.verifyMode) {
+      this.verifyBtn = this.addVerifyButton(btn => this.runVerify(btn));
+    }
+
+    this.enablePointPlacing();
+
+    // Stato salvato: se questo grafico era già stato completato, ricreiamo i
+    // punti sui target e segniamo il goal senza dispatchare l'evento (x-step
+    // ricostruisce la contabilità da storage).
     const saved = window.courseProgress
       ? window.courseProgress.getStepForElement(this)
       : null;
-    const savedDone = Boolean(saved && Array.isArray(saved.goals) && saved.goals.includes(this.id));
+    if (saved && Array.isArray(saved.goals) && saved.goals.includes(this.id)) {
+      this.targets.forEach(({ tx, ty }) => this.addUserPoint(tx, ty));
+      this.setAttribute('data-completed', 'true');
+      this.freezePoints();
+    }
 
-    // In verify mode: raccoglie {point, tx, ty, tolerance, index} per il check globale
-    const verifyItems = [];
+    this.refreshPoints();
+  }
 
-    pointsData.forEach((cfg, index) => {
-      const label = String.fromCharCode(65 + index); // A, B, C, ...
-      const targetStr = cfg.target || '';
-      const hasTarget = Boolean(targetStr);
-      const [tx, ty] = hasTarget ? targetStr.split(',').map(Number) : [0, 0];
+  // Il piano parte vuoto: un tocco sul vuoto aggiunge un punto, un tocco su un
+  // punto lo toglie, un trascinamento lo sposta.
+  enablePointPlacing() {
+    this.pointerClaimed = false;
+    let downAt = null;
 
-      const snapStep = cfg.snap !== undefined ? parseFloat(cfg.snap) : globalSnap;
-      const tolerance = cfg.tolerance !== undefined
-        ? parseFloat(cfg.tolerance)
-        // Soglia minima assoluta: con target nell'origine ("0,0") o vicino, la
-        // tolleranza proporzionale sarebbe ~0 e il goal risulterebbe di fatto
-        // incompletabile senza snap. 0.15 garantisce sempre un margine.
-        : hasTarget ? Math.max(0.15, (Math.abs(tx) + Math.abs(ty)) * 0.01) : 0;
-
-      const point = this.board.create('point', [0, 0], {
-        name: label,
-        color: '#3498db',
-        size: 5,
-        snapToGrid: snapStep !== null,
-        snapSizeX: snapStep ?? 1,
-        snapSizeY: snapStep ?? 1,
-        label: { offset: [10, 10] }
-      });
-
-      if (showCoords) this.addCoordsDisplay(point, label);
-
-      if (hasTarget) {
-        // Ripristino: posiziona il punto sul target e marcalo completato.
-        if (savedDone) {
-          point.setPosition(JXG.COORDS_BY_USER, [tx, ty]);
-          point.setAttribute({ color: '#2ecc71' });
-          completedSet.add(index);
-        }
-
-        if (showTargets) {
-          this.board.create('point', [tx, ty], {
-            name: label + '?',
-            color: '#2ecc71',
-            size: 6,
-            fixed: true,
-            opacity: 0.35,
-            label: { offset: [10, 10] }
-          });
-        }
-
-        if (verify) {
-          verifyItems.push({ point, tx, ty, tolerance, index });
-        } else {
-          const check = () => {
-            if (completedSet.has(index)) return;
-            const dist = Math.sqrt((point.X() - tx) ** 2 + (point.Y() - ty) ** 2);
-            if (dist <= tolerance) {
-              completedSet.add(index);
-              point.setAttribute({ color: '#2ecc71' });
-              this.board.update();
-              if (completedSet.size === totalTargets) {
-                this.markComplete();
-              }
-            }
-          };
-          point.on('drag', check);
-          point.on('up', check);
-        }
-      }
+    this.board.on('down', (e) => {
+      downAt = this.pointerPixels(e);
     });
 
-    // Applica il ripristino dei punti completati e segna il goal come completato
-    // senza dispatchare l'evento (x-step ricostruisce la contabilità da storage).
-    if (savedDone) {
-      this.setAttribute('data-completed', 'true');
-      this.board.update();
-    }
+    this.board.on('up', (e) => {
+      const from = downAt;
+      downAt = null;
 
-    if (verify && verifyItems.length > 0) {
-      const verifyBtn = this.addVerifyButton((btn) => {
-        // Tutti i punti devono essere corretti simultaneamente
-        const allCorrect = verifyItems.every(({ point, tx, ty, tolerance }) => {
-          const dist = Math.sqrt((point.X() - tx) ** 2 + (point.Y() - ty) ** 2);
-          return dist <= tolerance;
-        });
-
-        if (allCorrect) {
-          verifyItems.forEach(({ point }) => point.setAttribute({ color: '#2ecc71' }));
-          this.board.update();
-          btn.disabled = true;
-          this.markComplete();
-        } else {
-          // Tutti lampeggiano rosso: nessuna info su quali sono giusti o sbagliati
-          verifyItems.forEach(({ point }) => point.setAttribute({ color: '#ef4444' }));
-          this.board.update();
-          setTimeout(() => {
-            verifyItems.forEach(({ point }) => point.setAttribute({ color: '#3498db' }));
-            this.board.update();
-          }, 900);
-        }
-      });
-
-      // In ripristino, il check è già superato: disabilita il bottone.
-      if (savedDone) {
-        verifyBtn.disabled = true;
+      // Il down è stato preso da un punto esistente: quello è un trascinamento
+      // o una rimozione, non un inserimento. JSXGraph avvisa gli elementi prima
+      // della board sul down e dopo sull'up, quindi il flag lo alza il punto e
+      // lo azzera qui, a gesto finito.
+      if (this.pointerClaimed) {
+        this.pointerClaimed = false;
+        return;
       }
+
+      if (this.hasAttribute('data-completed')) return;
+      // Un gesto che ha spostato il puntatore è un pan (o uno swipe di scroll),
+      // non un tocco: non deve lasciare punti per strada.
+      const to = this.pointerPixels(e);
+      if (from && to && Math.hypot(to[0] - from[0], to[1] - from[1]) > 6) return;
+      // Più punti che target non è un disegno libero: è un modo per completare
+      // l'esercizio cospargendo il piano. Per cambiarne uno si toglie il vecchio.
+      if (this.targets.length && this.userPoints.length >= this.targets.length) return;
+
+      const [x, y] = this.board.getUsrCoordsOfMouse(e);
+      this.addUserPoint(this.snapValue(x), this.snapValue(y));
+      this.refreshPoints(true);
+    });
+  }
+
+  pointerPixels(e) {
+    try {
+      return this.board.getMousePosition(e);
+    } catch {
+      return null;
     }
+  }
+
+  snapValue(value) {
+    const snap = this.snapStep;
+    return snap ? Math.round(value / snap) * snap : value;
+  }
+
+  addUserPoint(x, y) {
+    const snap = this.snapStep;
+    const point = this.board.create('point', [x, y], {
+      name: '',
+      withLabel: false,
+      color: '#3498db',
+      size: 5,
+      snapToGrid: snap !== null,
+      snapSizeX: snap ?? 1,
+      snapSizeY: snap ?? 1
+    });
+
+    // Tocco e trascinamento sono lo stesso gesto: quello che li distingue è se
+    // il punto si è mosso. JSXGraph emette 'drag' solo quando si muove davvero,
+    // quindi un tocco fermo (anche lungo) resta un tocco, e un trascinamento
+    // che torna al punto di partenza resta un trascinamento.
+    let moved = false;
+    point.on('down', () => {
+      this.pointerClaimed = true;
+      moved = false;
+    });
+    // Durante il trascinamento si aggiorna solo il colore: il goal si decide a
+    // punto fermo, così non si blocca un punto che il dito sta ancora muovendo.
+    point.on('drag', () => {
+      moved = true;
+      this.refreshPoints();
+    });
+    point.on('up', () => {
+      const tap = !moved;
+      moved = false;
+      if (this.hasAttribute('data-completed')) return;
+      if (tap) this.removeUserPoint(point);
+      else this.refreshPoints(true);
+    });
+
+    const text = this.showCoords ? this.addCoordsDisplay(point) : null;
+    // Anche l'etichetta delle coordinate copre il punto: un tocco lì non deve
+    // diventare l'inserimento di un punto nuovo.
+    if (text) text.on('down', () => { this.pointerClaimed = true; });
+
+    this.userPoints.push({ point, text });
+    return point;
+  }
+
+  removeUserPoint(point) {
+    const index = this.userPoints.findIndex(item => item.point === point);
+    if (index === -1) return;
+    const { text } = this.userPoints[index];
+    this.userPoints.splice(index, 1);
+    // Fuori dal listener che ci ha portati qui: la rimozione avviene mentre
+    // JSXGraph sta ancora iterando gli oggetti coinvolti nel gesto.
+    requestAnimationFrame(() => {
+      // Il testo delle coordinate rilegge point.X()/Y() a ogni update: va tolto
+      // insieme al punto, o resta appeso a un oggetto che non esiste più.
+      if (text) this.board.removeObject(text);
+      this.board.removeObject(point);
+      this.refreshPoints(true);
+    });
+  }
+
+  // Accoppia punti e target senza guardare l'ordine: restituisce gli indici dei
+  // punti che coprono un target. Greedy dalla coppia più vicina — con dischi di
+  // tolleranza disgiunti (l'unico caso sensato per un esercizio) coincide con
+  // l'accoppiamento ottimo.
+  matchPoints() {
+    const pairs = [];
+    this.targets.forEach((t, ti) => {
+      this.userPoints.forEach(({ point }, pi) => {
+        const dist = Math.hypot(point.X() - t.tx, point.Y() - t.ty);
+        if (dist <= t.tolerance) pairs.push({ ti, pi, dist });
+      });
+    });
+    pairs.sort((a, b) => a.dist - b.dist);
+
+    const usedTargets = new Set();
+    const usedPoints = new Set();
+    for (const { ti, pi } of pairs) {
+      if (usedTargets.has(ti) || usedPoints.has(pi)) continue;
+      usedTargets.add(ti);
+      usedPoints.add(pi);
+    }
+    return usedPoints;
+  }
+
+  // Un punto per target, e ogni punto su un target diverso: senza il vincolo
+  // sul numero basterebbe riempire il piano di punti per completare il goal.
+  isPointsComplete(matched = this.matchPoints()) {
+    return this.targets.length > 0
+      && matched.size === this.targets.length
+      && this.userPoints.length === this.targets.length;
+  }
+
+  // Ricalcolata a ogni aggiunta, rimozione e trascinamento: il colore racconta
+  // lo stato vivo, non un traguardo raggiunto una volta. `settled` distingue il
+  // gesto finito (può chiudere il goal) dal trascinamento in corso.
+  refreshPoints(settled = false) {
+    const matched = this.matchPoints();
+    if (settled && !this.verifyMode && this.isPointsComplete(matched)) this.markComplete();
+
+    const done = this.hasAttribute('data-completed');
+    this.userPoints.forEach(({ point }, index) => {
+      // In verify mode il colore non anticipa la risposta: i punti restano
+      // neutri finché non si preme il bottone.
+      const right = done || (!this.verifyMode && matched.has(index));
+      point.setAttribute({ color: right ? '#2ecc71' : '#3498db' });
+    });
+    this.board.update();
+
+    if (this.verifyBtn) {
+      this.verifyBtn.disabled = done || this.userPoints.length !== this.targets.length;
+    }
+    this.updateHint();
+  }
+
+  runVerify(btn) {
+    if (this.isPointsComplete()) {
+      btn.disabled = true;
+      this.markComplete();
+      this.updateHint();
+      return;
+    }
+
+    // Tutti lampeggiano rosso: nessuna info su quali sono giusti o sbagliati
+    this.userPoints.forEach(({ point }) => point.setAttribute({ color: '#ef4444' }));
+    this.board.update();
+    setTimeout(() => {
+      this.userPoints.forEach(({ point }) => point.setAttribute({ color: '#3498db' }));
+      this.board.update();
+    }, 900);
+  }
+
+  // A goal raggiunto i punti si bloccano: un trascinamento non deve "scompletare"
+  // visivamente un esercizio già chiuso.
+  freezePoints() {
+    this.userPoints.forEach(({ point }) => {
+      point.setAttribute({ fixed: true, color: '#2ecc71' });
+    });
+    this.board.update();
+  }
+
+  updateHint() {
+    if (!this.hint) return;
+    if (this.hasAttribute('data-completed')) {
+      this.hint.hidden = true;
+      return;
+    }
+    const base = 'Tocca il piano per aggiungere un punto, tocca un punto per toglierlo';
+    this.hint.textContent = this.targets.length
+      ? `${base} — ${this.userPoints.length}/${this.targets.length}`
+      : base;
   }
 
   markComplete() {
     if (this.hasAttribute('data-completed')) return;
     this.setAttribute('data-completed', 'true');
+    if (this.userPoints) this.freezePoints();
     this.dispatchEvent(new CustomEvent('goal-complete', {
       bubbles: true,
       composed: true,
       detail: { goalId: this.id }
     }));
   }
+}
+
+// 3 -> "3", 2.5 -> "2,5": virgola decimale, e per questo le coordinate sono
+// separate da punto e virgola.
+function formatCoord(value) {
+  return String(Math.round(value * 100) / 100).replace('.', ',');
 }
 
 customElements.define('x-graph', XGraph);

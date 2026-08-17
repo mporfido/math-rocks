@@ -501,10 +501,25 @@ x-graph {
     border-color: var(--rossa);
 }
 
+/* Disabilitato ha due significati diversi: "non hai ancora messo tutti i punti"
+   (grigio, in attesa) e "hai finito" (verde). */
 .graph-verify-btn:disabled {
+    background: var(--locked);
+    border-color: var(--locked);
+    cursor: default;
+}
+
+x-graph[data-completed] .graph-verify-btn:disabled {
     background: var(--spunta);
     border-color: var(--spunta);
-    cursor: default;
+}
+
+.graph-hint {
+    margin: 0.6rem 0 0;
+    color: var(--ink-soft);
+    font-family: var(--font-mono);
+    font-size: 0.8em;
+    line-height: 1.4;
 }
 
 .graph-error {
