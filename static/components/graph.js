@@ -11,6 +11,8 @@
  *   data-xticks / data-yticks: passo per singolo asse (vince su data-ticks)
  *   data-aspect: "free" per assi con scale indipendenti (default: equiscalati)
  *   data-bind: variabili che ridisegnano le curve, separate da virgola
+ *   data-navigate: "true" per riattivare pan, zoom e barra di navigazione
+ *     (default: vista fissa sulla finestra dichiarata)
  *
  * Layer curve:
  *   data-functions: JSON array di oggetti {expr, color?, xclip?}
@@ -71,22 +73,43 @@ class XGraph extends HTMLElement {
       // chi combina `aspect: free` e `points` indichi una `tolerance` esplicita.
       const keepAspect = this.dataset.aspect !== 'free';
 
+      // Di default la vista è ferma: la finestra è quella di xrange/yrange e le
+      // domande possono contarci. Soprattutto su mobile, dove JSXGraph pana con
+      // un dito solo (col mouse invece chiede Shift): uno swipe verticale che
+      // parte dal grafico trascinava il piano invece di scrollare la pagina.
+      // Chi ha bisogno di esplorare la vista scrive `navigate: true`.
+      const navigate = this.dataset.navigate === 'true';
+
       this.board = JXG.JSXGraph.initBoard(containerId, {
         boundingbox: [xmin, ymax, xmax, ymin],
         axis: true,
-        showNavigation: true,
+        showNavigation: navigate,
         showCopyright: false,
         keepaspectratio: keepAspect,
         // Ridisegna la board quando il contenitore cambia dimensione
         // (resize della finestra, rotazione del dispositivo su mobile).
         resize: { enabled: true, throttle: 200 },
-        pan: { enabled: true },
-        zoom: { enabled: true },
+        // `browserPan` è ciò che convince JSXGraph a rimettere
+        // touch-action: pan-x pan-y sul container, invece di 'none', a ogni
+        // pointerdown: è così che lo scroll della pagina torna al browser.
+        browserPan: !navigate,
+        // needShift solo per la rotella: con `navigate` il drag pana subito
+        // (è il gesto che uno si aspetta), mentre la rotella nuda resta scroll
+        // della pagina e lo zoom chiede Shift.
+        pan: { enabled: navigate, needShift: false },
+        zoom: { enabled: navigate, wheel: navigate, pinch: navigate },
         defaultAxes: {
           x: { ticks: { ticksDistance: xTick, insertTicks: false, minorTicks: 0 } },
           y: { ticks: { ticksDistance: yTick, insertTicks: false, minorTicks: 0 } }
         }
       });
+
+      // JSXGraph scrive touch-action: none *inline* sul container quando
+      // registra i pointer handler, e lo riscrive a ogni pointerdown: una regola
+      // in components.css non vincerebbe mai, e la riassegnazione di browserPan
+      // arriva troppo tardi per il primo tocco dopo il caricamento. Qui lo
+      // impostiamo subito, così anche il primo swipe scrolla.
+      if (!navigate) this.board.containerObj.style.touchAction = 'pan-x pan-y';
 
       const step = this.closest('x-step');
       this.step = step;
