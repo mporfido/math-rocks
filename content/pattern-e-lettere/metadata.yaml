@@ -1,0 +1,10 @@
+title: Dai pattern alle lettere
+description: >-
+  Una figura che cresce di passo in passo, e la formula che la descrive: da
+  "conta e riconta" alla lettera al posto del numero del passo, fino alla prima
+  idea di funzione.
+level: beginner
+duration: 45 minuti
+color: "#D81B60"
+# Gli step si costruiscono uno sull'altro: prima si conta, poi si guarda la figura
+progression: sequential

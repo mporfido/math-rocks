@@ -11,6 +11,10 @@ sections:
       - numeri-naturali
       - numeri-interi
       - le-frazioni
+  - id: algebra
+    title: Algebra
+    courses:
+      - pattern-e-lettere
   - id: geometria
     title: Geometria
     courses:
