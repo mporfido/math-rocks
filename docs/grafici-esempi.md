@@ -35,7 +35,7 @@ yrange: "-10,10"
 ## 3. Posizionare un punto su una coordinata
 
 ```markdown
-Trascina il punto in (2, 3):
+Metti un punto in (2, 3):
 
 :::graph
 snap: 1
@@ -51,6 +51,7 @@ points:
 
 `targets: true` mostra dove andare (pallini verdi); `verify: true` sposta il
 controllo su un bottone, così lo studente decide quando dichiararsi pronto.
+L'ordine in cui li mette non conta.
 
 ```markdown
 Posiziona i punti dove indicato:

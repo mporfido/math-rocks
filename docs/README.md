@@ -15,7 +15,7 @@ Ogni pagina di questo indice chiude indicando lo step corrispondente.
 | capire come si organizzano corso, lezioni e step | [struttura.md](struttura.md) |
 | far scrivere una risposta o scegliere fra opzioni | [blanks.md](blanks.md) |
 | uno slider, un campo numerico, un calcolo che si aggiorna | [variabili.md](variabili.md) |
-| un piano cartesiano: curve, punti da trascinare, punti legati a variabili | [grafici.md](grafici.md) |
+| un piano cartesiano: curve, punti da inserire, punti legati a variabili | [grafici.md](grafici.md) |
 | un grafico già pronto da copiare per uno scenario tipico | [grafici-esempi.md](grafici-esempi.md) |
 | una simulazione o una figura interattiva scritta a mano | [p5.md](p5.md) |
 | far sciogliere un'espressione un'operazione per volta | [espressioni.md](espressioni.md) |

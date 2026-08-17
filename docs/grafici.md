@@ -17,7 +17,7 @@ bind: a               # variabili del modello che ridisegnano il grafico
 functions:            # layer curve
   - expr: "sin(a*x)"
 
-points:               # layer punti obiettivo trascinabili
+points:               # layer punti che lo studente inserisce col tocco
   - target: "3,2"
 
 boundpoints:          # layer punti legati a variabili del modello
@@ -30,7 +30,7 @@ I tre layer in una riga:
 | Layer | Cos'è | Goal? |
 | --- | --- | :---: |
 | `functions` | curve `y = f(x)`, anche animate da uno slider | no |
-| `points` | punti che lo studente trascina su una coordinata obiettivo | sì |
+| `points` | punti che lo studente mette sulle coordinate obiettivo | sì |
 | `boundpoints` | punti le cui coordinate vengono dal modello, non trascinabili | no |
 
 ---
@@ -89,40 +89,42 @@ functions:
 
 ---
 
-## Layer `points` — punti obiettivo trascinabili
+## Layer `points` — punti che lo studente inserisce
 
-Punti che lo studente trascina nelle posizioni indicate, etichettati
-automaticamente A, B, C, … Quando tutti quelli con `target` sono corretti il
-grafico emette `goal-complete`.
+Il piano parte **vuoto**: si tocca per aggiungere un punto, lo si trascina per
+spostarlo, lo si tocca di nuovo per toglierlo. I punti non hanno etichetta e
+sono **intercambiabili**: conta l'insieme delle posizioni, non l'ordine in cui
+sono stati messi né quale punto finisce su quale `target`. Si può mettere al
+massimo un punto per `target`.
 
 **Chiavi di ogni elemento:**
 
 | Chiave | Tipo | Descrizione |
 | --- | --- | --- |
-| `target` | `"x,y"` | Coordinata obiettivo (i punti senza `target` restano liberi) |
-| `snap` | numero | Snap di questo punto (sovrascrive quello globale) |
-| `tolerance` | numero | Raggio di tolleranza attorno al target (default: 1% della somma delle coordinate) |
+| `target` | `"x,y"` | Una posizione da coprire |
+| `tolerance` | numero | Raggio di tolleranza attorno a questo target |
 
 **Chiavi top-level collegate:**
 
 | Chiave | Tipo | Descrizione |
 | --- | --- | --- |
-| `snap` | numero | Griglia di scatto globale (`1` = interi, `0.5` = mezzi) |
+| `snap` | numero | Griglia di scatto (`1` = interi, `0.5` = mezzi) |
+| `tolerance` | numero | Tolleranza di tutti i target (default: 1% della somma delle coordinate, minimo `0.15`) |
 | `verify` | bool | Richiede un click su "Verifica" invece del controllo automatico |
-| `coords` | bool | Mostra le coordinate live accanto ai punti (default `false`) |
+| `coords` | bool | Scrive le coordinate accanto a ogni punto (default `false`) |
 | `targets` | bool | Mostra gli obiettivi come pallini verdi semitrasparenti (default `false`) |
 
 ```
 :::graph
 snap: 1
 verify: true
+tolerance: 0.3
 xrange: "-6,6"
 yrange: "-6,6"
 points:
   - target: "3,2"
   - target: "-2,4"
   - target: "1,-3"
-    snap: 0.5
 :::
 ```
 
@@ -185,13 +187,15 @@ I layer sono indipendenti e si usano insieme nello stesso blocco:
 ## Obiettivi (goal tracking)
 
 - Ogni grafico con almeno un `target` genera automaticamente **un** goal.
-- Quando tutti i suoi punti sono corretti emette `goal-complete`; completati
-  tutti i goal dello step, i blocchi `:::div.reveal` diventano visibili.
-- Con **`verify: true`**: appare un pulsante "Verifica", tutti i punti devono
-  essere corretti simultaneamente al click, e se qualcuno sbaglia lampeggiano
-  *tutti* in rosso — senza rivelare quali erano giusti.
+- Il goal è raggiunto quando i punti sul piano sono tanti quanti i `target` e
+  ognuno ne copre uno diverso: allora emette `goal-complete` e i punti si
+  bloccano. Completati tutti i goal dello step, i blocchi `:::div.reveal`
+  diventano visibili.
+- Con **`verify: true`**: appare un pulsante "Verifica", attivo solo quando il
+  numero di punti è quello giusto; se la disposizione è sbagliata lampeggiano
+  *tutti* in rosso — senza rivelare quali erano a posto.
 - In **modalità automatica** (default): il controllo avviene a ogni
-  trascinamento e ogni punto diventa verde appena è a posto.
+  trascinamento e ogni punto è verde finché copre un target.
 
 `functions` e `boundpoints` sono esplorativi. Per farne un esercizio usa
 `[Testo]{check: condizione}` (vedi [variabili.md](variabili.md)).
@@ -201,7 +205,7 @@ I layer sono indipendenti e si usano insieme nello stesso blocco:
 La vista è **ferma**: la finestra visibile è quella di `xrange`/`yrange`, e le
 domande possono contarci ("sopra $x = 0$ c'è un pezzo di curva?"). Assi e griglia
 sono sempre visibili. Su mobile uno swipe verticale che parte dal grafico scrolla
-la pagina; il trascinamento dei punti di `points` funziona comunque.
+la pagina; inserire e trascinare i punti di `points` funziona comunque.
 
 | Chiave | Tipo | Default | Descrizione |
 | --- | --- | --- | --- |
@@ -248,7 +252,7 @@ yticks: 100
 > ⚠️ Con `aspect: free` una distanza sull'asse $x$ e la stessa distanza
 > sull'asse $y$ non si somigliano più, quindi la `tolerance` di default (una
 > soglia unica, in unità del modello) risulta generosa su un asse e severa
-> sull'altro. Se combini `aspect: free` e punti trascinabili, indica una
+> sull'altro. Se combini `aspect: free` e il layer `points`, indica una
 > `tolerance` esplicita.
 
 ---
