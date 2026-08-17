@@ -55,23 +55,24 @@ navigate: true
 
 # Trova le Coordinate
 
-Trascina i tre punti **A**, **B**, **C** nelle posizioni indicate (i pallini verdi semitrasparenti):
+Tocca il piano per mettere un punto su ciascuna delle posizioni indicate (i pallini verdi semitrasparenti). In che ordine li metti non conta; se sbagli, tocca il punto per toglierlo.
 
-- **A** = (3, 2)
-- **B** = (−2, 4)
-- **C** = (1, −3)
+- (3, 2)
+- (−2, 4)
+- (1, −3)
 
 :::graph
 snap: 1
 verify: true
-coords: false
+targets: true
+coords: true
+tolerance: 0.3
 xrange: "-6,6"
 yrange: "-6,6"
 points:
   - target: "3,2"
   - target: "-2,4"
   - target: "1,-3"
-    snap: 0.5
 :::
 
 :::details.syntax-doc
@@ -81,25 +82,26 @@ points:
 :::graph
 snap: 1
 verify: true
-coords: false
+targets: true
+coords: true
+tolerance: 0.3
 xrange: "-6,6"
 yrange: "-6,6"
 points:
   - target: "3,2"
   - target: "-2,4"
   - target: "1,-3"
-    snap: 0.5
 :::
 ```
 
-Ogni voce di `points` con un `target` crea un punto trascinabile e un goal da completare. `snap` arrotonda alla griglia (sovrascrivibile per singolo punto), `verify` attiva il controllo automatico, `coords: false` nasconde le coordinate.
+Ogni voce di `points` è una posizione da coprire, e insieme fanno un goal: i punti non hanno nome e valgono uno per l'altro. `snap` arrotonda alla griglia, `tolerance` allarga il margine attorno a ogni obiettivo, `verify` sposta il controllo su un bottone, `coords: true` scrive le coordinate accanto ai punti.
 
 📖 Riferimento: `docs/grafici.md` — layer `points`
 
 :::
 
 :::div.reveal
-Ottimo! Hai posizionato tutti e tre i punti correttamente.
+Ottimo! Hai coperto tutte e tre le posizioni.
 :::
 
 ---
@@ -107,7 +109,7 @@ Ottimo! Hai posizionato tutti e tre i punti correttamente.
 > id: prevedi-continuazione
 > title: Prevedi come continua la funzione
 
-Inserisci correttamente i punti di ordinata 3, 4 e 5
+La parabola è disegnata fino a $x = 3$. Tocca il piano per aggiungere i punti di ascissa 3, 4 e 5.
 
 :::graph
 expr: "x^2"
