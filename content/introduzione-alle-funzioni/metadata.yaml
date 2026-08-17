@@ -1,0 +1,10 @@
+title: Introduzione alle funzioni
+description: >-
+  Che cosa rende affidabile una macchina, che cosa può ricevere e che cosa può
+  restituire: prima con le frecce fra due insiemi, poi con i punti sul piano
+  cartesiano.
+level: beginner
+duration: 45 minuti
+color: "#0277BD"
+# Il vocabolario della lezione 1 serve tutto per leggere i grafici della lezione 2
+progression: sequential

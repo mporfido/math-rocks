@@ -22,6 +22,7 @@ sections:
   - id: funzioni
     title: Funzioni
     courses:
+      - introduzione-alle-funzioni
       - funzione-esponenziale
   - id: esempi
     title: Corsi di esempio
