@@ -251,6 +251,7 @@
       commit();
       active = idx;
       typed = (idx >= 0 && cells[idx].value != null) ? String(cells[idx].value) : '';
+      syncMobileInput();
     }
 
     function checkComplete() {
@@ -260,26 +261,74 @@
       }
       done = true;
       active = -1;
+      if (mobileInput) mobileInput.blur();
       ctx.complete();
+    }
+
+    // Conferma la cella attiva e passa alla prossima modificabile (Invio/Tab
+    // fisici e tasto di conferma della tastiera virtuale condividono la logica).
+    function advance() {
+      commit();
+      const nx = nextEditable(active);
+      if (nx >= 0) activate(nx);
+      else { active = -1; syncMobileInput(); }
     }
 
     // ---- Input: tastiera ----
     p.keyPressed = () => {
       if (done || active < 0) return undefined;
       if (p.keyCode === p.ENTER || p.keyCode === p.TAB) {
-        commit();
-        const nx = nextEditable(active);
-        if (nx >= 0) activate(nx);
-        else active = -1;
+        advance();
         return false;   // TAB: non spostare il focus fuori dal canvas
       }
-      if (p.keyCode === p.BACKSPACE) { typed = typed.slice(0, -1); return false; }
+      if (p.keyCode === p.BACKSPACE) { typed = typed.slice(0, -1); syncMobileInput(); return false; }
       if (p.key >= '0' && p.key <= '9') {
         if (typed.length < 2) typed += p.key;   // esponenti a una-due cifre
+        syncMobileInput();
         return false;
       }
       return undefined;
     };
+
+    // ---- Input: tastiera virtuale (mobile) ----
+    // Un <canvas> non può mai far comparire la tastiera del telefono: serve un
+    // vero <input> a cui dare focus al tocco. Resta invisibile (1x1, opacity 0,
+    // pointer-events none: i tocchi restano sul canvas) dentro il container,
+    // reso `position: relative` per ancorarlo. `enterkeyhint="done"` chiede al
+    // sistema operativo un tasto di conferma anche con `inputmode="numeric"`
+    // (che su iOS non ha un Invio): la sua pressione arriva come keydown Enter.
+    let mobileInput = null;
+    function syncMobileInput() {
+      if (!mobileInput) return;
+      mobileInput.value = (active >= 0 && !done) ? typed : '';
+    }
+    function setupMobileInput() {
+      const host = p.canvas.parentElement;
+      if (!host) return;
+      host.style.position = 'relative';
+      mobileInput = document.createElement('input');
+      mobileInput.type = 'text';
+      mobileInput.inputMode = 'numeric';
+      mobileInput.enterKeyHint = 'done';
+      mobileInput.autocomplete = 'off';
+      mobileInput.autocapitalize = 'off';
+      mobileInput.spellcheck = false;
+      mobileInput.tabIndex = -1;
+      Object.assign(mobileInput.style, {
+        position: 'absolute', top: '0', left: '0', width: '1px', height: '1px',
+        opacity: '0', border: '0', padding: '0', margin: '0', pointerEvents: 'none',
+      });
+      mobileInput.addEventListener('input', () => {
+        if (active < 0 || done) { mobileInput.value = ''; return; }
+        const digits = mobileInput.value.replace(/\D/g, '').slice(0, 2);
+        typed = digits;
+        mobileInput.value = digits;
+      });
+      mobileInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); advance(); }
+      });
+      host.appendChild(mobileInput);
+    }
 
     // ---- Input: mouse e touch ----
     function press(px, py) {
@@ -288,11 +337,16 @@
       if (idx >= 0 && !cellEditable(cells[idx])) {
         commit();
         active = -1;
+        syncMobileInput();
         setMessage('Prima completa la scomposizione di ' + A + ' e ' + B
           + ' qui sopra.', 'neutral');
         return true;           // tap su cella (bloccata): resta dentro l'area
       }
       activate(idx);           // idx == -1 conferma e deseleziona
+      // Il tocco è il gesto utente richiesto dal browser per aprire la tastiera:
+      // deve restare synchrono con l'evento touchstart/mousedown.
+      if (idx >= 0 && mobileInput) mobileInput.focus();
+      else if (mobileInput) mobileInput.blur();
       return idx >= 0;
     }
     p.mousePressed = () => { press(p.mouseX, p.mouseY); };
@@ -312,6 +366,7 @@
       p.createCanvas(ctx.width, ctx.height);
       layout();
       p.textFont('IBM Plex Mono, monospace');
+      setupMobileInput();
     };
 
     p.draw = () => {

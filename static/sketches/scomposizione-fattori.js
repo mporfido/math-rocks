@@ -208,8 +208,8 @@
       if (q === 1) {
         l.done = true;
         // Passa da sé a una scala ancora aperta (comodo con più scale).
-        if (!allDone()) active = nextOpenLadder(active);
-        else ctx.complete();
+        if (!allDone()) { active = nextOpenLadder(active); }
+        else { if (mobileInput) mobileInput.blur(); ctx.complete(); }
       }
     }
 
@@ -219,18 +219,61 @@
       if (p.keyCode === p.ENTER) { submit(); return false; }
       if (p.keyCode === p.TAB) {
         // Tab: passa alla prossima scala ancora da completare (utile con due scale).
-        if (ladders.length > 1) active = nextOpenLadder(active);
+        if (ladders.length > 1) { active = nextOpenLadder(active); syncMobileInput(); }
         return false;   // non spostare il focus fuori dal canvas
       }
       const l = ladders[active];
       if (l.done) return undefined;
-      if (p.keyCode === p.BACKSPACE) { l.typed = l.typed.slice(0, -1); return false; }
+      if (p.keyCode === p.BACKSPACE) { l.typed = l.typed.slice(0, -1); syncMobileInput(); return false; }
       if (p.key >= '0' && p.key <= '9') {
         if (l.typed.length < l.maxlen) l.typed += p.key;
+        syncMobileInput();
         return false;
       }
       return undefined;
     };
+
+    // ---- Input: tastiera virtuale (mobile) ----
+    // Un <canvas> non può mai far comparire la tastiera del telefono: serve un
+    // vero <input> a cui dare focus al tocco. Resta invisibile (1x1, opacity 0,
+    // pointer-events none: i tocchi restano sul canvas) dentro il container,
+    // reso `position: relative` per ancorarlo. `enterkeyhint="done"` chiede al
+    // sistema operativo un tasto di conferma anche con `inputmode="numeric"`
+    // (che su iOS non ha un Invio): la sua pressione arriva come keydown Enter.
+    let mobileInput = null;
+    function syncMobileInput() {
+      if (!mobileInput) return;
+      const l = ladders[active];
+      mobileInput.value = (l && !l.done) ? l.typed : '';
+    }
+    function setupMobileInput() {
+      const host = p.canvas.parentElement;
+      if (!host) return;
+      host.style.position = 'relative';
+      mobileInput = document.createElement('input');
+      mobileInput.type = 'text';
+      mobileInput.inputMode = 'numeric';
+      mobileInput.enterKeyHint = 'done';
+      mobileInput.autocomplete = 'off';
+      mobileInput.autocapitalize = 'off';
+      mobileInput.spellcheck = false;
+      mobileInput.tabIndex = -1;
+      Object.assign(mobileInput.style, {
+        position: 'absolute', top: '0', left: '0', width: '1px', height: '1px',
+        opacity: '0', border: '0', padding: '0', margin: '0', pointerEvents: 'none',
+      });
+      mobileInput.addEventListener('input', () => {
+        const l = ladders[active];
+        if (!l || l.done) { mobileInput.value = ''; return; }
+        const digits = mobileInput.value.replace(/\D/g, '').slice(0, l.maxlen);
+        l.typed = digits;
+        mobileInput.value = digits;
+      });
+      mobileInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); submit(); syncMobileInput(); }
+      });
+      host.appendChild(mobileInput);
+    }
 
     // ---- Input: mouse e touch (scelta della scala attiva) ----
     // Restituisce l'indice della scala nella cui regione orizzontale cade px, o -1.
@@ -248,6 +291,9 @@
       const i = ladderAt(px);
       if (i < 0 || ladders[i].done) return false;
       active = i;
+      // Il tocco è il gesto utente richiesto dal browser per aprire la tastiera:
+      // deve restare synchrono con l'evento touchstart/mousedown.
+      if (mobileInput) { syncMobileInput(); mobileInput.focus(); }
       return true;
     }
     p.mousePressed = () => { press(p.mouseX, p.mouseY); };
@@ -319,6 +365,7 @@
       p.createCanvas(ctx.width, ctx.height);
       layout();
       p.textFont('IBM Plex Mono, monospace');
+      setupMobileInput();
     };
 
     p.draw = () => {
