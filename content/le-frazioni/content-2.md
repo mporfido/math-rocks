@@ -7,6 +7,8 @@
 > id: frazioni-equivalenti-1
 > title: I pannelli solari
 
+# I pannelli solari
+
 Qui sono rappresentati 3 modelli di pannelli solari, i modelli Alfa, Beta e Gamma. Un pannello produce tanta più energia quanta più è la *superficie attiva*, che nel disegno è colorata in blu.
 
 :::p5 sketch=frazioni-pannelli-suddivisioni width=600 height=260
@@ -26,6 +28,8 @@ Perché la risposta corretta è questa? Non preoccuparti se non sei sicuro/a! Ve
 > id: frazioni-equivalenti-2
 > title: Verifichiamo la risposta
 
+# Pannelli equivalenti
+
 Concentriamoci sul Modello **Gamma**: i suoi 8 settori attivi sembrano sparsi un po' ovunque. Ma l'energia prodotta dipende solo da *quanta* superficie è attiva, non da *dove* si trova.
 
 Trascina lo slider per far scivolare verso sinistra tutti i blocchi attivi di Gamma, poi confrontalo con Alfa e Beta:
@@ -43,6 +47,11 @@ Spostando i blocchi — senza toglierne nemmeno uno — la superficie blu non ca
 
 > id: frazioni-equivalenti-3
 > title: Confrontiamo le frazioni
+
+# Cosa hanno in comune?
+
+:::p5 sketch=frazioni-pannelli-suddivisioni width=600 height=260
+:::
 
 Ora completa la tabella: scriviamo per ogni pannello il numero totale di sezioni e poi solo quello delle sezioni attive per costruire la frazione di area attiva.
 
@@ -63,7 +72,9 @@ Perfetto! Le tre frazioni — $\frac{2}{3}$, $\frac{4}{6}$ e $\frac{8}{12}$ — 
 ---
 
 > id: frazioni-equivalenti-4
-> title: Il fattore di scala
+> title: Un pannello più grande
+
+# Un pannello con ancora più settori
 
 L'azienda vuole produrre un **Modello Delta**: deve avere *esattamente la stessa superficie attiva* di Alfa, Beta e Gamma, ma la sua griglia è composta da **24 quadratini** in totale.
 
@@ -87,7 +98,7 @@ Settori attivi: ${k}{k|0|0,24,1}
 ---
 
 > id: frazioni-equivalenti-5
-> title: L'astrazione numerica
+> title: Costruire le frazioni equivalenti
 
 Un cliente ordina un pannello personalizzato con **90 micro-settori** in totale, sempre con la stessa efficienza dei modelli precedenti.
 
@@ -97,17 +108,28 @@ Per passare da 3 a 90 settori totali, per quale numero dobbiamo moltiplicare? $9
 
 Allora i settori attivi (moltiplicando per lo stesso numero) passano da due a [[60]].
 
-Qual è l'"operazione segreta" che hai fatto sui numeri?
+Qual è l'"operazione segreta" che hai fatto sulle frazioni per passare da $\frac{2}{3}$ a $\frac{60}{90}$?
 [[Ho moltiplicato solo il totale per un numero|*Ho moltiplicato numeratore e denominatore per lo stesso numero|Ho sottratto lo stesso numero da numeratore e denominatore]]
 
 :::div.reveal
-**Bravo!** $\frac{2}{3} = \frac{2 \times 30}{3 \times 30} = \frac{60}{90}$. Moltiplicare numeratore e denominatore per **lo stesso numero** crea una frazione equivalente: serviranno **60 settori attivi**, senza disegnare nulla.
+**Bravo!** $\frac{2}{3} = \frac{2 \cdot 30}{3 \cdot 30} = \frac{60}{90}$. Moltiplicare numeratore e denominatore per **lo stesso numero** crea una frazione equivalente: serviranno **60 settori attivi**, senza disegnare nulla.
+
+:::formula
+\frac{@n0{2}}{@d0{3}} = \frac{@n1{4}}{@d1{6}} = \frac{@n2{8}}{@d2{12}} = \frac{@n3{60}}{@d3{90}}
+
+n0 -> n1 : per 2
+d0 -> d1 : per 2
+n1 -> n2 : per 2
+d1 -> d2 : per 2
+n0 -> n3 : per 30
+d0 -> d3 : per 30
+:::
 :::
 
 ---
 
-> id: semplificare
-> title: Tornare indietro
+> id: frazioni-equivalenti-6
+> title: Semplificare le frazioni
 
 # Si può percorrere la strada al contrario?
 
@@ -124,7 +146,7 @@ Quanti gruppi vengono fuori dai 12 settori totali? [[3]]
 
 E quanti di quei gruppi sono fatti di settori attivi? [[2]]
 
-Quindi lo stesso pannello si può descrivere anche così: $\frac{8}{12} = \frac{2}{3}$.
+Quindi lo stesso pannello si può descrivere anche così: $\frac{8}{12} = \frac{2}{3}$, cioè due gruppi su tre (fatti dallo stesso numero di elementi) sono attivi.
 
 ## L'operazione sui numeri
 
@@ -138,27 +160,19 @@ Qual è stata l'"operazione segreta"?
 **Esatto.** È la stessa regola di prima, letta al contrario: **dividere** numeratore e denominatore per lo stesso numero dà ancora una frazione **equivalente**. Questa operazione si chiama **semplificare** una frazione.
 
 Quando non si può più semplificare — come $\frac{2}{3}$, perché nessun numero divide sia 2 sia 3 — si dice che la frazione è **ridotta ai minimi termini**.
+
+:::formula
+\frac{@n0{8}}{@d0{12}} = \frac{@n1{2}}{@d1{3}}
+
+n0 -> n1 : diviso 4
+d0 -> d1 : diviso 4
+:::
 :::
 
-## Ti ricordi il campo dei Rossi?
-
-Nella lezione scorsa avevamo raggruppato i 16 mattoncini **a coppie**, e la zona D era passata da $\frac{2}{16}$ a $\frac{1}{8}$. Era una semplificazione, solo che non ne conoscevamo ancora il nome:
-
-$$\frac{2}{16} = \frac{2 \div 2}{16 \div 2} = \frac{1}{8}$$
-
-Prova ora con la zona **A**, che valeva $\frac{4}{16}$: semplificala dividendo entrambi i numeri per **4**.
-
-$\frac{4}{16} =$ [[1/4]]
-
-:::div.reveal
-$\frac{4}{16} = \frac{4 \div 4}{16 \div 4} = \frac{1}{4}$, ed è ridotta ai minimi termini.
-
-Ecco perché una stessa zona di terreno poteva avere due nomi: $\frac{4}{16}$ e $\frac{1}{4}$ sono frazioni **equivalenti**.
-:::
 
 ---
 
-> id: frazioni-equivalenti-6
+> id: frazioni-equivalenti-7
 > title: Si può sempre?
 
 Ultima sfida: è possibile progettare un pannello equivalente ai precedenti diviso in **esattamente 10 settori** totali?
@@ -177,7 +191,7 @@ Perché un pannello equivalente sia possibile, il numero totale di settori deve 
 
 ---
 
-> id: recap
+> id: frazioni-equivalenti-8
 > title: "Recap: Frazioni Equivalenti"
 
 # Recap: Frazioni Equivalenti
@@ -192,7 +206,7 @@ Nel pannello Gamma, spostare i settori attivi da una parte all'altra [[select: a
 
 ## Regole
 
-**Regola 1 — Amplificare (griglia più fitta).** Moltiplicando numeratore e denominatore per [[select: numeri diversi|*lo stesso numero|il solo numeratore]] si ottiene una frazione equivalente: $\frac{2}{3} = \frac{2 \times 30}{3 \times 30} = \frac{60}{90}$.
+**Regola 1 — Amplificare (griglia più fitta).** Moltiplicando numeratore e denominatore per [[select: numeri diversi|*lo stesso numero|il solo numeratore]] si ottiene una frazione equivalente: $\frac{2}{3} = \frac{2 \cdot 30}{3 \cdot 30} = \frac{60}{90}$.
 
 **Regola 2 — Semplificare (griglia più larga).** La stessa cosa vale all'indietro: [[select: sottraendo|*dividendo]] numeratore e denominatore per lo stesso numero, $\frac{8}{12}$ diventa $\frac{2}{3}$. Quando non si può più semplificare, la frazione è **ridotta ai [[select: massimi|*minimi]] termini**.
 
