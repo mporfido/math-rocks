@@ -15,6 +15,7 @@ sections:
     title: Algebra
     courses:
       - pattern-e-lettere
+      - pattern-quadratici
   - id: geometria
     title: Geometria
     courses:

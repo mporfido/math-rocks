@@ -43,6 +43,7 @@ tools_data/
 
 # Claude Code: impostazioni personali (le config condivise restano tracciabili)
 .claude/settings.local.json
+.claude/launch.json
 
 # OS
 .DS_Store

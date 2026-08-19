@@ -9,14 +9,22 @@
 
 # Qualcosa cresce, un passo alla volta
 
-Qui sotto ci sono i primi quattro passi di una figura. Non è un disegno a caso: c'è una regola, ed è sempre la stessa da un passo al successivo.
+Qui sotto c'è una figura che ad ogni passo aumenta il numero di cerchietti. La regola con la quale disegniamo il passo successivo è sempre la stessa: cerca di capire qual è.
 
 :::p5 sketch=pattern-colonne passi=1,2,3,4 altezza=3 fisso=1 height=200
 :::
 
+:::details.hint
+<summary>💡 Suggerimento</summary>
+
+Prova a riconoscere la forma generale e come cambia di passo in passo. Oppure prova a **contare** quanti cerchietti ci sono ad ogni passo.
+:::
+
 ## Prima cosa: contare
 
-Quanti cerchietti ci sono al **passo 4**? [[13]]
+Ad ogni passo il numero di cerchietti aumenta di [[3]].
+
+Quanti ce ne sono al **passo 4**? [[13]]
 
 E al **passo 5**, che non è disegnato? [[16]]
 
@@ -37,12 +45,12 @@ Guarda il passo 4 e chiediti: che cosa devo **aggiungere** per ottenere il passo
 :::
 
 :::div.reveal
-**Bene.** Hai già scoperto due cose che ci serviranno per tutta la lezione:
+**Bene!** Hai già scoperto due cose che ci serviranno per tutta la lezione:
 
 - da un passo al successivo si aggiunge sempre **una colonna da 3**;
-- il cerchietto solo in fondo a destra **non cambia mai**: ce n'è uno al passo 1 come al passo 5.
+- il cerchietto solo in fondo a destra **non cambia mai**: è fisso in ogni passo.
 
-Tienile da parte. Adesso proviamo a metterle in fila in una tabella.
+Adesso proviamo a mettere il numero dei cerchietti in una tabella.
 :::
 
 ---
@@ -57,7 +65,7 @@ Una tabella non è un compito da riempire: serve a far vedere **che cosa succede
 Completa i due gradini che mancano.
 
 :::table
-| Passo | Cerchietti | v : + 3 |
+| Passo | Cerchietti | v + 3 |
 | ----- | ---------- | ------- |
 | 1     | 4          |
 | 2     | 7          |
@@ -83,7 +91,6 @@ Non contare i passi: conta le **frecce**. Da 1 a 6 i passi sono sei, ma i salti 
 
 Vuol dire che per arrivare al passo 6 fai $4 + 3 + 3 + 3 + 3 + 3$, cioè $4 + 5 \times 3 = 19$.
 
-Ricordati questo "uno in meno": ti tornerà utile fra poco.
 :::
 
 ---
@@ -210,7 +217,7 @@ Questa cresce in un altro modo — e stavolta sono quadratini. Guardala bene: le
 Completa la tabella seguendo le frecce.
 
 :::table
-| Passo | Quadratini | v : + 5 |
+| Passo | Quadratini | v + 5 |
 | ----- | ---------- | ------- |
 | 1     | 3          |
 | 2     | 8          |
