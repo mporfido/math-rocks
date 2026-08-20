@@ -1,15 +1,15 @@
 > id: dal-pattern-alla-formula
 > title: Dal pattern alla formula
-> description: Una figura che cresce di passo in passo, e la lettera che la descrive tutta insieme.
+> description: Una figura che cresce di passo in passo, e la lettera che permette di descriverla tutta insieme.
 
 ---
 
 > id: il-passo-successivo
-> title: La figura che cresce
+> title: Una figura che cresce
 
 # Qualcosa cresce, un passo alla volta
 
-Qui sotto c'è una figura che ad ogni passo aumenta il numero di cerchietti. La regola con la quale disegniamo il passo successivo è sempre la stessa: cerca di capire qual è.
+**Pattern** è una parola inglese che indica uno schema che si ripete, come succede nella figura qui sotto: da un passo al successivo aumenta il numero di cerchietti. La regola per disegnare il passo successivo è sempre la stessa: cerca di capire qual è.
 
 :::p5 sketch=pattern-colonne passi=1,2,3,4 altezza=3 fisso=1 height=200
 :::
@@ -56,11 +56,11 @@ Adesso proviamo a mettere il numero dei cerchietti in una tabella.
 ---
 
 > id: una-tabella-per-vedere
-> title: La tabella dei passi
+> title: Dalla figura alla tabella
 
 # Mettiamo in fila quello che sappiamo
 
-Una tabella non è un compito da riempire: serve a far vedere **che cosa succede fra un passo e il successivo**. Le frecce a lato dicono proprio quello.
+Una tabella ci aiuta a vedere **che cosa succede fra un passo e il successivo**. Le frecce a lato dicono proprio quello.
 
 Completa i due gradini che mancano.
 
@@ -113,21 +113,21 @@ Quanti al **passo 20**? [[61]]
 Se volessi arrivare al **passo 67** partendo dal passo 1 e aggiungendo 3 ogni volta, quante volte dovresti aggiungere 3? [[66]]
 
 :::div.reveal
-**Sessantasei addizioni.** Si può fare, ma basta distrarsi una volta e il risultato è sbagliato — e non te ne accorgeresti.
+**Sessantasei addizioni.** Si può fare, ma è un procedimento lungo e noioso.
 
-Il problema non sei tu: è il **modo di guardare**. Finché leggiamo la figura come "quella di prima più 3", per sapere quanti sono al passo 67 dobbiamo passare per tutti i 66 passi precedenti.
+Non è il modo più comodo di lavorare: la figura ci offre una scorciatoia. Finché leggiamo la figura come "quella di prima più 3", per sapere quanti sono al passo 67 dobbiamo passare per tutti i 66 passi precedenti.
 
-Serve un modo di guardare che salti direttamente al passo che ci interessa. E sta nella figura, non nella tabella.
+Serve un modo di guardare che salti direttamente al passo che ci interessa. Torniamo alla figura.
 :::
 
 ---
 
 > id: guardare-la-figura
-> title: Guardare la figura
+> title: Torniamo alla figura
 
 # La figura è già fatta di pezzi
 
-Ecco tre passi della stessa figura. Stavolta il pezzo che **non cresce mai** è colorato di rosso.
+Ecco tre passi diversi della stessa figura. Il pezzo che **non cresce mai** (un cerchietto) è colorato di rosso. La parte che cresce invece aggiunge una colonna di tre cerchietti ad ogni passo.
 
 :::p5 sketch=pattern-colonne passi=2,4,6 altezza=3 fisso=1 evidenzia=si conteggio=si height=240
 :::
@@ -178,9 +178,21 @@ $$3 \times ${n} + 1 = ${= 3*n+1}$$
 
 ## La scrittura corta
 
-In matematica il segno di moltiplicazione fra un numero e una lettera non si scrive: $3 \times n$ diventa semplicemente $3n$.
+:::table
+| Passo | Colonne da 3 | Cerchietto singolo | Formula        |
+| ----- | ------------ | ------------------ | -------------- |
+| 1     | 1            | 1                  | $3\cdot 1 + 1$ |
+| 2     | 2            | 1                  | $3\cdot 2 + 1$ |
+| 6     | 7            | 1                  | $3\cdot 6 + 1$ |
+| 67    | 67           | 1                  | $3\cdot 67+ 1$ |
+| ...   | ...          | ...                | ...            |
+| $n$   | $n$          | 1                  | ?              |
+:::
 
-Quale scrittura descrive questa figura? [[select: 3n+1|n+3|3(n+1)|4n]]
+Quale formula descrive questa figura? [[select: 3n+1|n+3|3(n+1)|4n]]
+
+Quando un numero moltiplica una lettera, di solito non scriviamo il segno di molpitplicazione: $3 \cdot n$ diventa semplicemente $3n$. Continua a significare "n gruppi da tre".
+
 
 ## Prova a usarla
 
@@ -193,23 +205,23 @@ Porta lo slider sul passo in cui i cerchietti sono esattamente **25**.
 
 $$3n + 1$$
 
-Non è un'abbreviazione furba: è la figura, scritta. La lettera $n$ non è "un numero misterioso da trovare" — è il **posto** dove metti il numero del passo che ti interessa.
+$3n$ conta i cerchietti nelle colonne da 3, $+1$ conta il cerchietto singolo. Qui $n$ non è un numero misterioso da trovare: indica il numero del passo scelto — lo puoi sostituire con il numero del passo che ti interessa.
 
-- passo 8 → $3 \times 8 + 1 = 25$
-- passo 67 → $3 \times 67 + 1 = 202$
-- passo 1000 → $3 \times 1000 + 1 = 3001$
+- passo $n=8$ → $3 \cdot 8 + 1 = 25$
+- passo $n=67$ → $3 \cdot 67 + 1 = 202$
+- passo $n=1000$ → $3 \cdot 1000 + 1 = 3001$
 
-Una scrittura sola, infinite figure.
+Una sola formula permette di trovare il numero di cerchietti per qualsiasi $n=1,2,3\ldots$
 :::
 
 ---
 
 > id: un-altro-pattern
-> title: Una figura che toglie
+> title: Se alla figura manca qualcosa
 
 # Cambiamo figura
 
-Questa cresce in un altro modo — e stavolta sono quadratini. Guardala bene: le colonne sono più alte, ma all'ultima manca qualcosa.
+In queste figure fatte di quadratini il **pattern** di crescita è diverso. Guardala bene e nota le differenze col pattern di prima.
 
 :::p5 sketch=pattern-colonne passi=1,2,3,4 altezza=5 fisso=-2 forma=quadrato height=230
 :::
@@ -218,7 +230,7 @@ Completa la tabella seguendo le frecce.
 
 :::table
 | Passo | Quadratini | v + 5 |
-| ----- | ---------- | ------- |
+| ----- | ---------- | ----- |
 | 1     | 3          |
 | 2     | 8          |
 | 3     | 13         |
@@ -243,13 +255,13 @@ Ma allora perché al passo 1 i cerchietti sono 3 e non 5? Guarda l'ultima colonn
 ---
 
 > id: cinque-per-n-meno-due
-> title: Cinque per n, meno due
+> title: Quello che c'è, meno quello che manca
 
 # Quello che manca conta quanto quello che c'è
 
 Ecco il passo 3 e il passo 5, con i quadratini **mancanti** disegnati tratteggiati.
 
-:::p5 sketch=pattern-colonne passi=3,5 altezza=5 fisso=-2 forma=quadrato fantasmi=si evidenzia=si conteggio=si height=250
+:::p5 sketch=pattern-colonne passi=1,3,5 altezza=5 fisso=-2 forma=quadrato fantasmi=si evidenzia=si conteggio=si height=250
 :::
 
 Se le colonne fossero tutte piene, al passo 5 sarebbero $5 \times 5 = 25$ quadratini.
@@ -260,6 +272,17 @@ E al passo 3? Ne mancano sempre [[2]].
 
 ## La formula
 
+:::table
+| Passo | Colonne da 5 | Quadratini tolti   | Formula        |
+| ----- | ------------ | ------------------ | -------------- |
+| 1     | 1            | -2                 | $5\cdot 1 - 2$ |
+| 3     | 2            | -2                 | $5\cdot 3 - 2$ |
+| 5     | 7            | -2                 | $5\cdot 7 - 2$ |
+| ...   | ...          | ...                | ...            |
+| $n$   | $n$          | -2                 | ?              |
+:::
+
+
 Al passo $n$ ci sono $n$ colonne da 5, meno i due che mancano sempre. Come si scrive?
 
 [[select: 5n-2|5n+2|5(n-2)|2n-5]]
@@ -269,11 +292,15 @@ Adesso il passo 67: quanti quadratini? [[333]]
 :::div.highlight
 💡 C'è chi guarda la stessa figura in un altro modo: **le prime $n-1$ colonne sono piene** (5 ciascuna) e **l'ultima ne ha 3**. Viene $5(n-1) + 3$.
 
-Provala sul passo 4: $5 \times 3 + 3 = 18$. Ed è esattamente quello che dà anche $5n - 2$. Due scritture diverse, la stessa figura, gli stessi numeri: nessuna delle due è "quella giusta".
+Provala sul passo 5: $5 \times 4 + 3 = 23$. Ed è esattamente quello che dà anche $5n - 2$. 
+
+E al passo $n=1$ che succede? ci sono $n-1$ cioé nessuna colonna completa e poi $+3$ dell'ultima.
+
+Due scritture diverse, la stessa figura, gli stessi risultati: le formule sono entrambe corrette, puoi scegliere di vederla nella maniera che preferisci.
 :::
 
 :::div.reveal
-**Il meno non è un errore.** $5n - 2$ dice: "prendi $n$ colonne piene da 5, poi togli i 2 che non ci sono mai stati".
+$5n - 2$ dice: "prendi $n$ colonne piene da 5, poi togli 2 per avere l'ultima colonnina incompleta da 3".
 
 $$5n - 2$$
 
@@ -281,19 +308,19 @@ $$5n - 2$$
 - passo 4 → $20 - 2 = 18$ ✓
 - passo 67 → $335 - 2 = 333$ ✓
 
-E la verifica sui passi che già conosci non è un dettaglio: è **il** modo di capire se la formula che hai scritto è quella giusta.
+Verificare sui passi che già conosci ti aiuta a capire se la formula che hai scritto è quella giusta.
 :::
 
 ---
 
 > id: la-macchina
-> title: La macchina dei passi
+> title: Una funzione è una macchina
 
 # Un nome per quello che hai costruito
 
-Guarda che cosa fa $5n - 2$: gli dai un numero (il passo) e ti restituisce un numero (i quadratini). Sempre uno. Sempre lo stesso, se gli dai lo stesso passo.
+Guarda che cosa fa $5n - 2$: alla formula diamo un numero di passo e la formula restituisce il numero di quadratini. Il risultato è sempre lo stesso, se gli dai lo stesso numero di passo.
 
-È una **macchina**: entra il passo, esce la quantità.
+È come una **macchina**: entra il passo, esce la quantità di quadratini.
 
 :::table
 | Entra: il passo $n$ | Esce: i quadratini |
@@ -311,9 +338,9 @@ Se ti dico il numero del passo, quante risposte diverse puoi darmi sul numero di
 :::div.reveal
 # Questa macchina si chiama **funzione**
 
-A ogni ingresso corrisponde **una e una sola** uscita: è proprio questo che rende la macchina utile. Se al passo 67 potesse rispondere sia 333 sia 340, non ci potresti fare niente.
+A ogni ingresso corrisponde **una e una sola** uscita: è proprio questo che rende la macchina utile. Se al passo 67 potesse rispondere sia 333 sia 340, non sapremmo quale usare.
 
-Alla macchina si dà un nome — di solito $f$ — e si scrive così:
+Alla macchina si dà un nome (di solito $f$ di *funzione*) e si scrive così:
 
 $$f(n) = 5n - 2$$
 
@@ -321,7 +348,5 @@ Si legge "**f di n**", e vuol dire: *ecco che cosa esce, quando entra $n$*.
 
 $$f(1) = 3 \qquad f(10) = 48 \qquad f(67) = 333$$
 
-Guarda quanta strada: hai cominciato contando cerchietti uno a uno, e sei arrivato a una scrittura che risponde per **qualsiasi** passo, anche per uno che nessuno disegnerà mai.
-
-**Nella prossima lezione:** figure in cui il salto **non** è sempre lo stesso — e lì $n$ da solo non basterà più.
+Hai cominciato contando cerchietti uno a uno, e sei arrivato a una scrittura che risponde per **qualsiasi** passo, anche senza bisogno di disegnarli.
 :::
