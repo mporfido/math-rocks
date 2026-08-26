@@ -1824,6 +1824,181 @@ x-formula[data-attivo] .fx-label.is-attivo {
     border-color: currentColor;
 }
 
+/* ========== Smistamento in categorie (<x-smista>) ========== */
+x-smista {
+    display: block;
+    margin: 1.5rem 0;
+}
+
+.smista-titolo {
+    font-family: var(--font-disp);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+/* Il mazzo: i cartellini ancora da smistare. Ha un'altezza minima perché
+   svuotandosi non deve far saltare il resto della pagina verso l'alto. */
+.smista-pool {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: flex-start;
+    min-height: 3.5rem;
+    padding: 0.6rem;
+    background: var(--surface);
+    border: 2px dashed var(--line);
+    border-radius: var(--radius);
+}
+
+.smista-pool.is-over {
+    border-color: var(--ink);
+    background: var(--ink-wash-1);
+}
+
+.smista-bins {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+}
+
+.smista-bin {
+    flex: 1 1 12rem;
+    min-width: 10rem;
+    background: var(--surface);
+    border: 2px solid var(--ink);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+.smista-bin.is-over {
+    box-shadow: var(--shadow-hard);
+    transform: translate(-2px, -2px);
+}
+
+.smista-bin-label {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.35rem 0.6rem;
+    background: var(--ink);
+    color: var(--carta);
+    font-family: var(--font-disp);
+    font-size: 0.95em;
+}
+
+/* Il numero non è decorazione: è il tasto che assegna il cartellino a questo
+   contenitore quando si lavora da tastiera. */
+.smista-bin-num {
+    flex: 0 0 auto;
+    min-width: 1.35em;
+    text-align: center;
+    padding: 0 0.2em;
+    border-radius: 4px;
+    background: var(--carta);
+    color: var(--ink);
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+}
+
+.smista-bin-drop {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-content: flex-start;
+    min-height: 3.2rem;
+    padding: 0.5rem;
+}
+
+.smista-card {
+    font-family: var(--font-body);
+    font-size: 1.05em;
+    padding: 0.3rem 0.7rem;
+    background: var(--carta);
+    color: var(--ink);
+    border: 2px solid var(--ink);
+    border-radius: 6px;
+    cursor: grab;
+    /* Lo swipe verticale continua a scrollare la pagina; il resto è del drag. */
+    touch-action: pan-y;
+    user-select: none;
+}
+
+.smista-card:hover {
+    background: var(--ink-wash-1);
+}
+
+.smista-card:focus-visible {
+    outline: 3px solid var(--rossa);
+    outline-offset: 2px;
+}
+
+.smista-card.is-selected {
+    box-shadow: var(--shadow-hard-accent);
+    transform: translate(-2px, -2px);
+}
+
+.smista-card.is-dragging {
+    cursor: grabbing;
+    position: relative;
+    z-index: 10;
+    box-shadow: var(--shadow-hard);
+    opacity: 0.95;
+}
+
+.smista-card.is-right {
+    border-color: var(--spunta);
+    background: var(--spunta-soft);
+}
+
+/* A goal chiuso i cartellini non si muovono più, ma restano leggibili: la
+   disposizione finale È il risultato dell'esercizio. */
+x-smista.is-done .smista-card {
+    cursor: default;
+}
+
+.smista-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-top: 0.75rem;
+}
+
+.smista-btn {
+    font-family: var(--font-disp);
+    font-size: 0.95em;
+    padding: 0.45rem 1.1rem;
+    background: var(--ink);
+    color: var(--carta);
+    border: 2px solid var(--ink);
+    border-radius: var(--radius);
+    cursor: pointer;
+}
+
+.smista-btn:hover:not(:disabled) {
+    background: var(--carta);
+    color: var(--ink);
+}
+
+.smista-btn:disabled {
+    background: var(--surface);
+    color: var(--ink-soft);
+    border-color: var(--line);
+    cursor: default;
+}
+
+/* Nessun rosso: chi sbaglia legge quante ne ha sistemate, non quali no. */
+.smista-feedback {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    color: var(--ink-soft);
+}
+
+.smista-feedback.success {
+    color: var(--spunta);
+}
+
 /* ========== Responsive ========== */
 
 @media (max-width: 768px) {
@@ -1973,6 +2148,17 @@ x-formula[data-attivo] .fx-label.is-attivo {
        non occupano mai più di metà schermo in portrait. */
     .graph-container {
         height: min(56vh, 320px);
+    }
+
+    /* Contenitori in colonna: su schermo stretto affiancarli li ridurrebbe a
+       fessure in cui trascinare è impossibile — e resta comunque il tocco. */
+    .smista-bin {
+        flex: 1 1 100%;
+    }
+
+    .smista-card {
+        font-size: 1em;
+        padding: 0.4rem 0.75rem;   /* bersaglio più comodo per il dito */
     }
 }
 

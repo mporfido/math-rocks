@@ -3,7 +3,7 @@ import re
 import mistune
 import yaml
 from pathlib import Path
-from parser.preprocessors import process_blanks, process_variables, process_blocks, process_math, process_images, process_checks, process_graphs, process_p5, process_expr, process_formula, process_theorem, process_tables
+from parser.preprocessors import process_blanks, process_variables, process_blocks, process_math, process_images, process_checks, process_graphs, process_p5, process_expr, process_formula, process_theorem, process_tables, process_smista
 
 
 class CourseParser:
@@ -30,6 +30,7 @@ class CourseParser:
         self.graph_counter = 0
         self.p5_counter = 0
         self.expr_counter = 0
+        self.smista_counter = 0
         self.math_counter = 0
         self.formula_counter = 0
         self.theorem_counter = 0
@@ -80,6 +81,7 @@ class CourseParser:
         self.graph_counter = 0
         self.p5_counter = 0
         self.expr_counter = 0
+        self.smista_counter = 0
         self.math_counter = 0
         self.formula_counter = 0
         self.theorem_counter = 0
@@ -380,6 +382,13 @@ class CourseParser:
         # toccato dagli altri preprocessori né da mistune.
         content, expr_replacements, self.expr_counter = process_expr(content, self.expr_counter)
 
+        # :::smista ... ::: → marker (ripristinato a fine render). Il corpo è
+        # LaTeX una riga per cartellino: come :::formula non deve passare da
+        # process_math né da mistune, che leggerebbe `^`, `*` e `_` come enfasi.
+        content, smista_replacements, self.smista_counter = process_smista(
+            content, self.smista_counter
+        )
+
         # :::formula ... ::: → marker (ripristinato a fine render). Il corpo è
         # LaTeX: `\`, `{`, `_`, `*` non devono passare né da process_math né da
         # mistune, che li leggerebbe come enfasi o graffe di variabile.
@@ -448,6 +457,7 @@ class CourseParser:
         # i blocchi div: i marker (alfanumerici) sopravvivono a mistune intatti.
         block_replacements.update(p5_replacements)
         block_replacements.update(expr_replacements)
+        block_replacements.update(smista_replacements)
         block_replacements.update(formula_replacements)
         block_replacements.update(theorem_replacements)
         block_replacements.update(table_replacements)
@@ -553,6 +563,9 @@ class CourseParser:
 
         # Trova tutti <x-expr id="..."> (sempre un goal)
         goals.extend(re.findall(r'<x-expr id="([^"]+)"', html))
+
+        # Trova tutti <x-smista id="..."> (solo con flag `goal` ha id)
+        goals.extend(re.findall(r'<x-smista id="([^"]+)"', html))
 
         # Trova tutti <x-theorem id="..."> (sempre un goal: in modalità `leggi`
         # il componente si completa alla lettura, altrove alla verifica)

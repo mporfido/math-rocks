@@ -139,6 +139,10 @@ class XStep extends HTMLElement {
       goals.push(p5.id);
     });
 
+    this.querySelectorAll('x-smista[id]').forEach(smista => {
+      goals.push(smista.id);
+    });
+
     this.querySelectorAll('x-expr[id]').forEach(expr => {
       goals.push(expr.id);
     });

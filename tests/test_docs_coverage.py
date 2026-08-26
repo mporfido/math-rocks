@@ -32,6 +32,8 @@ COPERTURA = [
     ('struttura.md', '> use-mathjs: true'),
     ('blanks.md', '[[select:'),
     ('blanks.md', '[[Addizione|'),
+    ('smista.md', ':::smista'),
+    ('smista.md', 'verdetto=no'),
     ('variabili.md', '|input}'),
     ('variabili.md', '${= '),
     ('variabili.md', '{check:'),

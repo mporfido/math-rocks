@@ -277,3 +277,75 @@ Il metadato **use-mathjs: true** abilita la valutazione delle espressioni con ma
 
 :::
 
+
+---
+
+> id: smistamento
+> title: Smistare in categorie
+
+# Un mazzo di cartellini, dei mucchietti
+
+Il blocco `:::smista` dà allo studente un gruppo di espressioni e dei
+contenitori in cui metterle. Serve per far **classificare** — e, se i
+contenitori non hanno ancora un nome, per far *scoprire* il criterio prima di
+riceverlo.
+
+## Smistamento libero, con l'opzione **verdetto=no**
+
+Nessuna risposta giusta, nessun controllo: non è un goal e non blocca lo step.
+
+:::smista verdetto=no categorie="Gruppo A;Gruppo B;Gruppo C" titolo="Raggruppale come ti sembra giusto"
+3x^2
+x^2 + 5
+-4ab
+7
+2x^3 - x + 7
+x + y + z
+:::
+
+## Con la verifica, col flag **goal**
+
+Qui invece c'è un posto giusto per ogni cartellino, e finché non sono tutti
+sistemati lo step non si chiude.
+
+:::smista goal categorie="un termine;due termini;tre termini"
+-4ab -> un termine
+x^2 + 5 -> due termini
+2x^3 - x + 7 -> tre termini
+5xy -> un termine
+a^2 - b^2 -> due termini
+:::
+
+:::details.syntax-doc
+<summary>📝 Mostra la sintassi dello step</summary>
+
+```md
+:::smista verdetto=no categorie="Gruppo A;Gruppo B;Gruppo C" titolo="Raggruppale come ti sembra giusto"
+3x^2
+x^2 + 5
+-4ab
+:::
+
+:::smista goal categorie="un termine;due termini"
+-4ab -> un termine
+x^2 + 5 -> due termini
+:::
+```
+
+Il corpo è **LaTeX**, una riga per cartellino. La freccia indica il contenitore
+in cui va: senza freccia il cartellino non ha soluzione, e ha senso solo in uno
+smistamento libero.
+
+Tre modi di muovere un cartellino, sempre tutti e tre attivi: trascinarlo,
+toccarlo e poi toccare il contenitore, oppure — da tastiera — prenderlo con
+Invio e premere il numero del contenitore.
+
+📖 Riferimento: `docs/smista.md`
+
+:::
+
+:::div.reveal
+**Fatto.** Con `goal` il feedback è volutamente neutro: i cartellini fuori posto
+tornano nel mazzo senza essere additati, e quello che si legge è *quanti* sono
+già a posto.
+:::

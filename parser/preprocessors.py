@@ -794,6 +794,169 @@ def process_p5(content, p5_counter):
     return processed, replacements, p5_counter
 
 
+def _parse_opts_quoted(options_str):
+    """
+    Parsa la riga di opzioni di un blocco ammettendo valori fra virgolette.
+
+    Il token è `chiave=valore`, `chiave="valore con spazi"` o un flag isolato.
+    Le virgolette servono quando il valore non è un identificatore: un'etichetta
+    letta dallo studente (`categorie="grado 1;grado 2"`) o una coppia di numeri
+    (`target="3,4"`). Senza toglierle finirebbero dentro il valore, e uno
+    `split(',')` nello sketch leggerebbe `"3` invece di `3`.
+
+    Returns:
+        dict chiave→valore (i flag valgono True)
+    """
+    token = re.compile(r'([A-Za-z_][\w-]*)(?:=("[^"]*"|\'[^\']*\'|\S+))?')
+    opts = {}
+    for m in token.finditer(options_str):
+        key, raw = m.group(1), m.group(2)
+        if raw is None:
+            opts[key] = True
+        else:
+            if len(raw) >= 2 and raw[0] == raw[-1] and raw[0] in '"\'':
+                raw = raw[1:-1]
+            opts[key] = raw.strip()
+    return opts
+
+
+def process_smista(content, smista_counter):
+    """
+    Converte blocchi :::smista ... ::: in <x-smista> web component
+    (cartellini da assegnare a categorie: "classifica queste espressioni").
+
+    Sintassi:
+        :::smista goal categorie="monomio;binomio;trinomio"
+        3x^2y       -> monomio
+        2a + b      -> binomio
+        x^2 + x + 1 -> trinomio
+        :::
+
+    Una riga per cartellino: il corpo è LaTeX, la categoria è l'etichetta del
+    contenitore in cui va. La freccia è la stessa di :::formula.
+
+    Opzioni della riga di apertura:
+        goal              flag: assegna un id, lo step non si chiude finché lo
+                          smistamento non è corretto
+        categorie="a;b"   ordine e insieme dei contenitori (può includerne di
+                          vuoti). Se omesso, si deducono dal corpo nell'ordine
+                          di apparizione
+        mescola=no        non mescola i cartellini (default: mescola)
+        verdetto=no       nessun controllo: smistamento LIBERO, espositivo
+        titolo="..."      intestazione sopra il mazzo
+
+    Senza `-> categoria` il cartellino non ha soluzione: ha senso solo in uno
+    smistamento libero (`verdetto=no`), che è il gesto di apertura di una
+    lezione — si raggruppa prima di sapere come si chiamano i gruppi.
+
+    Come :::p5 e :::formula, il corpo è LaTeX (`\\`, `{`, `^`, `*`) e non deve
+    passare né dagli altri preprocessori né da mistune: viene estratto in un
+    marker e l'HTML è restituito come replacement da applicare DOPO il
+    rendering markdown.
+
+    Args:
+        content: Contenuto markdown
+        smista_counter: Contatore per ID univoci
+
+    Returns:
+        Tuple (contenuto con marker, dict marker→HTML, nuovo valore counter)
+
+    Raises:
+        ValueError: corpo vuoto, categorie insufficienti o incoerenti,
+            `goal` senza soluzioni, `goal` insieme a `verdetto=no`
+    """
+    pattern = re.compile(r'^:::smista[ \t]*([^\n]*)\n(.*?)\n?:::[ \t]*$',
+                         re.DOTALL | re.MULTILINE)
+    replacements = {}
+
+    def replace_smista(match):
+        nonlocal smista_counter
+        opts = _parse_opts_quoted(match.group(1).strip())
+        body = match.group(2)
+
+        e_goal = bool(opts.get('goal'))
+        verdetto = str(opts.get('verdetto', 'si')).lower() not in ('no', 'false', '0')
+
+        # Un goal senza verifica non si completerebbe mai: è una contraddizione
+        # che va fermata qui, non scoperta a lezione aperta.
+        if e_goal and not verdetto:
+            raise ValueError(':::smista: `goal` e `verdetto=no` si escludono')
+
+        carte = []
+        for riga in body.splitlines():
+            riga = riga.strip()
+            if not riga:
+                continue
+            # rsplit: una freccia dentro il LaTeX (raro ma legittimo) non deve
+            # rubare il posto a quella che separa la categoria.
+            if '->' in riga:
+                tex, _, cat = riga.rpartition('->')
+                carte.append({'tex': tex.strip(), 'cat': cat.strip()})
+            else:
+                carte.append({'tex': riga, 'cat': None})
+
+        if not carte:
+            raise ValueError(':::smista: nessun cartellino nel corpo')
+
+        # Categorie: esplicite (ordine deciso dall'autore, contenitori vuoti
+        # ammessi) oppure dedotte dal corpo nell'ordine di apparizione.
+        if opts.get('categorie'):
+            categorie = [c.strip() for c in str(opts['categorie']).split(';') if c.strip()]
+        else:
+            categorie = []
+            for carta in carte:
+                if carta['cat'] and carta['cat'] not in categorie:
+                    categorie.append(carta['cat'])
+
+        if len(categorie) < 2:
+            raise ValueError(
+                ':::smista: servono almeno due categorie '
+                '(indicane l\'elenco con categorie="a;b")'
+            )
+
+        ignote = sorted({c['cat'] for c in carte if c['cat'] and c['cat'] not in categorie})
+        if ignote:
+            raise ValueError(
+                f':::smista: categoria sconosciuta {ignote!r}; '
+                f'le categorie dichiarate sono {categorie!r}'
+            )
+
+        if e_goal and any(c['cat'] is None for c in carte):
+            senza = [c['tex'] for c in carte if c['cat'] is None]
+            raise ValueError(
+                f':::smista goal: manca la categoria per {senza!r} '
+                '(scrivi `espressione -> categoria`)'
+            )
+
+        attrs = []
+        if e_goal:
+            attrs.append(f'id="smista-{smista_counter}"')
+        attrs.append(
+            'data-categorie="'
+            + html_lib.escape(json.dumps(categorie, ensure_ascii=False), quote=True)
+            + '"'
+        )
+        attrs.append(
+            'data-carte="'
+            + html_lib.escape(json.dumps(carte, ensure_ascii=False), quote=True)
+            + '"'
+        )
+        if not verdetto:
+            attrs.append('data-verdetto="no"')
+        if str(opts.get('mescola', 'si')).lower() in ('no', 'false', '0'):
+            attrs.append('data-mescola="no"')
+        if opts.get('titolo'):
+            attrs.append(f'data-titolo="{html_lib.escape(str(opts["titolo"]), quote=True)}"')
+
+        marker = f'XSMISTABLOCK{smista_counter}X'
+        replacements[marker] = f'<x-smista {" ".join(attrs)}></x-smista>'
+        smista_counter += 1
+        return marker
+
+    processed = pattern.sub(replace_smista, content)
+    return processed, replacements, smista_counter
+
+
 def process_expr(content, expr_counter):
     """
     Converte blocchi :::expr ... ::: in <x-expr> web component
