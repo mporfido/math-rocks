@@ -142,6 +142,8 @@ Si ridisegnano in tempo reale, non sono trascinabili, non generano goal.
 | `x` | nome di variabile, numero **o espressione** | sì | Ascissa |
 | `y` | nome di variabile, numero **o espressione** | sì | Ordinata |
 | `label` | stringa | no | Etichetta (default: A, B, C, …) |
+| `drag` | bool | no | Rende il punto **trascinabile** (vedi sotto) |
+| `start` | `"x,y"` | con `drag` | Da dove parte il punto la prima volta |
 
 Una coordinata **fissa** serve quando è l'autore a decidere dove sta il punto su
 un asse e lo studente riempie solo l'altro: in una tabella "esponente → valore"
@@ -172,6 +174,24 @@ Finché la variabile è vuota (`${y}{y||input}`, campo mai compilato) il punto
 | Chiave | Tipo | Descrizione |
 | --- | --- | --- |
 | `connect` | bool | Unisce i punti consecutivi con una spezzata |
+
+### `drag: true` — il punto che scrive nel modello
+
+Con `drag` il legame va nei **due sensi**: il punto (arancione, per distinguerlo
+da quelli guidati) si trascina, e trascinandolo **riscrive le sue due
+variabili**. Da lì in poi tutto il resto della pagina segue: `${bx}` nel testo,
+un `${= …}`, uno slider legato alla stessa variabile, un `[Verifica]{check: …}`.
+
+Si scrive `- {x: bx, y: by, label: B, drag: true, start: "8,3"}` (esempio
+completo in [grafici-esempi.md](grafici-esempi.md)).
+
+- Le due coordinate devono essere **nomi di variabile**: un numero o
+  un'espressione non si può riscrivere trascinando, e la build si ferma.
+- `start` è obbligatorio: dice dove nasce il punto la prima volta. Le volte
+  successive vince la posizione salvata nei progressi.
+- `snap` (top-level) vale anche qui: `snap: 1` fa scattare il punto sugli interi.
+- Il punto trascinabile **non è un goal** — è esplorativo come tutti i
+  `boundpoints`. Per farne un esercizio serve un `{check: …}`.
 
 ---
 

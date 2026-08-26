@@ -137,6 +137,31 @@ boundpoints:
 :::
 ```
 
+## 8. Un punto da trascinare, e una condizione da soddisfare
+
+Dati $A$ e il punto medio $M$, trovare l'altro estremo. Il punto arancione si
+trascina e scrive `bx`/`by` nel modello; il bottone li interroga. Serve
+`> use-mathjs: true` nei metadata dello step per l'`and` della condizione.
+
+```markdown
+Trascina il punto arancione $B$ dove pensi che sia.
+
+:::graph
+xrange: "-1,12"
+yrange: "-1,10"
+snap: 1
+boundpoints:
+  - {x: 1, y: 4, label: A}
+  - {x: 5, y: 6, label: M}
+  - {x: bx, y: by, label: B, drag: true, start: "8,3"}
+:::
+
+[Verifica]{check: bx == 9 and by == 8}
+```
+
+Le stesse variabili possono comparire nel testo (`$B(${bx}; ${by})$`) o essere
+guidate da uno slider: il punto e lo slider restano allineati nei due sensi.
+
 ---
 
 **Vedi anche**: [grafici.md](grafici.md) per il riferimento delle chiavi ·

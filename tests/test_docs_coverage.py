@@ -39,6 +39,7 @@ COPERTURA = [
     ('variabili.md', '{check:'),
     ('grafici.md', ':::graph'),
     ('grafici.md', 'boundpoints:'),
+    ('grafici.md', 'drag: true'),
     ('grafici.md', 'points:'),
     ('grafici.md', 'navigate: true'),
     ('grafici.md', 'targets: true'),

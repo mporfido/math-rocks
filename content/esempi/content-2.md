@@ -391,3 +391,61 @@ Le opzioni vanno sulla riga di apertura: `goal` rende lo sketch un goal, `height
 :::div.reveal
 Ottimo! Lo sketch ha verificato da solo il criterio (`a == 7`) ed emesso il completamento del goal: esattamente come blank, slider e grafici, anche una mini-app p5 può sbloccare lo step.
 :::
+---
+
+> id: punto-trascinabile
+> title: Punto trascinabile legato al modello
+> use-mathjs: true
+
+# Trascinalo tu
+
+Un `boundpoint` con `drag: true` è **trascinabile**, e trascinandolo riscrive le sue due variabili: il legame col modello va nei due sensi. Il punto arancione si tocca, quelli blu no.
+
+Muovi $P$ e guarda lo slider seguirlo — e viceversa.
+
+Ascissa di $P$: ${px}{px|3|-6,6,1}
+
+:::graph
+xrange: "-6,6"
+yrange: "-6,6"
+snap: 1
+boundpoints:
+  - {x: 0, y: 0, label: O}
+  - {x: px, y: py, label: P, drag: true, start: "3,2"}
+connect: true
+:::
+
+Le coordinate di $P$ sono $(${px}; ${py})$, e la sua distanza dall'origine vale ${= sqrt(px^2 + py^2)}.
+
+Portalo in $(-4; 3)$:
+
+[Verifica]{check: px == -4 and py == 3}
+
+:::details.syntax-doc
+<summary>📝 Mostra la sintassi</summary>
+
+```md
+Ascissa di $P$: ${px}{px|3|-6,6,1}
+
+:::graph
+xrange: "-6,6"
+yrange: "-6,6"
+snap: 1
+boundpoints:
+  - {x: 0, y: 0, label: O}
+  - {x: px, y: py, label: P, drag: true, start: "3,2"}
+connect: true
+:::
+
+[Verifica]{check: px == -4 and py == 3}
+```
+
+Con `drag: true` le coordinate devono essere **nomi di variabile** (non numeri né espressioni: non sarebbero riscrivibili) e serve `start: "x,y"`, la posizione da cui parte la prima volta. Poi vince quella salvata nei progressi. Il punto resta esplorativo: il goal lo fa il `{check: …}`.
+
+📖 Riferimento: `docs/grafici.md` §boundpoints · `docs/grafici-esempi.md` §8
+
+:::
+
+:::div.reveal
+Il punto e lo slider sono due facce della stessa variabile: chiunque dei due si muova, l'altro lo segue e le formule si ricalcolano.
+:::

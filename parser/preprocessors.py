@@ -6,6 +6,53 @@ from urllib.parse import quote as url_quote
 import yaml
 
 
+_NOME_VARIABILE = re.compile(r'^[A-Za-z_]\w*$')
+
+
+def _valida_boundpoints(boundpoints):
+    """
+    Ferma in build i boundpoints trascinabili impossibili.
+
+    Un punto con `drag: true` scrive nel modello le variabili che legge: se una
+    coordinata è un numero fisso o un'espressione non c'è niente da riscrivere,
+    e lo studente trascinerebbe un punto che torna sempre indietro. Meglio un
+    errore di build che una figura che non risponde.
+    """
+    if not isinstance(boundpoints, list):
+        return
+
+    for indice, punto in enumerate(boundpoints):
+        if not isinstance(punto, dict) or not punto.get('drag'):
+            continue
+
+        nome = punto.get('label') or f'boundpoint #{indice + 1}'
+
+        for asse in ('x', 'y'):
+            coord = punto.get(asse)
+            if not isinstance(coord, str) or not _NOME_VARIABILE.match(coord.strip()):
+                raise ValueError(
+                    f"Blocco :::graph, {nome}: con `drag: true` la coordinata "
+                    f"`{asse}` deve essere il nome di una variabile "
+                    f"(ricevuto: {coord!r}). Un numero o un'espressione non si "
+                    "possono riscrivere trascinando il punto."
+                )
+
+        start = punto.get('start')
+        if not isinstance(start, str) or len(start.split(',')) != 2:
+            raise ValueError(
+                f"Blocco :::graph, {nome}: con `drag: true` serve "
+                '`start: "x,y"`, la posizione da cui parte il punto. '
+                f'(ricevuto: {start!r})'
+            )
+        try:
+            [float(pezzo) for pezzo in start.split(',')]
+        except ValueError:
+            raise ValueError(
+                f"Blocco :::graph, {nome}: `start` deve essere due numeri "
+                f'separati da una virgola (ricevuto: {start!r})'
+            )
+
+
 def process_graphs(content, graph_counter):
     """
     Converte blocchi :::graph YAML ::: in <x-graph> web component
@@ -20,10 +67,16 @@ def process_graphs(content, graph_counter):
           - target: "3,2"
         boundpoints:
           - {x: ax, y: ay, label: A}
+          - {x: bx, y: by, label: B, drag: true, start: "4,5"}
         :::
 
     `expr` top-level è una scorciatoia per una singola curva (con eventuale
     `xclip`); equivale a functions: [{expr, xclip}].
+
+    Un boundpoint con `drag: true` è trascinabile e RISCRIVE le variabili da cui
+    dipende: per questo le sue coordinate devono essere nomi di variabile nudi
+    (un'espressione come "2^a" non è invertibile) e serve un `start` che dica da
+    dove parte, altrimenti il punto nasce invisibile e intrascinabile.
 
     Il grafico riceve un id per il goal tracking solo se almeno un punto
     di `points` ha un `target` (gli altri layer sono solo esplorativi).
@@ -66,6 +119,8 @@ def process_graphs(content, graph_counter):
             if 'xclip' in config:
                 entry['xclip'] = config.pop('xclip')
             config.setdefault('functions', []).append(entry)
+
+        _valida_boundpoints(config.get('boundpoints'))
 
         graph_counter += 1
 

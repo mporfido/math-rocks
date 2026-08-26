@@ -36,7 +36,10 @@
  * Layer punti bound al modello:
  *   data-boundpoints: JSON array di oggetti {x, y, label} dove x/y sono nomi
  *     di variabili del modello (es. da input editabili in una tabella). I
- *     punti si ridisegnano live quando le variabili cambiano. Non trascinabili.
+ *     punti si ridisegnano live quando le variabili cambiano.
+ *     Con {drag: true, start: "x,y"} il punto diventa trascinabile e il legame
+ *     col modello va nei due sensi: trascinarlo riscrive le sue due variabili
+ *     (e quindi slider, formule live e [Verifica]{check: …} nel testo).
  *   data-connect: "true" per unire i punti con una spezzata
  *
  * Eventi:
@@ -225,8 +228,15 @@ class XGraph extends HTMLElement {
       return typeof v === 'number' ? v : NaN;
     };
 
+    // Lo snap dei punti trascinabili è lo stesso di quelli inseriti a mano.
+    // initPoints() lo assegna solo se esiste il layer `points`: qui il layer
+    // può essere l'unico della board, quindi lo si rilegge dall'attributo.
+    const snap = this.dataset.snap ? parseFloat(this.dataset.snap) : null;
+    this.snapStep = this.snapStep ?? snap;
+
     const jxgPoints = pointsData.map((cfg, index) => {
       const label = cfg.label || String.fromCharCode(65 + index); // A, B, C, ...
+      if (cfg.drag) return this.createDragPoint(cfg, label, snap);
       return this.board.create('point', [
         () => readVar(cfg.x),
         () => readVar(cfg.y)
@@ -254,6 +264,104 @@ class XGraph extends HTMLElement {
       }
     }
 
+  }
+
+  /**
+   * Boundpoint trascinabile: il legame col modello va nei due sensi.
+   *
+   * A differenza degli altri boundpoint le coordinate NON sono funzioni del
+   * modello — un punto le cui coordinate sono calcolate non si può muovere, il
+   * primo board.update() lo rimetterebbe dov'era. Qui il punto ha coordinate
+   * proprie, e le due direzioni sono cucite a mano:
+   *   trascinamento → scrive le due variabili (come farebbe uno slider);
+   *   variabile cambiata da fuori (slider, campo) → sposta il punto.
+   * `_sincronizzando` rompe l'anello: senza, ogni scrittura tornerebbe indietro.
+   */
+  createDragPoint(cfg, label, snap) {
+    const nomeX = String(cfg.x).trim();
+    const nomeY = String(cfg.y).trim();
+    const model = this.liveModel();
+
+    // Il modello vince sullo `start` (uno slider dichiarato nel testo, o un
+    // valore ripristinato da storage, sa dove eravamo rimasti).
+    const [sx, sy] = String(cfg.start || '0,0').split(',').map(Number);
+    const x0 = Number.isFinite(parseFloat(model[nomeX])) ? parseFloat(model[nomeX]) : sx;
+    const y0 = Number.isFinite(parseFloat(model[nomeY])) ? parseFloat(model[nomeY]) : sy;
+
+    const point = this.board.create('point', [x0, y0], {
+      name: label,
+      color: '#e67e22',       // arancio: "questo si tocca", contro il blu dei guidati
+      size: 6,
+      fixed: false,
+      snapToGrid: snap !== null,
+      snapSizeX: snap ?? 1,
+      snapSizeY: snap ?? 1,
+      label: { offset: [10, 10] }
+    });
+
+    const scrivi = (nome, valore) => {
+      const step = this.step;
+      if (!step || !step.model || step.model[nome] === valore) return;
+      step.model[nome] = valore;
+      this.dispatchEvent(new CustomEvent('variable-change', {
+        bubbles: true,
+        detail: { name: nome, value: valore }
+      }));
+    };
+
+    point.on('drag', () => {
+      this._sincronizzando = true;
+      scrivi(nomeX, this.snapValue(point.X()));
+      scrivi(nomeY, this.snapValue(point.Y()));
+      this._sincronizzando = false;
+    });
+
+    // Il modello parte allineato al punto, così ${bx} nel testo mostra subito un
+    // numero invece di un quadratino vuoto. Ma non adesso: step.js è caricato
+    // DOPO graph.js (vedi _assets.html), e fra i due c'è JSXGraph da rete —
+    // quando questa board nasce, <x-step> può non essere ancora stato aggiornato
+    // e il suo `model` non esiste (aspettare "un frame" non basta, il frame
+    // arriva prima). L'unico segnale affidabile è la definizione dell'elemento.
+    // È anche il momento in cui i valori ripristinati da storage sono leggibili,
+    // e allora vincono loro: il punto torna dove lo studente l'aveva lasciato.
+    customElements.whenDefined('x-step').then(() => {
+      // Dove eravamo rimasti. Il modello di <x-step> non basta: initializeModel()
+      // ripristina da storage solo le variabili che esistono già nel modello,
+      // cioè quelle dichiarate da uno slider o da un campo. Una variabile che
+      // nasce da questo punto non è fra quelle, quindi la si rilegge da qui —
+      // come fanno gli altri componenti nel loro connectedCallback.
+      const salvato = (window.courseProgress
+        && window.courseProgress.getStepForElement(this)
+        && window.courseProgress.getStepForElement(this).model) || {};
+      const m = this.liveModel();
+      const px = parseFloat(m[nomeX] !== undefined ? m[nomeX] : salvato[nomeX]);
+      const py = parseFloat(m[nomeY] !== undefined ? m[nomeY] : salvato[nomeY]);
+
+      if (Number.isFinite(px) && Number.isFinite(py)) {
+        point.setPosition(JXG.COORDS_BY_USER, [px, py]);
+        this.board.update();
+        scrivi(nomeX, px);
+        scrivi(nomeY, py);
+        return;
+      }
+      scrivi(nomeX, x0);
+      scrivi(nomeY, y0);
+    });
+
+    if (this.step) {
+      this.step.addEventListener('variable-change', (e) => {
+        if (this._sincronizzando) return;
+        if (e.detail.name !== nomeX && e.detail.name !== nomeY) return;
+        const m = this.liveModel();
+        const nx = parseFloat(m[nomeX]);
+        const ny = parseFloat(m[nomeY]);
+        if (!Number.isFinite(nx) || !Number.isFinite(ny)) return;
+        point.setPosition(JXG.COORDS_BY_USER, [nx, ny]);
+        this.board.update();
+      });
+    }
+
+    return point;
   }
 
   // Aggiunge un pulsante "Verifica" sotto il grafico; chiama checkFn(btn) al click
