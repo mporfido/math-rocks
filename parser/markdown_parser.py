@@ -30,6 +30,7 @@ class CourseParser:
         self.graph_counter = 0
         self.p5_counter = 0
         self.expr_counter = 0
+        self.math_counter = 0
         self.formula_counter = 0
         self.theorem_counter = 0
         self.table_counter = 0
@@ -79,6 +80,7 @@ class CourseParser:
         self.graph_counter = 0
         self.p5_counter = 0
         self.expr_counter = 0
+        self.math_counter = 0
         self.formula_counter = 0
         self.theorem_counter = 0
         self.table_counter = 0
@@ -109,7 +111,7 @@ class CourseParser:
                 continue
 
             # Pre-processing: converti sintassi custom
-            md_content, block_replacements = self._preprocess(md_content)
+            md_content, block_replacements, math_spans = self._preprocess(md_content)
 
             # Ripristina i code fence: mistune li renderizza come blocchi
             # di codice facendo l'escape dell'HTML al loro interno
@@ -124,6 +126,12 @@ class CourseParser:
 
             # Sostituisce marker placeholder con tag div reali
             html = self._apply_block_replacements(html, block_replacements)
+
+            # Le formule tornano al loro posto letterali: `str.replace` e non
+            # `re.sub`, perche' il LaTeX e' pieno di backslash che diventerebbero
+            # backreference.
+            for marker, tex in math_spans.items():
+                html = html.replace(marker, tex)
 
             # Estrai goals (elementi interattivi)
             goals = self._extract_goals(html)
@@ -311,6 +319,47 @@ class CourseParser:
         pattern = re.compile(r'(?<!`)`([^`\n]+)`(?!`)')
         return pattern.sub(replace_code, content), codes
 
+    # Le quattro delimitazioni della matematica, nell'ordine in cui vanno
+    # cercate: prima le display, o `$$` verrebbe letto come due `$` vuoti.
+    MATH_SPANS = (
+        re.compile(r'\$\$.+?\$\$', re.DOTALL),
+        re.compile(r'\\\[.+?\\\]', re.DOTALL),
+        re.compile(r'\\\(.+?\\\)', re.DOTALL),
+        re.compile(r'\$[^$\n]+?\$'),
+    )
+
+    def _extract_math(self, content):
+        """
+        $…$, $$…$$, \\(…\\), \\[…\\] → marker, ripristinati dopo il rendering.
+
+        Il LaTeX e il markdown si contendono gli stessi caratteri, e senza
+        questa protezione vince il markdown: in `\\underbrace{-3}_{\\text{…}}`
+        i due underscore diventano un `<em>`, e a MathJax arriva una formula
+        già rotta — a video resta il sorgente. Stessa fine per `\\;` (letto
+        come escape di `;`), per `a*b` (corsivo) e per `\\(` (escape di una
+        parentesi). La formula deve arrivare a MathJax **esattamente** come
+        l'ha scritta l'autore.
+
+        Va chiamata per ultima, quando blank e variabili sono già diventati
+        HTML: gli `${x}` dentro una formula restano quindi vivi. E mentre il
+        codice inline è ancora un marker, così un `$…$` citato fra backtick
+        resta testo e non diventa una formula.
+
+        Returns:
+            Tuple (contenuto con marker, dict marker→sorgente)
+        """
+        replacements = {}
+
+        def replace(match):
+            marker = f'XMATHSPAN{self.math_counter}X'
+            replacements[marker] = match.group(0)
+            self.math_counter += 1
+            return marker
+
+        for pattern in self.MATH_SPANS:
+            content = pattern.sub(replace, content)
+        return content, replacements
+
     def _preprocess(self, content):
         """
         Pre-processa sintassi custom prima del markdown rendering
@@ -385,6 +434,11 @@ class CourseParser:
         # :::div.class → placeholder marker (sostituiti dopo il markdown rendering)
         content, block_replacements = process_blocks(content)
 
+        # $…$ e $$…$$ → marker. Per ULTIMO fra i preprocessori: quello che
+        # sta dentro una formula (uno `${x}`, un blank) è già diventato HTML,
+        # e da qui in poi il LaTeX non lo tocca più nessuno.
+        content, math_replacements = self._extract_math(content)
+
         # Ripristina il codice inline: mistune lo renderizza come <code>
         # facendo l'escape dell'HTML al suo interno
         for marker, code in inline_codes.items():
@@ -398,7 +452,10 @@ class CourseParser:
         block_replacements.update(theorem_replacements)
         block_replacements.update(table_replacements)
 
-        return content, block_replacements
+        # La matematica torna a parte: `_apply_block_replacements` toglie il
+        # <p> attorno a un marker che sta da solo in un paragrafo — giusto per
+        # un blocco, sbagliato per una formula, che il <p> se lo tiene.
+        return content, block_replacements, math_replacements
 
     def _render_inline(self, text):
         """
@@ -425,9 +482,18 @@ class CourseParser:
         text, self.blank_counter = process_blanks(text, self.blank_counter)
         text, self.variable_counter = process_variables(text, self.variable_counter)
 
+        # Anche qui la matematica va sottratta a mistune: una cella di tabella
+        # con `x_1` o un passo di dimostrazione con `\overline{AB}_{\text{…}}`
+        # si romperebbero esattamente come nel corpo di uno step.
+        text, math_spans = self._extract_math(text)
+
         html = self.markdown(text).strip()
         unwrapped = re.fullmatch(r'<p>(.*)</p>', html, re.DOTALL)
-        return unwrapped.group(1).strip() if unwrapped else html
+        html = unwrapped.group(1).strip() if unwrapped else html
+
+        for marker, tex in math_spans.items():
+            html = html.replace(marker, tex)
+        return html
 
     def _unescape_variable_spans(self, html):
         """

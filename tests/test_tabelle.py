@@ -16,6 +16,7 @@ import re
 
 import pytest
 
+from conftest import rendi
 from parser.markdown_parser import CourseParser
 from parser.preprocessors import ARCO_VERTICALE
 
@@ -29,13 +30,6 @@ VALIDA = """:::table
 | $2^0$    | [[1]]   |
 | $2^{-1}$ | [[1/2]] |
 :::"""
-
-
-def rendi(sorgente):
-    """Il markdown di uno step → l'HTML finale, come in build."""
-    parser = CourseParser()
-    contenuto, blocchi = parser._preprocess(sorgente)
-    return parser._apply_block_replacements(parser.markdown(contenuto), blocchi)
 
 
 def frecce(html):

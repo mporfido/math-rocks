@@ -87,6 +87,27 @@ modello e gli operatori aritmetici, ma non `sqrt`, `sin`, `simplify`, …
 
 Attivalo solo dove serve: è una libreria, e viene caricata per intero.
 
+## Dentro una formula il markdown non entra
+
+Quello che sta fra `$…$`, `$$…$$`, `\(…\)` o `\[…\]` arriva a MathJax
+**letterale**: il parser lo mette da parte prima del rendering markdown e ce lo
+rimette dopo. Serve perché LaTeX e markdown si contendono gli stessi caratteri,
+e senza la protezione vincerebbe il markdown:
+
+| Nella formula | Cosa ne farebbe il markdown |
+| --- | --- |
+| `x_1`, `\underbrace{…}_{…}`, `\sum_{i=1}` | due `_` = corsivo, e in mezzo ci finisce un `<em>` |
+| `a * b * c` | due `*` = corsivo |
+| `\;`, `\,`, `\(` | il `\` letto come escape del carattere dopo |
+
+Quindi pedici, spaziature e asterischi si scrivono normalmente, senza
+accorgimenti. L'unica cosa che **non** viene protetta è ciò che sta dentro i
+backtick o dentro un blocco di codice: lì un `$x_1$` resta sorgente da leggere,
+che è esattamente quello che serve quando si mostra la sintassi.
+
+I riferimenti alle variabili continuano a funzionare dentro le formule
+(`$$2 \cdot ${x}$$`): diventano marker *prima* della protezione.
+
 ## Errori tipici
 
 | Sintomo | Causa |

@@ -8,14 +8,7 @@ che non si aggiorna, e nessuno se ne accorge finché non la usa in classe.
 """
 from urllib.parse import quote
 
-from parser.markdown_parser import CourseParser
-
-
-def rendi(sorgente):
-    """Il markdown di uno step → l'HTML finale, come in build."""
-    parser = CourseParser()
-    contenuto, blocchi = parser._preprocess(sorgente)
-    return parser._apply_block_replacements(parser.markdown(contenuto), blocchi)
+from conftest import rendi
 
 
 def test_il_marker_del_calcolo_sopravvive_al_markdown():

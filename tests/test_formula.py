@@ -14,7 +14,7 @@ import re
 
 import pytest
 
-from parser.markdown_parser import CourseParser
+from conftest import rendi
 from parser.preprocessors import expand_formula_anchors
 
 
@@ -25,13 +25,6 @@ VALIDO = """:::formula
 b1 -> b2 : reciproco
 e1 -> e2 : cambia segno
 :::"""
-
-
-def rendi(sorgente):
-    """Il markdown di uno step → l'HTML finale, come in build."""
-    parser = CourseParser()
-    contenuto, blocchi = parser._preprocess(sorgente)
-    return parser._apply_block_replacements(parser.markdown(contenuto), blocchi)
 
 
 def attributi(html):
