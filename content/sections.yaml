@@ -20,6 +20,10 @@ sections:
     title: Geometria
     courses:
       - fondamenti-geometria-euclidea
+  - id: geometria-analitica
+    title: Geometria analitica
+    courses:
+      - punti-e-rette-nel-piano
   - id: funzioni
     title: Funzioni
     courses:

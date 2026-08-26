@@ -1,0 +1,9 @@
+title: Punti e rette nel piano cartesiano
+description: >-
+  Due punti scritti come coppie di numeri: da lì si ricava quanto distano e chi
+  sta esattamente in mezzo, senza mai misurare con il righello.
+level: beginner
+duration: 50 minuti
+color: "#00838F"
+# Ogni step si appoggia al precedente: il triangolo prima della formula
+progression: sequential
