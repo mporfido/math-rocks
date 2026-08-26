@@ -801,22 +801,16 @@ def process_p5(content, p5_counter):
         options_str = match.group(1).strip()
         code = match.group(2)
 
-        # Parsing opzioni: token separati da spazi; `goal` è un flag,
-        # gli altri sono coppie chiave=valore. Le chiavi non riservate sono
-        # parametri dello sketch.
+        # Parsing opzioni: `goal` è un flag, gli altri sono coppie
+        # chiave=valore (anche fra virgolette, per i valori con spazi o con
+        # virgole). Le chiavi non riservate sono parametri dello sketch.
         opts = {}
         params = {}
-        for token in options_str.split():
-            if '=' in token:
-                key, _, value = token.partition('=')
-                key = key.strip()
-                value = value.strip()
-                if key in RESERVED_OPTS:
-                    opts[key] = value
-                else:
-                    params[key] = coerce(value)
+        for key, value in _parse_opts_quoted(options_str).items():
+            if key in RESERVED_OPTS or value is True:
+                opts[key] = value
             else:
-                opts[token] = True
+                params[key] = coerce(value)
 
         marker = f'XP5BLOCK{p5_counter}X'
 

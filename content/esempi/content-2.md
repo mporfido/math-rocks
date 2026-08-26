@@ -449,3 +449,50 @@ Con `drag: true` le coordinate devono essere **nomi di variabile** (non numeri n
 :::div.reveal
 Il punto e lo slider sono due facce della stessa variabile: chiunque dei due si muova, l'altro lo segue e le formule si ricalcolano.
 :::
+
+---
+
+> id: sketch-che-scrive
+> title: Uno sketch che riempie il testo
+> use-mathjs: true
+
+# La figura che detta i numeri
+
+`ctx.model` fa leggere alla figura le variabili della pagina. `ctx.set(nome, valore)` fa il contrario: la **figura** diventa la sorgente, e il testo accanto si compila da solo — in MathJax vero, non in testo disegnato sul canvas.
+
+Trascina i due punti sul quadrettato:
+
+:::p5 sketch=piano-distanza height=320 ax=-3 ay=-2 bx=1 by=1
+:::
+
+$$\Delta x = ${dx} \qquad \Delta y = ${dy} \qquad \overline{AB} = ${= sqrt(dx^2 + dy^2)}$$
+
+Portali a distanza esattamente $10$:
+
+[Verifica]{check: sqrt(dx^2 + dy^2) == 10}
+
+:::details.syntax-doc
+<summary>📝 Mostra la sintassi</summary>
+
+```md
+> use-mathjs: true
+
+:::p5 sketch=piano-distanza height=320 ax=-3 ay=-2 bx=1 by=1
+:::
+
+$$\Delta x = ${dx} \qquad \overline{AB} = ${= sqrt(dx^2 + dy^2)}$$
+
+[Verifica]{check: sqrt(dx^2 + dy^2) == 10}
+```
+
+Nello sketch basta `ctx.set('dx', valore)`: da lì in poi la variabile si comporta come se venisse da uno slider — riferimenti `${…}`, calcoli live, condizioni `{check: …}`, salvataggio nei progressi.
+
+Va chiamato **quando il valore cambia davvero** (fine trascinamento, click, `setup()`), mai dentro `draw()`: a 60 fotogrammi al secondo scriverebbe 60 volte nei progressi.
+
+📖 Riferimento: `docs/p5.md` §ctx.set
+
+:::
+
+:::div.reveal
+Testo e figura non sono più due mondi separati: la figura produce i numeri, il testo li spiega.
+:::

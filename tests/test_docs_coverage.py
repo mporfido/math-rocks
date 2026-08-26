@@ -47,6 +47,7 @@ COPERTURA = [
     ('grafici-esempi.md', 'xclip:'),
     ('p5.md', ':::p5'),
     ('p5.md', 'sketch='),
+    ('p5.md', "ctx.set("),
     ('espressioni.md', ':::expr'),
     ('espressioni.md', ':::powers'),
     ('espressioni.md', 'no-eval'),

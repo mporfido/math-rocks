@@ -356,7 +356,12 @@ class XStep extends HTMLElement {
       }
       return this.formatComputedValue(result);
     } catch (e) {
-      console.error('x-step: errore nel calcolo di', expression, e);
+      // Variabile che ancora non esiste: è il caso normale quando i numeri
+      // arrivano da uno sketch (ctx.set) o da un punto trascinabile, che si
+      // presentano dopo il primo render. Come per un campo vuoto: casella, non
+      // errore. Tutto il resto è un vero problema d'autore e va detto.
+      const nonDefinita = /undefined symbol|is not defined/i.test(e && e.message);
+      if (!nonDefinita) console.error('x-step: errore nel calcolo di', expression, e);
       return '\\square';
     }
   }

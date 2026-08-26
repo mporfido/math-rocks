@@ -29,6 +29,9 @@
  *   ctx.completed     true se il goal è già stato completato (anche da storage)
  *   ctx.model         valori live di slider e campi numerici della pagina
  *                     (es. ctx.model.a, ctx.model.ax): stesso modello di x-graph
+ *   ctx.set(n, v)     scrive nel modello dello step: la figura diventa la
+ *                     sorgente dei numeri che il testo mostra (${dx}) e che
+ *                     [Verifica]{check: …} interroga. Non chiamarlo a ogni frame
  *   ctx.onChange(cb)  registra cb(nome, valore) chiamata a ogni variable-change
  *   ctx.width/height  dimensioni suggerite (da usare in p.createCanvas)
  *   ctx.setHeight(h)  cambia l'altezza del canvas a runtime (es. per passare a
@@ -152,6 +155,24 @@ class XP5 extends HTMLElement {
         ctx.completed = true;
         self.markComplete();
       },
+      // Scrive nel modello dello step ed emette variable-change, come farebbe
+      // uno slider: il testo accanto alla figura (${dx}, ${= sqrt(dx^2+dy^2)})
+      // e i bottoni [Verifica]{check: …} si aggiornano da soli.
+      //
+      // Il guard sull'uguaglianza non è un'ottimizzazione: draw() gira a 60fps
+      // e senza di esso ogni frame scriverebbe su localStorage (saveModel).
+      set(nome, valore) {
+        const step = self.step;
+        const chiave = String(nome);
+        if (!step || !step.model || !/^[A-Za-z_]\w*$/.test(chiave)) return;
+        if (step.model[chiave] === valore) return;
+        step.model[chiave] = valore;
+        self.dispatchEvent(new CustomEvent('variable-change', {
+          bubbles: true,
+          composed: true,
+          detail: { name: chiave, value: valore },
+        }));
+      },
       onChange(cb) {
         if (typeof cb === 'function') changeCallbacks.push(cb);
       },
@@ -272,6 +293,9 @@ class XP5 extends HTMLElement {
     // callback registrate e ridisegna gli sketch che usano noLoop.
     if (step) {
       step.addEventListener('variable-change', (e) => {
+        // I cambi che vengono da ctx.set() sono nostri: rimandarli allo sketch
+        // che li ha appena scritti significa invitarlo a riscriverli.
+        if (e.target === this) return;
         changeCallbacks.forEach((cb) => {
           try { cb(e.detail.name, e.detail.value); } catch (err) { console.error(err); }
         });
