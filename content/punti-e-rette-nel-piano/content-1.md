@@ -91,9 +91,9 @@ Adesso $A(-3; 2)$ e $B(4; 2)$: sempre sulla stessa riga, ma uno dei due è a sin
 
 Quanti quadretti da $A$ a $B$? [[7]]
 
-Adesso scrivi la sottrazione che dà quel numero, con i numeri di questi due punti:
+Abbiamo visto che se il segmento è orizzontale, allora facciamo la sottrazione tra le coordinate $x$ dei suoi punti estremi. Che calcolo faccio per trovare la lunghezza?
 
-$4 - ($ [[-3]] $) = 7$
+[[$4-3$|$-3 - 4$|*$4-(-3)$]]
 
 :::details.hint
 <summary>💡 Suggerimento</summary>
@@ -107,7 +107,7 @@ $4 - (-3) = 4 + 3 = 7$. **Sottrarre un negativo somma**, e infatti i due punti s
 
 Un'ultima cosa, che eviterà un errore fra poco. Se avessi fatto la sottrazione al contrario avresti ottenuto $-3 - 4 = -7$. Ma una distanza **non è mai negativa**: quando l'ordine ti tradisce, tieni il numero e butta il segno: fai cioè il **valore assoluto**
 
-Quando due punti $A(x,y_A)$ e $B(x,y_B)$ hanno la stessa coordinata x, allora la loro distanza si calcola facendo il valore assoluto della differenza delle coordinate y:
+Quando due punti $A(x,y_A)$ e $B(x,y_B)$ hanno la stessa coordinata x, allora la loro distanza si calcola facendo il **valore assoluto** della differenza delle coordinate y:
 
 $$\overline{AB} = \lvert y_A - y_B\rvert$$
 
@@ -135,9 +135,9 @@ I due numeri sui tratteggi ti dicono già a che punto sei. Muovi un solo punto a
 
 :::
 
-Fatto? Allora guarda bene la figura: i due tratteggi e il segmento rosso formano una figura che conosci.
+Fatto? Allora guarda bene la figura: i due tratteggi e il segmento verde formano una figura che conosci.
 
-Quanto è lungo il segmento rosso? [[5]]
+Quanto è lungo il segmento verde? [[5]]
 
 :::details.hint
 <summary>💡 Suggerimento</summary>
@@ -151,9 +151,9 @@ Un **triangolo rettangolo**. I due tratteggi sono i cateti, il volo del drone è
 
 $$\overline{AB}^{\,2} = 3^2 + 4^2 = 9 + 16 = 25 \qquad \overline{AB} = 5$$
 
-Cinque chilometri: proprio il numero che all'inizio avevi stimato "fra 4 e 10".
+Ricordi che all'inizio avevi stimato "fra 4 e 10" la lunghezza di un segmento? Anche in quel caso i cateti erano 3 e 4.
 
-**Il punto è questo:** fra due punti qualsiasi c'è sempre un triangolo rettangolo nascosto, e i suoi cateti sono sempre orizzontali o verticolai e quindi sai già trovare le loro lunghezze.
+**Il punto è questo:** fra due punti qualsiasi c'è sempre un triangolo rettangolo nascosto, e i suoi cateti sono sempre orizzontali o verticali e quindi sai già trovare le loro lunghezze.
 :::
 
 ---
@@ -163,13 +163,13 @@ Cinque chilometri: proprio il numero che all'inizio avevi stimato "fra 4 e 10".
 
 # Scriviamola una volta per tutte
 
-I due cateti sono le differenze delle coordinate, una per asse. Pitagora fa il resto:
+I due cateti sono le differenze delle coordinate, una per asse. Usando il teorema di Pitagora:
 
 :::formula
 @lato{\overline{AB}} = \sqrt{@dx{(x_B - x_A)}^{2} + @dy{(y_B - y_A)}^{2}}
 
-dx -> lato : il cateto orizzontale, i quadretti in larghezza
-dy -> lato : il cateto verticale, i quadretti in altezza
+dx -> dx : il cateto orizzontale, i quadretti in larghezza
+dy -> dy : il cateto verticale, i quadretti in altezza
 :::
 
 Non è una formula nuova: è il teorema di Pitagora con dentro le due sottrazioni dello step precedente.
