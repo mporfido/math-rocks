@@ -2167,3 +2167,71 @@ x-smista.is-done .smista-card {
         height: min(52vh, 280px);
     }
 }
+
+/* ============================================================
+   Algebra — la scrittura che si tocca (static/lib/algebra-rendering.js)
+   ============================================================
+   Un <span> per nodo dell'albero, niente MathJax: i pezzi non si cliccano
+   soltanto, si trascinano. La tipografia che serve ai polinomi è poca —
+   apici, frazioni impilate, lettere in corsivo — e in cambio la barra di
+   frazione raggruppa da sola: `(2x + 6)/3` si legge senza parentesi, che è
+   esattamente come si scrive il secondo principio "da lavagna".
+
+   NB: dentro la formula tutto è allineato al MEZZO, non alla linea di base.
+   Con le frazioni impilate la base cade sul numeratore, e `=` e `−` finirebbero
+   in cima alla frazione invece che all'altezza della barra.
+   ============================================================ */
+
+.alg-radice {
+  line-height: 1.25;
+}
+
+.alg-radice .alg-n,
+.alg-radice .alg-operatore,
+.alg-radice .alg-uguale,
+.alg-radice .alg-par {
+  vertical-align: middle;
+}
+
+.alg-lettera {
+  font-style: italic;
+}
+
+.alg-operatore,
+.alg-uguale {
+  margin: 0 .3em;
+  color: var(--ink-soft, #8a8580);
+}
+
+.alg-uguale {
+  margin: 0 .5em;
+  color: inherit;
+}
+
+.alg-par {
+  color: var(--ink-soft, #8a8580);
+}
+
+.alg-radice .alg-esponente {
+  font-size: .62em;
+  vertical-align: super;
+  line-height: 0;
+}
+
+.alg-frazione {
+  display: inline-flex;
+  flex-direction: column;
+  /* `stretch`, non `center`: le due righe devono prendere tutta la larghezza
+     della frazione, altrimenti la barra è lunga quanto il denominatore e
+     `(2x + 6)/3` esce con un trattino sotto a un numeratore molto più largo. */
+  align-items: stretch;
+  text-align: center;
+  vertical-align: middle;
+  line-height: 1.12;
+  font-size: .86em;
+  margin: 0 .14em;
+}
+
+/* Aria sotto al numeratore: senza, la barra taglia la coda di una `y`. */
+.alg-sopra { padding-bottom: .16em; }
+.alg-sotto { border-top: 1.5px solid currentColor; padding-top: .06em; }
