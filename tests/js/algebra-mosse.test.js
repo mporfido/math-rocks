@@ -328,3 +328,111 @@ test('e la lineare classica, fino a x = k', () => {
   assert.strictEqual(scrivi(s), 'x = 5/2');
   assert.ok(traguardo(s, { isola: 'x' }).ok);
 });
+
+// --- Il dominio, e la promessa di non sollevare mai --------------------------
+// Il parser accetta più di quanto la forma canonica sappia trattare: `x/y` si
+// scrive e si legge, ma non si sa dire di che grado sia. Il punto dolente sta
+// proprio lì in mezzo — una mossa OFFERTA che poi scoppia al momento di farla è
+// peggio di una mossa mai offerta, perché arriva a esercizio iniziato.
+
+test('una mossa fuori dominio non viene nemmeno proposta', () => {
+  const s = parse('x/y + 1');
+  assert.deepStrictEqual(mosseDisponibili(s, s.id), []);
+});
+
+test('e se la si chiede lo stesso, risponde invece di sollevare', () => {
+  const s = parse('x/y + 1');
+  const esito = applicaMossa(s, { mossa: 'ordina', nodo: s.id });
+  assert.strictEqual(esito.ok, false);
+  assert.strictEqual(esito.codice, 'fuori-dominio');
+  assert.match(esito.messaggio, /fuori dal dominio/);
+});
+
+test('fuori dominio: nessuna mossa del catalogo solleva, su nessun nodo', () => {
+  // La prova larga, quella che regge anche alle mosse che verranno: si prende
+  // un albero fuori dominio e si bussa a ogni mossa su ogni nodo. Non conta
+  // che cosa rispondono — conta che RISPONDANO.
+  for (const testo of ['x/y + 1', 'x/y = 1', '2/x = 3', 'x^-2 + 1 = 0']) {
+    const s = parse(testo);
+    const nodi = [null];
+    visita(s, (n) => nodi.push(n.id));
+    for (const nodo of nodi) {
+      assert.doesNotThrow(() => mosseDisponibili(s, nodo), testo + ' / disponibili su ' + nodo);
+      for (const mossa of Object.keys(CATALOGO)) {
+        const azione = {
+          mossa,
+          nodo,
+          parametri: { operazione: 'sottrai', valore: '1' },
+          digitato: '1',
+        };
+        let esito;
+        assert.doesNotThrow(() => { esito = applicaMossa(s, azione); },
+          testo + ' / ' + mossa + ' sul nodo ' + nodo);
+        assert.ok(esito && 'ok' in esito, mossa + ' non ha restituito un esito');
+      }
+    }
+  }
+});
+
+test('anche il pezzo DIGITATO deve stare nel dominio', () => {
+  const s = parse('3x + 2x = 5');
+  const esito = applicaMossa(s, { mossa: 'riduci-simili', nodo: s.left.id, digitato: 'x/y' });
+  assert.strictEqual(esito.codice, 'fuori-dominio');
+});
+
+test('la rete di applicaMossa: una mossa che scoppia resta un esito', () => {
+  // Ogni `applicabile` dichiara il proprio dominio, quindi qui non si dovrebbe
+  // sollevare mai. La rete serve al caso in cui una mossa futura se ne
+  // dimentichi: il prezzo di sbagliarsi è l'interfaccia che sparisce a metà
+  // esercizio, con dentro il lavoro dello studente.
+  CATALOGO['prova-che-scoppia'] = {
+    id: 'prova-che-scoppia',
+    etichetta: 'Mossa difettosa',
+    tipo: 'applicazione',
+    bersaglio: 'equazione',
+    parametri: [],
+    applicabile: () => ({ ok: true }),
+    esegui: () => { throw new Error('difetto'); },
+  };
+  try {
+    const esito = applicaMossa(parse('2x = 4'), { mossa: 'prova-che-scoppia', nodo: null });
+    assert.strictEqual(esito.ok, false);
+    assert.strictEqual(esito.codice, 'mossa-fallita');
+    assert.strictEqual(esito.messaggio, 'difetto');
+  } finally {
+    delete CATALOGO['prova-che-scoppia'];
+  }
+});
+
+// --- I parametri delle mosse -------------------------------------------------
+
+test('un\'operazione sconosciuta viene rifiutata, non interpretata', () => {
+  // Prima scivolava nel ramo `else` di un ternario: `moltiplica` sul primo
+  // principio diventava in silenzio un'addizione. L'equazione restava
+  // equivalente, quindi nessun test se ne accorgeva — ma lo studente vedeva
+  // comparire una mossa che non aveva chiesto.
+  const s = parse('2x + 3 = 8');
+  for (const operazione of ['moltiplica', 'dividi', undefined, '', 'AGGIUNGI', 'aggiungi ']) {
+    const esito = applicaMossa(s, { mossa: 'primo-principio', parametri: { operazione, valore: '3' } });
+    assert.strictEqual(esito.codice, 'operazione-non-valida', 'accettata: ' + operazione);
+  }
+  for (const operazione of ['aggiungi', 'sottrai', undefined, 'raddoppia']) {
+    const esito = applicaMossa(s, { mossa: 'secondo-principio', parametri: { operazione, valore: '3' } });
+    assert.strictEqual(esito.codice, 'operazione-non-valida', 'accettata: ' + operazione);
+  }
+});
+
+test('i due valori giusti invece passano, e fanno cose diverse', () => {
+  const s = parse('2x + 3 = 8');
+  const più = applicaMossa(s, { mossa: 'primo-principio', parametri: { operazione: 'aggiungi', valore: '3' } });
+  const meno = applicaMossa(s, { mossa: 'primo-principio', parametri: { operazione: 'sottrai', valore: '3' } });
+  assert.strictEqual(scrivi(più.albero), '2x + 3 + 3 = 8 + 3');
+  assert.strictEqual(scrivi(meno.albero), '2x + 3 - 3 = 8 - 3');
+});
+
+test('anche il valore di un principio deve stare nel dominio', () => {
+  const s = parse('2x = 4');
+  const esito = applicaMossa(s, { mossa: 'primo-principio', parametri: { operazione: 'aggiungi', valore: 'x/y' } });
+  assert.strictEqual(esito.ok, false);
+  assert.match(esito.messaggio, /fuori dal dominio/);
+});

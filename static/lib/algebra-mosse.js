@@ -118,10 +118,31 @@
   }
 
   /**
+   * Il pezzo sta dentro al dominio del componente? Fuori (una divisione per
+   * una lettera, un esponente negativo su una lettera) `canonicalizza` solleva,
+   * e siccome quasi ogni mossa ha bisogno della forma canonica — per giudicare
+   * o per eseguire — l'unico modo di non sollevare a metà è CHIEDERLO PRIMA.
+   *
+   * Il parser accetta più di quanto la forma canonica sappia trattare: `x/y`
+   * si scrive e si legge, ma non si sa dire di che grado sia. Il confine passa
+   * di qui, ed è bene che passi in un posto solo.
+   */
+  function nelDominio(nodo) {
+    try {
+      canonicalizza(nodo);
+      return sì();
+    } catch (e) {
+      return no('fuori-dominio', e.message);
+    }
+  }
+
+  /**
    * Il nodo scelto, o il motivo per cui non va bene. Sta qui e non in ogni
    * mossa perché l'equazione intera NON è un bersaglio: `canonicalizza` su un
    * nodo `eq` solleva, e senza questo filtro un click vicino all'uguale
-   * farebbe cadere l'intera interfaccia.
+   * farebbe cadere l'intera interfaccia. Per la stessa ragione qui si controlla
+   * anche il dominio: chi passa da `bersaglio` ha già la garanzia di poter
+   * canonicalizzare il pezzo senza rete.
    */
   function bersaglio(albero, id, invito) {
     const nodo = id == null ? null : trovaNodo(albero, id);
@@ -129,14 +150,35 @@
     if (nodo.type === 'eq') {
       return { errore: no('serve-un-pezzo', 'Scegli un pezzo, non l\'equazione intera') };
     }
+    const dominio = nelDominio(nodo);
+    if (!dominio.ok) return { errore: dominio };
     return { nodo };
+  }
+
+  /**
+   * Il parametro `operazione` è uno dei due valori previsti? Senza questo
+   * controllo un valore ignoto scivolava nel ramo `else` di un ternario e
+   * diventava in silenzio un'addizione: la mossa si faceva, ma non quella
+   * chiesta, e l'equazione restava equivalente — quindi nessuno se ne
+   * accorgeva.
+   */
+  function operazioneFraDue(param, ammesse) {
+    const scelta = param && param.operazione;
+    if (ammesse.indexOf(scelta) === -1) {
+      return no('operazione-non-valida',
+        'Operazione non valida: scegli fra ' + ammesse.join(' e '));
+    }
+    return sì();
   }
 
   function costante(testo) {
     let albero;
     try { albero = parse(testo); } catch (e) { return { errore: e.message }; }
     if (albero.type === 'eq') return { errore: 'Serve un numero, non un\'equazione' };
-    const c = canonicalizza(albero).costante;
+    // Anche qui il dominio va chiesto prima: `x/y` si parsa benissimo, ed è
+    // solo canonicalizzandolo che si scopre di non saperlo trattare.
+    let c;
+    try { c = canonicalizza(albero).costante; } catch (e) { return { errore: e.message }; }
     if (c === null) return { errore: 'Serve un numero: qui c\'è una lettera' };
     return { valore: c, albero };
   }
@@ -156,7 +198,9 @@
     parametri: ['operazione', 'valore'],
     applicabile(albero, id, param) {
       if (!èEquazione(albero)) return no('serve-equazione', 'Il primo principio vale per le equazioni');
-      if (!param || !param.valore) return no('serve-valore', 'Scrivi che cosa aggiungere o togliere');
+      const quale = operazioneFraDue(param, ['aggiungi', 'sottrai']);
+      if (!quale.ok) return quale;
+      if (!param.valore) return no('serve-valore', 'Scrivi che cosa aggiungere o togliere');
       try {
         if (parse(param.valore).type === 'eq') {
           return no('valore-non-valido', 'Serve un\'espressione, non un\'equazione');
@@ -164,6 +208,10 @@
       } catch (e) {
         return no('valore-non-valido', e.message);
       }
+      // Un valore fuori dominio non solleverebbe qui, ma alla prima mossa
+      // che prova a giudicare il risultato: meglio dirlo mentre lo si scrive.
+      const dominio = nelDominio(parse(param.valore));
+      if (!dominio.ok) return no('valore-non-valido', dominio.messaggio);
       return sì();
     },
     esegui(albero, id, param) {
@@ -195,7 +243,9 @@
       parametri: ['operazione', 'valore'],
       applicabile(albero, sel, param) {
         if (!èEquazione(albero)) return no('serve-equazione', 'Il secondo principio vale per le equazioni');
-        if (!param || !param.valore) return no('serve-valore', 'Scrivi per quanto moltiplicare o dividere');
+        const quale = operazioneFraDue(param, ['moltiplica', 'dividi']);
+        if (!quale.ok) return quale;
+        if (!param.valore) return no('serve-valore', 'Scrivi per quanto moltiplicare o dividere');
         const c = costante(param.valore);
         if (c.errore) {
           // È lo stesso confine di tutto il componente: dividere per una
@@ -270,6 +320,11 @@
       const nodo = id == null ? albero : trovaNodo(albero, id);
       if (!nodo || nodo.type === 'eq') return no('serve-selezione', 'Scegli il membro da ordinare');
       if (terminiDi(nodo).length < 2) return no('niente-da-ordinare', 'C\'è un solo termine');
+      // Ordinare vuol dire confrontare i gradi, e il grado lo sa dire solo la
+      // forma canonica: senza questo controllo la mossa veniva offerta su
+      // `x/y + 1` e poi sollevava al momento di eseguirla.
+      const dominio = nelDominio(nodo);
+      if (!dominio.ok) return dominio;
       return sì();
     },
     esegui(albero, id) {
@@ -481,6 +536,19 @@
    *   azione = { mossa, nodo, parametri, digitato }
    */
   function applicaMossa(albero, azione, whitelist) {
+    // Ogni `applicabile` dichiara il proprio dominio, quindi qui non si
+    // dovrebbe sollevare mai. Ma «non si dovrebbe» non è una garanzia, e il
+    // prezzo di sbagliarsi è l'interfaccia che sparisce a metà esercizio con
+    // il lavoro dello studente dentro: una mossa che non si può fare deve
+    // restare un esito come gli altri, mai un'eccezione che risale.
+    try {
+      return eseguiMossa(albero, azione, whitelist);
+    } catch (e) {
+      return no('mossa-fallita', e.message);
+    }
+  }
+
+  function eseguiMossa(albero, azione, whitelist) {
     const mossa = CATALOGO[azione.mossa];
     if (!mossa) return no('mossa-sconosciuta', 'Mossa sconosciuta: ' + azione.mossa);
     if (whitelist && whitelist.indexOf(azione.mossa) === -1) {
@@ -505,6 +573,10 @@
     } catch (e) {
       return no('non-si-legge', e.message);
     }
+    // Quello che lo studente digita è input quanto il resto: `x/y` si legge
+    // benissimo, e sarebbe `equivalenti` a sollevare, due righe più sotto.
+    const dominioScritto = nelDominio(scritto);
+    if (!dominioScritto.ok) return dominioScritto;
 
     const selezione = trovaNodo(albero, azione.nodo);
     if (!equivalenti(selezione, scritto)) {
