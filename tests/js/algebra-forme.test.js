@@ -236,3 +236,76 @@ test('i problemi indicano il nodo, così l interfaccia può puntarlo', () => {
   const r = traguardo(albero, { forma: 'normale' });
   assert.strictEqual(typeof r.problemi[0].nodo, 'number');
 });
+
+// --- Che cosa vuol dire `ax=b` quando le lettere sono più d'una --------------
+// `a` e `b` non devono contenere L'INCOGNITA — non "devono essere numeri". Con
+// una lettera sola le due letture coincidono ed è per questo che la differenza
+// era rimasta nascosta; con i parametri no, e va detto quale lettera è quella
+// da isolare.
+
+test('con una lettera sola l\'incognita si indovina, come sempre', () => {
+  assert.ok(trag('6x = 12', { forma: 'ax=b' }).ok);
+  assert.ok(trag('-3y = 5', { forma: 'ax=b' }).ok);
+  // e dichiararla non cambia niente
+  assert.ok(trag('6x = 12', { forma: 'ax=b', incognita: 'x' }).ok);
+});
+
+test('con più lettere il traguardo non indovina: lo chiede all\'autore', () => {
+  // Prima pescava la prima in ordine alfabetico. Su `ax = b` giudicava rispetto
+  // alla `a` e diceva che a destra "deve restare solo un numero": lo studente
+  // andava a cercare un errore che non c'era.
+  for (const src of ['xy = 1', '2xy = 4', 'ax = b']) {
+    assert.strictEqual(primo(trag(src, { forma: 'ax=b' })), 'incognita-ambigua',
+      'accettata senza incognita dichiarata: ' + src);
+  }
+  assert.match(trag('ax = b', { forma: 'ax=b' }).problemi[0].messaggio, /incognita/);
+});
+
+test('dichiarata l\'incognita, i coefficienti letterali sono leciti', () => {
+  // È il traguardo delle equazioni letterali: `ax = b` È in forma `ax=b`, con
+  // `a` e `b` parametri. Se qui si pretendesse un numero, quel tipo di
+  // esercizio non si potrebbe proprio dichiarare.
+  assert.ok(trag('ax = b', { forma: 'ax=b', incognita: 'x' }).ok);
+  assert.ok(trag('2xy = 4', { forma: 'ax=b', incognita: 'x' }).ok);
+  assert.ok(trag('xy = 1', { forma: 'ax=b', incognita: 'x' }).ok);
+});
+
+test('ma l\'incognita a destra resta un problema, e lo dice con la lettera giusta', () => {
+  assert.strictEqual(primo(trag('ax = bx', { forma: 'ax=b', incognita: 'x' })), 'destra-non-costante');
+  assert.match(trag('ax = bx', { forma: 'ax=b', incognita: 'x' }).problemi[0].messaggio, /la x/);
+  // con una lettera sola il messaggio resta quello di prima, più diretto
+  assert.match(trag('2x = 8 - 3', { forma: 'ax=b' }).problemi[0].messaggio, /solo un numero/);
+});
+
+test('un\'incognita che non compare: lo dice invece di giudicare a vuoto', () => {
+  assert.strictEqual(primo(trag('ay = b', { forma: 'ax=b', incognita: 'x' })), 'senza-incognita');
+  assert.strictEqual(primo(trag('2 = 2', { forma: 'ax=b' })), 'senza-incognita');
+});
+
+test('a sinistra il grado nell\'incognita resta 1: i parametri non lo alzano', () => {
+  assert.strictEqual(primo(trag('ax^2 = b', { forma: 'ax=b', incognita: 'x' })), 'sinistra-non-monomio');
+  assert.ok(trag('a^2x = b', { forma: 'ax=b', incognita: 'x' }).ok, 'a^2 è un parametro qualsiasi');
+});
+
+// --- Il traguardo si interroga a ogni passaggio: non deve sollevare ----------
+
+test('uno stato fuori dominio non fa cadere il traguardo', () => {
+  // `x/y` si scrive e si legge: è uno STATO che lo studente può raggiungere.
+  // Il traguardo viene chiesto a ogni mossa per sapere se accendersi, e
+  // sollevare lì vorrebbe dire far sparire l'esercizio a metà.
+  for (const spec of [{ forma: 'ax=b' }, { forma: 'normale' }, { forma: 'ridotta' }, { isola: 'x' }]) {
+    let esito;
+    assert.doesNotThrow(() => { esito = traguardo(parse('x/y = 1'), spec); }, JSON.stringify(spec));
+    assert.strictEqual(esito.ok, false);
+    assert.strictEqual(esito.problemi[0].codice, 'fuori-dominio');
+  }
+  assert.strictEqual(primo(trag('x/y + 1', { forma: 'ridotta' })), 'fuori-dominio');
+  assert.strictEqual(primo(trag('2/x = 3', { forma: 'normale' })), 'fuori-dominio');
+});
+
+test('ma un traguardo dichiarato male deve ancora fermare la build', () => {
+  // La differenza è chi ha sbagliato: uno stato illeggibile è dello studente e
+  // si racconta, una spec inventata è dell'autore e deve saltare fuori subito.
+  assert.throws(() => trag('x = 1', { forma: 'boh' }), /Traguardo sconosciuto/);
+  assert.throws(() => trag('x = 1', null), /Traguardo non dichiarato/);
+});

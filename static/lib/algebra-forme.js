@@ -21,13 +21,26 @@
  *   { isola: 'y' }         `y = ...`, con la y sparita da destra
  *
  * `{ isola: 'x' }` è anche "risolvi l'equazione": non serve un caso a parte.
+ *
+ * In `ax=b` la `a` e la `b` non devono contenere L'INCOGNITA — non "devono
+ * essere numeri". La differenza si vede solo con più di una lettera, ed è lì
+ * che l'autore deve dire quale sia l'incognita:
+ *
+ *   { forma: 'ax=b' }                    `6x = 12` — una lettera sola, è quella
+ *   { forma: 'ax=b', incognita: 'x' }    `ax = b`  — a e b sono parametri
+ *
+ * Senza `incognita` e con più lettere in campo il traguardo NON indovina: prima
+ * pescava la prima in ordine alfabetico, e su `ax = b` giudicava rispetto alla
+ * `a`, dicendo che a destra "deve restare un numero" — un messaggio che manda
+ * lo studente a cercare un errore che non c'è. Ora dice all'autore che gli
+ * manca una riga di configurazione.
  */
 
 (function (host, base) {
   if (!base || !base.canonicalizza) {
     throw new Error('algebra-forme.js: static/lib/algebra-canonica.js va caricato prima (vedi templates/_assets.html)');
   }
-  const { canonicalizza } = base;
+  const { canonicalizza, nelDominio } = base;
 
   const problema = (codice, messaggio, nodo) => ({ codice, messaggio, nodo: nodo ? nodo.id : null });
   const esito = (problemi) => ({ ok: problemi.length === 0, problemi });
@@ -246,9 +259,18 @@
   function traguardoLineare(albero, incognita) {
     if (albero.type !== 'eq') return NON_EQUAZIONE();
     const lettere = lettereDi(albero);
+    if (!incognita && lettere.length > 1) {
+      return esito([problema('incognita-ambigua',
+        'Ci sono più lettere (' + lettere.join(', ') + '): il traguardo deve dire '
+        + 'qual è l\'incognita, per esempio { forma: "ax=b", incognita: "x" }', albero)]);
+    }
     const x = incognita || lettere[0];
     if (!x) {
       return esito([problema('senza-incognita', 'Non c\'è nessuna incognita', null)]);
+    }
+    if (lettere.indexOf(x) === -1) {
+      return esito([problema('senza-incognita',
+        'La ' + x + ' non compare più: non c\'è niente da portare in questa forma', albero)]);
     }
 
     const sinistra = canonicalizza(albero.left);
@@ -256,7 +278,7 @@
 
     // I membri scambiati sono un caso a sé: c'è una mossa apposta, e dirlo è
     // più utile che ripetere che a sinistra manca l'incognita.
-    if (sinistra.èCostante && destra.gradoIn(x) === 1) {
+    if (sinistra.gradoIn(x) === 0 && destra.gradoIn(x) === 1) {
       return esito([problema('membri-scambiati',
         'I membri sono scambiati: l\'incognita va a sinistra', albero)]);
     }
@@ -265,10 +287,15 @@
     // (`èCostante`) e quello sulla SCRITTURA (`terminiDi`). `8 - 3` vale una
     // costante ma è ancora una somma da fare, e `6x + 0` è un monomio solo per
     // la forma canonica: sullo schermo ci sono ancora due termini.
+    // Il confronto è sempre CON L'INCOGNITA, mai con "è un numero": con una
+    // lettera sola le due cose coincidono, con i parametri no, ed è la seconda
+    // a essere quella giusta (`ax = b` è in forma `ax=b`).
     const problemi = [];
-    if (terminiDi(albero.right).length > 1 || !destra.èCostante) {
+    if (terminiDi(albero.right).length > 1 || destra.gradoIn(x) !== 0) {
       problemi.push(problema('destra-non-costante',
-        'A destra deve restare solo un numero', albero.right));
+        lettere.length > 1
+          ? 'A destra non deve restare la ' + x
+          : 'A destra deve restare solo un numero', albero.right));
     } else {
       problemi.push(...monomioNormale(albero.right).problemi);
     }
@@ -311,6 +338,17 @@
   function traguardo(albero, spec) {
     if (!spec || typeof spec !== 'object') throw new Error('Traguardo non dichiarato');
 
+    // Un traguardo mal dichiarato è un errore d'autore e deve fermare la build:
+    // quello continua a sollevare, sotto. Un albero fuori dominio invece è uno
+    // STATO che lo studente può raggiungere scrivendo (`x/y` si digita e si
+    // legge), e il traguardo lo si interroga a ogni passaggio per sapere se
+    // accendersi: sollevare lì vorrebbe dire far sparire l'esercizio a metà.
+    const dominio = nelDominio(albero);
+    if (!dominio.ok) {
+      return esito([problema('fuori-dominio',
+        'Non so ancora giudicare questa scrittura: ' + dominio.messaggio, albero)]);
+    }
+
     let risultato;
     if (spec.isola) risultato = traguardoIsola(albero, spec.isola);
     else if (spec.forma === 'ridotta') risultato = traguardoRidotta(albero);
@@ -326,6 +364,7 @@
   // "ordina per grado" a chi ha ancora termini simili da sommare manderebbe
   // avanti nell'ordine sbagliato.
   const URGENZA = [
+    'fuori-dominio', 'incognita-ambigua',
     'non-equazione', 'non-espressione', 'senza-incognita', 'membri-scambiati',
     'destra-non-zero', 'destra-non-costante', 'non-isolata', 'lettera-a-destra',
     'sinistra-non-monomio', 'fattore-non-monomio', 'esponente-negativo',

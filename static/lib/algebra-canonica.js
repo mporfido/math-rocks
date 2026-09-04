@@ -269,6 +269,29 @@
   }
 
   /**
+   * L'albero sta dentro al dominio? Il parser accetta più di quanto la forma
+   * canonica sappia trattare — `x/y` si scrive e si legge, ma non si sa dire di
+   * che grado sia — e chi ha bisogno del polinomio deve poterlo CHIEDERE PRIMA
+   * invece di scoprirlo con un'eccezione a metà lavoro.
+   *
+   * Sta qui, accanto a `canonicalizza`, perché il dominio è suo: le mosse e i
+   * traguardi lo interrogano, non lo ridefiniscono ciascuno per conto proprio.
+   */
+  function nelDominio(n) {
+    try {
+      if (n.type === 'eq') {
+        canonicalizza(n.left);
+        canonicalizza(n.right);
+      } else {
+        canonicalizza(n);
+      }
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, codice: 'fuori-dominio', messaggio: e.message };
+    }
+  }
+
+  /**
    * Valuta l'albero dando un valore alle lettere. Serve ai test come oracolo
    * indipendente dalla forma canonica (due implementazioni che sbagliano allo
    * stesso modo non si smentiscono a vicenda), e servirà al componente per i
@@ -303,6 +326,7 @@
   host.Poly = Poly;
   host.canonicalizza = canonicalizza;
   host.equivalenti = equivalenti;
+  host.nelDominio = nelDominio;
   host.valuta = valuta;
 })(
   typeof window !== 'undefined'

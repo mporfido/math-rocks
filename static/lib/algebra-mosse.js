@@ -29,7 +29,7 @@
     throw new Error('algebra-mosse.js: static/lib/algebra-forme.js va caricato prima (vedi templates/_assets.html)');
   }
   const {
-    parse, scrivi, canonicalizza, equivalenti, sostituisci, trovaNodo, trovaGenitore,
+    parse, scrivi, canonicalizza, equivalenti, nelDominio, sostituisci, trovaNodo, trovaGenitore,
     creaNodo, creaNumero, terminiDi, monomioNormale, parteLetterale,
   } = base;
 
@@ -115,25 +115,6 @@
     const membro = membroDi(albero, id);
     if (!membro) return false;
     return terminiDi(membro).some((t) => t.nodo.id === id);
-  }
-
-  /**
-   * Il pezzo sta dentro al dominio del componente? Fuori (una divisione per
-   * una lettera, un esponente negativo su una lettera) `canonicalizza` solleva,
-   * e siccome quasi ogni mossa ha bisogno della forma canonica — per giudicare
-   * o per eseguire — l'unico modo di non sollevare a metà è CHIEDERLO PRIMA.
-   *
-   * Il parser accetta più di quanto la forma canonica sappia trattare: `x/y`
-   * si scrive e si legge, ma non si sa dire di che grado sia. Il confine passa
-   * di qui, ed è bene che passi in un posto solo.
-   */
-  function nelDominio(nodo) {
-    try {
-      canonicalizza(nodo);
-      return sì();
-    } catch (e) {
-      return no('fuori-dominio', e.message);
-    }
   }
 
   /**
