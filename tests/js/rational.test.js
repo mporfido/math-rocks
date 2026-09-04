@@ -90,8 +90,8 @@ test('isInteger', () => {
 test('toLatex: il segno esce dalla frazione', () => {
   assert.strictEqual(r(3, 1).toLatex(), '3');
   assert.strictEqual(r(-3, 1).toLatex(), '-3');
-  assert.strictEqual(r(1, 2).toLatex(), '\frac{1}{2}');
-  assert.strictEqual(r(-1, 2).toLatex(), '-\frac{1}{2}');
+  assert.strictEqual(r(1, 2).toLatex(), '\\frac{1}{2}');
+  assert.strictEqual(r(-1, 2).toLatex(), '-\\frac{1}{2}');
 });
 
 test('toString: forma lineare a/b', () => {

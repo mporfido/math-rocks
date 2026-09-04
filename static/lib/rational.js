@@ -11,10 +11,18 @@
  *     che i file successivi di `static/lib/` estendono (non lo sostituiscono);
  *   - in Node è un modulo CommonJS, così `tests/js/` lo può provare senza DOM.
  *
+ * Tutto sta dentro una IIFE, come gli altri file di `static/lib/`. Non è
+ * cosmesi: fra due `<script>` classici lo scope lessicale globale è UNO, quindi
+ * un `const Rational` qui fuori collide con il `const { Rational } = ...` di
+ * `components/expr.js` e il browser rifiuta di parsare il secondo file — il
+ * componente non si registra e la scheda resta muta, senza niente a schermo che
+ * dica perché. Fuori di qui passa solo il namespace.
+ *
  * L'aritmetica è ESATTA: le frazioni non diventano mai decimali. È un vincolo
  * didattico, non un vezzo — `1/3` deve restare `1/3` fino in fondo.
  */
 
+(function () {
 // Limiti di sicurezza sull'input. In una lezione l'espressione la scrive
 // l'autore, ma la stessa espressione può arrivare dai parametri di un URL
 // (pagina-strumento), quindi non è più input fidato: senza questi limiti un
@@ -76,7 +84,7 @@ class Rational {
   toLatex() {
     if (this.den === 1) return String(this.num);
     const sign = this.num < 0 ? '-' : '';
-    return `${sign}\frac{${Math.abs(this.num)}}{${this.den}}`;
+    return `${sign}\\frac{${Math.abs(this.num)}}{${this.den}}`;
   }
 
   /** Rappresentazione testuale lineare (per i marker / debug). */
@@ -97,3 +105,4 @@ if (typeof window !== 'undefined') {
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = Algebra;
 }
+})();
