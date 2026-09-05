@@ -34,7 +34,7 @@
 
 {% block scripts %}
 {{ assets.component_scripts() }}
-<!-- Implementazione dello strumento (whitelist `TOOL_KINDS` in routes/tools.py) -->
+<!-- Implementazione dello strumento (whitelist `TOOL_KINDS` in tools_config.py) -->
 <script src="{{ url_for('static', filename='tools/' ~ tool.kind ~ '.js') }}"></script>
 {{ assets.mathjax_refresh(tool.math) }}
 {% endblock %}

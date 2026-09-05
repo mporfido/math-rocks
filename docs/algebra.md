@@ -221,6 +221,38 @@ in classe. L'elenco degli id vive in `static/lib/algebra-mosse.json`.
 > facile togliere senza accorgersene la mossa che serviva a chiudere — tipico:
 > l'esercizio finisce con un `2x/2` e manca `normalizza-monomio`.
 
+## Fuori da un corso: `/tools/equazioni/`
+
+La stessa lavagna esiste anche **a pagina intera**, configurata dall'indirizzo
+invece che dal markdown: serve a mandare alla classe una scheda senza scrivere
+una lezione. Nella pagina c'è un **costruttore** ("Componi una scheda e ottieni
+il link"): si scrivono le equazioni una per riga, si sceglie il traguardo, se
+serve si limitano le mosse, e si copia il link.
+
+```
+/tools/equazioni/?eq=2x%2B3%3D8&eq=5x%2B4-2x%3D9&forma=ax%3Db&titolo=Per%20gioved%C3%AC
+```
+
+| Parametro | Significato |
+|---|---|
+| `eq` | un'equazione; ripetibile (`?eq=…&eq=…`) o con più voci separate da `\|` |
+| `isola` | la variabile da isolare |
+| `forma` | `ax=b`, `normale` o `ridotta` |
+| `incognita` | la lettera, solo con `forma=ax=b` e solo se ce n'è più d'una |
+| `libera` | `1` → nessun traguardo (batte quello di partenza dell'istanza) |
+| `mosse` | gli id abilitati, separati da `;` |
+| `titolo` | titolo della scheda |
+| `noeditor` | `1` → pagina "per gli studenti": solo la scheda, senza costruttore |
+
+**Il traguardo è della scheda, non della singola equazione**: una scheda è un
+compito solo. Per mescolare traguardi servono più link — o una lezione, dove i
+blocchi `:::algebra` sono già uno per esercizio.
+
+L'altra differenza è che qui l'equazione **non è più fidata**: nel markdown la
+controlla la build, in un link la può scrivere chiunque. Equazione, traguardo e
+id di mossa vengono quindi validati nel browser prima del mount, e quello che
+non passa viene scartato con un avviso invece di far fallire la pagina.
+
 ## Errori tipici
 
 | Sintomo | Causa |

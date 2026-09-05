@@ -1082,7 +1082,14 @@ img, canvas, svg, video {
     color: var(--ink-soft);
 }
 
+/* `display: flex` batterebbe l'attributo `hidden` del campo che non serve
+   (la variabile da isolare compare solo con i traguardi che ne vogliono una). */
+.tool-field[hidden] {
+    display: none;
+}
+
 .tool-field input,
+.tool-field select,
 .tool-field textarea {
     font-family: var(--font-mono);
     font-size: 0.95rem;
@@ -1096,6 +1103,7 @@ img, canvas, svg, video {
 }
 
 .tool-field input:focus,
+.tool-field select:focus,
 .tool-field textarea:focus {
     outline: 2px solid var(--ink);
     outline-offset: 1px;
@@ -1122,6 +1130,21 @@ img, canvas, svg, video {
 
 .tool-check input:disabled + span {
     color: var(--locked);
+}
+
+/* Le mosse da spuntare, quando la scheda ne abilita solo alcune: sono una
+   quindicina, e in colonna sola spingerebbero il link fuori dallo schermo. */
+.tool-moves[hidden] {
+    display: none;   /* `display: grid` batterebbe l'attributo, come sopra */
+}
+
+.tool-moves {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 0.4rem 1rem;
+    padding: 0.75rem;
+    border: 1px dashed var(--line);
+    border-radius: 6px;
 }
 
 .tool-builder-errors:empty {

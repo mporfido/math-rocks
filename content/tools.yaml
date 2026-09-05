@@ -7,7 +7,7 @@
 #
 # Campi:
 #   id           segmento dell'URL (/tools/<id>/)
-#   kind         tipo di strumento fornito dall'engine (per ora: expr)
+#   kind         tipo di strumento fornito dall'engine (expr, algebra, theory)
 #   title        titolo mostrato
 #   description  sottotitolo / spiegazione breve
 #   icon         emoji opzionale per la card nell'elenco
@@ -43,6 +43,23 @@ tools:
         - "2^3 * 2^4"
         - "(3^2)^3 : 3^4"
         - "5^6 : 5^2 * 5"
+
+  - id: equazioni
+    kind: algebra
+    title: La lavagna delle mosse
+    description: >-
+      Un'equazione si trasforma una mossa per volta, con i principi di
+      equivalenza: gli stati sbagliati non sono raggiungibili.
+    icon: "⚖️"
+    # La lavagna disegna la scrittura con il proprio DOM (span, non LaTeX):
+    # MathJax qui non serve a niente.
+    math: false
+    defaults:
+      forma: "ax=b"
+      eq:
+        - "2x + 3 = 8"
+        - "5x + 4 - 2x = 9"
+        - "3(x - 1) = x + 5"
 
   - id: geometria
     kind: theory

@@ -65,7 +65,7 @@ math-rocks/
 │   ├── sketches/               # Sketch p5 riusabili: un file per sketch, caricati
 │   │                           # on-demand da <x-p5> (window.P5Sketches['<nome>'])
 │   └── tools/                  # Implementazioni delle pagine-strumento: un file per
-│                               # `kind` (expr.js), montato da tool.html
+│                               # `kind` (expr.js, algebra.js), montato da tool.html
 │
 ├── content/                    # Contenuti dei corsi (sorgente)
 │   ├── tools.yaml              # Config di ISTANZA: quali strumenti espone il sito
