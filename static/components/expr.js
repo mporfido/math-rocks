@@ -127,6 +127,18 @@ function canonicalRebase(p) {
 
 /** Parsa l'input dello studente ("4", "-5", "4/3", "3^6") in un valore, o null. */
 function parseValue(str) {
+  // Il contratto è «o un valore o null», e va mantenuto anche per un numero
+  // enorme: qui non passa dal tokenizer, quindi `MAX_DIGITS` non l'ha filtrato,
+  // e costruire un Rational fuori dai numeri esatti ora solleva. Una risposta
+  // che non si sa leggere è una risposta sbagliata, non un componente rotto.
+  try {
+    return leggiValore(str);
+  } catch (e) {
+    return null;
+  }
+}
+
+function leggiValore(str) {
   const s = String(str).trim().replace(/−/g, '-').replace(/\s+/g, '');
   if (s === '') return null;
   // Potenza: "3^6", "(-2)^3" — base intera (parentesi opzionali), esponente intero.
@@ -316,7 +328,17 @@ function applicableResults(op, a, b, powersMode) {
     return results;
   }
   if (!powersMode) return results; // in default `Power` non esiste mai
+  try {
+    return regolePotenze(op, a, b, powA, powB, results);
+  } catch (err) {
+    // Come per R0: se il conto esce dai numeri esatti (basi grandi moltiplicate
+    // fra loro) la mossa risulta non applicabile, invece di far cadere il
+    // componente sotto le dita dello studente.
+    return results;
+  }
+}
 
+function regolePotenze(op, a, b, powA, powB, results) {
   // Numero uguale alla base letto come potenza a esponente 1 (a · a^n, a^n : a).
   const pa = powA ? a : (powB && b.base.equals(a) ? new Power(a, new Rational(1)) : null);
   const pb = powB ? b : (powA && a.base.equals(b) ? new Power(b, new Rational(1)) : null);

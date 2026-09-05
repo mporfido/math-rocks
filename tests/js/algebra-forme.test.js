@@ -15,7 +15,7 @@ const test = require('node:test');
 const assert = require('node:assert');
 
 const {
-  parse, monomioNormale, polinomioRidotto, traguardo, fattoriDi, terminiDi,
+  parse, monomioNormale, polinomioRidotto, traguardo, fattoriDi, terminiDi, canonicalizza,
 } = require('../../static/lib/algebra-forme.js');
 
 const mono = (src) => monomioNormale(parse(src));
@@ -308,4 +308,24 @@ test('ma un traguardo dichiarato male deve ancora fermare la build', () => {
   // si racconta, una spec inventata è dell'autore e deve saltare fuori subito.
   assert.throws(() => trag('x = 1', { forma: 'boh' }), /Traguardo sconosciuto/);
   assert.throws(() => trag('x = 1', null), /Traguardo non dichiarato/);
+});
+
+// --- Il confine si sente anche da qui ---------------------------------------
+
+test('un\'espansione che uscirebbe dai numeri esatti si ferma, e lo dice', () => {
+  // Misurato: i coefficienti di `(2x + 3)^n` restano esatti fino a n = 23 e
+  // sfondano a 24. Nessuna lezione ci arriva — ma la pagina-strumento prende
+  // l'espressione dalla query string, e lì non la scrive l'autore.
+  assert.doesNotThrow(() => canonicalizza(parse('(2x + 3)^20')));
+  assert.throws(() => canonicalizza(parse('(2x + 3)^24')), /troppo grandi/);
+});
+
+test('e il traguardo lo racconta invece di cadere', () => {
+  // Stessa ragione del fuori dominio: `traguardo` viene interrogato a ogni
+  // passaggio, e non può essere lui a far sparire l'esercizio.
+  let esito;
+  assert.doesNotThrow(() => { esito = traguardo(parse('(2x + 3)^24 = 0'), { forma: 'normale' }); });
+  assert.strictEqual(esito.ok, false);
+  assert.strictEqual(esito.problemi[0].codice, 'fuori-dominio');
+  assert.match(esito.problemi[0].messaggio, /troppo grandi/);
 });
