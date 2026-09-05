@@ -2348,7 +2348,7 @@ x-algebra {
 .alg-zona[data-meta="left"] { left: 0.4rem; }
 .alg-zona[data-meta="right"] { right: 0.4rem; }
 
-.alg-lavagna.alg-trascinando .alg-zona { display: flex; }
+.alg-lavagna.alg-con-uguale.alg-trascinando .alg-zona { display: flex; }
 
 .alg-zona.attiva {
     border-color: var(--ink);

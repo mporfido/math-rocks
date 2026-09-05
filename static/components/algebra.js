@@ -240,6 +240,10 @@ class XAlgebra extends HTMLElement {
   // -- Disegno ---------------------------------------------------------------
 
   disegna() {
+    // Le zone "a sinistra/a destra" hanno senso solo per il trasporto
+    // attraverso l'uguale: in un'espressione non c'è un'altra parte dove
+    // portare un termine.
+    this.lavagna.classList.toggle('alg-con-uguale', this.albero.type === 'eq');
     // Gli id dei nodi finiscono in `data-nodo`, e lo svolgimento contiene
     // vecchi alberi con gli stessi id: ogni ricerca è quindi ristretta alla
     // scrittura viva, mai fatta sul documento.
