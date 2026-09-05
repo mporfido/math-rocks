@@ -30,7 +30,10 @@ test('il termine riscritto sostituisce anche il segno esterno', () => {
     ['a-(-1x)', 'semplifica', '+x', 'a + x'],
     ['a-(2*3)', 'calcola', '-6', 'a - 6'],
     ['a-(2x+3x)', 'riduci-simili', '-5x', 'a - 5x'],
-    ['a-2(x+3)', 'espandi', '-2x-6', 'a + (-2x - 6)'],
+    // Uno sviluppo con il meno davanti è più di un termine, e i suoi termini
+    // si agganciano alla somma che c'era: rimetterli come termine solo
+    // scriverebbe `a + (-2x - 6)`, cioè la parentesi appena tolta.
+    ['a-2(x+3)', 'espandi', '-2x-6', 'a - 2x - 6'],
   ]) {
     const n = A.parse(src);
     const esito = A.applicaMossa(n, {mossa, nodo: n.right.id, digitato, parametri: {conSegno: true}});

@@ -33,6 +33,8 @@ BLOCCHI = [
     ('g2', '3 + 2x - y = 0', '{"forma":"normale"}'),
     ('g3', '2x + 4 + 5x = 0', '{"forma":"normale"}'),
     ('g4', '2x + 5x = 0', '{"forma":"normale"}'),
+    # Dentro a una parentesi: i termini che nascono da un prodotto notevole.
+    ('g5', 'x/2 + 9(4x^2 - 1/9 - (4x^2 - 4/3x + 1/9)) = 0', '{"forma":"normale"}'),
 ]
 
 # Alta abbastanza da tenere tutte le lavagne dentro la finestra: il collaudo usa

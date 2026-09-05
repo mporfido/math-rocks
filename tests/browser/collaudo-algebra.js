@@ -228,6 +228,58 @@
     asserisci(A.scrivi(c.albero) === '7x + 4 = 0', 'dopo la somma: ' + A.scrivi(c.albero));
   });
 
+  /**
+   * Dentro a una parentesi si gioca come fuori.
+   *
+   * Il caso è quello vero: `9[(2x−1/3)(2x+1/3) − (2x−1/3)²]` svolto diventa
+   * `9(4x² − 1/9 − (4x² − 4/3x + 1/9))`, e lì lo studente vuole togliere il
+   * meno davanti alla parentesi e sommare i due `4x²`. Il motore lo sapeva
+   * fare, ma i pezzi non erano nemmeno afferrabili: il componente marcava
+   * come termini solo quelli del MEMBRO, e la parentesi ne è fuori.
+   */
+  prova('dentro a una parentesi: si toglie il meno e si sommano i simili', () => {
+    const c = document.getElementById('g5');
+
+    scegli(c, '4x^2 - 4/3x + 1/9');
+    premi(c, 'Svolgi il prodotto');
+    // Il campo parte dal pezzo COL suo meno: è quello che si sta riscrivendo.
+    asserisci(c.campoEl.value === '-(4x^2 - 4/3x + 1/9)',
+      'il campo propone: «' + c.campoEl.value + '»');
+    scrivi(c, '-4x^2 + 4/3x - 1/9');
+    asserisci(A.scrivi(c.albero) === 'x / 2 + 9(4x^2 - 1/9 - 4x^2 + 4/3x - 1/9) = 0',
+      'dopo lo sviluppo: ' + A.scrivi(c.albero));
+
+    // I due 4x², dentro alla parentesi: si prendono in mano e si sommano.
+    const quadrati = [];
+    A.visita(c.albero, (n) => { if (A.scrivi(n) === '4x^2') quadrati.push(n); });
+    asserisci(quadrati.length === 2, 'quadrati trovati: ' + quadrati.length);
+    for (const q of quadrati) {
+      asserisci(spanDi(c, q.id).classList.contains('alg-termine'),
+        'un 4x² dentro alla parentesi non è afferrabile');
+    }
+    const bersaglio = centro(spanDi(c, quadrati[0].id));
+    const preso = spanDi(c, quadrati[1].id);
+    const da = centro(preso);
+    punta(preso, 'pointerdown', da.x, da.y);
+    punta(c.lavagna, 'pointermove', da.x + 30, da.y);
+    punta(c.lavagna, 'pointermove', bersaglio.x, bersaglio.y);
+    punta(c.lavagna, 'pointerup', bersaglio.x, bersaglio.y);
+    asserisci(c.daDigitare === 'riduci-coppia', 'mossa in attesa: ' + c.daDigitare);
+    scrivi(c, '0');
+    asserisci(A.scrivi(c.albero) === 'x / 2 + 9(0 - 1/9 + 4/3x - 1/9) = 0',
+      'dopo la somma: ' + A.scrivi(c.albero));
+
+    // Lo zero si cancella lì, senza aspettare che la parentesi sparisca.
+    scegli(c, '0');
+    premi(c, 'Elimina il termine nullo');
+    asserisci(A.scrivi(c.albero) === 'x / 2 + 9(-1/9 + 4/3x - 1/9) = 0',
+      'dopo la cancellazione: ' + A.scrivi(c.albero));
+
+    // Il 9 è un fattore, non un termine: non si prende in mano.
+    asserisci(!spanDi(c, nodoScritto(c, '9').id).classList.contains('alg-termine'),
+      'il fattore 9 è afferrabile come un termine');
+  });
+
   prova('un risultato sbagliato non entra, e dice perché', () => {
     const c = document.getElementById('g4');
     scegliNodo(c, c.albero.left);

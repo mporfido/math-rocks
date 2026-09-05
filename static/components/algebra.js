@@ -299,23 +299,30 @@ class XAlgebra extends HTMLElement {
     this.annullaEl.disabled = this.azioni.length === 0;
   }
 
-  /** I termini di primo livello sono i pezzi che si trascinano: solo loro. */
+  /** I termini di una somma sono i pezzi che si trascinano: solo loro. */
   marcaTermini() {
-    for (const termine of this.terminiDiPrimoLivello()) {
+    for (const termine of this.terminiMobili()) {
       const span = this.scrittura.querySelector('[data-nodo="' + termine.id + '"]');
       if (!span) continue;
       span.classList.add('alg-termine');
     }
   }
 
-  /** I termini di primo livello dei due membri (o dell'unico, se non è
-   *  un'equazione), nell'ordine in cui si leggono. */
-  terminiDiPrimoLivello() {
-    const membri = this.albero.type === 'eq'
-      ? [this.albero.left, this.albero.right]
-      : [this.albero];
-    return membri.reduce(
-      (tutti, m) => tutti.concat(this.A.terminiDi(m).map((t) => t.nodo)), []);
+  /**
+   * I pezzi che si prendono in mano: non «i termini del membro», ma i termini
+   * della somma che li contiene — dentro a `9(4x² − 1/9 − 4x² + 4/3x − 1/9)`
+   * ci sono cinque termini da rimescolare, e sono quasi tutti quelli che
+   * nascono da un prodotto notevole. Chi lo sa dire è il motore: se
+   * `postoDelTermine` risponde, quel nodo è un termine di qualche somma.
+   * Si annidano (un termine sta dentro al termine `9(…)`), e vale il più
+   * interno: lo trova `closest` in `termineChiude`.
+   */
+  terminiMobili() {
+    const mobili = [];
+    this.A.visita(this.albero, (n) => {
+      if (n.type !== 'eq' && this.A.postoDelTermine(this.albero, n.id)) mobili.push(n);
+    });
+    return mobili;
   }
 
   disegnaMenu() {
@@ -681,23 +688,29 @@ class XAlgebra extends HTMLElement {
     const posto = preso && this.A.postoDelTermine(this.albero, this.trascinato);
     if (!posto) return null;
 
-    if (this.albero.type === 'eq') {
+    // Il trasporto porta un termine oltre l'uguale, quindi vuole un termine
+    // DEL MEMBRO: un pezzo dentro a una parentesi non può uscirne da solo, e
+    // il gesto verso l'altra metà non deve nemmeno proporglielo.
+    const suaSomma = posto.membro.id;
+    const diUnMembro = this.albero.type === 'eq'
+      && (suaSomma === this.albero.left.id || suaSomma === this.albero.right.id);
+    if (diUnMembro) {
       const uguale = this.scrittura.querySelector('.alg-uguale');
       if (uguale) {
         const r = uguale.getBoundingClientRect();
         const meta = e.clientX < r.left + r.width / 2 ? 'left' : 'right';
-        if (this.albero[meta].id !== posto.membro.id) return { tipo: 'trasporto', meta };
+        if (this.albero[meta].id !== suaSomma) return { tipo: 'trasporto', meta };
       }
     }
 
-    // Stesso membro. Se sotto al puntatore c'è un termine SIMILE, il gesto è
+    // Stessa somma. Se sotto al puntatore c'è un termine SIMILE, il gesto è
     // «sommali»; altrimenti è «mettilo qui».
     const sotto = this.termineChiude(e.target);
     if (sotto && sotto.id !== this.trascinato) {
-      const stessoMembro = posto.termini.some((t) => t.nodo.id === sotto.id);
+      const stessaSomma = posto.termini.some((t) => t.nodo.id === sotto.id);
       const suo = this.A.parteLetterale(sotto);
       const mio = this.A.parteLetterale(preso);
-      if (stessoMembro && suo !== null && suo === mio) {
+      if (stessaSomma && suo !== null && suo === mio) {
         return { tipo: 'simili', bersaglio: sotto.id };
       }
     }
@@ -751,13 +764,18 @@ class XAlgebra extends HTMLElement {
     if (span) span.classList.add(dopoDiLui ? 'alg-prima' : 'alg-dopo');
   }
 
-  /** Il termine di primo livello che contiene quell'elemento del DOM, o null:
-   *  si afferra il `2` di `2x`, ma quel che si sposta è tutto `2x`. */
+  /**
+   * Il termine che contiene quell'elemento del DOM, o null: si afferra il `2`
+   * di `2x`, ma quel che si sposta è tutto `2x`. Il più INTERNO fra i termini
+   * che lo contengono, e per questo si sale nel DOM invece di cercare
+   * nell'albero: `4x²` dentro a `9(…)` sta dentro a due termini annidati, e
+   * quello che si vuole in mano è il primo, non la parentesi intera.
+   */
   termineChiude(elemento) {
-    const id = this.idDalDom(elemento);
-    if (id === null) return null;
-    return this.terminiDiPrimoLivello()
-      .find((t) => t.id === id || this.A.trovaNodo(t, id)) || null;
+    const span = elemento && elemento.closest ? elemento.closest('.alg-termine') : null;
+    if (!span || !this.scrittura.contains(span)) return null;
+    const id = this.idDalDom(span);
+    return id === null ? null : this.A.trovaNodo(this.albero, id);
   }
 
   /** Un pezzo senza mosse lascia scegliere il primo antenato che ne ha.

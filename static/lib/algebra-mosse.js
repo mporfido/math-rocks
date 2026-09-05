@@ -314,19 +314,19 @@
       if (scelto.errore) return scelto.errore;
       const nodo = scelto.nodo;
       if (!canonicalizza(nodo).èZero) return no('non-nullo', 'Questo termine non vale zero');
-      if (!èTermineDiPrimoLivello(albero, id)) {
-        return no('non-termine', 'Si eliminano solo i termini di una somma');
-      }
-      const membro = membroDi(albero, id);
-      if (terminiDi(membro).length < 2) {
+      // La somma, non il membro: uno zero nato dentro a una parentesi si
+      // cancella lì, senza aspettare che la parentesi sparisca.
+      const posto = postoDelTermine(albero, id);
+      if (!posto) return no('non-termine', 'Si eliminano solo i termini di una somma');
+      if (posto.termini.length < 2) {
         return no('unico-termine', 'È rimasto solo questo: uno zero da solo si può scrivere');
       }
       return sì();
     },
     esegui(albero, id) {
-      const membro = membroDi(albero, id);
-      const rimasti = terminiDi(membro).filter((t) => t.nodo.id !== id);
-      return sostituisci(albero, membro.id, costruisciSomma(rimasti));
+      const posto = postoDelTermine(albero, id);
+      const rimasti = posto.termini.filter((t) => t.nodo.id !== id);
+      return sostituisci(albero, posto.membro.id, costruisciSomma(rimasti));
     },
   };
 
@@ -335,15 +335,41 @@
    * oppure null se quel nodo non è un termine di primo livello. Lo condividono
    * tutte le mosse che rimescolano una somma.
    */
-  function postoDelTermine(albero, id) {
+  /**
+   * La somma di cui quel nodo è un termine — non per forza il membro.
+   *
+   * Si sale finché il genitore è ancora un `+` o un `-`, e ci si ferma davanti
+   * a un prodotto, una barra o una potenza: quella è la parentesi. In
+   * `9(4x² - 1/9 - (4x² - 4/3x + 1/9))` la somma da rimescolare è quella
+   * dentro le graffe, non il membro — cercare i termini solo nel membro
+   * lasciava senza nessuna mossa ogni termine scritto dentro a una parentesi,
+   * e sono quasi tutti quelli che nascono da un prodotto notevole.
+   */
+  function sommaDelTermine(albero, id) {
+    const nodo = trovaNodo(albero, id);
+    if (!nodo) return null;
+    let corrente = nodo;
+    for (;;) {
+      const p = trovaGenitore(albero, corrente.id);
+      if (!p || p.type !== 'op' || (p.op !== '+' && p.op !== '-')) break;
+      corrente = p;
+    }
+    if (corrente !== nodo) return corrente;
+    // Nessuna somma sopra: è un termine solo se è tutto il membro. Un fattore
+    // dentro a un prodotto non lo è, e non deve diventarlo.
     const membro = membroDi(albero, id);
+    return membro && membro.id === id ? membro : null;
+  }
+
+  function postoDelTermine(albero, id) {
+    const membro = sommaDelTermine(albero, id);
     if (!membro) return null;
     const termini = terminiDi(membro);
     const indice = termini.findIndex((t) => t.nodo.id === id);
     return indice === -1 ? null : { membro, termini, indice };
   }
 
-  /** Il membro riscritto con quel termine spostato in quella posizione. */
+  /** La somma riscritta con quel termine spostato in quella posizione. */
   function riordina(albero, posto, destinazione) {
     const rimasti = [...posto.termini];
     const [preso] = rimasti.splice(posto.indice, 1);
@@ -491,7 +517,16 @@
         if (f.type === 'neg') { coeff = coeff.mul(new base.Rational(-1)); raccogli(f.operand); }
         else if (f.type === 'op' && f.op === '*') { raccogli(f.left); raccogli(f.right); }
         else if (f.type === 'num') coeff = coeff.mul(f.value);
-        else fattori.push(f);
+        // Una barra con un numero sotto è un fattore numerico come gli altri,
+        // solo scritto al contrario: `12((5x+1)/6)` è il passaggio che nasce
+        // sempre dal minimo comune multiplo, e sul quaderno lì si semplifica
+        // il 12 col 6 e resta `2(5x+1)`. Senza questo caso quel termine non
+        // aveva nessuna mossa: la somma sotto la barra non è un fattore, e
+        // quindi nemmeno `Svolgi il prodotto` la vedeva.
+        else if (f.type === 'op' && f.op === '/' && f.right.type === 'num' && f.right.num !== 0) {
+          coeff = coeff.div(f.right.value);
+          raccogli(f.left);
+        } else fattori.push(f);
       };
       raccogli(n);
       if (!fattori.length || coeff.num === 0) return creaNumero(coeff.num, coeff.den);
@@ -635,7 +670,10 @@
     const lì = postoDelTermine(albero, altro);
     if (!qui || !lì) return { errore: no('non-termine', 'Si sommano i termini di una somma') };
     if (qui.membro.id !== lì.membro.id) {
-      return { errore: no('membri-diversi', 'I due termini stanno in due membri diversi') };
+      // Non più solo «due membri diversi»: da quando i termini si contano
+      // nella somma che li contiene, due termini possono stare anche in due
+      // parentesi diverse dello stesso membro.
+      return { errore: no('somme-diverse', 'I due termini non stanno nella stessa somma') };
     }
     const mia = parteLetterale(scelto.nodo);
     const sua = parteLetterale(altroScelto.nodo);
@@ -891,6 +929,23 @@
       if (!haProdottoDaSvolgere(scelto.nodo)) return no('niente-da-svolgere', 'Qui non c\'è un prodotto da svolgere');
       return sì();
     },
+    /**
+     * Lo sviluppo torna al suo posto DENTRO alla somma che lo conteneva.
+     * Togliere il meno davanti a una parentesi dà più di un termine, e
+     * rimetterli come termine solo scriverebbe `4x² - 1/9 + (-4x² + 4/3x -
+     * 1/9)`: le parentesi che lo studente ha appena tolto, con dentro i segni
+     * già cambiati.
+     */
+    rimpiazza(albero, id, param, scritto) {
+      const p = param && param.conSegno ? trovaGenitore(albero, id) : null;
+      if (!p || p.type !== 'op' || (p.op !== '+' && p.op !== '-') || p.right.id !== id) {
+        return sostituisci(albero, id, scritto);
+      }
+      // `scritto` è il pezzo COL segno: i suoi termini si agganciano a quello
+      // che c'era prima della parentesi, ciascuno con il segno che ha adesso.
+      return sostituisci(albero, p.id,
+        costruisciSomma([{ segno: 1, nodo: p.left }, ...terminiDi(scritto)]));
+    },
     accetta(scritto, contesto) {
       if (!avanzaDistribuzione(contesto.selezione, scritto)) {
         return no('non-svolto', 'Il prodotto non è ancora stato svolto');
@@ -1019,7 +1074,7 @@
   }
 
   function applicabileAllaSelezione(mossa, albero, id, param) {
-    if (param.conSegno && (mossa.id === 'calcola' || mossa.id === 'normalizza-monomio')) {
+    if (param.conSegno && (mossa.id === 'calcola' || mossa.id === 'normalizza-monomio' || mossa.id === 'espandi')) {
       const pezzo = pezzoConSegno(albero, id);
       if (pezzo) return mossa.applicabile(pezzo, pezzo.id, param);
     }

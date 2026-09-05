@@ -2359,8 +2359,9 @@ x-algebra {
 
 /* -- I pezzi ------------------------------------------------------------- */
 
-/* Solo i termini di primo livello si prendono in mano: è il confine delle
-   mosse che rimescolano una somma. */
+/* Si prendono in mano i termini di una somma — anche quelli dentro a una
+   parentesi, che è una somma pure lei. I termini si annidano, e vale il più
+   interno: `closest` lo trova da sé. */
 .alg-termine {
     /* touch-action non si applica agli span inline: ogni termine deve avere
        un proprio box, mantenendo l'allineamento sulla linea di base. */

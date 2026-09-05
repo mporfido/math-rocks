@@ -94,7 +94,9 @@ Fanno tutte la stessa cosa — ogni gesto ha il suo gemello a click.
 - **trascinare un termine**: attraverso l'uguale lo porta dall'altra parte
   (trasporto), su un termine simile apre la somma, di lato lo sposta di posto.
   Si trascina **col dito come col mouse** (schermi touch compresi); lo swipe
-  verticale resta al browser e continua a scorrere la pagina.
+  verticale resta al browser e continua a scorrere la pagina. Si prendono in
+  mano anche i termini scritti **dentro a una parentesi**, e si rimescolano
+  fra loro; il trasporto no, perché porta un termine oltre l'uguale.
 
 Il gesto sui simili e il suo gemello a click non chiedono lo stesso conto, ed è
 voluto. Portando un `3x` sopra un `2x` si è già pensato «cinque x»: da riscrivere
@@ -139,12 +141,28 @@ mancano al traguardo, **quella da sistemare per prima**.
 | `espandi` | svolge un prodotto, prodotti notevoli compresi | **studente** |
 
 **Semplifica** permette, per esempio, `−1(3(x+2))` → `−3(x+2)`,
-`2(3(x+2))` → `6(x+2)` e `a−(−b)` → `a+b`. Selezionando il solo
+`2(3(x+2))` → `6(x+2)` e `a−(−b)` → `a+b`. Un numero **sotto la barra** è un
+fattore numerico come gli altri: dopo aver moltiplicato per il minimo comune
+multiplo, `12((5x+1)/6)` si semplifica in `2(5x+1)`, ed è lì che la somma torna
+a essere un fattore che `espandi` può svolgere. Selezionando il solo
 termine con il suo segno in `a−(−1x)`, si riscrive `x` (anche `+x` va bene).
 Il risultato sostituisce anche il segno esterno. Non basta un'espressione
 equivalente: bisogna semplificare i segni e i fattori numerici senza sviluppare
 o raccogliere le somme. Le parentesi che rendono leggibile `−(−1x)` sono
 automatiche, mentre il calcolo resta dello studente.
+
+**Svolgi il prodotto** vede anche il meno che precede il pezzo, e serve quindi
+a **togliere la parentesi con il segno meno davanti**: su
+`4x² − 1/9 − (4x² − 4/3x + 1/9)`, selezionata la parentesi, si scrive
+`−4x² + 4/3x − 1/9` e i suoi termini si agganciano alla somma che c'era
+(`4x² − 1/9 − 4x² + 4/3x − 1/9`), invece di rientrare in una parentesi nuova.
+
+**Un termine è un termine della somma che lo contiene, non del membro.** In
+`9(4x² − 1/9 − 4x² + 4/3x − 1/9)` i termini si spostano, si sommano a due a due
+e si cancellano *dentro* alla parentesi, senza aspettare che sparisca. Un
+fattore, invece, non è un termine: il `9` lì fuori non si sposta. Il trasporto
+resta l'eccezione — porta un termine dall'altra parte dell'uguale, e quindi
+vuole un termine del membro.
 
 Il menu evita comandi equivalenti: fra le mosse abilitate e applicabili al
 pezzo **con il suo segno**, dà precedenza a **Calcola**, poi a **Scrivi il

@@ -189,7 +189,7 @@ test('la coppia rifiuta quello che non è la somma dei due', () => {
   assert.strictEqual(applicaMossa(a, { ...coppia, digitato: '2x + 3x' }).codice, 'non-ridotto');
 });
 
-test('la coppia vuole due termini simili dello stesso membro', () => {
+test('la coppia vuole due termini simili della stessa somma', () => {
   const a = parse('2x + 3y = 10 + 4x');
   const da = nodoScritto(a, '2x').id;
   assert.strictEqual(applicaMossa(a,
@@ -197,9 +197,46 @@ test('la coppia vuole due termini simili dello stesso membro', () => {
   'non-simili');
   assert.strictEqual(applicaMossa(a,
     { mossa: 'riduci-coppia', nodo: da, parametri: { altro: nodoScritto(a, '4x').id } }).codice,
-  'membri-diversi');
+  'somme-diverse');
   assert.strictEqual(applicaMossa(a,
     { mossa: 'riduci-coppia', nodo: da, parametri: { altro: da } }).codice, 'stesso-termine');
+  // Anche dentro allo stesso membro: due parentesi sono due somme.
+  const b = parse('2(x + 1) + 3(x + 2) = 0');
+  assert.strictEqual(applicaMossa(b, { mossa: 'riduci-coppia',
+    nodo: nodoScritto(b, 'x + 1').left.id,
+    parametri: { altro: nodoScritto(b, 'x + 2').left.id } }).codice, 'somme-diverse');
+});
+
+test('i termini dentro a una parentesi sono termini di quella somma', () => {
+  // `9(4x² - 1/9 - 4x² + 4/3x - 1/9)`: cercare i termini solo nel membro
+  // lasciava senza nessuna mossa tutto ciò che nasce da un prodotto notevole.
+  const a = parse('x/2 + 9(4x^2 - 1/9 - 4x^2 + 4/3x - 1/9) = 0');
+  const primo = nodoScritto(a, '4x^2').id;
+  let secondo = null;
+  visita(a, (n) => { if (scrivi(n) === '4x^2' && n.id !== primo) secondo = n.id; });
+  const offerte = mosseDisponibili(a, primo).map((m) => m.id);
+  assert.ok(offerte.includes('sposta-destra'), 'offerte: ' + offerte.join(', '));
+  // Il gesto: uno dei due 4x² trascinato sull'altro, dentro alla parentesi.
+  const dopo = gioca(a,
+    { mossa: 'riduci-coppia', nodo: primo, parametri: { altro: secondo }, digitato: '0' });
+  assert.strictEqual(scrivi(dopo), 'x / 2 + 9(0 - 1/9 + 4/3x - 1/9) = 0');
+  // E lo zero si cancella lì, senza aspettare che la parentesi sparisca.
+  assert.strictEqual(
+    scrivi(gioca(dopo, { mossa: 'elimina-nullo', nodo: nodoScritto(dopo, '0').id })),
+    'x / 2 + 9(-1/9 + 4/3x - 1/9) = 0');
+  // Un fattore, invece, non è un termine: il 9 non si sposta né si elimina.
+  assert.strictEqual(applicaMossa(a,
+    { mossa: 'sposta-destra', nodo: nodoScritto(a, '9').id }).codice, 'non-termine');
+});
+
+test('il meno davanti alla parentesi si svolge, e i termini restano nella somma', () => {
+  const a = parse('x/2 + 9(4x^2 - 1/9 - (4x^2 - 4/3x + 1/9)) = 0');
+  const parentesi = nodoScritto(a, '4x^2 - 4/3x + 1/9').id;
+  const offerte = mosseDisponibili(a, parentesi).map((m) => m.id);
+  assert.ok(offerte.includes('espandi'), 'offerte: ' + offerte.join(', '));
+  const dopo = gioca(a, { mossa: 'espandi', nodo: parentesi,
+    parametri: { conSegno: true }, digitato: '-4x^2 + 4/3x - 1/9' });
+  assert.strictEqual(scrivi(dopo), 'x / 2 + 9(4x^2 - 1/9 - 4x^2 + 4/3x - 1/9) = 0');
 });
 
 test('il gesto sui simili resta abilitato dalla sua gemella a click', () => {
@@ -232,6 +269,30 @@ test('normalizza il monomio: 2x/3 diventa 2/3x', () => {
   const albero = parse('y = 2x/3');
   const dopo = gioca(albero, { mossa: 'normalizza-monomio', nodo: albero.right.id, digitato: '2/3x' });
   assert.strictEqual(scrivi(dopo), 'y = 2/3x');
+});
+
+test('dopo il minimo comune multiplo, il fattore entra nella frazione', () => {
+  // Il passaggio che nasce da ogni equazione a coefficienti frazionari:
+  // moltiplicati i due membri per il mcm, un termine diventa `12((5x+1)/6)`.
+  // La somma sta sotto la barra, quindi non è un fattore e `espandi` non la
+  // vede; il valore ha una lettera, quindi non è un calcolo; canonicalizzato
+  // sono due termini, quindi non è un monomio. Senza semplificare prima il 12
+  // col 6 quel termine non aveva nessuna mossa, e la lavagna si piantava lì.
+  const a = parse('12((5x + 1)/6) + 12(x/4) = 12 * 1/3');
+  const termine = nodoScritto(a, '12((5x + 1) / 6)').id;
+  assert.ok(mosseDisponibili(a, termine).map((m) => m.id).includes('semplifica'));
+  const dopo = gioca(a, { mossa: 'semplifica', nodo: termine, digitato: '2(5x + 1)' });
+  assert.strictEqual(scrivi(dopo), '2(5x + 1) + 12(x / 4) = 12 * 1/3');
+  // E ora la somma è un fattore vero: la distributiva riparte da sola.
+  assert.strictEqual(scrivi(gioca(dopo,
+    { mossa: 'espandi', nodo: nodoScritto(dopo, '2(5x + 1)').id, digitato: '10x + 2' })),
+  '10x + 2 + 12(x / 4) = 12 * 1/3');
+  // Solo un numero sotto la barra è un fattore numerico. Una lettera lì non
+  // arriva nemmeno alla mossa: è fuori dal dominio, e il confine tiene prima.
+  const conLettera = parse('12(x/y) = 1');
+  assert.strictEqual(applicaMossa(conLettera,
+    { mossa: 'semplifica', nodo: nodoScritto(conLettera, '12(x / y)').id, digitato: '12x/y' }).codice,
+  'fuori-dominio');
 });
 
 test('svolgi il prodotto', () => {
