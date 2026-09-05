@@ -232,6 +232,58 @@
       'messaggio: «' + c.messaggioEl.textContent + '»');
   });
 
+  prova('i due 2 senza mosse selezionano la frazione, anche dopo annulla', () => {
+    const c = document.createElement('x-algebra');
+    c.dataset.eq = '2x / 2';
+    document.body.prepend(c);
+    try {
+      const frazione = c.albero;
+      for (const numero of [frazione.left.left, frazione.right]) {
+        asserisci(spanDi(c, numero.id).tabIndex === -1, 'numero raggiungibile con Tab');
+        scegliNodo(c, numero);
+        asserisci(c.selezione === frazione.id, 'non ha selezionato la frazione');
+        asserisci(c.mosseEl.querySelector('[data-mossa]'), 'menu vuoto');
+        // Il secondo tocco sullo stesso bersaglio toglie la selezione.
+        scegliNodo(c, numero);
+        asserisci(c.selezione === null, 'selezione non rimossa');
+      }
+      const span = spanDi(c, frazione.id);
+      asserisci(span.tabIndex === 0, 'frazione non raggiungibile con Tab');
+      span.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      asserisci(c.selezione === frazione.id, 'tastiera non seleziona la frazione');
+      premi(c, 'Scrivi il monomio in forma normale');
+      scrivi(c, 'x');
+      asserisci(A.scrivi(c.albero) === 'x', 'semplificazione fallita');
+      scegliNodo(c, c.albero);
+      asserisci(c.selezione === null, 'x senza mosse selezionabile');
+      asserisci(!c.scrittura.querySelector('[tabindex="0"]'), 'Tab su pezzi senza mosse');
+      c.querySelector('[data-cmd="annulla"]').click();
+      scegliNodo(c, c.albero.right);
+      asserisci(c.selezione === c.albero.id, 'annulla non ripristina la selezione utile');
+    } finally {
+      c.remove();
+    }
+  });
+
+  prova('la selezione rispetta le mosse abilitate e mantiene i figli con azioni', () => {
+    const c = document.createElement('x-algebra');
+    c.dataset.eq = '(2 + 3)x / 2';
+    c.dataset.mosse = '["calcola"]';
+    document.body.prepend(c);
+    try {
+      scegliNodo(c, c.albero.right);
+      asserisci(c.selezione === null, 'selezionata una frazione senza mosse abilitate');
+      const somma = c.albero.left.left;
+      scegliNodo(c, somma.left);
+      asserisci(c.selezione === somma.id, 'non seleziona la somma interna calcolabile');
+      premi(c, 'Calcola');
+      scrivi(c, '5');
+      asserisci(!c.scrittura.querySelector('.alg-selezionabile'), 'restano pezzi senza azioni selezionabili');
+    } finally {
+      c.remove();
+    }
+  });
+
   // -- 3. la ripresa --------------------------------------------------------
 
   prova('la sequenza salvata si rigioca su un albero riletto da zero', () => {

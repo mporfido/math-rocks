@@ -222,7 +222,7 @@ class XAlgebra extends HTMLElement {
     // sceglie. Tutte le mosse sono bottoni, quindi già raggiungibili.
     this.lavagna.onkeydown = (e) => {
       if (e.key !== 'Enter' && e.key !== ' ') return;
-      const id = this.idDalDom(e.target);
+      const id = this.idSelezionabileDalDom(e.target);
       if (id === null) return;
       e.preventDefault();
       this.seleziona(id === this.selezione ? null : id);
@@ -245,6 +245,13 @@ class XAlgebra extends HTMLElement {
     // scrittura viva, mai fatta sul documento.
     this.scrittura.innerHTML = this.A.rendiHTML(this.albero);
     this.marcaTermini();
+    this.A.visita(this.albero, (n) => {
+      if (!this.A.mosseDisponibili(this.albero, n.id, this.whitelist).length) return;
+      const span = this.scrittura.querySelector('[data-nodo="' + n.id + '"]');
+      if (!span) return;
+      span.classList.add('alg-selezionabile');
+      span.tabIndex = 0;
+    });
 
     if (this.selezione) {
       const span = this.scrittura.querySelector('[data-nodo="' + this.selezione + '"]');
@@ -263,7 +270,6 @@ class XAlgebra extends HTMLElement {
       const span = this.scrittura.querySelector('[data-nodo="' + termine.id + '"]');
       if (!span) continue;
       span.classList.add('alg-termine');
-      span.tabIndex = 0;
     }
   }
 
@@ -439,7 +445,7 @@ class XAlgebra extends HTMLElement {
     this.presa = {
       pointerId: e.pointerId,
       id: termine ? termine.id : null,
-      scelto: this.idDalDom(e.target),
+      scelto: this.idSelezionabileDalDom(e.target),
       x: e.clientX,
       y: e.clientY,
       partita: false,
@@ -623,6 +629,14 @@ class XAlgebra extends HTMLElement {
     if (id === null) return null;
     return this.terminiDiPrimoLivello()
       .find((t) => t.id === id || this.A.trovaNodo(t, id)) || null;
+  }
+
+  /** Un pezzo senza mosse lascia scegliere il primo antenato che ne ha.
+   *  La presa dei termini usa invece il nodo originale, anche come bersaglio. */
+  idSelezionabileDalDom(elemento) {
+    const span = elemento && elemento.closest
+      ? elemento.closest('.alg-selezionabile') : null;
+    return span && this.scrittura.contains(span) ? this.idDalDom(span) : null;
   }
 
   /**
