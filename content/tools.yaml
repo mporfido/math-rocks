@@ -46,9 +46,9 @@ tools:
 
   - id: equazioni
     kind: algebra
-    title: La lavagna delle mosse
+    title: Espressioni ed equazioni
     description: >-
-      Un'equazione si trasforma una mossa per volta, con i principi di
+      Una scrittura si trasforma una mossa per volta, con i principi di
       equivalenza: gli stati sbagliati non sono raggiungibili.
     icon: "⚖️"
     # La lavagna disegna la scrittura con il proprio DOM (span, non LaTeX):
