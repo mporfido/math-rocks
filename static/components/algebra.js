@@ -34,8 +34,13 @@
  * I GESTI e i loro gemelli a click — ogni gesto ne ha uno, sempre, perché da
  * tastiera non si trascina:
  *   attraverso l'uguale        → trasporto      → menu "Porta dall'altra parte"
- *   su un termine simile       → riduci-simili  → menu "Somma i termini simili"
+ *   su un termine simile       → riduci-coppia  → menu "Somma i termini simili"
  *   di lato, fra due termini   → sposta         → menu "Sposta a sinistra/destra"
+ *
+ * Il gesto sui simili e il suo gemello a click NON chiedono lo stesso conto, ed
+ * è voluto: portando un `3x` sopra un `2x` si è già pensato «cinque x», e da
+ * riscrivere c'è quella somma lì (`riduci-coppia`); dal menu, senza un gesto
+ * che dica quali due, il pezzo è il membro intero (`riduci-simili`).
  *
  * Il trascinamento è di POINTER e non di HTML5 drag-and-drop: quello nativo
  * non parte col dito (né sul telefono né sui portatili con schermo touch), e
@@ -97,8 +102,10 @@ class XAlgebra extends HTMLElement {
     this.trascinato = null;
     this.completato = false;
     // Mossa di semplificazione in attesa del risultato digitato: finché è qui,
-    // la lavagna aspetta una scrittura e non un'altra mossa.
+    // la lavagna aspetta una scrittura e non un'altra mossa. I parametri sono
+    // quelli che il gesto le ha già dato (per `riduci-coppia`, l'altro termine).
     this.daDigitare = null;
+    this.parametriDaDigitare = null;
 
     this.costruisci();
     this.ripristina();
@@ -207,12 +214,14 @@ class XAlgebra extends HTMLElement {
       this.gioca({
         mossa: this.daDigitare,
         nodo: this.selezione,
+        parametri: this.parametriDaDigitare || undefined,
         digitato: this.campoEl.value,
       });
     };
     this.digitaEl.onclick = (e) => {
       if (e.target.closest('[data-cmd="lascia"]')) {
         this.daDigitare = null;
+        this.parametriDaDigitare = null;
         this.messaggio('');
         this.disegna();
       }
@@ -261,6 +270,15 @@ class XAlgebra extends HTMLElement {
       const span = this.scrittura.querySelector('[data-nodo="' + this.selezione + '"]');
       if (span) span.classList.add('alg-scelto');
       else this.selezione = null;
+    }
+
+    // Una mossa può lavorare su DUE pezzi (il gesto sui simili): finché si
+    // aspetta il risultato vanno evidenziati tutti e due, altrimenti il campo
+    // chiederebbe una somma di cui se ne vede acceso solo un addendo.
+    const altro = this.parametriDaDigitare && this.parametriDaDigitare.altro;
+    if (altro != null) {
+      const span = this.scrittura.querySelector('[data-nodo="' + altro + '"]');
+      if (span) span.classList.add('alg-scelto');
     }
 
     this.disegnaMenu();
@@ -376,19 +394,36 @@ class XAlgebra extends HTMLElement {
     this.gioca({ mossa: id, nodo: this.selezione });
   }
 
-  chiediIlRisultato(idMossa, idNodo) {
-    const nodo = this.A.trovaNodo(this.albero, idNodo);
-    if (!nodo) return;
+  chiediIlRisultato(idMossa, idNodo, parametri = null) {
+    const pezzo = this.pezzoDaRiscrivere(idMossa, idNodo, parametri);
+    if (!pezzo) return;
     this.selezione = idNodo;
     this.daDigitare = idMossa;
+    this.parametriDaDigitare = parametri;
     this.disegna();
     this.invitoEl.textContent = this.A.CATALOGO[idMossa].etichetta + ':';
     // Il campo parte dalla scrittura attuale invece che vuoto: la mossa cambia
     // un pezzo di una riga lunga, e ricopiare il resto a mano non è il conto
     // che si sta chiedendo.
-    this.campoEl.value = this.A.scrivi(nodo);
+    this.campoEl.value = this.A.scrivi(pezzo);
     this.campoEl.focus();
     this.campoEl.select();
+  }
+
+  /**
+   * Il pezzo che quella mossa fa riscrivere: di norma il nodo scelto, ma una
+   * mossa può comporselo (la somma di due termini lontani non è un nodo solo).
+   * È lei a saperlo, e lo dice con `pezzo`.
+   */
+  pezzoDaRiscrivere(idMossa, idNodo, parametri) {
+    const mossa = this.A.CATALOGO[idMossa];
+    if (!mossa) return null;
+    if (!mossa.pezzo) return this.A.trovaNodo(this.albero, idNodo);
+    try {
+      return mossa.pezzo(this.albero, idNodo, parametri || {});
+    } catch (e) {
+      return null;
+    }
   }
 
   /** Esegue una mossa e, se riesce, la aggiunge alla sequenza. */
@@ -404,7 +439,7 @@ class XAlgebra extends HTMLElement {
     this.azioni.push({
       mossa: azione.mossa,
       percorso: azione.nodo ? this.A.percorsoDi(this.albero, azione.nodo) : null,
-      parametri: azione.parametri || null,
+      parametri: this.parametriDaSalvare(azione),
       digitato: azione.digitato || null,
     });
     this.storia.push({
@@ -414,10 +449,46 @@ class XAlgebra extends HTMLElement {
 
     this.selezione = null;
     this.daDigitare = null;
+    this.parametriDaDigitare = null;
     this.messaggio('');
     this.disegna();
     this.verificaTraguardo();
     return true;
+  }
+
+  /**
+   * I parametri come vanno SALVATI. Quelli che sono nodi (la mossa li dichiara
+   * in `parametriNodo`) diventano cammini, per la stessa ragione del nodo
+   * scelto: gli id vivono quanto la pagina, il cammino vale anche domani.
+   */
+  parametriDaSalvare(azione) {
+    const param = azione.parametri;
+    if (!param) return null;
+    const mossa = this.A.CATALOGO[azione.mossa];
+    const nodi = (mossa && mossa.parametriNodo) || [];
+    const salvati = { ...param };
+    for (const chiave of nodi) {
+      if (salvati[chiave] == null) continue;
+      salvati[chiave] = { percorso: this.A.percorsoDi(this.albero, salvati[chiave]) };
+    }
+    return salvati;
+  }
+
+  /** L'inverso, alla ripresa: i cammini tornano id di questa pagina. Null se
+   *  uno non porta più da nessuna parte — l'albero è cambiato sotto. */
+  parametriRipresi(idMossa, param) {
+    if (!param) return undefined;
+    const mossa = this.A.CATALOGO[idMossa];
+    const nodi = (mossa && mossa.parametriNodo) || [];
+    const vivi = { ...param };
+    for (const chiave of nodi) {
+      const salvato = vivi[chiave];
+      if (salvato == null) continue;
+      const nodo = salvato.percorso ? this.A.nodoAlPercorso(this.albero, salvato.percorso) : null;
+      if (!nodo) return null;
+      vivi[chiave] = nodo.id;
+    }
+    return vivi;
   }
 
   annulla() {
@@ -426,6 +497,7 @@ class XAlgebra extends HTMLElement {
     this.azioni.pop();
     this.selezione = null;
     this.daDigitare = null;
+    this.parametriDaDigitare = null;
     this.disegna();
     this.messaggio('Passaggio annullato.');
   }
@@ -523,17 +595,19 @@ class XAlgebra extends HTMLElement {
     if (intento.tipo === 'trasporto') {
       this.gioca({ mossa: 'trasporto', nodo: preso });
     } else if (intento.tipo === 'simili') {
-      // Sommare due termini simili è un CONTO: il gesto sceglie la mossa e il
-      // pezzo, il risultato lo scrive lo studente. Si chiede prima al motore
-      // se la mossa è ammessa qui, altrimenti si aprirebbe un campo che non
-      // può accettare niente.
+      // Sommare due termini simili è un CONTO: il gesto sceglie la mossa e i
+      // due pezzi, il risultato lo scrive lo studente — e da riscrivere c'è
+      // solo la loro somma, non tutto il membro. Si chiede prima al motore se
+      // la mossa è ammessa qui, altrimenti si aprirebbe un campo che non può
+      // accettare niente.
+      const parametri = { altro: intento.bersaglio };
       const esito = this.A.applicaMossa(this.albero,
-        { mossa: 'riduci-simili', nodo: intento.somma }, this.whitelist);
+        { mossa: 'riduci-coppia', nodo: preso, parametri }, this.whitelist);
       if (!esito.ok && esito.codice !== 'serve-il-risultato') {
         this.messaggio(esito.messaggio);
         return;
       }
-      this.chiediIlRisultato('riduci-simili', intento.somma);
+      this.chiediIlRisultato('riduci-coppia', preso, parametri);
     } else if (intento.tipo === 'sposta') {
       this.gioca({ mossa: 'sposta', nodo: preso, parametri: { posizione: intento.posizione } });
     }
@@ -573,7 +647,7 @@ class XAlgebra extends HTMLElement {
       const suo = this.A.parteLetterale(sotto);
       const mio = this.A.parteLetterale(preso);
       if (stessoMembro && suo !== null && suo === mio) {
-        return { tipo: 'simili', bersaglio: sotto.id, somma: posto.membro.id };
+        return { tipo: 'simili', bersaglio: sotto.id };
       }
     }
 
@@ -751,10 +825,12 @@ class XAlgebra extends HTMLElement {
     for (const az of azioni) {
       const nodo = az.percorso ? this.A.nodoAlPercorso(this.albero, az.percorso) : null;
       if (az.percorso && !nodo) break;
+      const parametri = this.parametriRipresi(az.mossa, az.parametri);
+      if (parametri === null) break;
       const esito = this.A.applicaMossa(this.albero, {
         mossa: az.mossa,
         nodo: nodo ? nodo.id : null,
-        parametri: az.parametri || undefined,
+        parametri: parametri || undefined,
         digitato: az.digitato || undefined,
       }, this.whitelist);
       if (!esito.ok) break;

@@ -93,6 +93,13 @@ Fanno tutte la stessa cosa — ogni gesto ha il suo gemello a click.
   Si trascina **col dito come col mouse** (schermi touch compresi); lo swipe
   verticale resta al browser e continua a scorrere la pagina.
 
+Il gesto sui simili e il suo gemello a click non chiedono lo stesso conto, ed è
+voluto. Portando un `3x` sopra un `2x` si è già pensato «cinque x»: da riscrivere
+c'è quella somma sola (`riduci-coppia`), e gli altri termini li ricopia il
+motore — i due non devono nemmeno essere vicini, e il risultato torna al posto
+del primo dei due. Dal menu, invece, senza un gesto che dica *quali* due, il
+pezzo è la somma selezionata per intero (`riduci-simili`).
+
 `Annulla` torna indietro di un passaggio. `Ci sono?` dice, fra le cose che
 mancano al traguardo, **quella da sistemare per prima**.
 
@@ -122,7 +129,8 @@ mancano al traguardo, **quella da sistemare per prima**.
 | `ordina` | ordina i termini per grado decrescente | motore |
 | `elimina-nullo` | toglie un termine che vale zero | motore |
 | `calcola` | svolge un pezzo interamente numerico, o riduce una frazione | **studente** |
-| `riduci-simili` | somma i termini con la stessa parte letterale | **studente** |
+| `riduci-simili` | somma i termini con la stessa parte letterale, in tutta la somma scelta | **studente** |
+| `riduci-coppia` | somma **due** termini simili, e fa riscrivere solo la loro somma (è il gesto) | **studente** |
 | `normalizza-monomio` | riscrive un monomio in forma normale (`2x/3` → `2/3 x`) | **studente** |
 | `espandi` | svolge un prodotto, prodotti notevoli compresi | **studente** |
 
@@ -179,6 +187,11 @@ Un elenco di id separati da `;`. Omesso, sono abilitate tutte.
 
 Serve a far praticare una strada sola: qui l'equazione si muove solo per
 trasporto, e i principi non compaiono nemmeno nel menu.
+
+`riduci-simili` **abilita anche `riduci-coppia`**: sono la stessa algebra viste
+da due gesti, e chi scrive «somma i termini simili» in una lezione non intendeva
+togliere il trascinamento. Il contrario no — `riduci-coppia` da solo lascia
+soltanto il gesto sui due.
 
 Un id che non esiste **ferma la build**. È voluto: una whitelist con un refuso
 dentro è una scheda che lo studente non può finire, e va scoperta in build, non

@@ -481,6 +481,94 @@
     },
   });
 
+  /**
+   * Sommare DUE termini simili, e riscrivere solo la loro somma.
+   *
+   * È la stessa algebra di `riduci-simili`, ma il conto che chiede è quello che
+   * lo studente ha davvero in testa: portando un `3x` sopra un `2x` pensa
+   * «cinque x», non «riscrivo il membro». Far ricopiare gli altri termini è
+   * fatica senza pensiero — la stessa ragione per cui le mosse di applicazione
+   * le scrive il motore — e in una riga lunga è anche l'occasione di sbagliare
+   * a copiare un pezzo che non c'entrava niente.
+   *
+   * I due termini NON devono essere vicini: il pezzo da riscrivere è la loro
+   * somma (`3x - 2x`), e il risultato torna al posto del più a sinistra dei
+   * due. Il riordino implicito è commutativa, quindi lecito, e non è una mossa
+   * che si insegna qui: chi vuole vedere lo spostamento lo fa prima, a mano.
+   *
+   * Il parametro `altro` è l'altro termine, e glielo dà il trascinamento: a
+   * click resta `riduci-simili`, che è la sua gemella e la abilita.
+   */
+  const riduciCoppia = semplificazione({
+    id: 'riduci-coppia',
+    etichetta: 'Somma questi due termini',
+    parametri: ['altro'],
+    // Un parametro che è un NODO va salvato per cammino, non per id: lo dice
+    // qui, e l'interfaccia converte da sola invece di sapere quale mossa sia.
+    parametriNodo: ['altro'],
+    // Abilitata da chi la contiene: una whitelist che dà «somma i termini
+    // simili» non intendeva togliere il gesto che fa la stessa cosa su due.
+    gemella: 'riduci-simili',
+    applicabile(albero, id, param) {
+      const coppia = coppiaSimile(albero, id, param);
+      return coppia.errore ? coppia.errore : sì();
+    },
+    /** Il pezzo che si sta riscrivendo: la somma dei due, e nient'altro. */
+    pezzo(albero, id, param) {
+      const coppia = coppiaSimile(albero, id, param);
+      if (coppia.errore) return null;
+      return costruisciSomma([coppia.termini[coppia.primo], coppia.termini[coppia.secondo]]);
+    },
+    /** Il membro rimontato: al posto del primo dei due c'è il risultato. */
+    rimpiazza(albero, id, param, scritto) {
+      const coppia = coppiaSimile(albero, id, param);
+      const rimasti = coppia.termini
+        .filter((t, i) => i !== coppia.primo && i !== coppia.secondo);
+      // Segno `+`: quello vero lo porta la scrittura dello studente, e
+      // `costruisciSomma` lo legge da lì (un `-3x` digitato diventa `- 3x`).
+      rimasti.splice(coppia.primo, 0, { segno: 1, nodo: scritto });
+      return sostituisci(albero, coppia.membro.id, costruisciSomma(rimasti));
+    },
+    accetta(scritto) {
+      if (terminiDi(scritto).length >= 2) {
+        return no('non-ridotto', 'I due termini non sono ancora stati sommati');
+      }
+      return sì();
+    },
+  });
+
+  /**
+   * I due termini simili di una coppia: `{ membro, termini, primo, secondo }`
+   * con gli indici già in ordine di lettura, oppure `{ errore }`.
+   */
+  function coppiaSimile(albero, id, param) {
+    const scelto = bersaglio(albero, id, 'Scegli il termine da sommare');
+    if (scelto.errore) return { errore: scelto.errore };
+    const altro = param && param.altro;
+    if (altro == null) return { errore: no('serve-l-altro', 'Scegli l\'altro termine') };
+    if (altro === id) return { errore: no('stesso-termine', 'Sono lo stesso termine') };
+    const altroScelto = bersaglio(albero, altro, 'Scegli l\'altro termine');
+    if (altroScelto.errore) return { errore: altroScelto.errore };
+
+    const qui = postoDelTermine(albero, id);
+    const lì = postoDelTermine(albero, altro);
+    if (!qui || !lì) return { errore: no('non-termine', 'Si sommano i termini di una somma') };
+    if (qui.membro.id !== lì.membro.id) {
+      return { errore: no('membri-diversi', 'I due termini stanno in due membri diversi') };
+    }
+    const mia = parteLetterale(scelto.nodo);
+    const sua = parteLetterale(altroScelto.nodo);
+    if (mia === null || sua === null || mia !== sua) {
+      return { errore: no('non-simili', 'Questi due termini non sono simili') };
+    }
+    return {
+      membro: qui.membro,
+      termini: qui.termini,
+      primo: Math.min(qui.indice, lì.indice),
+      secondo: Math.max(qui.indice, lì.indice),
+    };
+  }
+
   const normalizzaMonomio = semplificazione({
     id: 'normalizza-monomio',
     etichetta: 'Scrivi il monomio in forma normale',
@@ -720,7 +808,7 @@
     sposta,
     spostaDiUno('sposta-sinistra', 'Sposta il termine a sinistra', -1),
     spostaDiUno('sposta-destra', 'Sposta il termine a destra', +1),
-    calcola, riduciSimili, normalizzaMonomio, espandi,
+    calcola, riduciSimili, riduciCoppia, normalizzaMonomio, espandi,
     trasporto,
   ]) CATALOGO[m.id] = m;
 
@@ -731,6 +819,19 @@
     const ignoti = (ids || []).filter((id) => !CATALOGO[id]);
     if (ignoti.length) throw new Error('Mosse sconosciute: ' + ignoti.join(', '));
     return true;
+  }
+
+  /**
+   * Questa mossa è abilitata da questa whitelist? Non basta cercarla
+   * nell'elenco: una mossa da gesto può dichiarare la sua `gemella` a click, e
+   * chi ha scritto `riduci-simili` in una lezione non intendeva togliere il
+   * trascinamento che fa la stessa cosa su due termini soli.
+   */
+  function abilitata(id, whitelist) {
+    if (!whitelist) return true;
+    if (whitelist.indexOf(id) !== -1) return true;
+    const m = CATALOGO[id];
+    return Boolean(m && m.gemella && whitelist.indexOf(m.gemella) !== -1);
   }
 
   /**
@@ -778,7 +879,7 @@
   function eseguiMossa(albero, azione, whitelist) {
     const mossa = CATALOGO[azione.mossa];
     if (!mossa) return no('mossa-sconosciuta', 'Mossa sconosciuta: ' + azione.mossa);
-    if (whitelist && whitelist.indexOf(azione.mossa) === -1) {
+    if (!abilitata(azione.mossa, whitelist)) {
       return no('mossa-non-abilitata', 'Questa mossa non è disponibile in questo esercizio');
     }
 
@@ -805,7 +906,12 @@
     const dominioScritto = nelDominio(scritto);
     if (!dominioScritto.ok) return dominioScritto;
 
-    const selezione = trovaNodo(albero, azione.nodo);
+    // Di norma il pezzo che si riscrive È il nodo selezionato. Una mossa può
+    // però lavorare su un pezzo che nell'albero non è un nodo solo — la somma
+    // di due termini lontani — e allora se lo costruisce lei, e sa anche come
+    // rimontare il risultato al suo posto.
+    const selezione = mossa.pezzo ? mossa.pezzo(albero, azione.nodo, param) : trovaNodo(albero, azione.nodo);
+    if (!selezione) return no('serve-selezione', 'Scegli il pezzo da riscrivere');
     if (!equivalenti(selezione, scritto)) {
       // Una mossa che sa riconoscere la forma su cui sta lavorando può dire
       // *quale* condizione cade, invece del solo «non vale quanto»: vedi
@@ -823,12 +929,17 @@
       const accettato = mossa.accetta(scritto, { selezione, albero });
       if (!accettato.ok) return accettato;
     }
-    return sì({ albero: sostituisci(albero, azione.nodo, scritto) });
+    return sì({
+      albero: mossa.rimpiazza
+        ? mossa.rimpiazza(albero, azione.nodo, param, scritto)
+        : sostituisci(albero, azione.nodo, scritto),
+    });
   }
 
   host.CATALOGO = CATALOGO;
   host.applicaMossa = applicaMossa;
   host.mosseDisponibili = mosseDisponibili;
+  host.abilitata = abilitata;
   host.validaWhitelist = validaWhitelist;
   host.costruisciSomma = costruisciSomma;
   host.opposto = opposto;

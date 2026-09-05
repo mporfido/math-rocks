@@ -150,6 +150,77 @@ test('riscrivere la stessa cosa non è ridurre', () => {
   assert.strictEqual(esito.codice, 'non-ridotto');
 });
 
+// --- Sommare DUE termini: il conto che si è già fatto in testa ---------------
+// Il gesto (`3x` portato sopra `2x`) chiede il risultato di quella somma lì, non
+// del membro intero: ricopiare gli altri termini è fatica senza pensiero, ed è
+// anche il modo di sbagliare a copiare un pezzo che non c'entrava.
+
+test('la coppia fa riscrivere solo la sua somma, non il membro', () => {
+  const a = parse('2x + 5 + 3x = 10');
+  const coppia = {
+    mossa: 'riduci-coppia',
+    nodo: nodoScritto(a, '2x').id,
+    parametri: { altro: nodoScritto(a, '3x').id },
+  };
+  // Quello che il campo propone di riscrivere: i due termini, non `2x + 5 + 3x`.
+  assert.strictEqual(
+    scrivi(CATALOGO['riduci-coppia'].pezzo(a, coppia.nodo, coppia.parametri)),
+    '2x + 3x');
+  // E il risultato torna al posto del primo dei due.
+  assert.strictEqual(scrivi(gioca(a, { ...coppia, digitato: '5x' })), '5x + 5 = 10');
+});
+
+test('la coppia tiene i segni: il termine che si porta via può essere negativo', () => {
+  const a = parse('3x + 4 - 5x = 1');
+  const dopo = gioca(a, {
+    mossa: 'riduci-coppia',
+    nodo: nodoScritto(a, '5x').id,
+    parametri: { altro: nodoScritto(a, '3x').id },
+    digitato: '-2x',
+  });
+  assert.strictEqual(scrivi(dopo), '-2x + 4 = 1');
+});
+
+test('la coppia rifiuta quello che non è la somma dei due', () => {
+  const a = parse('2x + 3x = 10');
+  const coppia = { mossa: 'riduci-coppia', nodo: nodoScritto(a, '2x').id,
+    parametri: { altro: nodoScritto(a, '3x').id } };
+  assert.strictEqual(applicaMossa(a, { ...coppia, digitato: '6x' }).codice, 'non-equivalente');
+  assert.strictEqual(applicaMossa(a, { ...coppia, digitato: '2x + 3x' }).codice, 'non-ridotto');
+});
+
+test('la coppia vuole due termini simili dello stesso membro', () => {
+  const a = parse('2x + 3y = 10 + 4x');
+  const da = nodoScritto(a, '2x').id;
+  assert.strictEqual(applicaMossa(a,
+    { mossa: 'riduci-coppia', nodo: da, parametri: { altro: nodoScritto(a, '3y').id } }).codice,
+  'non-simili');
+  assert.strictEqual(applicaMossa(a,
+    { mossa: 'riduci-coppia', nodo: da, parametri: { altro: nodoScritto(a, '4x').id } }).codice,
+  'membri-diversi');
+  assert.strictEqual(applicaMossa(a,
+    { mossa: 'riduci-coppia', nodo: da, parametri: { altro: da } }).codice, 'stesso-termine');
+});
+
+test('il gesto sui simili resta abilitato dalla sua gemella a click', () => {
+  const a = parse('2x + 3x = 10');
+  const lista = ['riduci-simili', 'calcola'];
+  const esito = applicaMossa(a, {
+    mossa: 'riduci-coppia',
+    nodo: nodoScritto(a, '2x').id,
+    parametri: { altro: nodoScritto(a, '3x').id },
+    digitato: '5x',
+  }, lista);
+  assert.ok(esito.ok, esito.messaggio);
+  // Una gemella che non c'è non abilita niente: la whitelist resta una scelta.
+  assert.strictEqual(applicaMossa(a, {
+    mossa: 'riduci-coppia',
+    nodo: nodoScritto(a, '2x').id,
+    parametri: { altro: nodoScritto(a, '3x').id },
+    digitato: '5x',
+  }, ['calcola']).codice, 'mossa-non-abilitata');
+});
+
 test('una somma non è un monomio da normalizzare, nemmeno se vale un numero', () => {
   const albero = parse('2x + 3y = 0 + 6');
   const offerte = mosseDisponibili(albero, albero.right.id).map((m) => m.id);

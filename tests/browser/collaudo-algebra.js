@@ -215,10 +215,12 @@
     const p = centro(bersaglio);
     trascina(c, '5x', p.x, p.y);
     asserisci(!c.digitaEl.hidden, 'il campo per digitare non si è aperto');
-    asserisci(c.daDigitare === 'riduci-simili', 'mossa in attesa: ' + c.daDigitare);
+    asserisci(c.daDigitare === 'riduci-coppia', 'mossa in attesa: ' + c.daDigitare);
     asserisci(c.azioni.length === 0, 'la somma l\'ha fatta il motore: mosse ' + c.azioni.length);
-    // Ora il conto lo scrive lo studente, e solo lui.
-    scrivi(c, '7x + 4');
+    // Da riscrivere c'è la somma dei DUE, non il membro: il `4` in mezzo lo
+    // ricopia il motore, e il conto che resta è quello che si è già fatto.
+    asserisci(c.campoEl.value === '2x + 5x', 'il campo propone: «' + c.campoEl.value + '»');
+    scrivi(c, '7x');
     asserisci(A.scrivi(c.albero) === '7x + 4 = 0', 'dopo la somma: ' + A.scrivi(c.albero));
   });
 
@@ -298,6 +300,35 @@
     asserisci(A.scrivi(c.albero) === 'y = -2/3x + 2', 'ripreso a: ' + A.scrivi(c.albero));
     asserisci(c.hasAttribute('data-completed'), 'ripreso senza il traguardo acceso');
     asserisci(c.passiEl.children.length === 9, 'svolgimento ripreso: ' + c.passiEl.children.length);
+  });
+
+  /**
+   * La coppia porta nei parametri un NODO, e i nodi si salvano per cammino: un
+   * id di questa pagina, rigiocato domani, non troverebbe niente — e il
+   * passaggio sparirebbe in silenzio dallo svolgimento dello studente.
+   */
+  prova('anche la somma di due termini si rigioca dopo il salvataggio', () => {
+    const c = document.getElementById('g3');
+    asserisci(c.azioni.length === 1 && c.azioni[0].mossa === 'riduci-coppia',
+      'il gesto sui simili non è nella sequenza');
+    asserisci(c.azioni[0].parametri && Array.isArray(c.azioni[0].parametri.altro.percorso),
+      'l\'altro termine non è salvato per cammino');
+    const salvata = JSON.stringify(c.azioni);
+
+    window.courseProgress = {
+      getStepForElement: () => ({ goals: ['r2'], answers: { r2: salvata } }),
+    };
+    const ripreso = document.createElement('x-algebra');
+    ripreso.id = 'r2';
+    ripreso.dataset.eq = '2x + 4 + 5x = 0';
+    ripreso.dataset.traguardo = '{"forma":"normale"}';
+    document.body.appendChild(ripreso);
+    try {
+      asserisci(A.scrivi(ripreso.albero) === '7x + 4 = 0',
+        'ripreso a: ' + A.scrivi(ripreso.albero));
+    } finally {
+      ripreso.remove();
+    }
   });
 
   prova('una scrittura che il parser non legge non porta giù la lezione', () => {
