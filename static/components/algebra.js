@@ -31,15 +31,23 @@
  * Eventi:
  *   goal-complete   quando la scrittura raggiunge il traguardo
  *
- * I GESTI e i loro gemelli a click — ogni gesto ne ha uno, sempre, perché il
- * trascinamento nativo non esiste sul telefono e non esiste da tastiera:
+ * I GESTI e i loro gemelli a click — ogni gesto ne ha uno, sempre, perché da
+ * tastiera non si trascina:
  *   attraverso l'uguale        → trasporto      → menu "Porta dall'altra parte"
  *   su un termine simile       → riduci-simili  → menu "Somma i termini simili"
  *   di lato, fra due termini   → sposta         → menu "Sposta a sinistra/destra"
  *
- * TRAPPOLA (verificata guidando Chrome): un elemento sovrapposto a un termine
- * IMPEDISCE al trascinamento nativo di partire, anche con `pointer-events:
- * none`. Le due zone di rilascio stanno quindi DIETRO (`z-index: -1`, con
+ * Il trascinamento è di POINTER e non di HTML5 drag-and-drop: quello nativo
+ * non parte col dito (né sul telefono né sui portatili con schermo touch), e
+ * qui dito, mouse e penna devono essere lo stesso gesto. Premere e lasciare
+ * senza muoversi È la selezione: sotto la soglia il gesto sceglie, sopra
+ * trascina — per questo non c'è un ascoltatore di `click` sulla lavagna.
+ *
+ * TRAPPOLA: durante la presa il puntatore è CATTURATO dalla lavagna (la
+ * scrittura si ridisegna sotto le dita, e un elemento sparito non manda più
+ * eventi), quindi `e.target` è sempre la lavagna: chi sta sotto lo dice
+ * `document.elementFromPoint`. Perché quella risposta sia il termine e non la
+ * zona di rilascio, le due zone stanno DIETRO (`z-index: -1`, con
  * `isolation: isolate` sulla lavagna) e sono solo un aiuto visivo: la metà
  * bersaglio si ricava dalla x del puntatore, non da chi riceve l'evento.
  *
@@ -210,14 +218,6 @@ class XAlgebra extends HTMLElement {
       }
     };
 
-    // Selezione: un click su un pezzo lo sceglie, un click sull'operatore
-    // sceglie la somma che lo contiene (è così che si prende «tutto il
-    // membro» senza un bottone apposta), un click fuori deseleziona.
-    this.lavagna.onclick = (e) => {
-      const id = this.idDalDom(e.target);
-      this.seleziona(id === this.selezione ? null : id);
-    };
-
     // Da tastiera i termini sono raggiungibili con Tab: Invio o Spazio li
     // sceglie. Tutte le mosse sono bottoni, quindi già raggiungibili.
     this.lavagna.onkeydown = (e) => {
@@ -228,10 +228,13 @@ class XAlgebra extends HTMLElement {
       this.seleziona(id === this.selezione ? null : id);
     };
 
-    this.lavagna.ondragstart = (e) => this.iniziaTrascinamento(e);
-    this.lavagna.ondragover = (e) => this.durante(e);
-    this.lavagna.ondrop = (e) => this.rilascia(e);
-    this.lavagna.ondragend = () => this.fineTrascinamento();
+    // Il trascinamento e la SELEZIONE sono lo stesso gesto visto in due modi:
+    // premi, e se ti muovi trascini, se non ti muovi scegli. Per questo il
+    // click non serve — la scelta la decide `puntaSu`.
+    this.lavagna.onpointerdown = (e) => this.puntaGiu(e);
+    this.lavagna.onpointermove = (e) => this.puntaMuovi(e);
+    this.lavagna.onpointerup = (e) => this.puntaSu(e);
+    this.lavagna.onpointercancel = () => this.annullaLaPresa();
   }
 
   // -- Disegno ---------------------------------------------------------------
@@ -260,7 +263,6 @@ class XAlgebra extends HTMLElement {
       const span = this.scrittura.querySelector('[data-nodo="' + termine.id + '"]');
       if (!span) continue;
       span.classList.add('alg-termine');
-      span.draggable = true;
       span.tabIndex = 0;
     }
   }
@@ -420,27 +422,89 @@ class XAlgebra extends HTMLElement {
 
   // -- I gesti ---------------------------------------------------------------
 
-  iniziaTrascinamento(e) {
+  /** Quanto ci si deve muovere prima che «premere» diventi «trascinare»: sotto
+   *  questa soglia il gesto resta una scelta, e il dito non è mai fermo. */
+  static get SOGLIA() { return 8; }
+
+  /**
+   * Si preme. Non si decide ancora niente: si prende nota del pezzo e del
+   * punto. La cattura del puntatore va sulla LAVAGNA perché la scrittura si
+   * ridisegna sotto le dita, e un elemento sparito non manda più eventi; da
+   * lì in poi chi sta sotto lo dice `document.elementFromPoint`, non il
+   * bersaglio dell'evento (con la cattura è sempre la lavagna).
+   */
+  puntaGiu(e) {
+    if (e.button > 0 || this.daDigitare) return;
     const termine = this.termineChiude(e.target);
-    if (!termine || this.daDigitare) { e.preventDefault(); return; }
-    this.trascinato = termine.id;
-    e.dataTransfer.effectAllowed = 'move';
-    // Firefox non avvia il trascinamento se non c'è un dato: il valore non lo
-    // legge nessuno, lo stato vero è `this.trascinato`.
-    e.dataTransfer.setData('text/plain', termine.id);
-    this.lavagna.classList.add('alg-trascinando');
+    this.presa = {
+      pointerId: e.pointerId,
+      id: termine ? termine.id : null,
+      scelto: this.idDalDom(e.target),
+      x: e.clientX,
+      y: e.clientY,
+      partita: false,
+    };
+    // La cattura può rifiutarsi (un puntatore già rilasciato, un evento
+    // sintetico del collaudo): senza di lei il trascinamento funziona lo
+    // stesso finché il dito resta sulla lavagna, quindi non è un errore.
+    try {
+      if (termine) this.lavagna.setPointerCapture(e.pointerId);
+    } catch (err) { /* si tira avanti senza cattura */ }
   }
 
-  durante(e) {
-    if (!this.trascinato) return;
+  puntaMuovi(e) {
+    const presa = this.presa;
+    if (!presa || presa.pointerId !== e.pointerId || presa.id === null) return;
+    if (!presa.partita) {
+      const lontano = Math.abs(e.clientX - presa.x) > XAlgebra.SOGLIA
+        || Math.abs(e.clientY - presa.y) > XAlgebra.SOGLIA;
+      if (!lontano) return;
+      presa.partita = true;
+      this.trascinato = presa.id;
+      if (this.selezione !== null) this.seleziona(null);
+      this.lavagna.classList.add('alg-trascinando');
+    }
     e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    this.mostra(this.intento(e));
+    this.mostra(this.intento(this.punto(e)));
+  }
+
+  /**
+   * Si lascia. Se il pezzo si era mosso è un rilascio, altrimenti il gesto era
+   * una scelta: un tocco su un pezzo lo sceglie, uno sull'operatore sceglie la
+   * somma che lo contiene (è così che si prende «tutto il membro» senza un
+   * bottone apposta), uno fuori deseleziona.
+   */
+  puntaSu(e) {
+    const presa = this.presa;
+    if (!presa || presa.pointerId !== e.pointerId) return;
+    this.presa = null;
+    if (this.lavagna.hasPointerCapture(e.pointerId)) {
+      this.lavagna.releasePointerCapture(e.pointerId);
+    }
+    if (!presa.partita) {
+      const id = presa.scelto;
+      this.seleziona(id === this.selezione ? null : id);
+      return;
+    }
+    this.rilascia(this.punto(e));
+  }
+
+  /** Chi sta davvero sotto il puntatore. Con la cattura attiva `e.target` è
+   *  sempre la lavagna, quindi il bersaglio si chiede al documento. */
+  punto(e) {
+    const sotto = document.elementFromPoint(e.clientX, e.clientY);
+    return { clientX: e.clientX, clientY: e.clientY, target: sotto || this.lavagna };
+  }
+
+  /** Il sistema ha tolto il puntatore di mano (uno scroll che vince, una
+   *  chiamata in arrivo): la presa finisce senza fare la mossa. */
+  annullaLaPresa() {
+    this.presa = null;
+    this.fineTrascinamento();
   }
 
   rilascia(e) {
     if (!this.trascinato) return;
-    e.preventDefault();
     const intento = this.intento(e);
     const preso = this.trascinato;
     this.fineTrascinamento();

@@ -90,6 +90,8 @@ Fanno tutte la stessa cosa — ogni gesto ha il suo gemello a click.
   due membri: si sceglie l'operazione e si scrive per quanto;
 - **trascinare un termine**: attraverso l'uguale lo porta dall'altra parte
   (trasporto), su un termine simile apre la somma, di lato lo sposta di posto.
+  Si trascina **col dito come col mouse** (schermi touch compresi); lo swipe
+  verticale resta al browser e continua a scorrere la pagina.
 
 `Annulla` torna indietro di un passaggio. `Ci sono?` dice, fra le cose che
 mancano al traguardo, **quella da sistemare per prima**.

@@ -12,11 +12,13 @@
  * pezzi, si premono i bottoni, si scrive nel campo, si trascina. Il motore
  * serve solo a LEGGERE lo stato per giudicare (`A.scrivi`, `A.visita`).
  *
- * Il trascinamento è sintetico (`new DragEvent` con un `DataTransfer` vero):
- * prova i gesti e i loro esiti, non la macchina di trascinamento di Chrome.
- * Che il drag nativo parta davvero sugli span dipende dal non avere niente
- * sopra ai termini, ed è la ragione per cui le zone di rilascio stanno dietro
- * (vedi il commento in cima a static/components/algebra.js).
+ * I gesti sono sintetici (`new PointerEvent`): provano i gesti e i loro esiti,
+ * non la macchina del browser. Il componente non usa il drag-and-drop nativo —
+ * col dito non parte — ma pointerdown/move/up, e la stessa pressione vale come
+ * scelta se non ci si muove: per questo anche `scegli` è un premi-e-lascia.
+ * Che sotto il puntatore si trovi il termine e non la zona di rilascio dipende
+ * dal fatto che le zone stanno dietro (vedi il commento in cima a
+ * static/components/algebra.js).
  */
 (function () {
   const esiti = [];
@@ -55,13 +57,28 @@
     return s;
   }
 
-  /** Clicca il pezzo scritto così (come farebbe uno studente). */
+  /** Un evento di puntatore, come lo manda un dito o un mouse. */
+  function punta(el, tipo, x, y) {
+    el.dispatchEvent(new PointerEvent(tipo, {
+      bubbles: true, cancelable: true, pointerId: 1, isPrimary: true,
+      pointerType: 'touch', clientX: x, clientY: y,
+    }));
+  }
+
+  /** Tocca il pezzo senza muoversi: per il componente è una scelta. */
+  function toccaSpan(span) {
+    const p = centro(span);
+    punta(span, 'pointerdown', p.x, p.y);
+    punta(span, 'pointerup', p.x, p.y);
+  }
+
+  /** Sceglie il pezzo scritto così (come farebbe uno studente). */
   function scegli(c, testo) {
-    spanDi(c, nodoScritto(c, testo).id).dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    toccaSpan(spanDi(c, nodoScritto(c, testo).id));
   }
 
   function scegliNodo(c, nodo) {
-    spanDi(c, nodo.id).dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    toccaSpan(spanDi(c, nodo.id));
   }
 
   /** Preme il bottone di mossa con quell'etichetta. */
@@ -89,16 +106,22 @@
     form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
   }
 
-  /** Un trascinamento: dal pezzo scritto `testo` al punto (x, y). */
+  /**
+   * Un trascinamento: dal pezzo scritto `testo` al punto (x, y).
+   *
+   * Il primo spostamento è uno strappo di 30px che serve solo a superare la
+   * soglia oltre la quale premere diventa trascinare; conta l'ULTIMO. Da lì in
+   * poi gli eventi vanno alla lavagna e non allo span di partenza: il
+   * trascinamento ridisegna la scrittura, e uno span staccato dal documento
+   * non fa più bollire niente.
+   */
   function trascina(c, testo, x, y) {
-    const dt = new DataTransfer();
     const sorgente = spanDi(c, nodoScritto(c, testo).id);
-    sorgente.dispatchEvent(new DragEvent('dragstart', { bubbles: true, dataTransfer: dt }));
-    const sotto = document.elementFromPoint(x, y) || c.lavagna;
-    const opzioni = { bubbles: true, cancelable: true, dataTransfer: dt, clientX: x, clientY: y };
-    sotto.dispatchEvent(new DragEvent('dragover', opzioni));
-    sotto.dispatchEvent(new DragEvent('drop', opzioni));
-    sorgente.dispatchEvent(new DragEvent('dragend', { bubbles: true, dataTransfer: dt }));
+    const da = centro(sorgente);
+    punta(sorgente, 'pointerdown', da.x, da.y);
+    punta(c.lavagna, 'pointermove', da.x + 30, da.y);
+    punta(c.lavagna, 'pointermove', x, y);
+    punta(c.lavagna, 'pointerup', x, y);
   }
 
   const centro = (el) => {

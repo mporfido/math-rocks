@@ -2364,9 +2364,17 @@ x-algebra {
 .alg-termine {
     cursor: grab;
     border-radius: 4px;
-    /* Lo swipe verticale continua a scrollare la pagina. */
+    /* Il trascinamento è orizzontale: lo swipe verticale resta al browser e
+       continua a scrollare la pagina. */
     touch-action: pan-y;
+    /* Senza questo, trascinare col mouse selezionerebbe il testo invece del
+       pezzo. */
+    user-select: none;
+    -webkit-user-select: none;
 }
+
+.alg-lavagna.alg-trascinando { cursor: grabbing; }
+.alg-lavagna.alg-trascinando .alg-termine { cursor: grabbing; }
 
 .alg-radice .alg-n:hover {
     background: var(--ink-wash-1);
