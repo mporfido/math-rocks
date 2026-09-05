@@ -2362,11 +2362,14 @@ x-algebra {
 /* Solo i termini di primo livello si prendono in mano: è il confine delle
    mosse che rimescolano una somma. */
 .alg-termine {
+    /* touch-action non si applica agli span inline: ogni termine deve avere
+       un proprio box, mantenendo l'allineamento sulla linea di base. */
+    display: inline-block;
     cursor: grab;
     border-radius: 4px;
-    /* Il trascinamento è orizzontale: lo swipe verticale resta al browser e
-       continua a scrollare la pagina. */
-    touch-action: pan-y;
+    /* Anche un gesto diagonale appartiene al termine: il browser non deve
+       annullarlo per iniziare uno scroll. Fuori dai termini si scorre. */
+    touch-action: none;
     /* Senza questo, trascinare col mouse selezionerebbe il testo invece del
        pezzo. */
     user-select: none;
@@ -2376,7 +2379,7 @@ x-algebra {
 .alg-lavagna.alg-trascinando { cursor: grabbing; }
 .alg-lavagna.alg-trascinando .alg-termine { cursor: grabbing; }
 
-.alg-radice .alg-n:hover {
+.alg-scrittura .alg-selezionabile:hover {
     background: var(--ink-wash-1);
     border-radius: 4px;
 }
