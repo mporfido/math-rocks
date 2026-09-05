@@ -20,6 +20,7 @@ Ogni pagina di questo indice chiude indicando lo step corrispondente.
 | un grafico già pronto da copiare per uno scenario tipico | [grafici-esempi.md](grafici-esempi.md) |
 | una simulazione o una figura interattiva scritta a mano | [p5.md](p5.md) |
 | far sciogliere un'espressione un'operazione per volta | [espressioni.md](espressioni.md) |
+| far trasformare un'equazione mossa per mossa, coi principi di equivalenza | [algebra.md](algebra.md) |
 | una tabella in cui contano le frecce fra una riga e l'altra | [tabelle.md](tabelle.md) |
 | commentare una formula collegandone i pezzi con delle frecce | [formula.md](formula.md) |
 | box evidenziati, contenuto che appare a esercizio finito, suggerimenti | [blocchi.md](blocchi.md) |
