@@ -66,6 +66,43 @@
     return nodo({ type: 'num', num, den, value: new Rational(num, den) });
   }
 
+  /**
+   * Una divisione fra due NUMERI è una frazione, sempre — non un'operazione in
+   * attesa.
+   *
+   * Per chi studia le due cose non sono distinte, e non devono esserlo: a
+   * schermo `5 / 2` e `5/2` sono la stessa frazione impilata, e chiedergli di
+   * distinguerle vorrebbe dire insegnargli una differenza che in matematica
+   * non c'è. Prima la distinzione esisteva solo nell'albero — con l'effetto
+   * che `x = 5 / 2` sembrava finito e non lo era, e la diagnosi parlava di
+   * monomi a chi vedeva già il risultato.
+   *
+   * La frazione che ne esce NON è ridotta: `6 / 2` diventa la frazione `6/2`,
+   * che resta da semplificare. È l'unico criterio che rimane, ed è uno solo:
+   * una frazione va scritta ai minimi termini.
+   *
+   * Con una lettera in mezzo (`2x / 3`, `(x + 1) / 3`) resta una divisione
+   * vera: lì la barra raggruppa, e la mossa che serve è un'altra.
+   */
+  function dividi(sinistra, destra) {
+    if (sinistra.type !== 'num' || destra.type !== 'num') {
+      return nodo({ type: 'op', op: '/', left: sinistra, right: destra });
+    }
+    if (destra.num === 0) throw new Error('Denominatore zero');
+    // (a/b) / (c/d) = ad/bc, senza ridurre: la riduzione è una mossa dello
+    // studente, non un regalo del parser.
+    let num = sinistra.num * destra.den;
+    let den = sinistra.den * destra.num;
+    if (den < 0) { num = -num; den = -den; }   // il meno sta davanti, non sotto
+    try {
+      return numero(num, den);
+    } catch (e) {
+      // Oltre il limite dell'aritmetica esatta: meglio una divisione scritta
+      // che un numero sbagliato in silenzio.
+      return nodo({ type: 'op', op: '/', left: sinistra, right: destra });
+    }
+  }
+
   // --- Tokenizer -------------------------------------------------------------
 
   function tokenizza(sorgente) {
@@ -188,7 +225,12 @@
         const t = guarda();
         if (eOp(t, '*', '/')) {
           const op = avanti().op;
-          sinistra = nodo({ type: 'op', op, left: sinistra, right: fattore() });
+          const destra = fattore();
+          // `5 / 2` scritto con gli spazi deve dare quello che dà `5/2`
+          // attaccato: prima erano due alberi diversi per la stessa frazione.
+          sinistra = op === '/'
+            ? dividi(sinistra, destra)
+            : nodo({ type: 'op', op, left: sinistra, right: destra });
           continue;
         }
         // Prodotto implicito: `2x`, `3xy`, `2(x+1)`, `(x+1)(x-2)`.
@@ -360,6 +402,43 @@
     return esito;
   }
 
+  /**
+   * Il CAMMINO dalla radice a un nodo (`['left', 'right']`), o null se il nodo
+   * non c'è.
+   *
+   * Gli id vivono quanto la sessione: nascono da un contatore, e rileggere la
+   * stessa scrittura ne produce di nuovi. Per la selezione vanno benissimo —
+   * albero e schermo sono lì insieme — ma non per RICORDARE una mossa: una
+   * sequenza salvata e poi rigiocata su un albero riletto troverebbe id che
+   * non esistono più. Il cammino invece dice *dove* sta un pezzo nella
+   * struttura, e vale ancora domani.
+   */
+  function percorsoDi(albero, id) {
+    let esito = null;
+    const cerca = (n, cammino) => {
+      if (esito) return;
+      if (n.id === id) { esito = cammino; return; }
+      for (const campo of ['left', 'right', 'operand']) {
+        if (n[campo]) cerca(n[campo], [...cammino, campo]);
+      }
+    };
+    cerca(albero, []);
+    return esito;
+  }
+
+  /** Il nodo in fondo a un cammino, o null se il cammino non porta da nessuna
+   *  parte (l'albero è cambiato sotto: succede rigiocando una sequenza
+   *  salvata da una versione precedente della lezione). */
+  function nodoAlPercorso(albero, percorso) {
+    if (!Array.isArray(percorso)) return null;
+    let n = albero;
+    for (const campo of percorso) {
+      if (!n || !n[campo]) return null;
+      n = n[campo];
+    }
+    return n;
+  }
+
   /** Il genitore di un nodo, o null se è la radice: serve a togliere un
    *  termine da una somma, dove l'operazione da rifare è quella sopra. */
   function trovaGenitore(albero, id) {
@@ -396,11 +475,14 @@
   host.visita = visita;
   host.trovaNodo = trovaNodo;
   host.trovaGenitore = trovaGenitore;
+  host.percorsoDi = percorsoDi;
+  host.nodoAlPercorso = nodoAlPercorso;
   host.sostituisci = sostituisci;
   // Le mosse costruiscono nodi nuovi e devono pescare gli id dallo stesso
   // contatore, altrimenti due nodi diversi potrebbero ritrovarsi con lo stesso.
   host.creaNodo = nodo;
   host.creaNumero = numero;
+  host.dividi = dividi;
 })(
   // Nel browser il namespace è uno solo e i file di static/lib/ lo estendono;
   // in Node ogni file è un modulo, quindi qui ci si tira dentro il nucleo

@@ -2177,20 +2177,17 @@ x-smista.is-done .smista-card {
    frazione raggruppa da sola: `(2x + 6)/3` si legge senza parentesi, che è
    esattamente come si scrive il secondo principio "da lavagna".
 
-   NB: dentro la formula tutto è allineato al MEZZO, non alla linea di base.
-   Con le frazioni impilate la base cade sul numeratore, e `=` e `−` finirebbero
-   in cima alla frazione invece che all'altezza della barra.
+   NB: tutto sta sulla LINEA DI BASE, tranne la frazione. Allineare al mezzo
+   ogni nodo sembrava innocuo, ma i nodi sono annidati (`2x` è un livello più
+   in basso del `6` accanto) e `middle` non è idempotente: a ogni annidamento
+   il pezzo scivola di mezza x-height, e i termini con le lettere finiscono
+   sfalsati rispetto ai termini noti. Al mezzo ci va solo la frazione: è
+   simmetrica rispetto alla barra, quindi centrarla porta la barra all'altezza
+   giusta e `=` e `−` le restano di fianco.
    ============================================================ */
 
 .alg-radice {
   line-height: 1.25;
-}
-
-.alg-radice .alg-n,
-.alg-radice .alg-operatore,
-.alg-radice .alg-uguale,
-.alg-radice .alg-par {
-  vertical-align: middle;
 }
 
 .alg-lettera {
@@ -2235,3 +2232,330 @@ x-smista.is-done .smista-card {
 /* Aria sotto al numeratore: senza, la barra taglia la coda di una `y`. */
 .alg-sopra { padding-bottom: .16em; }
 .alg-sotto { border-top: 1.5px solid currentColor; padding-top: .06em; }
+
+/* ============================================================
+   <x-algebra> — la lavagna delle mosse (static/components/algebra.js)
+   ============================================================
+   Sopra la scrittura che si tocca (i `.alg-*` qui sopra) ci sta l'interfaccia:
+   il traguardo, il menu delle mosse, il campo dove si digita un risultato, lo
+   svolgimento.
+
+   Le DUE ZONE di rilascio (portalo di là) stanno dietro alla scrittura, con
+   `z-index: -1` e `isolation: isolate` sulla lavagna. Non è un vezzo: un
+   elemento sovrapposto a un termine impedisce al trascinamento nativo di
+   partire, e lo fa anche con `pointer-events: none` — provato guidando Chrome.
+   Le zone quindi non ricevono nulla; la metà bersaglio la ricava il JS dalla x
+   del puntatore.
+   ============================================================ */
+
+x-algebra {
+    display: block;
+    margin: 1.5rem 0;
+    border: var(--border);
+    border-radius: var(--radius);
+    background: var(--carta);
+    overflow: hidden;
+}
+
+.alg-testata {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding: 0.5rem 0.9rem;
+    border-bottom: 1px solid var(--line);
+    background: var(--ink-wash-1);
+}
+
+.alg-obiettivo {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+}
+
+.alg-comandi {
+    display: flex;
+    gap: 0.4rem;
+}
+
+.alg-btn {
+    font-family: var(--font-disp);
+    font-size: 0.85rem;
+    padding: 0.3rem 0.7rem;
+    background: var(--surface);
+    color: var(--ink);
+    border: 2px solid var(--ink);
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.alg-btn:hover:not(:disabled) {
+    background: var(--ink-wash-2);
+}
+
+.alg-btn:disabled {
+    color: var(--locked);
+    border-color: var(--locked);
+    cursor: default;
+}
+
+.alg-btn:focus-visible {
+    outline: 3px solid var(--rossa);
+    outline-offset: 2px;
+}
+
+.alg-btn-primario {
+    background: var(--ink);
+    color: var(--carta);
+}
+
+/* -- La lavagna ---------------------------------------------------------- */
+
+.alg-lavagna {
+    position: relative;
+    /* Crea il contesto di impilamento: senza, le zone a `z-index: -1`
+       finirebbero dietro allo sfondo del componente e sparirebbero. */
+    isolation: isolate;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 5.5rem;
+    padding: 1.2rem 1rem;
+    font-size: 1.5rem;
+}
+
+.alg-scrittura {
+    font-family: var(--font-body);
+}
+
+.alg-zona {
+    position: absolute;
+    top: 0.4rem;
+    bottom: 0.4rem;
+    width: calc(50% - 0.6rem);
+    z-index: -1;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed var(--line);
+    border-radius: var(--radius);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--ink-soft);
+}
+
+.alg-zona[data-meta="left"] { left: 0.4rem; }
+.alg-zona[data-meta="right"] { right: 0.4rem; }
+
+.alg-lavagna.alg-trascinando .alg-zona { display: flex; }
+
+.alg-zona.attiva {
+    border-color: var(--ink);
+    border-style: solid;
+    background: var(--ink-wash-1);
+    color: var(--ink);
+}
+
+/* -- I pezzi ------------------------------------------------------------- */
+
+/* Solo i termini di primo livello si prendono in mano: è il confine delle
+   mosse che rimescolano una somma. */
+.alg-termine {
+    cursor: grab;
+    border-radius: 4px;
+    /* Lo swipe verticale continua a scrollare la pagina. */
+    touch-action: pan-y;
+}
+
+.alg-radice .alg-n:hover {
+    background: var(--ink-wash-1);
+    border-radius: 4px;
+}
+
+.alg-scrittura .alg-scelto {
+    background: var(--ink-wash-3);
+    box-shadow: 0 0 0 2px var(--ink);
+    border-radius: 4px;
+}
+
+.alg-scrittura .alg-indicato {
+    box-shadow: 0 0 0 2px var(--rossa);
+    border-radius: 4px;
+}
+
+.alg-scrittura .alg-simile {
+    background: var(--spunta-soft);
+    box-shadow: 0 0 0 2px var(--spunta);
+    border-radius: 4px;
+}
+
+/* Il segno di inserimento: dove finisce il pezzo se lo lascio qui. */
+.alg-scrittura .alg-prima { box-shadow: -3px 0 0 var(--rossa); }
+.alg-scrittura .alg-dopo { box-shadow: 3px 0 0 var(--rossa); }
+
+.alg-scrittura [data-nodo]:focus-visible {
+    outline: 3px solid var(--rossa);
+    outline-offset: 1px;
+}
+
+/* -- Messaggio e menu ---------------------------------------------------- */
+
+.alg-messaggio {
+    margin: 0;
+    padding: 0 0.9rem;
+    max-height: 0;
+    overflow: hidden;
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+    transition: max-height 0.15s ease, padding 0.15s ease;
+}
+
+.alg-messaggio.visibile {
+    max-height: 6rem;
+    padding: 0.5rem 0.9rem;
+}
+
+.alg-menu {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding: 0.7rem 0.9rem 0.9rem;
+    border-top: 1px solid var(--line);
+}
+
+/* `display: flex` batte l'attributo `hidden`, che vale quanto un
+   `display: block` d'autore: senza questa riga il campo dove si digita il
+   risultato resta in pagina sempre, e la lavagna sembra chiedere una scrittura
+   anche quando non c'è nessun conto aperto. */
+.alg-digita[hidden] {
+    display: none;
+}
+
+.alg-mosse,
+.alg-digita {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+    width: 100%;
+}
+
+.alg-invito {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+}
+
+.alg-modulo {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    flex-wrap: wrap;
+}
+
+/* Il nome della regola davanti al campo: senza, i due secondi principi (per
+   intero e termine a termine) sono due moduli identici. */
+.alg-modulo-nome {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--ink-soft);
+}
+
+.alg-modulo select,
+.alg-modulo input,
+.alg-digita-campo {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    padding: 0.3rem 0.5rem;
+    background: var(--surface);
+    color: var(--ink);
+    border: 2px solid var(--ink);
+    border-radius: 6px;
+}
+
+.alg-digita-campo {
+    flex: 1 1 12rem;
+    font-size: 1rem;
+}
+
+.alg-digita-invito {
+    font-family: var(--font-disp);
+    font-size: 0.85rem;
+    width: 100%;
+}
+
+/* -- Lo svolgimento ------------------------------------------------------ */
+
+.alg-svolgimento {
+    border-top: 1px solid var(--line);
+    padding: 0.5rem 0.9rem 0.7rem;
+}
+
+.alg-svolgimento summary {
+    font-family: var(--font-disp);
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+    cursor: pointer;
+}
+
+/* Le tre colonne — pallino, equazione, regola — incolonnate su tutte le righe:
+   la regola di un passaggio si legge accanto al passaggio, non appiccicata alla
+   sua coda, e l'occhio scorre le equazioni senza incontrare numeri d'elenco che
+   somigliano ai coefficienti. `display: contents` sui `li` fa sì che siano le
+   celle, non le righe, a entrare nella griglia. */
+.alg-passi {
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    align-items: baseline;
+    column-gap: 0.6rem;
+    row-gap: 0.45rem;
+    justify-content: start;
+    margin: 0.6rem 0 0;
+    padding: 0;
+    list-style: none;
+    font-family: var(--font-body);
+}
+
+.alg-passi li {
+    display: contents;
+}
+
+/* Il pallino al posto del numero: segna la riga senza dire una cifra. Sta sulla
+   linea di base come le equazioni (`align-self: baseline` su una scatola vuota
+   ne appoggia il fondo alla base), rialzato quel tanto che lo porta all'altezza
+   del corpo delle lettere. */
+.alg-passi li::before {
+    content: "";
+    align-self: baseline;
+    width: 0.36em;
+    height: 0.36em;
+    margin-bottom: 0.08em;
+    border-radius: 50%;
+    background: var(--rossa, #c0392b);
+}
+
+.alg-passo-nome {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    line-height: 1.3;
+    color: var(--ink-soft);
+    padding-left: 0.6rem;
+}
+
+/* Lo svolgimento è una cronaca, non una lavagna: i suoi pezzi non si toccano
+   (e i loro `data-nodo` sono vecchi id, che nessuno deve poter selezionare). */
+.alg-passi .alg-radice .alg-n:hover { background: none; }
+.alg-passi [data-nodo] { cursor: default; }
+
+x-algebra[data-completed] .alg-testata {
+    background: var(--spunta-soft);
+}
+
+.alg-errore {
+    margin: 0;
+    padding: 0.9rem;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--error);
+}

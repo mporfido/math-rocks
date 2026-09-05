@@ -94,6 +94,33 @@
    * **tollerante**: `y^3x^2` passa, perché è una convenzione tipografica e non
    * un errore di algebra.
    */
+  /**
+   * Che divisione è rimasta lì: fra numeri va CALCOLATA (`5 / 2` → `5/2`),
+   * con delle lettere sopra va RISCRITTA con il coefficiente davanti
+   * (`2x / 3` → `2/3x`). Sono due mosse diverse, e il messaggio deve mandare
+   * a quella giusta.
+   */
+  function divisioneRimasta(f) {
+    const generico = problema('fattore-non-monomio',
+      'Questo non è un fattore di un monomio: un monomio è un numero per delle lettere', f);
+    let forma = null;
+    try {
+      forma = canonicalizza(f);
+    } catch (e) {
+      return generico;   // fuori dominio (`x / y`): non sappiamo dire di più
+    }
+    if (forma.costante !== null) {
+      return problema('divisione-da-fare', 'Questa divisione è ancora da fare', f);
+    }
+    // Sopra la barra c'è una somma (`(x + 1) / 2`, quello che lascia il secondo
+    // principio applicato al membro intero): non è un monomio scritto male, è
+    // un'altra cosa, e mandarlo a «scrivi il coefficiente davanti» sarebbe una
+    // bugia.
+    if (forma.termini.size !== 1) return generico;
+    return problema('coefficiente-sotto',
+      'Il coefficiente va scritto davanti, non sotto: 2/3x, non 2x/3', f);
+  }
+
   function monomioNormale(n) {
     const problemi = [];
 
@@ -153,6 +180,14 @@
           problemi.push(problema('esponente-negativo',
             'Esponente negativo: qui non è un monomio', f));
         }
+      } else if (f.type === 'op' && f.op === '/') {
+        // Il caso più frequente di tutti: lo lascia ogni secondo principio "da
+        // lavagna". A schermo `5 / 2` è una frazione impilata, identica al
+        // numero 5/2 — ma è una divisione ancora da fare, e rispondere «non è
+        // un fattore di un monomio» manda a cercare un errore che non c'è.
+        // Le due divisioni chiedono due mosse diverse, e il messaggio lo dice.
+        problemi.push(divisioneRimasta(f));
+        return;
       } else {
         problemi.push(problema('fattore-non-monomio',
           'Questo non è un fattore di un monomio: un monomio è un numero per delle lettere', f));
@@ -367,7 +402,8 @@
     'fuori-dominio', 'incognita-ambigua',
     'non-equazione', 'non-espressione', 'senza-incognita', 'membri-scambiati',
     'destra-non-zero', 'destra-non-costante', 'non-isolata', 'lettera-a-destra',
-    'sinistra-non-monomio', 'fattore-non-monomio', 'esponente-negativo',
+    'sinistra-non-monomio', 'divisione-da-fare', 'coefficiente-sotto',
+    'fattore-non-monomio', 'esponente-negativo',
     'termini-simili', 'termine-nullo', 'esponente-zero',
     'coefficienti-multipli', 'lettera-ripetuta', 'meno-fuori',
     'coefficiente-non-davanti', 'frazione-non-ridotta',
@@ -384,6 +420,7 @@
   }
 
   host.fattoriDi = fattoriDi;
+  host.frazioneRidotta = frazioneRidotta;
   host.terminiDi = terminiDi;
   host.parteLetterale = parteLetterale;
   host.monomioNormale = monomioNormale;

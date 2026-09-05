@@ -98,9 +98,49 @@ test('esponenti 0 e 1 non si scrivono', () => {
 
 test('2x/3 non è un monomio normale: il coefficiente va scritto davanti', () => {
   assert.ok(!mono('2x/3').ok);
-  assert.strictEqual(primo(mono('2x/3')), 'fattore-non-monomio');
+  assert.strictEqual(primo(mono('2x/3')), 'coefficiente-sotto');
   // ...ed è proprio la scrittura che produce il secondo principio "da lavagna"
   assert.ok(mono('2/3x').ok);
+});
+
+/**
+ * Fra numeri una divisione È una frazione (la fa `dividi`, in
+ * algebra-parser.js): `5 / 2` e `5/2` sono lo stesso albero, e quello che
+ * resta da giudicare è una cosa sola — se la frazione è ai minimi termini.
+ * Prima erano due scritture gemelle, indistinguibili a schermo e diverse
+ * nell'albero, e `x = 5/2` sembrava finito senza esserlo.
+ *
+ * Restano divisioni vere quelle con una lettera o una somma sopra la barra, e
+ * lì la diagnosi deve mandare alla mossa giusta.
+ */
+test('una frazione si giudica su una cosa sola: se è ridotta', () => {
+  assert.ok(mono('5 / 2').ok, '5 / 2 è la frazione 5/2, e va bene così');
+  assert.ok(mono('5/2').ok);
+  assert.strictEqual(primo(mono('6 / 2')), 'frazione-non-ridotta');
+  assert.strictEqual(primo(mono('6/2')), 'frazione-non-ridotta');
+});
+
+test('una divisione rimasta dice quale mossa manca', () => {
+  // con delle lettere: va riscritta col coefficiente davanti
+  assert.strictEqual(primo(mono('2x / 3')), 'coefficiente-sotto');
+  // una costante scritta come conto (quello che resta dopo un principio
+  // applicato a un termine composto): la divisione è ancora da fare
+  assert.strictEqual(primo(mono('(6 + 6) / 3')), 'divisione-da-fare');
+  // una somma sotto la barra non è un monomio scritto male: è un'altra cosa
+  assert.strictEqual(primo(mono('(x + 1) / 2')), 'fattore-non-monomio');
+  // e fuori dominio non si inventa una diagnosi
+  assert.strictEqual(primo(mono('x / y')), 'fattore-non-monomio');
+});
+
+test('dopo un secondo principio il traguardo dice il vero', () => {
+  const { traguardo, parse } = require('../../static/lib/algebra-forme.js');
+  // Il caso da cui è nata la regola: sullo schermo `x = 5/2` è finito, e ora
+  // lo è anche nell'albero.
+  assert.ok(traguardo(parse('x = 5 / 2'), { isola: 'x' }).ok);
+  // Mentre una frazione da ridurre resta un lavoro, e si chiama col suo nome.
+  const daRidurre = traguardo(parse('x = 6 / 2'), { isola: 'x' });
+  assert.ok(!daRidurre.ok);
+  assert.strictEqual(daRidurre.problemi[0].codice, 'frazione-non-ridotta');
 });
 
 test('una somma non è un monomio', () => {

@@ -30,7 +30,8 @@
   }
   const {
     parse, scrivi, canonicalizza, equivalenti, nelDominio, sostituisci, trovaNodo, trovaGenitore,
-    creaNodo, creaNumero, terminiDi, monomioNormale, parteLetterale,
+    creaNodo, creaNumero, dividi, terminiDi, monomioNormale, parteLetterale,
+    frazioneRidotta,
   } = base;
 
   const no = (codice, messaggio) => ({ ok: false, codice, messaggio });
@@ -174,9 +175,16 @@
   const primoPrincipio = {
     id: 'primo-principio',
     etichetta: 'Aggiungi o togli la stessa quantità ai due membri',
+    breve: 'primo principio',
     tipo: 'applicazione',
     bersaglio: 'equazione',
     parametri: ['operazione', 'valore'],
+    // `opzioni` e per l'interfaccia, non per il motore: dice quali valori
+    // ammette un parametro, cosi il menu costruisce il campo da solo invece di
+    // ricopiare qui la lista. Una mossa con parametri MA SENZA opzioni (come
+    // `sposta`) e per definizione una mossa da gesto: il parametro glielo da
+    // il trascinamento, e a click ci arrivano i suoi gemelli.
+    opzioni: { operazione: ['aggiungi', 'sottrai'] },
     applicabile(albero, id, param) {
       if (!èEquazione(albero)) return no('serve-equazione', 'Il primo principio vale per le equazioni');
       const quale = operazioneFraDue(param, ['aggiungi', 'sottrai']);
@@ -215,13 +223,18 @@
     return fai(n);
   }
 
-  function secondoPrincipio(id, etichetta, granularità) {
+  function secondoPrincipio(id, etichetta, breve, granularità) {
     return {
       id,
       etichetta,
+      // Il nome corto e per il menu: due moduli con lo stesso verbo nella
+      // tendina sarebbero indistinguibili, ed e proprio la granularita a
+      // distinguerli.
+      breve,
       tipo: 'applicazione',
       bersaglio: 'equazione',
       parametri: ['operazione', 'valore'],
+      opzioni: { operazione: ['moltiplica', 'dividi'] },
       applicabile(albero, sel, param) {
         if (!èEquazione(albero)) return no('serve-equazione', 'Il secondo principio vale per le equazioni');
         const quale = operazioneFraDue(param, ['moltiplica', 'dividi']);
@@ -237,10 +250,14 @@
         return sì();
       },
       esegui(albero, sel, param) {
-        const dividi = param.operazione === 'dividi';
+        const divide = param.operazione === 'dividi';
         const fai = (membro) => {
-          const applica = (pezzo) => (dividi
-            ? op('/', pezzo, parse(param.valore))
+          const applica = (pezzo) => (divide
+            // `dividi` (dal parser) e non un nodo `/` a mano: fra due numeri
+            // la divisione È una frazione, e deve esserlo da qualunque parte
+            // arrivi — altrimenti `6 / 3` scritto dalla mossa e `6/3` scritto
+            // dall'autore sarebbero due cose diverse sullo stesso schermo.
+            ? dividi(pezzo, parse(param.valore))
             : op('*', parse(param.valore), pezzo, { implicit: true }));
           return granularità === 'lavagna' ? terminePerTermine(membro, applica) : applica(membro);
         };
@@ -291,6 +308,91 @@
     },
   };
 
+  /**
+   * Dove sta un termine dentro al suo membro: `{ membro, termini, indice }`,
+   * oppure null se quel nodo non è un termine di primo livello. Lo condividono
+   * tutte le mosse che rimescolano una somma.
+   */
+  function postoDelTermine(albero, id) {
+    const membro = membroDi(albero, id);
+    if (!membro) return null;
+    const termini = terminiDi(membro);
+    const indice = termini.findIndex((t) => t.nodo.id === id);
+    return indice === -1 ? null : { membro, termini, indice };
+  }
+
+  /** Il membro riscritto con quel termine spostato in quella posizione. */
+  function riordina(albero, posto, destinazione) {
+    const rimasti = [...posto.termini];
+    const [preso] = rimasti.splice(posto.indice, 1);
+    rimasti.splice(destinazione, 0, preso);
+    return sostituisci(albero, posto.membro.id, costruisciSomma(rimasti));
+  }
+
+  /**
+   * Cambiare posto a un addendo è la proprietà commutativa, e non c'è niente
+   * da calcolare: è una mossa di applicazione, il motore la scrive. Serve
+   * perché l'ordine dei termini fa parte di quasi tutti i traguardi, e
+   * `ordina` (tutto il membro, per grado) è una scorciatoia che non insegna
+   * il gesto — sul quaderno un termine si sposta uno alla volta.
+   *
+   * Il parametro `posizione` glielo dà il trascinamento; a click le due mosse
+   * gemelle qui sotto spostano di un posto per volta.
+   */
+  const sposta = {
+    id: 'sposta',
+    etichetta: 'Sposta il termine',
+    tipo: 'applicazione',
+    bersaglio: 'nodo',
+    parametri: ['posizione'],
+    applicabile(albero, id, param) {
+      const scelto = bersaglio(albero, id, 'Scegli il termine da spostare');
+      if (scelto.errore) return scelto.errore;
+      const posto = postoDelTermine(albero, id);
+      if (!posto) return no('non-termine', 'Si spostano i termini di una somma');
+      if (posto.termini.length < 2) return no('unico-termine', 'C\'è un solo termine');
+      const destinazione = param && param.posizione;
+      if (!Number.isInteger(destinazione) || destinazione < 0
+          || destinazione >= posto.termini.length) {
+        return no('posizione-non-valida', 'Posizione non valida');
+      }
+      if (destinazione === posto.indice) return no('già-lì', 'Il termine è già in quel posto');
+      return sì();
+    },
+    esegui(albero, id, param) {
+      return riordina(albero, postoDelTermine(albero, id), param.posizione);
+    },
+  };
+
+  /** Il gemello a click di `sposta`: un posto per volta, senza parametri, così
+   *  compare da solo nel menu delle mosse disponibili. */
+  function spostaDiUno(id, etichetta, passo) {
+    return {
+      id,
+      etichetta,
+      tipo: 'applicazione',
+      bersaglio: 'nodo',
+      parametri: [],
+      applicabile(albero, sel) {
+        const scelto = bersaglio(albero, sel, 'Scegli il termine da spostare');
+        if (scelto.errore) return scelto.errore;
+        const posto = postoDelTermine(albero, sel);
+        if (!posto) return no('non-termine', 'Si spostano i termini di una somma');
+        const destinazione = posto.indice + passo;
+        if (destinazione < 0 || destinazione >= posto.termini.length) {
+          return no('niente-oltre', passo < 0
+            ? 'Questo termine è già il primo'
+            : 'Questo termine è già l\'ultimo');
+        }
+        return sì();
+      },
+      esegui(albero, sel) {
+        const posto = postoDelTermine(albero, sel);
+        return riordina(albero, posto, posto.indice + passo);
+      },
+    };
+  }
+
   const ordina = {
     id: 'ordina',
     etichetta: 'Ordina per grado decrescente',
@@ -334,7 +436,13 @@
       const scelto = bersaglio(albero, id, 'Scegli che cosa calcolare');
       if (scelto.errore) return scelto.errore;
       const nodo = scelto.nodo;
-      if (nodo.type === 'num') return no('già-numero', 'Questo è già un numero');
+      // Un numero già scritto ai minimi termini non ha più niente da dare; una
+      // frazione non ridotta invece sì, ed è la stessa mossa: `12/3` si
+      // calcola come `8 - 3`. Da quando una divisione fra numeri è una
+      // frazione, questo è l'unico modo per finirla.
+      if (nodo.type === 'num' && frazioneRidotta(nodo)) {
+        return no('già-numero', 'Questo numero è già scritto ai minimi termini');
+      }
       if (canonicalizza(nodo).costante === null) {
         return no('non-numerico', 'Qui non si può ancora calcolare: ci sono delle lettere');
       }
@@ -386,6 +494,12 @@
       // il calcolo).
       if (terminiDi(nodo).length > 1 || canonicalizza(nodo).termini.size > 1) {
         return no('non-monomio', 'Questo non è un monomio');
+      }
+      // Un numero da solo è un monomio, ma la mossa che lo sistema si chiama
+      // Calcola: offrirle tutte e due vorrebbe dire due bottoni per la stessa
+      // cosa, e chi legge il menu penserebbe di doverle fare entrambe.
+      if (nodo.type === 'num') {
+        return no('è-un-numero', 'Un numero da solo si sistema con Calcola');
       }
       if (monomioNormale(nodo).ok) return no('già-normale', 'Questo monomio è già in forma normale');
       return sì();
@@ -471,9 +585,14 @@
   const CATALOGO = {};
   for (const m of [
     primoPrincipio,
-    secondoPrincipio('secondo-principio', 'Moltiplica o dividi i due membri (termine a termine)', 'lavagna'),
-    secondoPrincipio('secondo-principio-rigoroso', 'Moltiplica o dividi i due membri (per intero)', 'membro'),
+    secondoPrincipio('secondo-principio', 'Moltiplica o dividi i due membri (termine a termine)',
+      'secondo principio, termine a termine', 'lavagna'),
+    secondoPrincipio('secondo-principio-rigoroso', 'Moltiplica o dividi i due membri (per intero)',
+      'secondo principio, sul membro intero', 'membro'),
     scambiaMembri, eliminaNullo, ordina,
+    sposta,
+    spostaDiUno('sposta-sinistra', 'Sposta il termine a sinistra', -1),
+    spostaDiUno('sposta-destra', 'Sposta il termine a destra', +1),
     calcola, riduciSimili, normalizzaMonomio, espandi,
     trasporto,
   ]) CATALOGO[m.id] = m;
@@ -576,6 +695,7 @@
   host.validaWhitelist = validaWhitelist;
   host.costruisciSomma = costruisciSomma;
   host.opposto = opposto;
+  host.postoDelTermine = postoDelTermine;
 })(
   typeof window !== 'undefined'
     ? (window.Algebra = window.Algebra || {})

@@ -128,3 +128,29 @@ test('toLatex produce una barra rovescia vera, non un carattere di controllo', (
   assert.strictEqual(tex.charCodeAt(0), 92, 'deve iniziare con una barra rovescia');
   assert.ok(!tex.includes('\f'), 'contiene un form feed: la barra non è raddoppiata');
 });
+
+/**
+ * Stessa rete per `<x-algebra>`: è il componente che usa TUTTO il nucleo
+ * (parser, forme, mosse, rendering) e sta in fondo alla catena. Se un file di
+ * `static/lib/` finisse dopo di lui in `_assets.html`, o se una libreria
+ * lasciasse un `const` fuori dalla sua IIFE, la lavagna resterebbe muta in
+ * lezione senza un errore che si veda.
+ */
+test('anche x-algebra si registra, caricato come lo carica la pagina', () => {
+  const ordine = scriptDelTemplate();
+  const daEseguire = ordine.filter((f) => f.startsWith('lib/') || f === 'components/algebra.js');
+
+  assert.strictEqual(daEseguire[daEseguire.length - 1], 'components/algebra.js',
+    'algebra.js deve venire dopo tutto static/lib/');
+
+  const { customElements, Algebra } = comeNelBrowser(...daEseguire);
+  assert.strictEqual(typeof customElements.get('x-algebra'), 'function',
+    'x-algebra non si è registrato');
+  // Le funzioni che il componente chiama per nome: se una sparisse dal
+  // namespace, il componente si romperebbe solo al primo click.
+  for (const nome of ['parse', 'scrivi', 'rendiHTML', 'terminiDi', 'parteLetterale',
+    'trovaNodo', 'percorsoDi', 'nodoAlPercorso', 'postoDelTermine',
+    'applicaMossa', 'mosseDisponibili', 'traguardo']) {
+    assert.strictEqual(typeof Algebra[nome], 'function', 'manca ' + nome);
+  }
+});

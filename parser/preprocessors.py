@@ -2,6 +2,8 @@
 import re
 import json
 import html as html_lib
+from functools import lru_cache
+from pathlib import Path
 from urllib.parse import quote as url_quote
 import yaml
 
@@ -1073,6 +1075,169 @@ def process_expr(content, expr_counter):
 
     processed = pattern.sub(replace_expr, content)
     return processed, replacements, expr_counter
+
+
+def process_algebra(content, algebra_counter):
+    """
+    Converte blocchi :::algebra ... ::: in <x-algebra> web component
+    (manipolare un'equazione applicando i principi di equivalenza).
+
+    Sintassi (una sola equazione o espressione per blocco):
+        :::algebra isola="y" mosse="trasporto;secondo-principio;calcola"
+        2x + 3y - 6 = 0
+        :::
+
+    Il TRAGUARDO è una forma, non un valore: si dichiara con una di queste
+    opzioni, e una ci vuole (o il flag `libera` al suo posto).
+        isola="y"           l'equazione va risolta rispetto a y
+        forma="normale"     ax^2 + bx + c = 0 (tutto a sinistra, zero a destra)
+        forma="ridotta"     un polinomio ridotto e ordinato (senza uguale)
+        forma="ax=b"        incognita da sola a sinistra, un numero a destra;
+                            con più lettere serve anche incognita="x"
+        libera              flag: nessun traguardo, nessun goal — una lavagna
+                            per far vedere una mossa, non per farla fare
+
+    Altre opzioni:
+        mosse="a;b;c"       le sole mosse abilitate (l'elenco degli id sta in
+                            static/lib/algebra-mosse.json). Omesso = tutte
+
+    Gli id di mossa si validano QUI contro quell'elenco: una mossa scritta male
+    nella whitelist è una scheda che lo studente non può risolvere, e deve
+    fermare la build invece di scoprirsi in classe. La build non sa altro del
+    catalogo — che cosa faccia ogni mossa lo sa solo il motore JavaScript, e
+    tenere due motori allineati costerebbe più di quanto renda.
+
+    Come :::expr, il corpo può contenere caratteri che mistune o gli altri
+    preprocessori interpreterebbero (`*`, `^`, `_`): viene estratto in un
+    marker e l'HTML è restituito come replacement da applicare DOPO il
+    rendering markdown.
+
+    Args:
+        content: Contenuto markdown
+        algebra_counter: Contatore per ID univoci
+
+    Returns:
+        Tuple (contenuto con marker, dict marker→HTML, nuovo valore counter)
+
+    Raises:
+        ValueError: corpo vuoto o su più righe, traguardo assente/doppio/ignoto,
+            id di mossa inesistente
+    """
+    pattern = re.compile(r'^:::algebra[ \t]*([^\n]*)\n(.*?)\n?:::[ \t]*$',
+                         re.DOTALL | re.MULTILINE)
+    replacements = {}
+
+    def replace_algebra(match):
+        nonlocal algebra_counter
+        opts = _parse_opts_quoted(match.group(1).strip())
+        righe = [r.strip() for r in match.group(2).splitlines() if r.strip()]
+
+        if not righe:
+            raise ValueError(':::algebra: manca l\'equazione di partenza')
+        if len(righe) > 1:
+            raise ValueError(
+                f':::algebra: una sola equazione per blocco, qui ce ne sono {len(righe)}'
+            )
+        partenza = righe[0]
+
+        traguardo = _traguardo_algebra(opts)
+
+        attrs = [f'data-eq="{html_lib.escape(partenza, quote=True)}"']
+        if traguardo is not None:
+            # L'id (quindi il goal) c'è solo con un traguardo: senza, non ci
+            # sarebbe niente da completare e lo step non si chiuderebbe mai.
+            attrs.insert(0, f'id="algebra-{algebra_counter}"')
+            attrs.append(
+                'data-traguardo="'
+                + html_lib.escape(json.dumps(traguardo, ensure_ascii=False), quote=True)
+                + '"'
+            )
+
+        if opts.get('mosse'):
+            mosse = [m.strip() for m in str(opts['mosse']).split(';') if m.strip()]
+            ignote = [m for m in mosse if m not in _mosse_note()]
+            if ignote:
+                raise ValueError(
+                    f':::algebra: mossa sconosciuta {ignote!r}; '
+                    f'le mosse sono {sorted(_mosse_note())!r}'
+                )
+            attrs.append(
+                'data-mosse="'
+                + html_lib.escape(json.dumps(mosse, ensure_ascii=False), quote=True)
+                + '"'
+            )
+
+        marker = f'XALGEBRABLOCK{algebra_counter}X'
+        replacements[marker] = f'<x-algebra {" ".join(attrs)}></x-algebra>'
+        algebra_counter += 1
+        return marker
+
+    processed = pattern.sub(replace_algebra, content)
+    return processed, replacements, algebra_counter
+
+
+# Le forme che il motore sa giudicare (`traguardo` in static/lib/algebra-forme.js).
+FORME_ALGEBRA = ('normale', 'ridotta', 'ax=b')
+
+
+def _traguardo_algebra(opts):
+    """
+    Il traguardo dichiarato nella riga di apertura, come dict pronto da
+    serializzare, oppure None per il flag `libera`.
+
+    Raises:
+        ValueError: nessun traguardo, più d'uno, o una forma che il motore non
+            conosce
+    """
+    libera = bool(opts.get('libera'))
+    isola = opts.get('isola')
+    forma = opts.get('forma')
+
+    dichiarati = [n for n, v in (('libera', libera), ('isola', isola), ('forma', forma)) if v]
+    if not dichiarati:
+        raise ValueError(
+            ':::algebra: manca il traguardo (isola="y", forma="normale", '
+            'forma="ridotta", forma="ax=b") oppure il flag `libera`'
+        )
+    if len(dichiarati) > 1:
+        raise ValueError(
+            f':::algebra: un traguardo solo per blocco, qui ce ne sono {dichiarati!r}'
+        )
+
+    if libera:
+        return None
+    if isola:
+        return {'isola': str(isola)}
+
+    if forma not in FORME_ALGEBRA:
+        raise ValueError(
+            f':::algebra: forma sconosciuta {forma!r}; sono {list(FORME_ALGEBRA)!r}'
+        )
+    traguardo = {'forma': forma}
+    # `incognita` serve solo a `ax=b`, e con più lettere in gioco è obbligatoria
+    # (lo dice il motore, con un problema apposta): accettarla altrove
+    # significherebbe scriverla e vederla ignorare in silenzio.
+    if opts.get('incognita'):
+        if forma != 'ax=b':
+            raise ValueError(
+                f':::algebra: `incognita` vale solo con forma="ax=b", non con forma={forma!r}'
+            )
+        traguardo['incognita'] = str(opts['incognita'])
+    return traguardo
+
+
+@lru_cache(maxsize=1)
+def _mosse_note():
+    """
+    Gli id di mossa che esistono, letti da static/lib/algebra-mosse.json.
+
+    È l'unica cosa che la build sa del catalogo, che vive in JavaScript. Un
+    test JS controlla che l'elenco combaci con le chiavi vere; qui si legge e
+    basta, una volta sola.
+    """
+    percorso = Path(__file__).resolve().parent.parent / 'static' / 'lib' / 'algebra-mosse.json'
+    with open(percorso, encoding='utf-8') as f:
+        return frozenset(json.load(f)['mosse'])
 
 
 def expand_formula_anchors(tex):

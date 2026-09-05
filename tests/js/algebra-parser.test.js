@@ -13,7 +13,9 @@
 const test = require('node:test');
 const assert = require('node:assert');
 
-const { parse, scrivi, visita, trovaNodo } = require('../../static/lib/algebra-parser.js');
+const {
+  parse, scrivi, visita, trovaNodo, percorsoDi, nodoAlPercorso,
+} = require('../../static/lib/algebra-parser.js');
 
 /** L'albero senza gli id: due parse dello stesso testo devono coincidere. */
 function forma(n) {
@@ -243,4 +245,33 @@ test('vuoto, troppo lungo, simboli estranei', () => {
   assert.throws(() => parse('1 + '.repeat(200) + '1'), /troppo lunga/);
   assert.throws(() => parse('2 § 3'), /Simbolo non riconosciuto/);
   assert.throws(() => parse('1234567890123456789'), /Numero troppo grande/);
+});
+
+// --- Indirizzare un nodo senza il suo id -------------------------------------
+
+test('il cammino ritrova lo stesso pezzo in un albero riletto da zero', () => {
+  const prima = parse('2x + 3 = 8');
+  const tre = trovaNodo(prima, prima.left.right.id);
+  const cammino = percorsoDi(prima, tre.id);
+  assert.deepStrictEqual(cammino, ['left', 'right']);
+
+  // La rilettura è il caso vero: una sequenza di mosse salvata ieri va
+  // rigiocata su un albero i cui id sono tutti diversi.
+  const dopo = parse('2x + 3 = 8');
+  assert.notStrictEqual(dopo.left.right.id, tre.id, 'gli id dovrebbero essere nuovi');
+  assert.strictEqual(scrivi(nodoAlPercorso(dopo, cammino)), '3');
+});
+
+test('il cammino della radice è vuoto, e quello di un nodo estraneo è null', () => {
+  const albero = parse('x + 1');
+  assert.deepStrictEqual(percorsoDi(albero, albero.id), []);
+  assert.strictEqual(percorsoDi(albero, 'nessuno'), null);
+});
+
+test('un cammino che non porta da nessuna parte dà null, non solleva', () => {
+  // Succede per davvero: la lezione cambia, la sequenza salvata resta.
+  const albero = parse('x + 1');
+  assert.strictEqual(nodoAlPercorso(albero, ['left', 'left', 'left']), null);
+  assert.strictEqual(nodoAlPercorso(albero, null), null);
+  assert.strictEqual(nodoAlPercorso(albero, ['operand']), null);
 });

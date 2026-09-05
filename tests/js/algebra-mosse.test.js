@@ -52,13 +52,16 @@ test('primo principio: scrive sui due membri e non tocca altro', () => {
 test('secondo principio: da lavagna il divisore va sotto ogni termine', () => {
   const dopo = gioca(parse('2x + 6 = 12'),
     { mossa: 'secondo-principio', parametri: { operazione: 'dividi', valore: '3' } });
-  assert.strictEqual(scrivi(dopo), '2x / 3 + 6 / 3 = 12 / 3');
+  // `6 / 3` e `12 / 3` sono FRAZIONI, non divisioni in attesa: fra numeri la
+  // divisione è una frazione, sempre, e resta da ridurre.
+  assert.strictEqual(scrivi(dopo), '2x / 3 + 6/3 = 12/3');
 });
 
 test('secondo principio rigoroso: il divisore sta sotto il membro intero', () => {
   const dopo = gioca(parse('2x + 6 = 12'),
     { mossa: 'secondo-principio-rigoroso', parametri: { operazione: 'dividi', valore: '3' } });
-  assert.strictEqual(scrivi(dopo), '(2x + 6) / 3 = 12 / 3');
+  // A sinistra la barra raggruppa una somma: lì la divisione resta.
+  assert.strictEqual(scrivi(dopo), '(2x + 6) / 3 = 12/3');
 });
 
 test('moltiplicare non produce scritture ambigue', () => {
@@ -298,7 +301,7 @@ test('dalla forma implicita alla forma esplicita, mossa per mossa', () => {
   controlla();
   s = gioca(s, { mossa: 'normalizza-monomio', nodo: s.left.id, digitato: 'y' });
   controlla();
-  s = gioca(s, { mossa: 'calcola', nodo: nodoScritto(s, '6 / 3').id, digitato: '2' });
+  s = gioca(s, { mossa: 'calcola', nodo: nodoScritto(s, '6/3').id, digitato: '2' });
   controlla();
   s = gioca(s, { mossa: 'normalizza-monomio', nodo: nodoScritto(s, '2x / 3').id, digitato: '2/3x' });
   controlla();
@@ -323,10 +326,34 @@ test('e la lineare classica, fino a x = k', () => {
   assert.ok(traguardo(s, { forma: 'ax=b' }).ok, 'ax=b non raggiunta su ' + scrivi(s));
 
   s = gioca(s, { mossa: 'secondo-principio', parametri: { operazione: 'dividi', valore: '2' } });
+  assert.strictEqual(scrivi(s), '2x / 2 = 5/2');
+
   s = gioca(s, { mossa: 'normalizza-monomio', nodo: s.left.id, digitato: 'x' });
-  s = gioca(s, { mossa: 'calcola', nodo: s.right.id, digitato: '5/2' });
+  // E qui si è arrivati: `5/2` è già una frazione ridotta, non una divisione
+  // che aspetta ancora una mossa. Prima toccava «calcolarla», e chi vedeva
+  // `x = 5/2` sullo schermo aveva ragione a chiedersi che cosa mancasse.
   assert.strictEqual(scrivi(s), 'x = 5/2');
   assert.ok(traguardo(s, { isola: 'x' }).ok);
+
+  assert.strictEqual(
+    applicaMossa(s, { mossa: 'calcola', nodo: s.right.id, digitato: '5/2' }).codice,
+    'già-numero', 'su una frazione ridotta non resta niente da calcolare');
+});
+
+test('ma una frazione NON ridotta è ancora un calcolo da fare', () => {
+  let s = parse('2x = 12');
+  s = gioca(s, { mossa: 'secondo-principio', parametri: { operazione: 'dividi', valore: '3' } });
+  assert.strictEqual(scrivi(s), '2x / 3 = 12/3');
+
+  // `12/3` si vede come frazione e si finisce come frazione: un criterio solo,
+  // «va scritta ai minimi termini», invece di due rappresentazioni gemelle.
+  const offerte = mosseDisponibili(s, nodoScritto(s, '12/3').id).map((m) => m.id);
+  assert.ok(offerte.includes('calcola'), 'offerte: ' + offerte);
+  assert.ok(!offerte.includes('normalizza-monomio'),
+    'un numero da solo non deve avere due bottoni che fanno la stessa cosa');
+
+  s = gioca(s, { mossa: 'calcola', nodo: nodoScritto(s, '12/3').id, digitato: '4' });
+  assert.strictEqual(scrivi(s), '2x / 3 = 4');
 });
 
 // --- Il dominio, e la promessa di non sollevare mai --------------------------
@@ -435,4 +462,89 @@ test('anche il valore di un principio deve stare nel dominio', () => {
   const esito = applicaMossa(s, { mossa: 'primo-principio', parametri: { operazione: 'aggiungi', valore: 'x/y' } });
   assert.strictEqual(esito.ok, false);
   assert.match(esito.messaggio, /fuori dal dominio/);
+});
+
+// --- Spostare un termine dentro al suo membro --------------------------------
+
+test('un termine si sposta di posto, e i segni lo seguono', () => {
+  const s = parse('3 - 2x = 0');
+  const posto = applicaMossa(s, {
+    mossa: 'sposta', nodo: nodoScritto(s, '2x').id, parametri: { posizione: 0 },
+  });
+  // `- 2x` in prima posizione porta il meno dentro al coefficiente: `-2x + 3`.
+  // Scritto `- 2x + 3` sarebbe una somma senza primo addendo.
+  assert.strictEqual(scrivi(posto.albero), '-2x + 3 = 0');
+  assert.ok(equivalenti(posto.albero.left, s.left));
+});
+
+test('spostare non cambia il valore, per nessuna delle permutazioni', () => {
+  const s = parse('x^2 - 3x + 2');
+  for (const posizione of [0, 1, 2]) {
+    const esito = applicaMossa(s, {
+      mossa: 'sposta', nodo: nodoScritto(s, '3x').id, parametri: { posizione },
+    });
+    if (posizione === 1) {
+      assert.strictEqual(esito.codice, 'già-lì');
+    } else {
+      assert.ok(esito.ok, esito.messaggio);
+      assert.ok(equivalenti(esito.albero, s), scrivi(esito.albero));
+    }
+  }
+});
+
+test('una posizione fuori dalla somma non sposta niente', () => {
+  const s = parse('2x + 3 = 8');
+  for (const posizione of [-1, 2, 1.5, undefined, '0']) {
+    const esito = applicaMossa(s, {
+      mossa: 'sposta', nodo: nodoScritto(s, '3').id, parametri: { posizione },
+    });
+    assert.strictEqual(esito.codice, 'posizione-non-valida', 'accettata: ' + posizione);
+  }
+});
+
+test('si sposta solo un termine di primo livello, non un pezzo dentro a un termine', () => {
+  const s = parse('2x + 3 = 8');
+  const esito = applicaMossa(s, {
+    mossa: 'sposta', nodo: nodoScritto(s, 'x').id, parametri: { posizione: 0 },
+  });
+  assert.strictEqual(esito.codice, 'non-termine');
+});
+
+test('i gemelli a click spostano di un posto e si fermano al bordo', () => {
+  const s = parse('2x + 3 - y = 0');
+  const sinistra = applicaMossa(s, { mossa: 'sposta-sinistra', nodo: nodoScritto(s, 'y').id });
+  assert.strictEqual(scrivi(sinistra.albero), '2x - y + 3 = 0');
+
+  const destra = applicaMossa(s, { mossa: 'sposta-destra', nodo: nodoScritto(s, '2x').id });
+  assert.strictEqual(scrivi(destra.albero), '3 + 2x - y = 0');
+
+  assert.strictEqual(
+    applicaMossa(s, { mossa: 'sposta-sinistra', nodo: nodoScritto(s, '2x').id }).codice,
+    'niente-oltre');
+  assert.strictEqual(
+    applicaMossa(s, { mossa: 'sposta-destra', nodo: nodoScritto(s, 'y').id }).codice,
+    'niente-oltre');
+});
+
+test('i gemelli a click compaiono nel menu, `sposta` no (ha un parametro)', () => {
+  const s = parse('2x + 3 = 8');
+  const offerte = mosseDisponibili(s, nodoScritto(s, '3').id).map((m) => m.id);
+  assert.ok(offerte.includes('sposta-sinistra'), 'manca il gemello a click');
+  assert.ok(!offerte.includes('sposta'),
+    'una mossa con parametri non si può offrire come bottone: il parametro lo dà il gesto');
+});
+
+// --- L'elenco degli id che legge la build ------------------------------------
+
+/**
+ * `static/lib/algebra-mosse.json` esiste perché la validazione della whitelist
+ * di un blocco `:::algebra` avviene in Python, dove il catalogo non c'è. È una
+ * copia, e le copie si scollano: qui si controlla che non l'abbia fatto.
+ */
+test('l\'elenco letto dalla build combacia con il catalogo', () => {
+  const elenco = require('../../static/lib/algebra-mosse.json');
+  assert.deepStrictEqual(
+    [...elenco.mosse].sort(), Object.keys(CATALOGO).sort(),
+    'static/lib/algebra-mosse.json non e allineato al catalogo: aggiorna l\'elenco');
+  assert.ok(validaWhitelist(elenco.mosse));
 });
