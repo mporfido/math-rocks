@@ -89,6 +89,19 @@
         }
         const p = PREC[n.op];
         const sx = operando(n.left, n.op === '^' ? p + 1 : p, true);
+        if (n.op === '+' || n.op === '-') {
+          // Il collegamento appartiene visivamente al termine successivo:
+          // un solo data-nodo racchiude sia il segno sia il pezzo selezionato.
+          const reso = rendiNodo(n.right);
+          const dentro = reso.slice(reso.indexOf('>') + 1, -7);
+          let primo = n.right;
+          while (primo.type === 'op' && (primo.op === '*' || primo.op === '/')) primo = primo.left;
+          const negativo = primo.type === 'neg' || (primo.type === 'num' && primo.num < 0);
+          const protetto = prec(n.right) < p + 1 || negativo;
+          return apri(n, sx + apri(n.right,
+            '<span class="alg-operatore">' + (n.op === '-' ? MENO : '+') + '</span>'
+            + (protetto ? parentesi(dentro) : dentro)));
+        }
         const dx = operando(n.right, p + 1, false);
         if (n.op === '*') {
           // Il punto si mette solo quando serve a leggere: `2x` no, `2 · 3` sì.
@@ -106,7 +119,9 @@
   function operando(n, minima, negativoNudo) {
     // Un numero negativo a destra di un operatore va protetto, come nella
     // scrittura lineare: `2 · (−3)`.
-    if (n.type === 'num' && n.num < 0 && minima > 1 && !negativoNudo) {
+    let primo = n;
+    while (primo.type === 'op' && (primo.op === '*' || primo.op === '/')) primo = primo.left;
+    if ((primo.type === 'neg' || (primo.type === 'num' && primo.num < 0)) && minima > 1 && !negativoNudo) {
       return parentesi(rendiNodo(n));
     }
     return prec(n) < minima ? parentesi(rendiNodo(n)) : rendiNodo(n);

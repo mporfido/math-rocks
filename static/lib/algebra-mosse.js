@@ -137,6 +137,26 @@
     return { nodo };
   }
 
+  /** La selezione visiva comprende il meno che collega il termine alla somma.
+   * Il nodo originale conserva il suo id per gesti, cronologia e ripristino. */
+  function pezzoConSegno(albero, id) {
+    const n = trovaNodo(albero, id);
+    const p = trovaGenitore(albero, id);
+    if (!n || !p || p.type !== 'op' || p.op !== '-' || p.right.id !== id) return n;
+    // Un coefficiente positivo porta il meno come nella scrittura visibile.
+    // Un meno già presente, invece, resta da semplificare dallo studente.
+    return segnoScritto(n) > 0 ? opposto(n) : creaNodo({ type: 'neg', operand: n });
+  }
+
+  function sostituisciConSegno(albero, id, scritto) {
+    const p = trovaGenitore(albero, id);
+    if (p && p.type === 'op' && (p.op === '+' || p.op === '-') && p.right.id === id) {
+      const { segno, nudo } = scomponiSegno({ segno: 1, nodo: scritto });
+      return sostituisci(albero, p.id, op(segno < 0 ? '-' : '+', p.left, nudo));
+    }
+    return sostituisci(albero, id, scritto);
+  }
+
   /**
    * Il parametro `operazione` è uno dei due valori previsti? Senza questo
    * controllo un valore ignoto scivolava nel ramo `else` di un ternario e
@@ -457,6 +477,61 @@
     },
   });
 
+  // Normalizzazione locale: segni, coefficienti e fattori neutri. Le somme
+  // restano somme e i fattori simbolici non vengono sviluppati né riordinati.
+  function semplificaScrittura(n) {
+    if (n.type === 'neg' || (n.type === 'op' && n.op === '*')) {
+      let coeff = new base.Rational(1);
+      const fattori = [];
+      const raccogli = (f) => {
+        if (f.type === 'neg') { coeff = coeff.mul(new base.Rational(-1)); raccogli(f.operand); }
+        else if (f.type === 'op' && f.op === '*') { raccogli(f.left); raccogli(f.right); }
+        else if (f.type === 'num') coeff = coeff.mul(f.value);
+        else fattori.push(f);
+      };
+      raccogli(n);
+      if (!fattori.length || coeff.num === 0) return creaNumero(coeff.num, coeff.den);
+      const unitario = Math.abs(coeff.num) === coeff.den;
+      const prodotto = fattori.reduce((a, b) => a ? op('*', a, b, { implicit: true }) : b,
+        unitario ? null : creaNumero(coeff.num, coeff.den));
+      return unitario && coeff.num < 0 ? creaNodo({ type: 'neg', operand: prodotto }) : prodotto;
+    }
+    if (n.type === 'op' && (n.op === '+' || n.op === '-')) {
+      const left = semplificaScrittura(n.left);
+      const right = semplificaScrittura(n.right);
+      const { segno, nudo } = scomponiSegno({ segno: n.op === '-' ? -1 : 1, nodo: right });
+      return op(segno < 0 ? '-' : '+', left, nudo);
+    }
+    return n;
+  }
+
+  // Ignora id e notazione del prodotto, non la struttura matematica.
+  function formaScritta(n) {
+    if (n.type === 'num') return ['num', n.num, n.den];
+    if (n.type === 'var') return ['var', n.name];
+    if (n.type === 'neg') return ['neg', formaScritta(n.operand)];
+    return [n.op, formaScritta(n.left), formaScritta(n.right)];
+  }
+  const stessaScrittura = (a, b) => JSON.stringify(formaScritta(a)) === JSON.stringify(formaScritta(b));
+
+  const semplifica = semplificazione({
+    id: 'semplifica',
+    etichetta: 'Semplifica',
+    applicabile(albero, id) {
+      const scelto = bersaglio(albero, id, 'Scegli il pezzo da semplificare');
+      if (scelto.errore) return scelto.errore;
+      const pezzo = pezzoConSegno(albero, id);
+      return stessaScrittura(pezzo, semplificaScrittura(pezzo))
+        ? no('già-semplice', 'Non ci sono segni o fattori da semplificare') : sì();
+    },
+    pezzo: pezzoConSegno,
+    rimpiazza: (albero, id, param, scritto) => sostituisciConSegno(albero, id, scritto),
+    accetta(scritto, contesto) {
+      return stessaScrittura(scritto, semplificaScrittura(contesto.selezione))
+        ? sì() : no('non-semplificato', 'Semplifica i segni e i fattori numerici, mantenendo le somme e i fattori letterali');
+    },
+  });
+
   const riduciSimili = semplificazione({
     id: 'riduci-simili',
     etichetta: 'Somma i termini simili',
@@ -474,7 +549,8 @@
       return no('niente-di-simile', 'Non ci sono termini simili da sommare');
     },
     accetta(scritto, contesto) {
-      if (terminiDi(scritto).length >= terminiDi(contesto.selezione).length) {
+      const selezione = contesto.selezione.type === 'neg' ? contesto.selezione.operand : contesto.selezione;
+      if (terminiDi(scritto).length >= terminiDi(selezione).length) {
         return no('non-ridotto', 'I termini simili non sono ancora stati sommati');
       }
       return sì();
@@ -727,21 +803,90 @@
     return null;
   }
 
+  const èSomma = (n) => n && n.type === 'op' && (n.op === '+' || n.op === '-');
+
+  function haProdottoDaSvolgere(n) {
+    if (!n) return false;
+    if (n.type === 'op' && n.op === '*' && (èSomma(n.left) || èSomma(n.right))) return true;
+    if (n.type === 'op' && n.op === '^' && èSomma(n.left) && n.right.num >= 2) return true;
+    if (n.type === 'neg' && èSomma(n.operand)) return true;
+    return ['left', 'right', 'operand'].some((campo) => haProdottoDaSvolgere(n[campo]));
+  }
+
+  /** Una distributiva, senza sviluppare gli altri fattori. Le alternative
+   * sono solo i fattori che sono somme: nessuna ricerca di tutte le sequenze. */
+  function* distribuzioniImmediate(n) {
+    let fattori;
+    if (n.type === 'op' && n.op === '*') fattori = base.fattoriDi(n);
+    else if (n.type === 'neg') fattori = [creaNumero(-1), n.operand];
+    else if (n.type === 'op' && n.op === '^' && èSomma(n.left) && n.right.num >= 2) {
+      fattori = [n.left, n.right.num === 2 ? n.left : op('^', n.left, creaNumero(n.right.num - 1))];
+    } else return;
+    for (let i = 0; i < fattori.length; i++) {
+      if (!èSomma(fattori[i])) continue;
+      yield terminiDi(fattori[i]).map((t) => ({
+        segno: t.segno,
+        nodo: fattori.map((f, j) => j === i ? t.nodo : f)
+          .reduce((a, b) => op('*', a, b, { implicit: true })),
+      }));
+    }
+  }
+
+  /** L'equivalenza da sola non prova una distributiva. Cerchiamo un riscontro:
+   * uno sviluppo completo, gli addendi di una distributiva, oppure un passo
+   * interno con lo stesso contesto. Calcolare solo i coefficienti, aggiungere
+   * uno zero o riscrivere una potenza come prodotto non sono riscontri. */
+  function avanzaDistribuzione(prima, dopo) {
+    const cache = new WeakMap();
+    const poly = (n) => {
+      if (!cache.has(n)) cache.set(n, canonicalizza(n));
+      return cache.get(n);
+    };
+    const uguali = (a, b) => poly(a).uguale(poly(b));
+    const contieneSomma = (n) => Boolean(n && (èSomma(n)
+      || ['left', 'right', 'operand'].some((campo) => contieneSomma(n[campo]))));
+    const verifica = (a, b) => {
+      if (!haProdottoDaSvolgere(a) || !uguali(a, b)) return false;
+      if (terminiDi(b).every((t) => !contieneSomma(t.nodo))) return true;
+
+      // Il prodotto esterno può restare: -1(3(x+2)) → -1(3x+6).
+      if (a.type === b.type && a.op === b.op) {
+        const campi = ['left', 'right', 'operand'].filter((campo) => a[campo] || b[campo]);
+        if (campi.length && campi.every((campo) => a[campo] && b[campo] && uguali(a[campo], b[campo]))
+            && campi.some((campo) => verifica(a[campo], b[campo]))) return true;
+      }
+
+      // Confronto degli addendi, inclusi segni e molteplicità. Il loro ordine
+      // non conta e i conti interni possono essere già stati svolti.
+      const dati = terminiDi(b).map(polyDelTermine);
+      for (const termini of distribuzioniImmediate(a)) {
+        if (termini.length !== dati.length) continue;
+        const rimasti = dati.slice();
+        const corrispondono = termini.every((t) => {
+          const atteso = polyDelTermine(t);
+          const i = rimasti.findIndex((p) => p.uguale(atteso));
+          if (i < 0) return false;
+          rimasti.splice(i, 1);
+          return true;
+        });
+        if (corrispondono) return true;
+      }
+      return false;
+    };
+    return verifica(prima, dopo);
+  }
+
   const espandi = semplificazione({
     id: 'espandi',
     etichetta: 'Svolgi il prodotto',
     applicabile(albero, id) {
       const scelto = bersaglio(albero, id, 'Scegli il prodotto da svolgere');
       if (scelto.errore) return scelto.errore;
-      const nodo = scelto.nodo;
-      const haSomma = (n) => n && n.type === 'op' && (n.op === '+' || n.op === '-');
-      const prodotto = nodo.type === 'op' && nodo.op === '*' && (haSomma(nodo.left) || haSomma(nodo.right));
-      const potenza = nodo.type === 'op' && nodo.op === '^' && haSomma(nodo.left) && nodo.right.num >= 2;
-      if (!prodotto && !potenza) return no('niente-da-svolgere', 'Qui non c\'è un prodotto da svolgere');
+      if (!haProdottoDaSvolgere(scelto.nodo)) return no('niente-da-svolgere', 'Qui non c\'è un prodotto da svolgere');
       return sì();
     },
     accetta(scritto, contesto) {
-      if (terminiDi(scritto).length <= terminiDi(contesto.selezione).length) {
+      if (!avanzaDistribuzione(contesto.selezione, scritto)) {
         return no('non-svolto', 'Il prodotto non è ancora stato svolto');
       }
       return sì();
@@ -808,7 +953,7 @@
     sposta,
     spostaDiUno('sposta-sinistra', 'Sposta il termine a sinistra', -1),
     spostaDiUno('sposta-destra', 'Sposta il termine a destra', +1),
-    calcola, riduciSimili, riduciCoppia, normalizzaMonomio, espandi,
+    calcola, semplifica, riduciSimili, riduciCoppia, normalizzaMonomio, espandi,
     trasporto,
   ]) CATALOGO[m.id] = m;
 
@@ -844,7 +989,7 @@
   function mosseDisponibili(albero, id, whitelist) {
     const ammesse = whitelist ? whitelist.filter((k) => CATALOGO[k]) : Object.keys(CATALOGO);
     const voluto = id == null ? 'equazione' : 'nodo';
-    return ammesse
+    const disponibili = ammesse
       .map((k) => CATALOGO[k])
       .filter((m) => m.bersaglio === voluto)
       .filter((m) => {
@@ -852,9 +997,23 @@
         // Rete: interrogare le mosse è un gesto continuo dell'interfaccia
         // (a ogni click, su ogni nodo). Se una di loro solleva, la risposta
         // giusta è "non si può fare", non una pagina bloccata.
-        try { return m.applicabile(albero, id, {}).ok; } catch (e) { return false; }
-      })
+        try { return applicabileAllaSelezione(m, albero, id, { conSegno: true }).ok; } catch (e) { return false; }
+      });
+    // Fra le mosse effettivamente disponibili, un solo comando per lo stesso
+    // lavoro. Le altre trasformazioni (sviluppo, somma, trasporto) restano.
+    const priorità = ['calcola', 'normalizza-monomio', 'semplifica'];
+    const preferita = priorità.find((id) => disponibili.some((m) => m.id === id));
+    return disponibili
+      .filter((m) => !priorità.includes(m.id) || m.id === preferita)
       .map((m) => ({ id: m.id, etichetta: m.etichetta, tipo: m.tipo }));
+  }
+
+  function applicabileAllaSelezione(mossa, albero, id, param) {
+    if (param.conSegno && (mossa.id === 'calcola' || mossa.id === 'normalizza-monomio')) {
+      const pezzo = pezzoConSegno(albero, id);
+      if (pezzo) return mossa.applicabile(pezzo, pezzo.id, param);
+    }
+    return mossa.applicabile(albero, id, param);
   }
 
   /**
@@ -884,7 +1043,7 @@
     }
 
     const param = azione.parametri || {};
-    const consentita = mossa.applicabile(albero, azione.nodo, param);
+    const consentita = applicabileAllaSelezione(mossa, albero, azione.nodo, param);
     if (!consentita.ok) return consentita;
 
     if (mossa.tipo === 'applicazione') {
@@ -910,7 +1069,8 @@
     // però lavorare su un pezzo che nell'albero non è un nodo solo — la somma
     // di due termini lontani — e allora se lo costruisce lei, e sa anche come
     // rimontare il risultato al suo posto.
-    const selezione = mossa.pezzo ? mossa.pezzo(albero, azione.nodo, param) : trovaNodo(albero, azione.nodo);
+    const selezione = mossa.pezzo ? mossa.pezzo(albero, azione.nodo, param)
+      : param.conSegno ? pezzoConSegno(albero, azione.nodo) : trovaNodo(albero, azione.nodo);
     if (!selezione) return no('serve-selezione', 'Scegli il pezzo da riscrivere');
     if (!equivalenti(selezione, scritto)) {
       // Una mossa che sa riconoscere la forma su cui sta lavorando può dire
@@ -932,7 +1092,8 @@
     return sì({
       albero: mossa.rimpiazza
         ? mossa.rimpiazza(albero, azione.nodo, param, scritto)
-        : sostituisci(albero, azione.nodo, scritto),
+        : param.conSegno ? sostituisciConSegno(albero, azione.nodo, scritto)
+          : sostituisci(albero, azione.nodo, scritto),
     });
   }
 
@@ -944,6 +1105,7 @@
   host.costruisciSomma = costruisciSomma;
   host.opposto = opposto;
   host.postoDelTermine = postoDelTermine;
+  host.pezzoConSegno = pezzoConSegno;
 })(
   typeof window !== 'undefined'
     ? (window.Algebra = window.Algebra || {})

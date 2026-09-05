@@ -15,7 +15,9 @@ Qui sotto c'è un'equazione. Non si risolve scrivendo la risposta: si
 Tre modi di dare una mossa, e fanno tutti la stessa cosa:
 
 - **clicca un pezzo** della scrittura: compaiono le mosse che si possono fare
-  su quel pezzo. Cliccando su un `+` o su un `−` scegli tutta la somma;
+  su quel pezzo. Il termine si seleziona insieme al suo segno: in `x−5`
+  scegli `−5`, anche cliccando sul meno. Per scegliere tutta la somma usa
+  **Seleziona espressione contenitrice**;
 - **i moduli in basso** (senza niente selezionato) applicano i due principi ai
   due membri: scegli l'operazione e scrivi per quanto;
 - **trascina un termine**: attraverso l'uguale lo porti dall'altra parte, su un
@@ -257,6 +259,13 @@ risultato sbagliato in un calcolo. Non succede, e la lavagna dice perché.
 :::algebra libera
 3(x + 2) - 4x = 5 - x
 :::
+
+Prova anche a moltiplicare termine a termine per `−1`: con **Semplifica**
+puoi riscrivere `−1(3(x+2))` come `−3(x+2)`, mantenendo la parentesi.
+Con **Svolgi il prodotto**, sullo stesso pezzo, puoi invece scrivere
+`−1(3x+6)` oppure sviluppare tutto in `−3x−6`.
+Selezionando `−(−1x)` selezioni anche il meno esterno: il risultato da
+scrivere è `x`.
 
 :::details.syntax-doc
 <summary>📝 Mostra la sintassi</summary>

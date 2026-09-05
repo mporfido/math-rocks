@@ -190,6 +190,11 @@ class XAlgebra extends HTMLElement {
     };
 
     this.mosseEl.onclick = (e) => {
+      if (e.target.closest('[data-seleziona-genitore]')) {
+        const padre = this.A.trovaGenitore(this.albero, this.selezione);
+        if (padre && padre.type !== 'eq') this.seleziona(padre.id);
+        return;
+      }
       const bottone = e.target.closest('[data-mossa]');
       if (bottone) this.scegliMossa(bottone.dataset.mossa);
     };
@@ -259,7 +264,11 @@ class XAlgebra extends HTMLElement {
     this.scrittura.innerHTML = this.A.rendiHTML(this.albero);
     this.marcaTermini();
     this.A.visita(this.albero, (n) => {
-      if (!this.A.mosseDisponibili(this.albero, n.id, this.whitelist).length) return;
+      const padre = this.A.trovaGenitore(this.albero, n.id);
+      const termine = padre && padre.type === 'op' && (padre.op === '+' || padre.op === '-');
+      // Anche un termine interno già semplice deve poter essere selezionato
+      // col proprio segno. Dal menu si risale poi alla somma da calcolare.
+      if (!termine && !this.A.mosseDisponibili(this.albero, n.id, this.whitelist).length) return;
       const span = this.scrittura.querySelector('[data-nodo="' + n.id + '"]');
       if (!span) return;
       span.classList.add('alg-selezionabile');
@@ -316,8 +325,12 @@ class XAlgebra extends HTMLElement {
     this.digitaEl.hidden = true;
 
     const disponibili = this.A.mosseDisponibili(this.albero, this.selezione, this.whitelist);
-    const bottoni = disponibili.map((m) => '<button type="button" class="alg-btn" data-mossa="'
+    let bottoni = disponibili.map((m) => '<button type="button" class="alg-btn" data-mossa="'
       + m.id + '">' + this.escapeHtml(m.etichetta) + '</button>').join('');
+    const padre = this.selezione && this.A.trovaGenitore(this.albero, this.selezione);
+    if (padre && padre.type !== 'eq') {
+      bottoni += '<button type="button" class="alg-btn" data-seleziona-genitore>Seleziona espressione contenitrice</button>';
+    }
 
     // Le mosse con `opzioni` (i due principi) chiedono un parametro, quindi non
     // sono un bottone ma un modulo. Sono mosse sui DUE MEMBRI: si offrono
@@ -395,6 +408,9 @@ class XAlgebra extends HTMLElement {
   }
 
   chiediIlRisultato(idMossa, idNodo, parametri = null) {
+    // Salvato anche nella cronologia: i passaggi precedenti a questa versione
+    // continuano a riferirsi al solo nodo, quelli nuovi al termine col segno.
+    parametri = { ...parametri, conSegno: true };
     const pezzo = this.pezzoDaRiscrivere(idMossa, idNodo, parametri);
     if (!pezzo) return;
     this.selezione = idNodo;
@@ -418,7 +434,8 @@ class XAlgebra extends HTMLElement {
   pezzoDaRiscrivere(idMossa, idNodo, parametri) {
     const mossa = this.A.CATALOGO[idMossa];
     if (!mossa) return null;
-    if (!mossa.pezzo) return this.A.trovaNodo(this.albero, idNodo);
+    if (!mossa.pezzo) return parametri && parametri.conSegno
+      ? this.A.pezzoConSegno(this.albero, idNodo) : this.A.trovaNodo(this.albero, idNodo);
     try {
       return mossa.pezzo(this.albero, idNodo, parametri || {});
     } catch (e) {
@@ -552,9 +569,8 @@ class XAlgebra extends HTMLElement {
 
   /**
    * Si lascia. Se il pezzo si era mosso è un rilascio, altrimenti il gesto era
-   * una scelta: un tocco su un pezzo lo sceglie, uno sull'operatore sceglie la
-   * somma che lo contiene (è così che si prende «tutto il membro» senza un
-   * bottone apposta), uno fuori deseleziona.
+   * una scelta: un tocco su un termine o sul suo segno sceglie il termine.
+   * Il menu permette di risalire all'espressione che lo contiene.
    */
   puntaSu(e) {
     const presa = this.presa;

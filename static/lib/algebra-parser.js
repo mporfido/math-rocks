@@ -380,7 +380,9 @@
     // Un numero negativo scritto come letterale va fra parentesi appena non è
     // in cima a una somma: `2 * -3` si scrive `2 * (-3)`, e `2-3` non deve
     // diventare `2 + -3`.
-    if (n.type === 'num' && n.num < 0 && minima > 1 && !negativoNudo) {
+    let primo = n;
+    while (primo.type === 'op' && (primo.op === '*' || primo.op === '/')) primo = primo.left;
+    if ((primo.type === 'neg' || (primo.type === 'num' && primo.num < 0)) && minima > 1 && !negativoNudo) {
       return '(' + scrivi(n) + ')';
     }
     const propria = n.type === 'op' ? PRECEDENZA[n.op] : (n.type === 'neg' ? PREC_NEG : 9);

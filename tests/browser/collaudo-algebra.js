@@ -161,7 +161,8 @@
 
     scegli(c, '2x / 3');
     premi(c, 'Scrivi il monomio in forma normale');
-    scrivi(c, '2/3x');
+    asserisci(c.campoEl.value.startsWith('-'), 'il campo deve includere il segno del termine');
+    scrivi(c, '-2/3x');
 
     scegliNodo(c, c.albero.right);
     premi(c, 'Ordina per grado decrescente');
@@ -277,13 +278,114 @@
       asserisci(c.selezione === null, 'selezionata una frazione senza mosse abilitate');
       const somma = c.albero.left.left;
       scegliNodo(c, somma.left);
-      asserisci(c.selezione === somma.id, 'non seleziona la somma interna calcolabile');
+      asserisci(c.selezione === somma.left.id, 'non seleziona il termine interno');
+      c.querySelector('[data-seleziona-genitore]').click();
+      asserisci(c.selezione === somma.id, 'non si risale alla somma interna calcolabile');
       premi(c, 'Calcola');
       scrivi(c, '5');
       asserisci(!c.scrittura.querySelector('.alg-selezionabile'), 'restano pezzi senza azioni selezionabili');
     } finally {
       c.remove();
     }
+  });
+
+  prova('il meno appartiene alla selezione, al trasporto e alle somme interne', () => {
+    const c = document.createElement('x-algebra');
+    c.dataset.eq = 'x-5=0';
+    document.body.prepend(c);
+    try {
+      scegli(c, '5');
+      asserisci(c.scrittura.querySelector('.alg-scelto').textContent === '−5', 'selezionato il numero senza meno');
+      premi(c, 'Porta il termine dall\'altra parte');
+      asserisci(A.scrivi(c.albero) === 'x = 0 + 5', 'trasporto senza il segno');
+      c.querySelector('[data-cmd="annulla"]').click();
+      const meno = spanDi(c, c.albero.left.right.id).querySelector('.alg-operatore');
+      toccaSpan(meno);
+      asserisci(c.selezione === c.albero.left.right.id, 'il click sul meno non seleziona il termine');
+      c.querySelector('[data-seleziona-genitore]').click();
+      asserisci(c.selezione === c.albero.left.id, 'non si può risalire alla somma');
+    } finally { c.remove(); }
+
+    const d = document.createElement('x-algebra');
+    d.dataset.eq = 'x-3(2+1)=0';
+    document.body.prepend(d);
+    try {
+      scegli(d, '2 + 1');
+      premi(d, 'Calcola');
+      asserisci(d.campoEl.value === '2 + 1', 'la selezione interna ha assorbito un meno esterno');
+      scrivi(d, '3');
+      asserisci(A.scrivi(d.albero) === 'x - 3(3) = 0' || A.scrivi(d.albero) === 'x - 3 * 3 = 0', 'calcolo interno sbagliato: ' + A.scrivi(d.albero));
+    } finally { d.remove(); }
+  });
+
+  prova('lavagna libera: semplificazione dello screenshot, annulla e ripresa', () => {
+    const c = document.createElement('x-algebra');
+    c.dataset.eq = '3(x+2)-4x=5-x';
+    document.body.prepend(c);
+    const progress = window.courseProgress;
+    try {
+      applica(c, 'secondo-principio', 'moltiplica', '-1');
+      const termine = c.albero.right.right;
+      const span = spanDi(c, termine.id);
+      asserisci(span.textContent === '−(−1x)', 'il segno esterno non è nello stesso elemento del termine');
+      span.dispatchEvent(new KeyboardEvent('keydown', {key:'Enter', bubbles:true}));
+      premi(c, 'Scrivi il monomio in forma normale');
+      asserisci(c.campoEl.value === '-(-1x)', 'campo diverso dalla selezione: ' + c.campoEl.value);
+      scrivi(c, '-x');
+      asserisci(c.azioni.length === 1, 'accettato il segno sbagliato');
+      scrivi(c, '+x');
+      asserisci(A.scrivi(c.albero.right) === '-1 * 5 + x', 'meno residuo dopo la semplificazione');
+      for (const [lato, posizione, risultato, mossa] of [
+        ['left','left','-3(x+2)', 'Semplifica'],
+        ['left','right','4x', 'Scrivi il monomio in forma normale'],
+        ['right','left','-5', 'Calcola'],
+      ]) {
+        scegliNodo(c, c.albero[lato][posizione]);
+        const alternative = [...c.querySelectorAll('[data-mossa]')]
+          .filter((b) => ['semplifica', 'calcola', 'normalizza-monomio'].includes(b.dataset.mossa));
+        asserisci(alternative.length === 1, 'più comandi per la stessa semplificazione');
+        premi(c, mossa);
+        scrivi(c, risultato);
+      }
+      const atteso = '-3(x + 2) + 4x = -5 + x';
+      asserisci(A.scrivi(c.albero) === atteso, 'percorso incompleto: ' + A.scrivi(c.albero));
+      const salvata = JSON.stringify(c.azioni);
+      c.querySelector('[data-cmd="annulla"]').click();
+      asserisci(A.scrivi(c.albero.right) === '-1 * 5 + x', 'annulla non ripristina il prodotto');
+      window.courseProgress = {getStepForElement: () => ({goals:['segni'], answers:{segni:salvata}})};
+      const ripreso = document.createElement('x-algebra');
+      ripreso.id = 'segni';
+      ripreso.dataset.eq = c.dataset.eq;
+      document.body.prepend(ripreso);
+      try { asserisci(A.scrivi(ripreso.albero) === atteso, 'ripristino dei segni fallito'); }
+      finally { ripreso.remove(); }
+    } finally { window.courseProgress = progress; c.remove(); }
+  });
+
+  prova('la distributiva sul prodotto esterno accetta un passo interno e lo sviluppo completo', () => {
+    const c = document.createElement('x-algebra');
+    c.dataset.eq = '3(x+2)-4x=5-x';
+    document.body.prepend(c);
+    try {
+      applica(c, 'secondo-principio', 'moltiplica', '-1');
+      scegliNodo(c, c.albero.left.left);
+      asserisci(c.querySelector('[data-mossa="semplifica"]'), 'manca la scelta sui coefficienti');
+      premi(c, 'Svolgi il prodotto');
+      scrivi(c, '-3(x+2)');
+      asserisci(c.azioni.length === 1, 'la sola semplificazione è passata per distributiva');
+      scrivi(c, '-1(3x-6)');
+      asserisci(c.azioni.length === 1, 'accettato uno sviluppo non equivalente');
+      scrivi(c, '-1(3x+6)');
+      asserisci(c.azioni.length === 2, 'rifiutato lo sviluppo interno');
+      asserisci(A.scrivi(c.albero.left.left) === '-1(3x + 6)', 'passo interno diverso da quello digitato');
+      c.querySelector('[data-cmd="annulla"]').click();
+      asserisci(A.scrivi(c.albero.left.left) === '-1(3(x + 2))', 'annulla non ripristina le parentesi');
+      scegliNodo(c, c.albero.left.left);
+      premi(c, 'Svolgi il prodotto');
+      scrivi(c, '-3x-6');
+      asserisci(c.azioni.length === 2, 'rifiutato lo sviluppo completo');
+      asserisci(A.scrivi(c.albero.left.left) === '-3x - 6', 'sviluppo completo errato');
+    } finally { c.remove(); }
   });
 
   // -- 3. la ripresa --------------------------------------------------------

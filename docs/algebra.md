@@ -85,7 +85,10 @@ per digitare i risultati delle mosse.
 Fanno tutte la stessa cosa — ogni gesto ha il suo gemello a click.
 
 - **cliccare un pezzo** della scrittura apre le mosse che agiscono su *quel*
-  pezzo. Cliccando un `+` o un `−` si sceglie tutta la somma;
+  pezzo, incluso il segno che lo collega alla somma: in `x−5` si seleziona
+  `−5`. Cliccando il segno si sceglie lo stesso termine. Il bottone
+  **Seleziona espressione contenitrice** permette di risalire alla somma o
+  al prodotto completo; i pezzi interni restano selezionabili;
 - **i moduli in basso**, senza niente selezionato, applicano i due principi ai
   due membri: si sceglie l'operazione e si scrive per quanto;
 - **trascinare un termine**: attraverso l'uguale lo porta dall'altra parte
@@ -129,15 +132,29 @@ mancano al traguardo, **quella da sistemare per prima**.
 | `ordina` | ordina i termini per grado decrescente | motore |
 | `elimina-nullo` | toglie un termine che vale zero | motore |
 | `calcola` | svolge un pezzo interamente numerico, o riduce una frazione | **studente** |
+| `semplifica` | sistema segni, coefficienti e fattori neutri, conservando le somme nei prodotti | **studente** |
 | `riduci-simili` | somma i termini con la stessa parte letterale, in tutta la somma scelta | **studente** |
 | `riduci-coppia` | somma **due** termini simili, e fa riscrivere solo la loro somma (è il gesto) | **studente** |
 | `normalizza-monomio` | riscrive un monomio in forma normale (`2x/3` → `2/3 x`) | **studente** |
 | `espandi` | svolge un prodotto, prodotti notevoli compresi | **studente** |
 
+**Semplifica** permette, per esempio, `−1(3(x+2))` → `−3(x+2)`,
+`2(3(x+2))` → `6(x+2)` e `a−(−b)` → `a+b`. Selezionando il solo
+termine con il suo segno in `a−(−1x)`, si riscrive `x` (anche `+x` va bene).
+Il risultato sostituisce anche il segno esterno. Non basta un'espressione
+equivalente: bisogna semplificare i segni e i fattori numerici senza sviluppare
+o raccogliere le somme. Le parentesi che rendono leggibile `−(−1x)` sono
+automatiche, mentre il calcolo resta dello studente.
+
+Il menu evita comandi equivalenti: fra le mosse abilitate e applicabili al
+pezzo **con il suo segno**, dà precedenza a **Calcola**, poi a **Scrivi il
+monomio in forma normale**, infine a **Semplifica**. Le trasformazioni con
+scopi diversi, come lo sviluppo del prodotto, restano disponibili.
+
 ### I prodotti notevoli
 
 Non hanno una mossa loro: si svolgono con `espandi`, selezionando **il
-prodotto** — il nodo `(x+3)^2`, non il membro intero — e digitando lo sviluppo
+prodotto** (o l'espressione che lo contiene) e digitando lo sviluppo
 per intero. L'oracolo di equivalenza sviluppa da sé, quindi `(2a+b)^2` e
 `(x+1)^3` funzionano come `(x+3)^2`.
 
@@ -158,10 +175,13 @@ incrociati si annullano fra loro. Fuori da queste due forme — o quando
 l'errore è di un altro genere — resta il messaggio generico, che è sempre vero:
 meglio nessuna diagnosi che una diagnosi che indica il pezzo sbagliato.
 
-Un passaggio intermedio si può fare, ma solo se **aumenta i termini**:
-`(x+3)(x+3)` → `x(x+3) + 3(x+3)` è accettato, mentre `(x+3)^2` →
-`(x+3)(x+3)` no («Il prodotto non è ancora stato svolto»), perché resta un
-termine solo.
+Un passaggio intermedio si può fare anche **dentro un fattore**:
+`−1(3(x+2))` → `−1(3x+6)` è accettato, come lo sviluppo completo `−3x−6`.
+Anche `(x+3)(x+3)` → `x(x+3) + 3(x+3)` è accettato. Il controllo cerca
+un'effettiva distributiva, non soltanto un aumento dei termini esterni.
+`(x+3)^2` → `(x+3)(x+3)` resta escluso («Il prodotto non è ancora stato
+svolto»), così come aggiungere uno zero. `−1(3(x+2))` → `−3(x+2)` si fa
+invece con **Semplifica**, perché cambia solo i coefficienti.
 
 Il **trasporto non è una regola nuova**: il motore lo esegue davvero come primo
 principio più riduzione dei termini simili, e una lezione può introdurlo al
