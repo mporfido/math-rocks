@@ -548,3 +548,61 @@ test('l\'elenco letto dalla build combacia con il catalogo', () => {
     'static/lib/algebra-mosse.json non e allineato al catalogo: aggiorna l\'elenco');
   assert.ok(validaWhitelist(elenco.mosse));
 });
+
+// --- La diagnosi sui prodotti notevoli ---------------------------------------
+
+/**
+ * «Non vale quanto il pezzo che stai sostituendo» è vero per qualunque errore,
+ * quindi non insegna niente proprio dove l'errore è sempre lo stesso: il
+ * doppio prodotto dimenticato. Queste prove fissano che cosa risponde il
+ * motore ai tre modi tipici di sbagliare un quadrato di binomio, e ai due di
+ * sbagliare una differenza di quadrati.
+ *
+ * La diagnosi non deve mai *scrivere* il pezzo giusto: dice quale condizione
+ * cade, il conto resta dello studente.
+ */
+function perché(eq, digitato) {
+  const albero = parse(eq);
+  const esito = applicaMossa(albero, { mossa: 'espandi', nodo: albero.id, digitato });
+  assert.ok(!esito.ok, 'ci si aspettava un rifiuto per ' + digitato);
+  return esito.messaggio;
+}
+
+test('il quadrato di binomio dice quale pezzo non torna', () => {
+  assert.match(perché('(x + 3)^2', 'x^2 + 9'), /manca il doppio prodotto/);
+  assert.match(perché('(x + 3)^2', 'x^2 + 3x + 9'), /doppio prodotto che non torna/);
+  assert.match(perché('(x + 3)^2', 'x^2 + 6x + 6'), /uno dei due quadrati no/);
+  // Il segno sta dentro al termine: in `(x-3)^2` il doppio prodotto è `-6x`,
+  // e chi lo scrive giusto sbagliando il quadrato va detto proprio così.
+  assert.match(perché('(x - 3)^2', 'x^2 - 6x - 9'), /uno dei due quadrati no/);
+  // Più lettere: il riconoscimento non è cablato su una x.
+  assert.match(perché('(2a + b)^2', '4a^2 + b^2'), /manca il doppio prodotto/);
+});
+
+test('la differenza di quadrati dice quale condizione cade', () => {
+  assert.match(perché('(x - 3)(x + 3)', 'x^2 + 9'), /va sottratto, non sommato/);
+  assert.match(perché('(x - 3)(x + 3)', 'x^2 + 3x - 9'), /si annullano fra loro/);
+  // Lo stesso esercizio scritto nell'altro ordine è lo stesso esercizio.
+  assert.match(perché('(x + 3)(x - 3)', 'x^2 + 9'), /va sottratto, non sommato/);
+});
+
+test('dove non c\'è un prodotto notevole resta il messaggio generico', () => {
+  const generico = /non vale quanto il pezzo/;
+  assert.match(perché('2(x + 4)', '2x + 6'), generico);
+  assert.match(perché('(x + 1)(x + 2)', 'x^2 + 2'), generico);
+  // Un quadrato di binomio con dentro anche altro: la diagnosi indicherebbe un
+  // pezzo mentre il problema è un altro, e allora è meglio non indicarne
+  // nessuno.
+  assert.match(perché('(x + 3)^2', 'x^2 + 6x + 9 + y'), generico);
+});
+
+test('una diagnosi non trasforma mai un rifiuto in un\'accettazione', () => {
+  const albero = parse('(x + 3)^2');
+  for (const sbagliato of ['x^2 + 9', 'x^2 + 3x + 9', 'x^2 + 6x + 6']) {
+    const esito = applicaMossa(albero, { mossa: 'espandi', nodo: albero.id, digitato: sbagliato });
+    assert.strictEqual(esito.codice, 'non-equivalente');
+    assert.ok(esito.albero === undefined, 'uno stato non equivalente non deve uscire dalla mossa');
+  }
+  assert.ok(applicaMossa(albero,
+    { mossa: 'espandi', nodo: albero.id, digitato: 'x^2 + 6x + 9' }).ok);
+});

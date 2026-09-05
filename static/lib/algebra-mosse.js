@@ -515,6 +515,130 @@
     },
   });
 
+  // --- I prodotti notevoli: dire QUALE pezzo non torna -----------------------
+  // «Non vale quanto il pezzo che stai sostituendo» è vero e inutile: dice che
+  // c'è un errore, non quale, ed è la stessa frase per un segno sbagliato e per
+  // il doppio prodotto dimenticato — che è l'errore che si ripete in ogni
+  // classe. Quando il pezzo da svolgere è un prodotto notevole si può fare di
+  // meglio, senza però scrivere la risposta: si dice quale delle condizioni
+  // cade, e il conto resta dello studente.
+
+  const DUE = canonicalizza(creaNumero(2));
+
+  /** Il termine di una somma come polinomio, segno compreso. */
+  function polyDelTermine(t) {
+    const p = canonicalizza(t.nodo);
+    return t.segno < 0 ? p.negato() : p;
+  }
+
+  /**
+   * Il prodotto notevole che il pezzo selezionato è — letto dalla SCRITTURA,
+   * non dalla forma canonica: `(x+3)^2` e `(x-3)(x+3)` si riconoscono da come
+   * sono scritti, che è anche il modo in cui lo studente li vede. Torna
+   * `{ tipo, a, b }` con i due termini del binomio già canonici e col segno,
+   * oppure null se non è nessuno dei due.
+   */
+  function prodottoNotevole(nodo) {
+    if (!nodo || nodo.type !== 'op') return null;
+
+    if (nodo.op === '^' && nodo.right.type === 'num'
+        && nodo.right.den === 1 && nodo.right.num === 2) {
+      const t = terminiDi(nodo.left);
+      if (t.length !== 2) return null;
+      return { tipo: 'quadrato', a: polyDelTermine(t[0]), b: polyDelTermine(t[1]) };
+    }
+
+    if (nodo.op === '*') {
+      const sx = terminiDi(nodo.left);
+      const dx = terminiDi(nodo.right);
+      if (sx.length !== 2 || dx.length !== 2) return null;
+      const [p, q] = sx.map(polyDelTermine);
+      const [r, s] = dx.map(polyDelTermine);
+      // `(a+b)(a-b)` si può scrivere in quattro ordini, e sono lo stesso
+      // esercizio: quale dei due binomi porti il meno non cambia niente.
+      for (const [a, b, c, d] of [[p, q, r, s], [p, q, s, r], [q, p, r, s], [q, p, s, r]]) {
+        if (a.uguale(c) && b.uguale(d.negato())) return { tipo: 'differenza', a, b };
+      }
+    }
+    return null;
+  }
+
+  /** Ogni monomio di `atteso` c'è in `dato` con lo stesso coefficiente? */
+  function tornano(atteso, dato) {
+    for (const [k, t] of atteso.termini) {
+      const u = dato.termini.get(k);
+      if (!u || !u.coeff.equals(t.coeff)) return false;
+    }
+    return true;
+  }
+
+  /** `dato` porta monomi che nel risultato giusto non esistono proprio? */
+  function haEstranei(dato, atteso) {
+    for (const k of dato.termini.keys()) if (!atteso.termini.has(k)) return true;
+    return false;
+  }
+
+  /** I due gruppi di monomi si sovrappongono? (`(x+x)^2` e simili degeneri:
+   *  lì non c'è più un "pezzo" da indicare, e il messaggio generico è più
+   *  onesto di una diagnosi inventata.) */
+  function sisovrappongono(p, q) {
+    for (const k of p.termini.keys()) if (q.termini.has(k)) return true;
+    return false;
+  }
+
+  /**
+   * Che cosa non torna, in una frase, o null se non si sa dire meglio del
+   * messaggio generico. Non rivela mai il valore giusto.
+   */
+  function diagnosticaNotevole(selezione, scritto) {
+    const notevole = prodottoNotevole(selezione);
+    if (!notevole) return null;
+
+    let dato;
+    let quadA;
+    let quadB;
+    let incrociato;
+    try {
+      dato = canonicalizza(scritto);
+      quadA = notevole.a.moltiplica(notevole.a);
+      quadB = notevole.b.moltiplica(notevole.b);
+      incrociato = notevole.a.moltiplica(notevole.b);
+    } catch (e) {
+      return null;  // troppo grande da sviluppare: la diagnosi non vale un errore
+    }
+
+    if (notevole.tipo === 'quadrato') {
+      const quadrati = quadA.somma(quadB);
+      const doppio = incrociato.moltiplica(DUE);
+      if (sisovrappongono(quadrati, doppio)) return null;
+
+      if (dato.uguale(quadrati)) {
+        return 'Ci sono i due quadrati, ma manca il doppio prodotto.';
+      }
+      const atteso = quadrati.somma(doppio);
+      if (haEstranei(dato, atteso)) return null;
+      if (tornano(quadrati, dato) && !tornano(doppio, dato)) {
+        return 'I due quadrati ci sono: è il doppio prodotto che non torna.';
+      }
+      if (tornano(doppio, dato) && !tornano(quadrati, dato)) {
+        return 'Il doppio prodotto torna, ma uno dei due quadrati no.';
+      }
+      return null;
+    }
+
+    // Differenza di quadrati: i due prodotti incrociati si annullano, e i due
+    // errori tipici sono non farli annullare e sommare invece di sottrarre.
+    const atteso = quadA.sottrai(quadB);
+    if (dato.uguale(quadA.somma(quadB))) {
+      return 'I due quadrati ci sono, ma il secondo va sottratto, non sommato.';
+    }
+    if (tornano(atteso, dato) && !sisovrappongono(atteso, incrociato)
+        && !haEstranei(dato, atteso.somma(incrociato))) {
+      return 'I due prodotti incrociati si annullano fra loro: quel termine non deve restare.';
+    }
+    return null;
+  }
+
   const espandi = semplificazione({
     id: 'espandi',
     etichetta: 'Svolgi il prodotto',
@@ -533,6 +657,9 @@
         return no('non-svolto', 'Il prodotto non è ancora stato svolto');
       }
       return sì();
+    },
+    diagnostica(scritto, contesto) {
+      return diagnosticaNotevole(contesto.selezione, scritto);
     },
   });
 
@@ -680,7 +807,17 @@
 
     const selezione = trovaNodo(albero, azione.nodo);
     if (!equivalenti(selezione, scritto)) {
-      return no('non-equivalente', 'Quello che hai scritto non vale quanto il pezzo che stai sostituendo');
+      // Una mossa che sa riconoscere la forma su cui sta lavorando può dire
+      // *quale* condizione cade, invece del solo «non vale quanto»: vedi
+      // `diagnosticaNotevole`. Se non sa dire di meglio, torna null e resta il
+      // messaggio generico — che è sempre vero, e non è mai una diagnosi
+      // sbagliata.
+      let dettaglio = null;
+      try {
+        if (mossa.diagnostica) dettaglio = mossa.diagnostica(scritto, { selezione, albero });
+      } catch (e) { dettaglio = null; }
+      return no('non-equivalente',
+        dettaglio || 'Quello che hai scritto non vale quanto il pezzo che stai sostituendo');
     }
     if (mossa.accetta) {
       const accettato = mossa.accetta(scritto, { selezione, albero });
