@@ -145,7 +145,8 @@ math-rocks/
 │   │   ├── variable.js         # Web Component slider
 │   │   └── step.js             # Web Component container
 │   ├── tools/
-│   │   └── expr.js             # Implementazione della pagina-strumento `expr`
+│   │   ├── expr.js             # Implementazione della pagina-strumento `expr`
+│   │   └── algebra.js          # …e della pagina-strumento `algebra`
 │   ├── style.css               # Stili globali
 │   └── components.css          # Stili componenti
 │
@@ -257,6 +258,7 @@ a pagina intera e li configura con i **parametri dell'indirizzo**, così un link
 ```
 /tools/espressioni/?ex=(4%20%2B%205*4)%20-%20(8%3A2%20%2B%206)&ex=2%2B2&titolo=Compiti
 /tools/potenze/?ex=2%5E3*2%5E4&mode=powers&noeval=1
+/tools/equazioni/?eq=2x%2B3%3D8&eq=5x%2B4-2x%3D9&forma=ax%3Db
 ```
 
 Non serve costruire quegli indirizzi a mano: **ogni pagina-strumento contiene un
@@ -279,10 +281,21 @@ Parametri dello strumento `espressioni` / `potenze` (kind `expr`):
 | `titolo` | titolo della scheda |
 | `noeditor=1` | pagina "per gli studenti": mostra solo la scheda, nasconde il costruttore |
 
+Parametri dello strumento `equazioni` (kind `algebra`, la lavagna delle mosse —
+[docs/algebra.md](docs/algebra.md) per il dettaglio):
+
+| Parametro | Significato |
+|---|---|
+| `eq` | un'equazione; ripetibile o con più voci separate da `\|` |
+| `isola`, `forma`, `incognita` | il traguardo della scheda (`forma`: `ax=b`, `normale`, `ridotta`) |
+| `libera=1` | nessun traguardo: la lavagna si muove e non si chiude |
+| `mosse` | gli id di mossa abilitati, separati da `;` |
+| `titolo`, `noeditor=1` | come sopra |
+
 **Quali strumenti compaiono** lo decide l'istanza in `content/tools.yaml` (id,
 titolo, descrizione, valori di partenza). L'engine fornisce le route, il
 template `tool.html` e un'implementazione per `kind` in `static/tools/<kind>.js`;
-i `kind` ammessi sono in whitelist in `routes/tools.py`. Se `content/tools.yaml`
+i `kind` ammessi sono in whitelist in `tools_config.py`. Se `content/tools.yaml`
 manca, la sezione — e la voce di menu — semplicemente non esiste.
 
 Due conseguenze del modello static-first:

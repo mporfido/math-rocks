@@ -1,0 +1,29 @@
+{
+  "_nota": [
+    "Elenco piatto degli id di mossa: l unica cosa che la build (Python) deve",
+    "sapere del catalogo, che vive in static/lib/algebra-mosse.js ed e JavaScript.",
+    "Un id sbagliato nella whitelist di un blocco :::algebra e una scheda che lo",
+    "studente non puo risolvere, e deve fermare la build invece di scoprirsi in",
+    "classe: per fermarla basta sapere quali id esistono, non che cosa fanno --",
+    "niente secondo motore in Python. Che questo elenco combaci con le chiavi del",
+    "catalogo lo sorveglia tests/js/algebra-mosse.test.js."
+  ],
+  "mosse": [
+    "primo-principio",
+    "secondo-principio",
+    "secondo-principio-rigoroso",
+    "scambia-membri",
+    "elimina-nullo",
+    "ordina",
+    "sposta",
+    "sposta-sinistra",
+    "sposta-destra",
+    "calcola",
+    "semplifica",
+    "riduci-simili",
+    "riduci-coppia",
+    "normalizza-monomio",
+    "espandi",
+    "trasporto"
+  ]
+}

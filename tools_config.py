@@ -18,11 +18,12 @@ import yaml
 # implementa (`static/tools/<kind>.js`): la whitelist evita che un id scritto
 # male (o malevolo) in tools.yaml diventi un path arbitrario.
 #
-#   expr    un widget configurato dalla query string, senza contenuto
-#   theory  un CORPUS di teoremi in content/<corpus>/, compilato in
-#           tools_data/<corpus>.json: mappa a livelli + una pagina per teorema
-#           (vedi TEORIA.md)
-TOOL_KINDS = {'expr', 'theory'}
+#   expr     un widget configurato dalla query string, senza contenuto
+#   algebra  la lavagna delle mosse (<x-algebra>) a pagina intera, idem
+#   theory   un CORPUS di teoremi in content/<corpus>/, compilato in
+#            tools_data/<corpus>.json: mappa a livelli + una pagina per teorema
+#            (vedi TEORIA.md)
+TOOL_KINDS = {'expr', 'algebra', 'theory'}
 
 # I `kind` che portano con sé un corpus di contenuti da compilare in build.
 CORPUS_KINDS = {'theory'}

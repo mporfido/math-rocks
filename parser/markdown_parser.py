@@ -3,7 +3,7 @@ import re
 import mistune
 import yaml
 from pathlib import Path
-from parser.preprocessors import process_blanks, process_variables, process_blocks, process_math, process_images, process_checks, process_graphs, process_p5, process_expr, process_formula, process_theorem, process_tables, process_smista
+from parser.preprocessors import process_blanks, process_variables, process_blocks, process_math, process_images, process_checks, process_graphs, process_p5, process_expr, process_algebra, process_formula, process_theorem, process_tables, process_smista
 
 
 class CourseParser:
@@ -30,6 +30,7 @@ class CourseParser:
         self.graph_counter = 0
         self.p5_counter = 0
         self.expr_counter = 0
+        self.algebra_counter = 0
         self.smista_counter = 0
         self.math_counter = 0
         self.formula_counter = 0
@@ -81,6 +82,7 @@ class CourseParser:
         self.graph_counter = 0
         self.p5_counter = 0
         self.expr_counter = 0
+        self.algebra_counter = 0
         self.smista_counter = 0
         self.math_counter = 0
         self.formula_counter = 0
@@ -382,6 +384,13 @@ class CourseParser:
         # toccato dagli altri preprocessori né da mistune.
         content, expr_replacements, self.expr_counter = process_expr(content, self.expr_counter)
 
+        # :::algebra ... ::: → marker (ripristinato a fine render). Come :::expr,
+        # il corpo è un'equazione con `*`, `^` e `_`: mistune la leggerebbe come
+        # enfasi, e gli altri preprocessori come sintassi loro.
+        content, algebra_replacements, self.algebra_counter = process_algebra(
+            content, self.algebra_counter
+        )
+
         # :::smista ... ::: → marker (ripristinato a fine render). Il corpo è
         # LaTeX una riga per cartellino: come :::formula non deve passare da
         # process_math né da mistune, che leggerebbe `^`, `*` e `_` come enfasi.
@@ -457,6 +466,7 @@ class CourseParser:
         # i blocchi div: i marker (alfanumerici) sopravvivono a mistune intatti.
         block_replacements.update(p5_replacements)
         block_replacements.update(expr_replacements)
+        block_replacements.update(algebra_replacements)
         block_replacements.update(smista_replacements)
         block_replacements.update(formula_replacements)
         block_replacements.update(theorem_replacements)
