@@ -289,6 +289,7 @@
   const scambiaMembri = {
     id: 'scambia-membri',
     etichetta: 'Scambia i due membri',
+    breve: 'Scambia i membri',
     tipo: 'applicazione',
     bersaglio: 'equazione',
     parametri: [],
@@ -304,6 +305,7 @@
   const eliminaNullo = {
     id: 'elimina-nullo',
     etichetta: 'Elimina il termine nullo',
+    breve: 'Elimina lo zero',
     tipo: 'applicazione',
     bersaglio: 'nodo',
     parametri: [],
@@ -386,10 +388,11 @@
 
   /** Il gemello a click di `sposta`: un posto per volta, senza parametri, così
    *  compare da solo nel menu delle mosse disponibili. */
-  function spostaDiUno(id, etichetta, passo) {
+  function spostaDiUno(id, etichetta, breve, passo) {
     return {
       id,
       etichetta,
+      breve,
       tipo: 'applicazione',
       bersaglio: 'nodo',
       parametri: [],
@@ -416,6 +419,7 @@
   const ordina = {
     id: 'ordina',
     etichetta: 'Ordina per grado decrescente',
+    breve: 'Ordina per grado',
     tipo: 'applicazione',
     bersaglio: 'nodo',
     parametri: [],
@@ -535,6 +539,7 @@
   const riduciSimili = semplificazione({
     id: 'riduci-simili',
     etichetta: 'Somma i termini simili',
+    breve: 'Somma i simili',
     applicabile(albero, id) {
       const scelto = bersaglio(albero, id, 'Scegli la somma da ridurre');
       if (scelto.errore) return scelto.errore;
@@ -648,6 +653,7 @@
   const normalizzaMonomio = semplificazione({
     id: 'normalizza-monomio',
     etichetta: 'Scrivi il monomio in forma normale',
+    breve: 'Forma normale',
     applicabile(albero, id) {
       const scelto = bersaglio(albero, id, 'Scegli il monomio');
       if (scelto.errore) return scelto.errore;
@@ -908,6 +914,7 @@
     id: 'trasporto',
     bersaglio: 'nodo',
     etichetta: 'Porta il termine dall\'altra parte',
+    breve: 'Portalo di là',
     tipo: 'applicazione',
     parametri: [],
     composta: ['primo-principio', 'riduci-simili'],
@@ -951,8 +958,8 @@
       'secondo principio, sul membro intero', 'membro'),
     scambiaMembri, eliminaNullo, ordina,
     sposta,
-    spostaDiUno('sposta-sinistra', 'Sposta il termine a sinistra', -1),
-    spostaDiUno('sposta-destra', 'Sposta il termine a destra', +1),
+    spostaDiUno('sposta-sinistra', 'Sposta il termine a sinistra', 'Spostalo a sinistra', -1),
+    spostaDiUno('sposta-destra', 'Sposta il termine a destra', 'Spostalo a destra', +1),
     calcola, semplifica, riduciSimili, riduciCoppia, normalizzaMonomio, espandi,
     trasporto,
   ]) CATALOGO[m.id] = m;
@@ -1005,7 +1012,10 @@
     const preferita = priorità.find((id) => disponibili.some((m) => m.id === id));
     return disponibili
       .filter((m) => !priorità.includes(m.id) || m.id === preferita)
-      .map((m) => ({ id: m.id, etichetta: m.etichetta, tipo: m.tipo }));
+      // `breve` è il nome sul bottone, `etichetta` la frase intera: la prima
+      // sta su un telefono, la seconda dice che cosa hai fatto nello
+      // svolgimento e la legge chi usa uno screen reader.
+      .map((m) => ({ id: m.id, etichetta: m.etichetta, breve: m.breve || null, tipo: m.tipo }));
   }
 
   function applicabileAllaSelezione(mossa, albero, id, param) {

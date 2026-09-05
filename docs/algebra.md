@@ -86,9 +86,9 @@ Fanno tutte la stessa cosa — ogni gesto ha il suo gemello a click.
 
 - **cliccare un pezzo** della scrittura apre le mosse che agiscono su *quel*
   pezzo, incluso il segno che lo collega alla somma: in `x−5` si seleziona
-  `−5`. Cliccando il segno si sceglie lo stesso termine. Il bottone
-  **Seleziona espressione contenitrice** permette di risalire alla somma o
-  al prodotto completo; i pezzi interni restano selezionabili;
+  `−5`. Cliccando il segno si sceglie lo stesso termine. Il rimando
+  **↑ scegli l'espressione che lo contiene**, sotto le mosse, risale alla somma
+  o al prodotto completo; i pezzi interni restano selezionabili;
 - **i moduli in basso**, senza niente selezionato, applicano i due principi ai
   due membri: si sceglie l'operazione e si scrive per quanto;
 - **trascinare un termine**: attraverso l'uguale lo porta dall'altra parte

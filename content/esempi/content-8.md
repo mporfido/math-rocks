@@ -16,8 +16,8 @@ Tre modi di dare una mossa, e fanno tutti la stessa cosa:
 
 - **clicca un pezzo** della scrittura: compaiono le mosse che si possono fare
   su quel pezzo. Il termine si seleziona insieme al suo segno: in `x−5`
-  scegli `−5`, anche cliccando sul meno. Per scegliere tutta la somma usa
-  **Seleziona espressione contenitrice**;
+  scegli `−5`, anche cliccando sul meno. Per scegliere tutta la somma usa il
+  rimando **↑ scegli l'espressione che lo contiene**, sotto le mosse;
 - **i moduli in basso** (senza niente selezionato) applicano i due principi ai
   due membri: scegli l'operazione e scrivi per quanto;
 - **trascina un termine**: attraverso l'uguale lo porti dall'altra parte, su un

@@ -62,11 +62,15 @@
  */
 
 /** Come si legge un'operazione nel menu: `aggiungi` è il valore, non l'invito. */
+// Solo il verbo: "ai due membri" lo dicono già il nome della card ("primo
+// principio") e l'intestazione del gruppo ("su tutta l'equazione"), e ripeterlo
+// dentro la tendina la faceva più larga dello schermo di un telefono. La frase
+// intera resta nell'`aria-label` del campo.
 const ALG_VERBI = {
-  aggiungi: 'aggiungi ai due membri',
-  sottrai: 'togli dai due membri',
-  moltiplica: 'moltiplica i due membri per',
-  dividi: 'dividi i due membri per',
+  aggiungi: 'aggiungi',
+  sottrai: 'togli',
+  moltiplica: 'moltiplica per',
+  dividi: 'dividi per',
 };
 
 class XAlgebra extends HTMLElement {
@@ -324,17 +328,22 @@ class XAlgebra extends HTMLElement {
     }
     this.digitaEl.hidden = true;
 
+    // Il menu ha due AMBITI, e il motore ne offre uno solo per volta: con un
+    // pezzo scelto si agisce su quel pezzo, senza si agisce sui due membri.
+    // Dirlo in testa al gruppo è il modo più economico di far vedere allo
+    // studente in quale dei due si trova — prima si leggeva solo dal fatto che
+    // qualcosa fosse acceso sulla lavagna.
     const disponibili = this.A.mosseDisponibili(this.albero, this.selezione, this.whitelist);
-    let bottoni = disponibili.map((m) => '<button type="button" class="alg-btn" data-mossa="'
-      + m.id + '">' + this.escapeHtml(m.etichetta) + '</button>').join('');
-    const padre = this.selezione && this.A.trovaGenitore(this.albero, this.selezione);
-    if (padre && padre.type !== 'eq') {
-      bottoni += '<button type="button" class="alg-btn" data-seleziona-genitore>Seleziona espressione contenitrice</button>';
-    }
+    const bottoni = disponibili.map((m) => '<button type="button" class="alg-btn" data-mossa="'
+      + m.id + '" aria-label="' + this.escapeHtml(m.etichetta) + '">'
+      + this.escapeHtml(m.breve || m.etichetta) + '</button>').join('');
 
     // Le mosse con `opzioni` (i due principi) chiedono un parametro, quindi non
     // sono un bottone ma un modulo. Sono mosse sui DUE MEMBRI: si offrono
     // quando non c'è una selezione, come le altre mosse di quel bersaglio.
+    // Ogni modulo è una CARD: nome, campi e "Applica" sono un'unità sola, e
+    // senza uno sfondo che lo dica il bottone della mossa accanto sembrava
+    // farne parte (il gap fra moduli valeva quanto quello fra i loro campi).
     const moduli = this.selezione ? '' : this.mosseConParametri().map((m) => `
       <form class="alg-modulo" data-mossa-form="${m.id}">
         <span class="alg-modulo-nome">${this.escapeHtml(m.breve || m.etichetta)}</span>
@@ -342,14 +351,40 @@ class XAlgebra extends HTMLElement {
           ${m.opzioni.operazione.map((o) => '<option value="' + o + '">' + (ALG_VERBI[o] || o) + '</option>').join('')}
         </select>
         <input type="text" name="valore" size="6" autocomplete="off" spellcheck="false" placeholder="quanto">
-        <button type="submit" class="alg-btn">Applica</button>
+        <button type="submit" class="alg-btn alg-modulo-applica">Applica</button>
       </form>
     `).join('');
 
-    const invito = (bottoni || moduli) ? ''
-      : '<p class="alg-invito">Scegli un pezzo della scrittura per vedere che cosa puoi farci.</p>';
+    // Risalire al contenitore NON è una mossa: non cambia la scrittura, sposta
+    // solo lo sguardo. Perciò non è un bottone bordato in mezzo alle mosse —
+    // era anche l'etichetta più lunga di tutte, quella che sfasciava il wrap.
+    // Si offre anche quando il pezzo scelto non ha mosse sue: è proprio lì che
+    // serve, perché la mossa buona sta sull'espressione che lo contiene.
+    const padre = this.selezione && this.A.trovaGenitore(this.albero, this.selezione);
+    const risali = (padre && padre.type !== 'eq')
+      ? '<button type="button" class="alg-risali" data-seleziona-genitore>'
+        + '↑ scegli l\'espressione che lo contiene</button>'
+      : '';
 
-    this.mosseEl.innerHTML = bottoni + moduli + invito;
+    if (!bottoni && !moduli && !risali) {
+      this.mosseEl.innerHTML =
+        '<p class="alg-invito">Scegli un pezzo della scrittura per vedere che cosa puoi farci.</p>';
+      return;
+    }
+
+    this.mosseEl.innerHTML = `
+      <div class="alg-gruppo">
+        <p class="alg-gruppo-nome">${this.nomeAmbito()}</p>
+        ${moduli}
+        ${bottoni ? '<div class="alg-gruppo-corpo">' + bottoni + '</div>' : ''}
+        ${risali}
+      </div>`;
+  }
+
+  /** Che cosa colpiscono le mosse offerte adesso, detto allo studente. */
+  nomeAmbito() {
+    if (this.selezione) return 'sul pezzo scelto';
+    return this.albero.type === 'eq' ? 'su tutta l\'equazione' : 'su tutta la scrittura';
   }
 
   /** Le mosse abilitate che chiedono un parametro con opzioni dichiarate, e

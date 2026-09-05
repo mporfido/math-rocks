@@ -81,12 +81,15 @@
     toccaSpan(spanDi(c, nodo.id));
   }
 
-  /** Preme il bottone di mossa con quell'etichetta. */
+  /** Preme il bottone di mossa con quell'etichetta. Sul bottone c'è il nome
+   *  corto, ma l'`aria-label` porta sempre la frase intera del catalogo: il
+   *  collaudo nomina quella, così accorciare un'etichetta è una scelta di
+   *  grafica e non rompe le prove. */
   function premi(c, etichetta) {
-    const b = [...c.querySelectorAll('.alg-mosse [data-mossa]')]
-      .find((x) => x.textContent.trim() === etichetta);
+    const nome = (x) => x.getAttribute('aria-label') || x.textContent.trim();
+    const b = [...c.querySelectorAll('.alg-mosse [data-mossa]')].find((x) => nome(x) === etichetta);
     asserisci(b, 'nessun bottone «' + etichetta + '» fra ['
-      + [...c.querySelectorAll('.alg-mosse [data-mossa]')].map((x) => x.textContent.trim()) + ']');
+      + [...c.querySelectorAll('.alg-mosse [data-mossa]')].map(nome) + ']');
     b.click();
   }
 

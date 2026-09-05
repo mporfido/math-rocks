@@ -2427,10 +2427,17 @@ x-algebra {
     padding: 0.5rem 0.9rem;
 }
 
+/* Il menu è una COLONNA DI GRUPPI, non una fila di bottoni: le mosse su un
+   pezzo, i principi sui due membri e il rimando al contenitore sono cose di
+   natura diversa, e messe in un unico `flex-wrap` con lo stesso gap finivano
+   incollate fra loro appena lo schermo si stringeva.
+   Il `min-height` tiene ferma la lavagna: senza, ogni mossa che cambia il
+   numero di comandi faceva sobbalzare in su e in giù la scrittura. */
 .alg-menu {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
+    display: grid;
+    align-content: start;
+    gap: 0.75rem;
+    min-height: 5.5rem;
     padding: 0.7rem 0.9rem 0.9rem;
     border-top: 1px solid var(--line);
 }
@@ -2443,8 +2450,38 @@ x-algebra {
     display: none;
 }
 
-.alg-mosse,
+.alg-mosse {
+    display: grid;
+    gap: 0.75rem;
+    width: 100%;
+}
+
 .alg-digita {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+    width: 100%;
+}
+
+.alg-gruppo {
+    display: grid;
+    justify-items: start;
+    gap: 0.45rem;
+}
+
+/* Dice su che cosa agiscono le mosse qui sotto. Prende il ruolo
+   mono-piccolo-grigio della testata: il grigio serve alle didascalie, non ai
+   comandi. */
+.alg-gruppo-nome {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.02em;
+    color: var(--ink-soft);
+}
+
+.alg-gruppo-corpo {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -2458,19 +2495,53 @@ x-algebra {
     color: var(--ink-soft);
 }
 
+/* Risalire al contenitore non cambia la scrittura: sposta lo sguardo. Testo e
+   non bottone bordato, così non compete con le mosse vere. */
+.alg-risali {
+    padding: 0.2rem 0;
+    border: 0;
+    background: none;
+    font-family: var(--font-disp);
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+}
+
+.alg-risali:hover {
+    color: var(--ink);
+}
+
+.alg-risali:focus-visible {
+    outline: 3px solid var(--rossa);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* Il modulo è una CARD, e lo sfondo è ciò che tiene insieme nome, campi e
+   "Applica". Senza, il gap fra il modulo e il bottone della mossa accanto
+   valeva quanto il gap fra i campi dentro al modulo, e "Scambia i due membri"
+   sembrava un pezzo del primo principio. */
 .alg-modulo {
     display: flex;
     align-items: center;
-    gap: 0.3rem;
+    gap: 0.4rem;
     flex-wrap: wrap;
+    width: 100%;
+    padding: 0.5rem 0.6rem;
+    border-radius: var(--radius);
+    background: var(--ink-wash-1);
 }
 
-/* Il nome della regola davanti al campo: senza, i due secondi principi (per
-   intero e termine a termine) sono due moduli identici. */
+/* Il nome della regola in testa alla card: senza, i due secondi principi (per
+   intero e termine a termine) sono due moduli identici. Ha il peso di un
+   titolo perché è lui a dire quale regola si sta per usare. */
 .alg-modulo-nome {
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
-    color: var(--ink-soft);
+    flex-basis: 100%;
+    font-family: var(--font-disp);
+    font-size: 0.78rem;
+    color: var(--ink);
 }
 
 .alg-modulo select,
@@ -2569,4 +2640,52 @@ x-algebra[data-completed] .alg-testata {
     font-family: var(--font-mono);
     font-size: 0.85rem;
     color: var(--error);
+}
+
+/* -- Sul telefono -------------------------------------------------------- */
+
+/* Le etichette delle mosse sono FRASI, non parole ("Porta il termine
+   dall'altra parte"): affiancarle è proprio ciò che rompe il layout stretto.
+   Una frase, una riga. E i bersagli passano ai 44px del dito: `alg-btn` a
+   riposo ne misura una trentina. */
+@media (max-width: 480px) {
+    .alg-gruppo-corpo {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .alg-btn,
+    .alg-modulo select,
+    .alg-modulo input,
+    .alg-digita-campo {
+        min-height: 2.75rem;
+    }
+
+    .alg-testata .alg-btn {
+        /* In testata i comandi restano affiancati e piccoli: sono due, corti,
+           e rubare 44px in alto vuol dire spingere giù la lavagna. */
+        min-height: 0;
+    }
+
+    /* Nella card i campi stanno su una riga sola e "Applica" prende tutta la
+       larghezza sotto: è l'unica disposizione che non cambia forma a seconda
+       di quanto è lungo il verbo nella tendina. */
+    .alg-modulo {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+    }
+
+    .alg-modulo select {
+        min-width: 0;
+    }
+
+    .alg-modulo-nome,
+    .alg-modulo-applica {
+        grid-column: 1 / -1;
+    }
+
+    .alg-modulo input {
+        width: 100%;
+        min-width: 0;
+    }
 }
