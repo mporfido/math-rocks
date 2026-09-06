@@ -16,6 +16,7 @@ sections:
     courses:
       - pattern-e-lettere
       - pattern-quadratici
+      - equazioni-lineari
   - id: geometria
     title: Geometria
     courses:
