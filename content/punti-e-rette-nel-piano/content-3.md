@@ -1,5 +1,5 @@
 > id: il-club-che-non-si-scrive
-> title: Il club che non si scrive
+> title: Forma implicita e rette verticali
 > description: Una retta verticale non si può scrivere nella forma y = mx + q. Per scriverla serve un'altra forma, ax + by + c = 0. In questa forma si possono scrivere tutte le rette.
 
 ---

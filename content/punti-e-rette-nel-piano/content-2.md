@@ -1,5 +1,5 @@
 > id: il-club-dei-punti-in-fila
-> title: Il club dei punti in fila
+> title: Equazione della retta e coefficiente angolare
 > description: Un'equazione è la regola per entrare in un club di punti. I soci del club stanno tutti su una retta. Due numeri bastano a descrivere la retta, cioè quanto sale e dove taglia l'asse y.
 
 ---
