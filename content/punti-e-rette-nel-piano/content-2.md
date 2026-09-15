@@ -5,7 +5,7 @@
 ---
 
 > id: il-club-segreto
-> title: Il club segreto
+> title: L'equazione come regola di appartenenza
 > use-mathjs: true
 
 # Chi entra e chi no
@@ -75,7 +75,7 @@ Da adesso nessuno ha più bisogno di chiedere a me se è socio. Si fa il conto s
 ---
 
 > id: un-altro-club
-> title: Un altro club
+> title: I due numeri che descrivono la regola
 
 # Stesso gioco, altro club
 
@@ -131,7 +131,7 @@ I due club hanno la stessa forma e cambiano solo due numeri. E due numeri bastan
 ---
 
 > id: la-regola-la-do-io
-> title: La regola la do io
+> title: Verificare se un punto appartiene
 
 # Adesso la regola ce l'hai
 
@@ -168,7 +168,7 @@ E la regola funziona anche nell'altro verso. Se conosci l'ordinata, diventa un'e
 ---
 
 > id: i-soci-in-fila
-> title: I soci in fila
+> title: Il grafico è una retta, e le rette parallele
 
 # Finalmente, un disegno
 
@@ -227,7 +227,7 @@ Le due rette hanno lo stesso primo numero e sono **parallele**: salgono allo ste
 ---
 
 > id: di-quanto-sale
-> title: Di quanto sale
+> title: Salita e passo, un rapporto costante
 
 # Lo scalino
 
@@ -265,7 +265,7 @@ Ed è proprio il $2$ di $y = 2x + 1$.
 ---
 
 > id: piu-ripida-meno-ripida
-> title: Più ripida, meno ripida
+> title: Coefficiente angolare e ordinata all'origine
 
 # Tre rette per lo stesso punto
 
@@ -314,7 +314,7 @@ Le tre rette di questo step hanno tutte $q = 1$, e infatti si incontrano tutte i
 ---
 
 > id: due-soci-bastano
-> title: Due soci bastano
+> title: Il coefficiente angolare da due punti
 
 # Un club intero da due soci
 

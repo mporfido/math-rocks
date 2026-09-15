@@ -5,7 +5,7 @@
 ---
 
 > id: due-club-strani
-> title: Due club strani
+> title: Rette orizzontali e rette verticali
 
 # Due club strani
 
@@ -69,7 +69,7 @@ La regola c'è, $x = 2$, ma nella forma «$y = \ldots$» non si riesce a scriver
 ---
 
 > id: quattro-carte
-> title: Quattro carte
+> title: Equazioni diverse della stessa retta
 
 # Lo stesso club?
 
@@ -114,7 +114,7 @@ L'intrusa, $3x + y - 6 = 0$, è $y = -3x + 6$: scende.
 ---
 
 > id: una-scrittura-per-tutte
-> title: Una scrittura per tutte
+> title: Forma implicita e forma esplicita
 
 # Il club impossibile, alla maniera delle carte
 
@@ -146,7 +146,7 @@ L'implicita è più capiente: ci entrano anche le rette verticali, basta che $b$
 ---
 
 > id: tre-manopole
-> title: Tre manopole
+> title: Il ruolo di a, b e c nella forma implicita
 > use-mathjs: true
 
 # a, b, c
