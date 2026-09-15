@@ -303,15 +303,15 @@
       const dy = retta(B.x) - retta(A.x);
       let testo;
       if (dx === 0) {
-        testo = 'A e B sono lo stesso punto: allontanali lungo la retta.';
+        testo = 'A e B sono nello stesso punto. Allontanali lungo la retta.';
       } else if (!MISURE) {
-        testo = 'Conta i quadretti dello scalino, prima in orizzontale e poi in verticale.';
+        testo = 'Conta i quadretti dello scalino. Prima in orizzontale, poi in verticale.';
       } else {
         const passo = `${fmt(Math.abs(dx))} a ${dx > 0 ? 'destra' : 'sinistra'}`;
         const salita = dy === 0
-          ? "l'ordinata non cambia"
-          : `${fmt(Math.abs(dy))} in ${dy > 0 ? 'su' : 'giù'}`;
-        testo = `Da A a B: ${passo}, ${salita}.`;
+          ? 'resti alla stessa altezza'
+          : `${dy > 0 ? 'sali' : 'scendi'} di ${fmt(Math.abs(dy))}`;
+        testo = `Da A a B vai ${passo} e ${salita}.`;
       }
       piede(testo, INKSOFT);
     }
@@ -322,7 +322,7 @@
         (c !== 0 ? termine(c, '', false) : '') + ' = 0';
 
       if (a === 0 && b === 0) {
-        piede(`${equazione} — con a e b tutti e due zero non c'è più nessuna retta.`, ROSSA);
+        piede(`${equazione}. Se a e b sono tutti e due zero, non c'è nessuna retta.`, ROSSA);
         return;
       }
 

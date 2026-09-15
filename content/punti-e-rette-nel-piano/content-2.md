@@ -1,6 +1,6 @@
 > id: il-club-dei-punti-in-fila
 > title: Il club dei punti in fila
-> description: Un'equazione è la regola d'ingresso di un club di punti. I soci stanno tutti su una retta, e due numeri bastano a descriverla, di quanto sale e da dove parte.
+> description: Un'equazione è la regola per entrare in un club di punti. I soci del club stanno tutti su una retta. Due numeri bastano a descrivere la retta, cioè quanto sale e dove taglia l'asse y.
 
 ---
 
@@ -10,7 +10,7 @@
 
 # Chi entra e chi no
 
-Ho un club, e la regola per entrare non te la dico. Ti dico solo chi c'è dentro e chi è rimasto fuori.
+Ho un club segreto. Non ti dico la regola per entrare. Ti dico solo quali punti sono soci e quali punti sono rimasti fuori.
 
 | Soci | Non soci |
 | --- | --- |
@@ -19,12 +19,12 @@ Ho un club, e la regola per entrare non te la dico. Ti dico solo chi c'è dentro
 | $(2; 5)$ | $(2; 6)$ |
 | $(4; 9)$ | |
 
-Il punto $(7; \ldots)$ vuole entrare. Che ordinata deve avere? [[15]]
+Il punto $(7; \ldots)$ vuole entrare nel club. Quale ordinata deve avere? [[15]]
 
 :::details.hint
 <summary>💡 Suggerimento</summary>
 
-Metti in fila i primi tre soci. A sinistra quanto cresce l'ascissa da una riga all'altra: e a destra, l'ordinata di quanto cresce ogni volta?
+Guarda i primi tre soci nella tabella qui sotto. Le frecce a sinistra dicono che l'ascissa cresce di 1 da una riga all'altra. Di quanto cresce l'ordinata ogni volta?
 
 :::table
 | v $+1$ | ascissa | ordinata | v ? |
@@ -43,11 +43,11 @@ Qual è la regola del club?
 :::details.hint
 <summary>💡 Suggerimento</summary>
 
-«Dispari» sembra funzionare con tutti i soci, ma guarda $(3; 5)$: ha l'ordinata dispari ed è rimasto fuori.
+Tutti i soci hanno l'ordinata dispari. Però anche il punto $(3; 5)$ ha l'ordinata dispari, e il punto $(3; 5)$ è rimasto fuori. Quindi la regola non può essere «l'ordinata è dispari».
 
 :::
 
-Adesso tocca a te: inventa **due soci nuovi**, che non siano già nella lista, e **un punto che resta fuori**.
+Adesso tocca a te. Inventa **due soci nuovi** che non sono già nella lista. Poi inventa **un punto che resta fuori**.
 
 | | ascissa | ordinata |
 | --- | --- | --- |
@@ -60,16 +60,16 @@ Adesso tocca a te: inventa **due soci nuovi**, che non siano già nella lista, e
 :::details.hint
 <summary>💡 Suggerimento</summary>
 
-Per un socio scegli un'ascissa che nella lista non c'è — va bene anche negativa — e calcola la sua ordinata con la regola. Per l'escluso, prendi un socio e sbaglia apposta l'ordinata.
+Per un socio nuovo, scegli un'ascissa che non c'è nella lista. Va bene anche un numero negativo. Poi calcola l'ordinata con la regola. Per il punto escluso, prendi un socio e cambia la sua ordinata.
 
 :::
 
 :::div.reveal
-La regola sta in una frase: **l'ordinata è il doppio dell'ascissa, più 1**. Con le lettere, chiamando $x$ l'ascissa e $y$ l'ordinata:
+La regola è questa: **l'ordinata è il doppio dell'ascissa, più 1**. Chiamiamo $x$ l'ascissa e $y$ l'ordinata. Allora la regola si scrive così:
 
 $$y = 2x + 1$$
 
-Da adesso nessuno ha più bisogno di chiedere a me se è socio. Si fa il conto sull'ascissa e si guarda se torna l'ordinata: per $(7; 15)$ viene $2 \cdot 7 + 1 = 15$, dentro. Per $(3; 5)$ viene $2 \cdot 3 + 1 = 7$, non $5$: fuori.
+Adesso chiunque può controllare se un punto è socio. Fai il conto con l'ascissa e guarda se ottieni l'ordinata del punto. Per $(7; 15)$ il conto è $2 \cdot 7 + 1 = 15$. Il risultato è uguale all'ordinata, quindi il punto è socio. Per $(3; 5)$ il conto è $2 \cdot 3 + 1 = 7$. Il risultato non è $5$, quindi il punto resta fuori.
 :::
 
 ---
@@ -77,24 +77,24 @@ Da adesso nessuno ha più bisogno di chiedere a me se è socio. Si fa il conto s
 > id: un-altro-club
 > title: I due numeri che descrivono la regola
 
-# Stesso gioco, altro club
+# Un secondo club
 
-Un secondo club. I suoi soci: $(0; -2)$, $(1; 1)$, $(2; 4)$, $(-1; -5)$.
+Ecco un secondo club. I suoi soci sono $(0; -2)$, $(1; 1)$, $(2; 4)$ e $(-1; -5)$.
 
-Qual è la sua regola?
+Qual è la regola di questo club?
 
 [[$y = 2x - 2$|$y = 3x + 2$|*$y = 3x - 2$|$y = x - 2$]]
 
 :::details.hint
 <summary>💡 Suggerimento</summary>
 
-Metti i soci in ordine di ascissa: $(-1; -5)$, $(0; -2)$, $(1; 1)$, $(2; 4)$. Di quanto cresce l'ordinata a ogni passo? Poi prova ogni regola su un paio di soci.
+Metti i soci in ordine di ascissa: $(-1; -5)$, $(0; -2)$, $(1; 1)$, $(2; 4)$. Poi guarda di quanto cresce l'ordinata a ogni passo. Infine prova ogni regola su due soci.
 
 :::
 
-Adesso mettili a confronto, con i soci in fila per ascissa. A sinistra di quanto cresce l'ascissa da una riga all'altra, a destra di quanto cresce l'ordinata.
+Adesso confrontiamo i due club. Nelle tabelle i soci sono in fila, dall'ascissa più piccola alla più grande. Le frecce a sinistra dicono di quanto cresce l'ascissa. Le frecce a destra dicono di quanto cresce l'ordinata.
 
-Il primo club, $y = 2x + 1$:
+Questa è la tabella del primo club, $y = 2x + 1$:
 
 :::table
 | v $+1$ | $x$ | $y$ | v $+2$ |
@@ -105,7 +105,7 @@ Il primo club, $y = 2x + 1$:
 | | $2$ | $5$ |
 :::
 
-Il secondo, $y = 3x - 2$. Completa tu le frecce di destra:
+Questa è la tabella del secondo club, $y = 3x - 2$. Completa tu le frecce a destra.
 
 :::table
 | v $+1$ | $x$ | $y$ | v |
@@ -116,16 +116,16 @@ Il secondo, $y = 3x - 2$. Completa tu le frecce di destra:
 | | $2$ | $4$ | |
 :::
 
-Il socio con ascissa $0$ ha ordinata [[1]] nel primo club e [[-2 || −2]] nel secondo.
+Guarda il socio che ha ascissa $0$. Nel primo club la sua ordinata è [[1]]. Nel secondo club la sua ordinata è [[-2 || −2]].
 
 :::div.reveal
-Guarda dove sono finiti i numeri che hai trovato:
+Guarda dove si trovano i numeri che hai trovato:
 
 $$y = \mathbf{2}x + \mathbf{1} \qquad\qquad y = \mathbf{3}x - \mathbf{2}$$
 
-Il numero che moltiplica la $x$ dice **di quanto cresce l'ordinata a ogni passo**. Il numero in fondo è **l'ordinata del socio che ha ascissa 0**, e non per caso: con $x = 0$ la moltiplicazione vale zero, e resta solo lui.
+Il numero che moltiplica la $x$ dice **di quanto cresce l'ordinata a ogni passo**. Il numero alla fine è **l'ordinata del socio che ha ascissa 0**. Questo succede sempre. Quando $x = 0$, la moltiplicazione dà zero e resta solo l'ultimo numero.
 
-I due club hanno la stessa forma e cambiano solo due numeri. E due numeri bastano: dimmi quei due, e ti costruisco il club intero.
+I due club hanno la stessa forma. Cambiano solo due numeri. Se conosci quei due numeri, conosci tutto il club.
 :::
 
 ---
@@ -133,11 +133,11 @@ I due club hanno la stessa forma e cambiano solo due numeri. E due numeri bastan
 > id: la-regola-la-do-io
 > title: Verificare se un punto appartiene
 
-# Adesso la regola ce l'hai
+# Usare la regola
 
-Il club è $y = 4x - 3$. Stavolta non c'è niente da indovinare: la regola va usata.
+Questo club ha la regola $y = 4x - 3$. Questa volta non devi indovinare la regola. Devi usarla.
 
-Metti ogni punto dalla sua parte.
+Metti ogni punto nel gruppo giusto.
 
 :::smista goal categorie="socio;non socio"
 (1;\ 1) -> socio
@@ -148,21 +148,21 @@ Metti ogni punto dalla sua parte.
 (2;\ 4) -> non socio
 :::
 
-Un punto lontano, dove col disegno non arriveresti: $(25; 97)$ è socio? [[*sì|no]]
+Il punto $(25; 97)$ è molto lontano e non lo puoi disegnare facilmente. È un socio? [[*sì|no]]
 
-E al contrario: il socio che ha ordinata $21$, che ascissa ha? [[6]]
+Adesso fai il contrario. Un socio ha ordinata $21$. Qual è la sua ascissa? [[6]]
 
 :::details.hint
 <summary>💡 Suggerimento</summary>
 
-Stavolta conosci la $y$ e ti manca la $x$: $4x - 3 = 21$. Quale numero, moltiplicato per 4 e diminuito di 3, dà 21?
+In questo caso conosci la $y$ e devi trovare la $x$. L'equazione è $4x - 3 = 21$. Cerca il numero che, moltiplicato per 4 e diminuito di 3, dà 21.
 
 :::
 
 :::div.reveal
-Con la regola in mano, **stabilire se un punto è socio è un conto**: metti le sue coordinate al posto di $x$ e $y$ e guarda se l'uguaglianza regge. $4 \cdot 25 - 3 = 97$: regge, $(25; 97)$ è dentro.
+Quando conosci la regola, controllare un punto è un semplice conto. Metti le coordinate del punto al posto di $x$ e di $y$. Poi guarda se i due lati dell'uguale danno lo stesso numero. Per $(25; 97)$ il conto è $4 \cdot 25 - 3 = 97$. I due lati sono uguali, quindi il punto è socio.
 
-E la regola funziona anche nell'altro verso. Se conosci l'ordinata, diventa un'equazione da risolvere: $4x - 3 = 21$, quindi $x = 6$. Il socio è $(6; 21)$.
+La regola funziona anche al contrario. Se conosci l'ordinata, ottieni un'equazione. Risolvi $4x - 3 = 21$ e trovi $x = 6$. Il socio è $(6; 21)$.
 :::
 
 ---
@@ -170,9 +170,9 @@ E la regola funziona anche nell'altro verso. Se conosci l'ordinata, diventa un'e
 > id: i-soci-in-fila
 > title: Il grafico è una retta, e le rette parallele
 
-# Finalmente, un disegno
+# Finalmente un disegno
 
-Torna il primo club, $y = 2x + 1$. Metti sul piano i suoi soci con ascissa $-2$, $-1$, $0$, $1$ e $2$.
+Torniamo al primo club, $y = 2x + 1$. Metti sul piano i soci che hanno ascissa $-2$, $-1$, $0$, $1$ e $2$.
 
 :::graph
 snap: 1
@@ -190,13 +190,13 @@ points:
 :::details.hint
 <summary>💡 Suggerimento</summary>
 
-Prima calcola le ordinate, poi disegna. Con $x = -2$ viene $2 \cdot (-2) + 1 = -3$: il primo punto è $(-2; -3)$.
+Prima calcola le ordinate, poi disegna i punti. Con $x = -2$ il conto è $2 \cdot (-2) + 1 = -3$. Quindi il primo punto è $(-2; -3)$.
 
 :::
 
-Come stanno i soci, sul piano? [[sparsi, senza un ordine|su una linea che si piega|*in fila, su una linea dritta]]
+Come sono disposti i soci sul piano? [[sono sparsi, senza un ordine|stanno su una linea curva|*stanno in fila su una linea dritta]]
 
-Adesso un secondo club, $y = 2x - 4$: **stesso primo numero**, secondo numero diverso. Il primo club è già disegnato in grigio. Metti i soci del secondo con ascissa $0$, $1$, $2$, $3$ e $4$.
+Adesso prendiamo un secondo club, $y = 2x - 4$. Il primo numero è lo stesso del club di prima. Il secondo numero invece è diverso. Il primo club è già disegnato in grigio. Metti sul piano i soci del secondo club che hanno ascissa $0$, $1$, $2$, $3$ e $4$.
 
 :::graph
 snap: 1
@@ -214,14 +214,14 @@ points:
   - target: "4,4"
 :::
 
-Le due file sono [[*parallele|incidenti, si incontrano in un punto|la stessa fila]].
+Le due file di punti sono [[*parallele|file che si incontrano in un punto|la stessa fila]].
 
-Nei due club il primo numero è uguale e il secondo cambia. Quindi il primo numero decide [[select: *quanto è inclinata la fila|a che altezza passa la fila]], il secondo [[select: quanto è inclinata la fila|*a che altezza passa la fila]].
+Nei due club il primo numero è uguale e il secondo numero cambia. Il primo numero decide [[select: *quanto è inclinata la fila|a che altezza passa la fila]]. Il secondo numero decide [[select: quanto è inclinata la fila|*a che altezza passa la fila]].
 
 :::div.reveal
-I soci di un club **stanno tutti su una retta**, e ogni punto di quella retta è un socio. Il club e la retta sono la stessa cosa detta in due modi: $y = 2x + 1$ è la regola d'ingresso, la retta è il disegno di tutti quelli che la rispettano.
+I soci di un club **stanno tutti su una retta**. Anche ogni punto di quella retta è un socio. Quindi il club e la retta sono la stessa cosa. L'equazione $y = 2x + 1$ è la regola per entrare. La retta è il disegno di tutti i punti che rispettano la regola.
 
-Le due rette hanno lo stesso primo numero e sono **parallele**: salgono allo stesso modo. Il secondo numero le sposta su o giù senza girarle: da $+1$ a $-4$, la retta si è abbassata di 5 quadretti.
+Le due rette hanno lo stesso primo numero. Per questo sono **parallele** e salgono allo stesso modo. Il secondo numero sposta la retta in su o in giù, ma non la fa girare. Qui il secondo numero passa da $+1$ a $-4$, quindi la retta scende di 5 quadretti.
 :::
 
 ---
@@ -231,12 +231,12 @@ Le due rette hanno lo stesso primo numero e sono **parallele**: salgono allo ste
 
 # Lo scalino
 
-Qui c'è la retta $y = 2x + 1$ con due suoi soci, $A$ e $B$. Trascinali: scorrono **solo lungo la retta**, perché fuori non sarebbero più soci. Fra i due c'è uno scalino, con i quadretti contati: quanti in orizzontale, quanti in verticale.
+Qui vedi la retta $y = 2x + 1$ e due suoi soci, $A$ e $B$. Puoi trascinare i due punti. I punti si muovono **solo lungo la retta**, perché fuori dalla retta non sarebbero più soci. Tra $A$ e $B$ c'è uno scalino. Lo scalino mostra quanti quadretti ci sono in orizzontale e quanti in verticale.
 
 :::p5 sketch=retta-nel-piano height=380 m=2 q=1 ax=-1 bx=0 xmin=-5 xmax=5 ymin=-6 ymax=8
 :::
 
-Qui sotto ci sono tre scalini di fila sulla stessa retta: di $1$ a destra, poi di $3$ a destra, poi di $5$ a **sinistra**. A destra della tabella scrivi di quanto cambia l'ordinata per restare socio.
+Nella tabella ci sono tre scalini sulla stessa retta. Il primo va di $1$ a destra. Il secondo va di $3$ a destra. Il terzo va di $5$ a **sinistra**. Scrivi nelle frecce a destra di quanto cambia l'ordinata.
 
 :::table
 | v | $x$ | $y$ | v |
@@ -250,16 +250,16 @@ Qui sotto ci sono tre scalini di fila sulla stessa retta: di $1$ a destra, poi d
 :::details.hint
 <summary>💡 Suggerimento</summary>
 
-Ogni freccia è uno scalino che puoi costruire sulla figura: per la seconda, porta $A$ in $x = -1$ e $B$ in $x = 2$, e leggi quanti quadretti sale. Nell'ultima vai verso sinistra, e la retta scende: l'ordinata diminuisce, e il cambio è negativo.
+Puoi costruire ogni scalino sulla figura. Per il secondo scalino, porta $A$ in $x = -1$ e $B$ in $x = 2$. Poi conta di quanti quadretti sale. Nel terzo scalino vai verso sinistra. Andando a sinistra la retta scende. Quindi l'ordinata diminuisce e il cambio è negativo.
 
 :::
 
-Sposta lo scalino lungo la retta e allungalo. Se divido la salita per il passo, il risultato [[dipende da dove metto lo scalino|dipende da quanto è lungo lo scalino|*è sempre lo stesso]].
+Adesso sposta lo scalino lungo la retta e prova ad allungarlo. Dividi la salita per il passo. Il risultato [[cambia se sposti lo scalino|cambia se allunghi lo scalino|*è sempre lo stesso]].
 
 :::div.reveal
-Qualunque scalino tu prenda su questa retta, la salita è **il doppio** del passo: $2$ su $1$, $6$ su $3$, $-10$ su $-5$. Il rapporto fra i due non cambia mai, dovunque lo misuri e comunque lo allunghi.
+Su questa retta la salita è sempre **il doppio** del passo. Con il passo $1$ la salita è $2$. Con il passo $3$ la salita è $6$. Con il passo $-5$ la salita è $-10$. Il rapporto tra salita e passo non cambia mai, anche se sposti o allunghi lo scalino.
 
-Ed è proprio il $2$ di $y = 2x + 1$.
+Questo rapporto è proprio il numero $2$ dell'equazione $y = 2x + 1$.
 :::
 
 ---
@@ -269,9 +269,9 @@ Ed è proprio il $2$ di $y = 2x + 1$.
 
 # Tre rette per lo stesso punto
 
-Tre rette che passano tutte per $(0; 1)$: $y = 2x + 1$, che ormai conosci, poi $y = 5x + 1$ e $y = \tfrac12 x + 1$.
+Queste tre rette passano tutte per il punto $(0; 1)$: $y = 2x + 1$, $y = 5x + 1$ e $y = \tfrac12 x + 1$. La prima la conosci già.
 
-La seconda è troppo ripida per starci in un disegno, quindi la mettiamo in tabella. Di quanto sale l'ordinata?
+La seconda retta sale molto in fretta e non ci sta bene in un disegno. Per questo la guardiamo in una tabella. Di quanto sale l'ordinata?
 
 :::table
 | v | $x$ | $y = 5x + 1$ | v |
@@ -281,12 +281,12 @@ La seconda è troppo ripida per starci in un disegno, quindi la mettiamo in tabe
 | | $4$ | $21$ | |
 :::
 
-La terza invece è dolce. Eccola, con il suo scalino:
+La terza retta invece sale piano. Qui la vedi con il suo scalino:
 
 :::p5 sketch=retta-nel-piano height=340 m=0.5 q=1 ax=0 bx=4 nome="y = ½x + 1" xmin=-6 xmax=6 ymin=-4 ymax=6
 :::
 
-E sulla retta dolce:
+Completa anche la sua tabella:
 
 :::table
 | v | $x$ | $y = \tfrac12 x + 1$ | v |
@@ -297,18 +297,20 @@ E sulla retta dolce:
 :::
 
 :::div.reveal
-Tre rette e tre pendenze: la più ripida sale di 5 a ogni passo, la più dolce di mezzo quadretto. Il numero che dice *quanto* è sempre quello davanti alla $x$, ed è un rapporto, salita diviso passo: $\tfrac12$ vuol dire proprio «1 in su ogni 2 a destra».
+Le tre rette hanno pendenze diverse. La più ripida sale di 5 quadretti a ogni passo. La meno ripida sale di mezzo quadretto a ogni passo. Il numero davanti alla $x$ dice sempre quanto sale la retta. Questo numero è un rapporto tra la salita e il passo. Per esempio, $\tfrac12$ vuol dire che la retta sale di 1 quadretto ogni 2 quadretti verso destra.
 
-I due numeri di un club hanno un nome:
+I due numeri dell'equazione hanno un nome:
 
 :::formula
 y = @m{m}\,x + @q{q}
 
-m -> m : il coefficiente angolare, di quanto sale a ogni passo verso destra
-q -> q : l'ordinata all'origine, dove la retta taglia l'asse y
+m -> m : coefficiente angolare
+q -> q : ordinata all'origine
 :::
 
-Le tre rette di questo step hanno tutte $q = 1$, e infatti si incontrano tutte in $(0; 1)$.
+Il **coefficiente angolare** $m$ dice di quanto sale la retta a ogni passo verso destra. L'**ordinata all'origine** $q$ dice in quale punto la retta taglia l'asse $y$.
+
+Le tre rette di questo step hanno tutte $q = 1$. Per questo si incontrano tutte nel punto $(0; 1)$.
 :::
 
 ---
@@ -318,9 +320,9 @@ Le tre rette di questo step hanno tutte $q = 1$, e infatti si incontrano tutte i
 
 # Un club intero da due soci
 
-Di un club conosci solo due soci: $(2; 7)$ e $(6; 19)$.
+Di un club conosci solo due soci, $(2; 7)$ e $(6; 19)$.
 
-Da un socio all'altro l'ascissa cresce di $4$. E l'ordinata?
+Da un socio all'altro l'ascissa cresce di $4$. Di quanto cresce l'ordinata?
 
 :::table
 | v | $x$ | $y$ | v |
@@ -329,16 +331,16 @@ Da un socio all'altro l'ascissa cresce di $4$. E l'ordinata?
 | | $6$ | $19$ | |
 :::
 
-Quindi il coefficiente angolare è $m =$ [[3]], e l'ordinata all'origine è $q =$ [[1]].
+Adesso trova i due numeri del club. Il coefficiente angolare è $m =$ [[3]]. L'ordinata all'origine è $q =$ [[1]].
 
 :::details.hint
 <summary>💡 Suggerimento</summary>
 
-Dodici quadretti di salita su quattro di passo: su un passo solo, quanto si sale? Per $q$, parti da $(2; 7)$ e torna indietro di 2 passi fino all'ascissa 0: a ogni passo indietro scendi di $m$.
+L'ordinata sale di 12 quadretti mentre l'ascissa avanza di 4. Quanto sale in un passo solo? Per trovare $q$, parti da $(2; 7)$ e torna indietro fino all'ascissa 0. Devi fare 2 passi indietro. A ogni passo indietro l'ordinata scende di $m$.
 
 :::
 
-Altri due soci, di un altro club: $(-1; 5)$ e $(3; -7)$.
+Ecco due soci di un altro club, $(-1; 5)$ e $(3; -7)$.
 
 :::table
 | v | $x$ | $y$ | v |
@@ -347,23 +349,23 @@ Altri due soci, di un altro club: $(-1; 5)$ e $(3; -7)$.
 | | $3$ | $-7$ | |
 :::
 
-Qui $m =$ [[-3 || −3]] e $q =$ [[2]].
+In questo club $m =$ [[-3 || −3]] e $q =$ [[2]].
 
 :::details.hint
 <summary>💡 Suggerimento</summary>
 
-Da $(-1; 5)$ a $(3; -7)$ ti sposti di 4 a destra, ma l'ordinata sale o scende? Dividi tenendo il segno. Poi da $(-1; 5)$ basta un passo a destra per arrivare all'ascissa 0.
+Da $(-1; 5)$ a $(3; -7)$ ti sposti di 4 a destra. L'ordinata sale o scende? Fai la divisione e tieni il segno. Per trovare $q$, parti da $(-1; 5)$. Basta un passo a destra per arrivare all'ascissa 0.
 
 :::
 
 :::div.reveal
-Il primo club è $y = 3x + 1$, il secondo $y = -3x + 2$. E il secondo **scende**: andando verso destra l'ordinata diminuisce, e il coefficiente angolare è negativo.
+Il primo club è $y = 3x + 1$. Il secondo club è $y = -3x + 2$. Il secondo club **scende**: quando vai verso destra, l'ordinata diminuisce. Per questo il suo coefficiente angolare è negativo.
 
-Quello che hai fatto si scrive una volta per tutte. Da due soci $A$ e $B$:
+Quello che hai fatto vale per due punti qualsiasi. Se conosci due punti $A$ e $B$ di una retta, il coefficiente angolare si calcola così:
 
 $$m = \frac{y_B - y_A}{x_B - x_A}$$
 
-La salita diviso il passo. Sono le stesse due sottrazioni della distanza, solo che qui non si elevano al quadrato: si dividono. E il segno conta, perché dice se la retta sale o scende.
+Sopra la linea di frazione c'è la salita. Sotto c'è il passo. Sono le stesse sottrazioni che hai usato per la distanza tra due punti. Per la distanza le elevi al quadrato. Qui invece le dividi. Il segno è importante, perché dice se la retta sale o scende.
 
-Per due punti passa una retta sola, e adesso sai anche scriverne l'equazione.
+Per due punti passa una sola retta. Adesso sai anche scrivere la sua equazione.
 :::
