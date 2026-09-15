@@ -27,7 +27,7 @@ Il punto $(7; \ldots)$ vuole entrare. Che ordinata deve avere? [[15]]
 Metti in fila i primi tre soci. A sinistra quanto cresce l'ascissa da una riga all'altra: e a destra, l'ordinata di quanto cresce ogni volta?
 
 :::table
-| v : $+1$ | ascissa | ordinata | v : ? |
+| v $+1$ | ascissa | ordinata | v ? |
 | --- | --- | --- | --- |
 | | $0$ | $1$ |
 | | $1$ | $3$ |
@@ -97,7 +97,7 @@ Adesso mettili a confronto, con i soci in fila per ascissa. A sinistra di quanto
 Il primo club, $y = 2x + 1$:
 
 :::table
-| v : $+1$ | $x$ | $y$ | v : $+2$ |
+| v $+1$ | $x$ | $y$ | v $+2$ |
 | --- | --- | --- | --- |
 | | $-1$ | $-1$ |
 | | $0$ | $1$ |
@@ -108,7 +108,7 @@ Il primo club, $y = 2x + 1$:
 Il secondo, $y = 3x - 2$. Completa tu le frecce di destra:
 
 :::table
-| v : $+1$ | $x$ | $y$ | v |
+| v $+1$ | $x$ | $y$ | v |
 | --- | --- | --- | --- |
 | | $-1$ | $-5$ | [[+3 || 3]] |
 | | $0$ | $-2$ | [[+3 || 3]] |
