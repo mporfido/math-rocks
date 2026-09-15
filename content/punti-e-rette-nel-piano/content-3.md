@@ -25,7 +25,16 @@ boundpoints:
   - {x: 2, y: -3, label: " "}
 :::
 
-Nel primo club, a ogni passo verso destra l'ordinata sale di [[0]], e il socio con ascissa $0$ ha ordinata [[4]].
+Metti in fila due soci del primo club. Di quanto cambia l'ordinata?
+
+:::table
+| v | $x$ | $y$ | v |
+| --- | --- | --- | --- |
+| $+2$ | $1$ | $4$ | [[0 || +0]] |
+| | $3$ | $4$ | |
+:::
+
+E il socio con ascissa $0$ ha ordinata [[4]].
 
 Quindi la sua regola è [[$x = 4$|*$y = 4$|$y = 4x$]].
 
@@ -43,7 +52,16 @@ Guarda che cosa hanno in comune tutti i soci di un club, e che cosa invece cambi
 :::div.reveal
 Il primo club è una retta **orizzontale**. Non sale mai, quindi $m = 0$, e $y = 0 \cdot x + 4$ si riduce a $y = 4$: tutti i soci hanno ordinata $4$, l'ascissa è libera.
 
-Il secondo è una retta **verticale**, e qui la forma $y = mx + q$ si inceppa. Quella forma, data un'ascissa, ti dà *un* socio. Qui con ascissa $2$ ce ne sono infiniti, e con qualsiasi altra ascissa nessuno. Non c'è $m$ che tenga: lo scalino ha passo zero, e per zero non si divide.
+Il secondo è una retta **verticale**, e qui la forma $y = mx + q$ si inceppa. Quella forma, data un'ascissa, ti dà *un* socio. Qui con ascissa $2$ ce ne sono infiniti, e con qualsiasi altra ascissa nessuno. Non c'è $m$ che tenga, perché lo scalino ha passo zero:
+
+:::table
+| v | $x$ | $y$ | v |
+| --- | --- | --- | --- |
+| $+0$ | $2$ | $0$ | $+9$ |
+| | $2$ | $9$ | |
+:::
+
+Salita $9$ su passo $0$: e per zero non si divide.
 
 La regola c'è, $x = 2$, ma nella forma «$y = \ldots$» non si riesce a scrivere. Serve un'altra scrittura.
 :::

@@ -24,7 +24,15 @@ Il punto $(7; \ldots)$ vuole entrare. Che ordinata deve avere? [[15]]
 :::details.hint
 <summary>💡 Suggerimento</summary>
 
-Guarda i primi tre soci, in fila: l'ascissa cresce di 1 alla volta. E l'ordinata, di quanto cresce ogni volta?
+Metti in fila i primi tre soci. A sinistra quanto cresce l'ascissa da una riga all'altra: e a destra, l'ordinata di quanto cresce ogni volta?
+
+:::table
+| v : $+1$ | ascissa | ordinata | v : ? |
+| --- | --- | --- | --- |
+| | $0$ | $1$ |
+| | $1$ | $3$ |
+| | $2$ | $5$ |
+:::
 
 :::
 
@@ -84,9 +92,29 @@ Metti i soci in ordine di ascissa: $(-1; -5)$, $(0; -2)$, $(1; 1)$, $(2; 4)$. Di
 
 :::
 
-Adesso mettili a confronto: il primo club è $y = 2x + 1$, il secondo $y = 3x - 2$.
+Adesso mettili a confronto, con i soci in fila per ascissa. A sinistra di quanto cresce l'ascissa da una riga all'altra, a destra di quanto cresce l'ordinata.
 
-Quando l'ascissa cresce di 1, l'ordinata cresce di [[2]] nel primo club e di [[3]] nel secondo.
+Il primo club, $y = 2x + 1$:
+
+:::table
+| v : $+1$ | $x$ | $y$ | v : $+2$ |
+| --- | --- | --- | --- |
+| | $-1$ | $-1$ |
+| | $0$ | $1$ |
+| | $1$ | $3$ |
+| | $2$ | $5$ |
+:::
+
+Il secondo, $y = 3x - 2$. Completa tu le frecce di destra:
+
+:::table
+| v : $+1$ | $x$ | $y$ | v |
+| --- | --- | --- | --- |
+| | $-1$ | $-5$ | [[+3 || 3]] |
+| | $0$ | $-2$ | [[+3 || 3]] |
+| | $1$ | $1$ | [[+3 || 3]] |
+| | $2$ | $4$ | |
+:::
 
 Il socio con ascissa $0$ ha ordinata [[1]] nel primo club e [[-2 || −2]] nel secondo.
 
@@ -208,16 +236,21 @@ Qui c'è la retta $y = 2x + 1$ con due suoi soci, $A$ e $B$. Trascinali: scorron
 :::p5 sketch=retta-nel-piano height=380 m=2 q=1 ax=-1 bx=0 xmin=-5 xmax=5 ymin=-6 ymax=8
 :::
 
-Sulla retta $y = 2x + 1$, se mi sposto di $1$ a destra devo salire di [[2]] per restare socio.
+Qui sotto ci sono tre scalini di fila sulla stessa retta: di $1$ a destra, poi di $3$ a destra, poi di $5$ a **sinistra**. A destra della tabella scrivi di quanto cambia l'ordinata per restare socio.
 
-Se mi sposto di $3$ a destra, di [[6]].
-
-Se mi sposto di $5$ a **sinistra**, l'ordinata cambia di [[-10 || −10]].
+:::table
+| v | $x$ | $y$ | v |
+| --- | --- | --- | --- |
+| $+1$ | $-2$ | $-3$ | [[+2 || 2]] |
+| $+3$ | $-1$ | $-1$ | [[+6 || 6]] |
+| $-5$ | $2$ | $5$ | [[-10 || −10]] |
+| | $-3$ | $-5$ | |
+:::
 
 :::details.hint
 <summary>💡 Suggerimento</summary>
 
-Metti $A$ e $B$ a 3 quadretti di distanza e leggi lo scalino, poi a 5, con $B$ a sinistra di $A$. Andando verso sinistra la retta scende: l'ordinata diminuisce, e il cambio è negativo.
+Ogni freccia è uno scalino che puoi costruire sulla figura: per la seconda, porta $A$ in $x = -1$ e $B$ in $x = 2$, e leggi quanti quadretti sale. Nell'ultima vai verso sinistra, e la retta scende: l'ordinata diminuisce, e il cambio è negativo.
 
 :::
 
@@ -238,13 +271,14 @@ Ed è proprio il $2$ di $y = 2x + 1$.
 
 Tre rette che passano tutte per $(0; 1)$: $y = 2x + 1$, che ormai conosci, poi $y = 5x + 1$ e $y = \tfrac12 x + 1$.
 
-La seconda è troppo ripida per starci in un disegno, quindi fai i conti. Su $y = 5x + 1$, spostandoti di $1$ a destra sali di [[5]]; di $3$ a destra, sali di [[15]].
+La seconda è troppo ripida per starci in un disegno, quindi la mettiamo in tabella. Di quanto sale l'ordinata?
 
-:::details.hint
-<summary>💡 Suggerimento</summary>
-
-Prendi due soci e confronta le ordinate: con $x = 0$ viene $1$, con $x = 3$ viene $5 \cdot 3 + 1 = 16$.
-
+:::table
+| v | $x$ | $y = 5x + 1$ | v |
+| --- | --- | --- | --- |
+| $+1$ | $0$ | $1$ | [[+5 || 5]] |
+| $+3$ | $1$ | $6$ | [[+15 || 15]] |
+| | $4$ | $21$ | |
 :::
 
 La terza invece è dolce. Eccola, con il suo scalino:
@@ -252,7 +286,15 @@ La terza invece è dolce. Eccola, con il suo scalino:
 :::p5 sketch=retta-nel-piano height=340 m=0.5 q=1 ax=0 bx=4 nome="y = ½x + 1" xmin=-6 xmax=6 ymin=-4 ymax=6
 :::
 
-Su $y = \tfrac12 x + 1$, spostandoti di $2$ a destra sali di [[1]]; di $1$ a destra, di [[0,5 || 0.5 || 1/2 || ½]].
+E sulla retta dolce:
+
+:::table
+| v | $x$ | $y = \tfrac12 x + 1$ | v |
+| --- | --- | --- | --- |
+| $+2$ | $0$ | $1$ | [[+1 || 1]] |
+| $+1$ | $2$ | $2$ | [[+0,5 || 0,5 || +0.5 || 0.5 || 1/2 || +1/2 || ½]] |
+| | $3$ | $2{,}5$ | |
+:::
 
 :::div.reveal
 Tre rette e tre pendenze: la più ripida sale di 5 a ogni passo, la più dolce di mezzo quadretto. Il numero che dice *quanto* è sempre quello davanti alla $x$, ed è un rapporto, salita diviso passo: $\tfrac12$ vuol dire proprio «1 in su ogni 2 a destra».
@@ -278,7 +320,14 @@ Le tre rette di questo step hanno tutte $q = 1$, e infatti si incontrano tutte i
 
 Di un club conosci solo due soci: $(2; 7)$ e $(6; 19)$.
 
-Da un socio all'altro ti sposti di [[4]] a destra e sali di [[12]].
+Da un socio all'altro l'ascissa cresce di $4$. E l'ordinata?
+
+:::table
+| v | $x$ | $y$ | v |
+| --- | --- | --- | --- |
+| $+4$ | $2$ | $7$ | [[+12 || 12]] |
+| | $6$ | $19$ | |
+:::
 
 Quindi il coefficiente angolare è $m =$ [[3]], e l'ordinata all'origine è $q =$ [[1]].
 
@@ -290,6 +339,13 @@ Dodici quadretti di salita su quattro di passo: su un passo solo, quanto si sale
 :::
 
 Altri due soci, di un altro club: $(-1; 5)$ e $(3; -7)$.
+
+:::table
+| v | $x$ | $y$ | v |
+| --- | --- | --- | --- |
+| $+4$ | $-1$ | $5$ | [[-12 || −12]] |
+| | $3$ | $-7$ | |
+:::
 
 Qui $m =$ [[-3 || −3]] e $q =$ [[2]].
 
