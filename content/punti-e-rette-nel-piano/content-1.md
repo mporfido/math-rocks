@@ -5,7 +5,7 @@
 ---
 
 > id: il-volo-del-drone
-> title: Quanto è lungo il volo?
+> title: Stimare la distanza fra due punti
 
 # Un drone da A a B
 
@@ -38,7 +38,7 @@ Cominciamo da due casi più facili.
 ---
 
 > id: stessa-riga-stessa-colonna
-> title: Sulla stessa riga
+> title: Distanza fra punti sulla stessa riga o colonna
 
 # Quando è facile
 
@@ -80,7 +80,7 @@ $$\overline{CD} = 6 - 1 = 5$$
 ---
 
 > id: quando-ci-sono-i-segni
-> title: Quando ci sono i segni
+> title: Distanza con coordinate negative e valore assoluto
 
 # Attenzione alla sottrazione
 
@@ -117,7 +117,7 @@ In questo modo se calcoli $y_A - y_B$ oppue $y_B - y_A$ ottieni sempre lo stesso
 ---
 
 > id: il-triangolo-nascosto
-> title: Il triangolo nascosto
+> title: Distanza e teorema di Pitagora
 
 # E se il volo è in obliquo?
 
@@ -159,7 +159,7 @@ Ricordi che all'inizio avevi stimato "fra 4 e 10" la lunghezza di un segmento? A
 ---
 
 > id: la-formula
-> title: La formula
+> title: La formula della distanza fra due punti
 
 # Scriviamola una volta per tutte
 
@@ -201,7 +201,7 @@ Non sempre le distanze vengono "belle". Anzi: quasi mai.
 ---
 
 > id: provala-tu
-> title: Costruisci tu il triangolo
+> title: Distanze intere e terne pitagoriche
 > use-mathjs: true
 
 # I numeri si compilano da soli
@@ -233,7 +233,7 @@ Coppie così — $3,4,5$ · $5,12,13$ · $8,15,17$ — si chiamano **terne pitag
 ---
 
 > id: il-ripetitore-a-meta-strada
-> title: Il punto medio
+> title: Le coordinate del punto medio
 
 # Dove va il ripetitore?
 
@@ -266,7 +266,7 @@ $$M\left(\frac{x_A + x_B}{2};\ \frac{y_A + y_B}{2}\right)$$
 ---
 
 > id: torna-indietro
-> title: Trovare un estremo conoscendo M
+> title: Trovare un estremo dal punto medio
 > use-mathjs: true
 
 # Conosco il centro, mi manca un estremo
