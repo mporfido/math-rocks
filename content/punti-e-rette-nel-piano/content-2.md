@@ -282,6 +282,12 @@ Adesso sposta lo scalino lungo la retta e prova ad allungarlo. Dividi la salita 
 :::div.reveal
 Su questa retta la salita è sempre **il doppio** del passo. Con il passo $1$ la salita è $2$. Con il passo $3$ la salita è $6$. Con il passo $-5$ la salita è $-10$. Il rapporto tra salita e passo non cambia mai, anche se sposti o allunghi lo scalino.
 
+Il passo e la salita hanno un nome. Il passo si chiama $\Delta x$ e la salita si chiama $\Delta y$. Il simbolo $\Delta$ è una lettera greca e si legge «delta». $\Delta x$ dice di quanto cambia la $x$. $\Delta y$ dice di quanto cambia la $y$. Questi cambiamenti si chiamano anche **incrementi**. Per questo il rapporto tra salita e passo si chiama **rapporto incrementale**:
+
+$$\text{rapporto incrementale} = \frac{\Delta y}{\Delta x} = \frac{\text{salita}}{\text{passo}}$$
+
+Nel secondo scalino della tabella $\Delta x = 3$ e $\Delta y = 6$. Il rapporto incrementale è $\dfrac{6}{3} = 2$.
+
 Questo rapporto è proprio il numero $2$ dell'equazione $y = 2x + 1$.
 :::
 
