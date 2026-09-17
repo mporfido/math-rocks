@@ -52,7 +52,7 @@ Guarda che cosa hanno in comune tutti i soci di un club. Guarda anche che cosa c
 :::div.reveal
 Il primo club è una retta **orizzontale**. La retta non sale mai, quindi $m = 0$. L'equazione $y = 0 \cdot x + 4$ diventa semplicemente $y = 4$. Tutti i soci hanno ordinata 4. L'ascissa invece può essere qualsiasi numero.
 
-Il secondo club è una retta **verticale**. Questa retta non si può scrivere nella forma $y = mx + q$. Con quella forma, a ogni ascissa corrisponde un solo socio. Qui invece con ascissa 2 ci sono infiniti soci. Con le altre ascisse non c'è nessun socio. Non riusciamo nemmeno a calcolare $m$, perché lo scalino ha passo zero:
+Il secondo club è una retta **verticale**. Questa retta non si può scrivere nella forma $y = mx + q$. Con quella forma, a ogni ascissa corrisponde un solo socio. Qui invece con ascissa 2 ci sono infiniti soci. Con le altre ascisse non c'è nessun socio. Non riusciamo nemmeno a calcolare $m$, perché nello scalino $\Delta x$ è zero:
 
 :::table
 | v | $x$ | $y$ | v |
@@ -61,7 +61,7 @@ Il secondo club è una retta **verticale**. Questa retta non si può scrivere ne
 | | $2$ | $9$ | |
 :::
 
-La salita è 9 e il passo è 0. Non possiamo dividere per zero.
+Qui $\Delta y = 9$ e $\Delta x = 0$. Il rapporto incrementale $\dfrac{\Delta y}{\Delta x}$ non si può calcolare, perché non possiamo dividere per zero.
 
 La regola del secondo club esiste, ed è $x = 2$. Però non si può scrivere nella forma «$y = \ldots$». Ci serve un altro modo di scrivere le rette.
 :::

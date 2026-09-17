@@ -298,16 +298,30 @@ Questo rapporto è proprio il numero $2$ dell'equazione $y = 2x + 1$.
 
 # Tre rette per lo stesso punto
 
-Queste tre rette passano tutte per il punto $(0; 1)$: $y = 2x + 1$, $y = 5x + 1$ e $y = \tfrac12 x + 1$. La prima la conosci già.
+Queste tre rette passano tutte per il punto $(0; 1)$: $y = 2x + 1$, $y = -2x + 1$ e $y = \tfrac12 x + 1$. La prima la conosci già. Le altre due le guardiamo una alla volta.
 
-La seconda retta sale molto in fretta e non ci sta bene in un disegno. Per questo la guardiamo in una tabella. Di quanto sale l'ordinata?
+La seconda retta è $y = -2x + 1$. Questa volta il numero davanti alla $x$ è negativo. Trascina $A$ e $B$ e guarda lo scalino.
+
+:::p5 sketch=retta-nel-piano height=340 m=-2 q=1 ax=0 bx=1 xmin=-5 xmax=5 ymin=-6 ymax=6
+:::
+
+Completa la tabella. Nelle frecce a destra scrivi quanto vale $\Delta y$.
 
 :::table
-| v | $x$ | $y = 5x + 1$ | v |
+| v | $x$ | $y = -2x + 1$ | v |
 | --- | --- | --- | --- |
-| $+1$ | $0$ | $1$ | [[+5 || 5]] |
-| $+3$ | $1$ | $6$ | [[+15 || 15]] |
-| | $4$ | $21$ | |
+| $+1$ | $0$ | $1$ | [[-2 || −2]] |
+| $+2$ | $1$ | $-1$ | [[-4 || −4]] |
+| | $3$ | $-5$ | |
+:::
+
+Quando vai verso destra, questa retta [[sale|*scende]]. Il suo rapporto incrementale è $\dfrac{\Delta y}{\Delta x} =$ [[-2 || −2]].
+
+:::details.hint
+<summary>💡 Suggerimento</summary>
+
+Nella prima riga $\Delta x = 1$ e $\Delta y = -2$. Il segno meno dice che l'ordinata diminuisce. Dividi $\Delta y$ per $\Delta x$ e tieni il segno.
+
 :::
 
 La terza retta invece sale piano. Qui la vedi con il suo scalino:
@@ -325,8 +339,30 @@ Completa anche la sua tabella:
 | | $3$ | $2{,}5$ | |
 :::
 
+Adesso guarda le tre rette insieme. La retta $y = 2x + 1$ è rossa. La retta $y = -2x + 1$ è blu. La retta $y = \tfrac12 x + 1$ è verde.
+
+:::graph
+xrange: "-6,6"
+yrange: "-6,6"
+functions:
+  - expr: "2*x + 1"
+    color: "#D7263D"
+  - expr: "-2*x + 1"
+    color: "#1F6FB2"
+  - expr: "0.5*x + 1"
+    color: "#2E8B57"
+:::
+
+Quale retta è la meno ripida? [[$y = 2x + 1$|$y = -2x + 1$|*$y = \tfrac12 x + 1$]]
+
+La retta rossa e la retta blu sono ripide [[*allo stesso modo|in modo diverso]].
+
 :::div.reveal
-Le tre rette hanno pendenze diverse. La più ripida sale di 5 quadretti a ogni passo. La meno ripida sale di mezzo quadretto a ogni passo. Il numero davanti alla $x$ dice sempre quanto sale la retta. Questo numero è un rapporto tra la salita e il passo. Per esempio, $\tfrac12$ vuol dire che la retta sale di 1 quadretto ogni 2 quadretti verso destra.
+Le tre rette hanno pendenze diverse. La retta $y = 2x + 1$ sale di 2 quadretti a ogni passo verso destra. La retta $y = \tfrac12 x + 1$ sale solo di mezzo quadretto. La retta $y = -2x + 1$ invece **scende** di 2 quadretti a ogni passo verso destra.
+
+Il numero davanti alla $x$ è sempre il rapporto incrementale $\dfrac{\Delta y}{\Delta x}$. Il suo segno dice da che parte va la retta. Quando il numero è positivo, $\Delta y$ ha lo stesso segno di $\Delta x$. Allora andando verso destra la retta sale. Quando il numero è negativo, $\Delta y$ ha il segno opposto a $\Delta x$. Allora andando verso destra la retta scende.
+
+Il numero senza il segno dice quanto è ripida la retta. Per questo $y = 2x + 1$ e $y = -2x + 1$ sono ripide allo stesso modo. La prima sale e la seconda scende.
 
 I due numeri dell'equazione hanno un nome:
 
@@ -337,7 +373,7 @@ m -> m : coefficiente angolare
 q -> q : ordinata all'origine
 :::
 
-Il **coefficiente angolare** $m$ dice di quanto sale la retta a ogni passo verso destra. L'**ordinata all'origine** $q$ dice in quale punto la retta taglia l'asse $y$.
+Il **coefficiente angolare** $m$ è il rapporto incrementale $\dfrac{\Delta y}{\Delta x}$. Dice di quanto cambia la $y$ a ogni passo verso destra. Se $m$ è positivo, la retta sale. Se $m$ è negativo, la retta scende. L'**ordinata all'origine** $q$ dice in quale punto la retta taglia l'asse $y$.
 
 Le tre rette di questo step hanno tutte $q = 1$. Per questo si incontrano tutte nel punto $(0; 1)$.
 :::
@@ -351,7 +387,7 @@ Le tre rette di questo step hanno tutte $q = 1$. Per questo si incontrano tutte 
 
 Di un club conosci solo due soci, $(2; 7)$ e $(6; 19)$.
 
-Da un socio all'altro l'ascissa cresce di $4$. Di quanto cresce l'ordinata?
+Da un socio all'altro $\Delta x = 4$. Quanto vale $\Delta y$?
 
 :::table
 | v | $x$ | $y$ | v |
@@ -365,7 +401,7 @@ Adesso trova i due numeri del club. Il coefficiente angolare è $m =$ [[3]]. L'o
 :::details.hint
 <summary>💡 Suggerimento</summary>
 
-L'ordinata sale di 12 quadretti mentre l'ascissa avanza di 4. Quanto sale in un passo solo? Per trovare $q$, parti da $(2; 7)$ e torna indietro fino all'ascissa 0. Devi fare 2 passi indietro. A ogni passo indietro l'ordinata scende di $m$.
+Il coefficiente angolare è il rapporto incrementale. Qui $\Delta y = 12$ e $\Delta x = 4$. Per trovare $q$, parti da $(2; 7)$ e torna indietro fino all'ascissa 0. Devi fare 2 passi indietro. A ogni passo indietro l'ordinata scende di $m$.
 
 :::
 
@@ -383,18 +419,23 @@ In questo club $m =$ [[-3 || −3]] e $q =$ [[2]].
 :::details.hint
 <summary>💡 Suggerimento</summary>
 
-Da $(-1; 5)$ a $(3; -7)$ ti sposti di 4 a destra. L'ordinata sale o scende? Fai la divisione e tieni il segno. Per trovare $q$, parti da $(-1; 5)$. Basta un passo a destra per arrivare all'ascissa 0.
+Da $(-1; 5)$ a $(3; -7)$ hai $\Delta x = 4$. L'ordinata diminuisce, quindi $\Delta y$ è negativo. Fai la divisione e tieni il segno. Per trovare $q$, parti da $(-1; 5)$. Basta un passo a destra per arrivare all'ascissa 0.
 
 :::
 
 :::div.reveal
-Il primo club è $y = 3x + 1$. Il secondo club è $y = -3x + 2$. Il secondo club **scende**: quando vai verso destra, l'ordinata diminuisce. Per questo il suo coefficiente angolare è negativo.
+Il primo club è $y = 3x + 1$. Il secondo club è $y = -3x + 2$. Il secondo club **scende**, come la retta $y = -2x + 1$ dello step precedente. Per questo il suo coefficiente angolare è negativo.
 
 Quello che hai fatto vale per due punti qualsiasi. Se conosci due punti $A$ e $B$ di una retta, il coefficiente angolare si calcola così:
 
-$$m = \frac{y_B - y_A}{x_B - x_A}$$
+:::formula
+m = \frac{@dy{\Delta y}}{@dx{\Delta x}} = \frac{@yy{y_B - y_A}}{@xx{x_B - x_A}}
 
-Sopra la linea di frazione c'è la salita. Sotto c'è il passo. Sono le stesse sottrazioni che hai usato per la distanza tra due punti. Per la distanza le elevi al quadrato. Qui invece le dividi. Il segno è importante, perché dice se la retta sale o scende.
+dy -> yy : differenza tra le ordinate
+dx -> xx : differenza tra le ascisse
+:::
+
+$\Delta y$ è la differenza tra le ordinate dei due punti. $\Delta x$ è la differenza tra le ascisse. Sono le stesse sottrazioni che hai usato per la distanza tra due punti. Per la distanza le elevi al quadrato. Qui invece le dividi. Il segno è importante, perché dice se la retta sale o scende.
 
 Per due punti passa una sola retta. Adesso sai anche scrivere la sua equazione.
 :::
