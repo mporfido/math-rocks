@@ -168,11 +168,35 @@ La regola funziona anche al contrario. Se conosci l'ordinata, ottieni un'equazio
 ---
 
 > id: i-soci-in-fila
-> title: Il grafico è una retta, e le rette parallele
+> title: Tabella dei valori e grafico della retta
+> use-mathjs: true
 
 # Finalmente un disegno
 
-Torniamo al primo club, $y = 2x + 1$. Metti sul piano i soci che hanno ascissa $-2$, $-1$, $0$, $1$ e $2$.
+Vogliamo disegnare i soci del primo club, $y = 2x + 1$. I soci sono infiniti e non possiamo disegnarli tutti. Allora ne scegliamo alcuni. Il lavoro si fa in tre passi.
+
+**Primo passo.** Scegli alcuni valori per la $x$. Qui prendiamo $-2$, $-1$, $0$, $1$ e $2$.
+
+**Secondo passo.** Per ogni valore della $x$ calcola la $y$ con la regola. Scrivi i risultati nella tabella.
+
+:::table
+| $x$ | $y = 2x + 1$ |
+| --- | --- |
+| $-2$ | [[-3 || −3]] |
+| $-1$ | [[-1 || −1]] |
+| $0$ | [[1]] |
+| $1$ | [[3]] |
+| $2$ | [[5]] |
+:::
+
+:::details.hint
+<summary>💡 Suggerimento</summary>
+
+Metti il valore della $x$ al posto della lettera. Con $x = -2$ il conto è $2 \cdot (-2) + 1 = -4 + 1 = -3$.
+
+:::
+
+**Terzo passo.** Ogni riga della tabella è un punto. La $x$ è l'ascissa e la $y$ è l'ordinata. Metti i cinque punti sul piano.
 
 :::graph
 snap: 1
@@ -187,41 +211,40 @@ points:
   - target: "2,5"
 :::
 
+Come sono disposti i soci sul piano? [[sono sparsi, senza un ordine|stanno su una linea curva|*stanno in fila su una linea dritta]]
+
+Adesso fai tu i tre passi con un altro club, $y = 3x - 4$. Questa volta i valori della $x$ li scegli tu. Mentre scrivi, i punti compaiono sul piano.
+
+| Punto | $x$ | $y$ |
+| --- | --- | --- |
+| A | ${pax}{pax||input} | ${pay}{pay||input} |
+| B | ${pbx}{pbx||input} | ${pby}{pby||input} |
+| C | ${pcx}{pcx||input} | ${pcy}{pcy||input} |
+
+:::graph
+xrange: "-6,6"
+yrange: "-6,6"
+boundpoints:
+  - {x: pax, y: pay, label: A}
+  - {x: pbx, y: pby, label: B}
+  - {x: pcx, y: pcy, label: C}
+:::
+
+[Verifica]{check: pay == 3*pax - 4 and pby == 3*pbx - 4 and pcy == 3*pcx - 4 and pax != pbx and pax != pcx and pbx != pcx}
+
 :::details.hint
 <summary>💡 Suggerimento</summary>
 
-Prima calcola le ordinate, poi disegna i punti. Con $x = -2$ il conto è $2 \cdot (-2) + 1 = -3$. Quindi il primo punto è $(-2; -3)$.
+Scegli tre valori diversi della $x$. Numeri piccoli come $0$, $1$, $2$ e $3$ vanno bene, perché i punti restano dentro il disegno. Poi calcola la $y$ di ognuno. Con $x = 2$ il conto è $3 \cdot 2 - 4 = 2$.
 
 :::
-
-Come sono disposti i soci sul piano? [[sono sparsi, senza un ordine|stanno su una linea curva|*stanno in fila su una linea dritta]]
-
-Adesso prendiamo un secondo club, $y = 2x - 4$. Il primo numero è lo stesso del club di prima. Il secondo numero invece è diverso. Il primo club è già disegnato in grigio. Metti sul piano i soci del secondo club che hanno ascissa $0$, $1$, $2$, $3$ e $4$.
-
-:::graph
-snap: 1
-verify: true
-xrange: "-6,6"
-yrange: "-6,6"
-functions:
-  - expr: "2*x + 1"
-    color: "#5A6275"
-points:
-  - target: "0,-4"
-  - target: "1,-2"
-  - target: "2,0"
-  - target: "3,2"
-  - target: "4,4"
-:::
-
-Le due file di punti sono [[*parallele|file che si incontrano in un punto|la stessa fila]].
-
-Nei due club il primo numero è uguale e il secondo numero cambia. Il primo numero decide [[select: *quanto è inclinata la fila|a che altezza passa la fila]]. Il secondo numero decide [[select: quanto è inclinata la fila|*a che altezza passa la fila]].
 
 :::div.reveal
+Per disegnare una retta si fa sempre così. Scegli alcuni valori della $x$. Calcola la $y$ di ognuno con l'equazione. Scrivi le coppie in una tabella. Ogni riga della tabella è un punto. Alla fine metti i punti sul piano.
+
 I soci di un club **stanno tutti su una retta**. Anche ogni punto di quella retta è un socio. Quindi il club e la retta sono la stessa cosa. L'equazione $y = 2x + 1$ è la regola per entrare. La retta è il disegno di tutti i punti che rispettano la regola.
 
-Le due rette hanno lo stesso primo numero. Per questo sono **parallele** e salgono allo stesso modo. Il secondo numero sposta la retta in su o in giù, ma non la fa girare. Qui il secondo numero passa da $+1$ a $-4$, quindi la retta scende di 5 quadretti.
+Conviene calcolare almeno tre punti. Se un punto non sta in fila con gli altri, c'è un errore nei conti.
 :::
 
 ---
