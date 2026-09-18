@@ -6,5 +6,5 @@ description: >-
 level: beginner
 duration: 50 minuti
 color: "#00838F"
-# Ogni step si appoggia al precedente: il triangolo prima della formula
-progression: sequential
+# L'ordine consigliato è quello dell'elenco, ma le lezioni si aprono tutte
+progression: free

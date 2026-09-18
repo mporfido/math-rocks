@@ -3,5 +3,5 @@ description: Che cosa vuol dire elevare a un esponente che non è un numero natu
 level: intermediate
 duration: 45 minuti
 color: "#7E57C2"
-# Le lezioni si costruiscono una sull'altra: la scala delle potenze viene prima
-progression: sequential
+# L'ordine consigliato è quello dell'elenco, ma le lezioni si aprono tutte
+progression: free

@@ -6,5 +6,5 @@ description: >-
 level: beginner
 duration: 45 minuti
 color: "#0277BD"
-# Il vocabolario della lezione 1 serve tutto per leggere i grafici della lezione 2
-progression: sequential
+# L'ordine consigliato è quello dell'elenco, ma le lezioni si aprono tutte
+progression: free
