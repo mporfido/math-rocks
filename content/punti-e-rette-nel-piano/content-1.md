@@ -28,7 +28,7 @@ Non serve calcolare niente. Confronta il segmento rosso con un lato dei quadrett
 :::
 
 :::div.reveal
-Quindi la risposta sta **fra 4 e 10**. Restringere il campo delle possibili lunghezze pu essere importante, unsando il quadretto come unità di misura.
+Quindi la risposta sta **fra 4 e 10**. Restringere il campo delle possibili lunghezze può essere importante, usando il quadretto come unità di misura.
 
 Adesso però la domanda vera: **quanto esattamente?** E soprattutto, come si fa a esserne sicuri senza misurare?
 
@@ -111,7 +111,7 @@ Quando due punti $A(x,y_A)$ e $B(x,y_B)$ hanno la stessa coordinata x, allora la
 
 $$\overline{AB} = \lvert y_A - y_B\rvert$$
 
-In questo modo se calcoli $y_A - y_B$ oppue $y_B - y_A$ ottieni sempre lo stesso risultato, dopo aver preso il valore assoluto.
+In questo modo se calcoli $y_A - y_B$ oppure $y_B - y_A$ ottieni sempre lo stesso risultato, dopo aver preso il valore assoluto.
 :::
 
 ---
