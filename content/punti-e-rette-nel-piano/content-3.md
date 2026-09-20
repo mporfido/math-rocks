@@ -172,6 +172,7 @@ functions:
   - expr: "2*x + 1"
     color: "#1B2A4A"
   - expr: "m*x + q"
+    color: "#D7263D"
 :::
 
 Porta la retta rossa a essere parallela alla nera, senza però farla finire sopra la nera.
@@ -209,18 +210,22 @@ L'ultima coppia è una trappola utile: $0,5$ e $\frac{1}{2}$ sono lo stesso nume
 
 Ecco due regole: $y = 2x + 1$ e $2y = 4x + 2$.
 
-La seconda non è ancora scritta nella forma che conosci, perché a sinistra dell'uguale c'è $2y$ e non $y$. Dividi per $2$ tutti e tre i numeri della seconda regola.
+La seconda non è ancora scritta nella forma che conosci, perché a sinistra dell'uguale c'è $2y$ e non $y$. Finché la $y$ non è da sola non puoi leggere il coefficiente angolare.
 
-Ottieni una retta con coefficiente angolare $m =$ [[2]] e ordinata all'origine $q =$ [[1]].
+Portala tu nella forma giusta: dividi per $2$ i due membri, poi sistema i conti che restano.
 
-Quanti punti hanno in comune le due rette? [[uno|nessuno|*infiniti]]
+:::algebra isola="y"
+2y = 4x + 2
+:::
 
 :::details.hint
 <summary>💡 Suggerimento</summary>
 
-Se dividi per $2$ ogni termine di $2y = 4x + 2$ ottieni $y = 2x + 1$. Confrontala con la prima regola.
+Senza selezionare niente, usa il secondo principio in basso: dividi per $2$. La lavagna divide ogni termine, quindi ti ritrovi $2y$ diviso $2$ da una parte, e $4x$ diviso $2$ più $2$ diviso $2$ dall'altra. A quel punto tocca a te: clicca un pezzo per volta e scrivi quanto fa.
 
 :::
+
+Quanti punti hanno in comune le due rette? [[uno|nessuno|*infiniti]]
 
 :::div.reveal
 Erano la stessa retta, scritta in due modi diversi. Ogni punto dell'una è anche un punto dell'altra. Due rette così si chiamano **coincidenti**.
@@ -305,7 +310,66 @@ $$m \cdot m' = -1 \qquad \text{cioè} \qquad m' = -\frac{1}{m}$$
 
 Non è una regola da imparare a memoria: è il passo girato di un quarto di giro, scritto con i numeri. Le componenti si scambiano, una cambia segno, e il rapporto si capovolge insieme al segno.
 
-Resta una domanda aperta. Una retta orizzontale ha coefficiente angolare $0$: quale numero moltiplicato per $0$ può dare $-1$? Nessuno. Eppure la perpendicolare a una retta orizzontale esiste, e sai già qual è: è verticale. Gira il passo $(1; 0)$ di un quarto di giro e ottieni $(0; 1)$, che non ha nessun coefficiente angolare, perché il passo orizzontale vale zero e non si può dividere per zero.
+Resta però una crepa. Se una retta è orizzontale il suo coefficiente angolare vale $0$, e nessun numero moltiplicato per $0$ può dare $-1$. La perpendicolare a una retta orizzontale però esiste eccome. Nello step successivo vai a vedere che cosa succede.
+:::
 
-La regola del prodotto vale per tutte le coppie di rette perpendicolari, tranne quella formata da una retta orizzontale e una verticale.
+---
+
+> id: retta-verticale-senza-coefficiente-angolare
+> title: La retta verticale non ha coefficiente angolare
+> use-mathjs: true
+
+# La crepa nella regola
+
+Riprendi la crepa dello step precedente. La retta $y = 0$ è l'asse delle ascisse: è orizzontale e il suo coefficiente angolare vale $0$.
+
+Il suo passo va a destra di $1$ e non sale per niente: è il passo $(1; 0)$. Girarlo di un quarto di giro si può, come tutti gli altri. Fallo.
+
+:::p5 goal sketch=passo-girato height=400 ax=1 ay=0 xmin=-5 xmax=5 ymin=-5 ymax=5
+:::
+
+Girando a sinistra il passo $(1; 0)$ è diventato $(0;$ [[1]] $)$.
+
+La retta rossa che ne esce è [[orizzontale|*verticale|obliqua]].
+
+Adesso prova a calcolarne il coefficiente angolare. È il rapporto fra la salita e il passo orizzontale, cioè $\frac{\Delta y}{\Delta x}$. Qui la salita vale $1$, mentre il passo orizzontale vale [[0]].
+
+Quindi la retta verticale ha coefficiente angolare [[uguale a zero|molto grande|*non ha coefficiente angolare]].
+
+:::details.hint
+<summary>💡 Suggerimento</summary>
+
+Per trovare il coefficiente angolare devi dividere per il passo orizzontale. Quando il passo orizzontale è zero, quella divisione non si può fare: dividere per zero non è permesso.
+
+Attenzione a non confondere i due casi. Una retta **orizzontale** ha coefficiente angolare $0$, che è un numero. Una retta **verticale** non ce l'ha proprio.
+
+:::
+
+Una retta verticale non si può scrivere come $y = mx + q$, perché quel coefficiente angolare non esiste. Si riconosce in un altro modo: tutti i suoi punti hanno la stessa ascissa.
+
+Metti tre punti sulla retta verticale che passa per il punto $(3; 0)$.
+
+:::graph
+snap: 1
+verify: true
+xrange: "-5,6"
+yrange: "-5,6"
+points:
+  - target: "3,-2"
+  - target: "3,1"
+  - target: "3,4"
+:::
+
+Quei tre punti hanno ordinate diverse ma la stessa ascissa. L'equazione di quella retta è $x =$ [[3]].
+
+:::div.reveal
+La regola del prodotto vale per tutte le coppie di rette perpendicolari, tranne una: quella formata da una retta orizzontale e una verticale. Lì non c'è nessun prodotto da fare, perché uno dei due coefficienti angolari non esiste.
+
+Il quarto di giro invece funziona sempre, anche in questo caso. È il motivo per cui conviene tenerlo in mente: la formula è la traduzione in numeri di una rotazione, e la rotazione non si ferma mai.
+
+| Retta | Equazione | Coefficiente angolare |
+| --- | --- | --- |
+| Obliqua | $y = mx + q$ | $m$, un numero diverso da zero |
+| Orizzontale | $y = q$ | $0$ |
+| Verticale | $x = k$ | non esiste |
 :::

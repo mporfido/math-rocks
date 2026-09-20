@@ -130,6 +130,7 @@
       if (P.nome) return String(P.nome);
       const m = pendenza(AX, AY);
       if (m === 'verticale') return 'x = 0';
+      if (m === '0') return 'y = 0';
       return m === '1' ? 'y = x' : `y = ${m}x`;
     }
 
@@ -289,9 +290,16 @@
       const r = girato();
       if (aQuartoDiGiro()) {
         const verso = theta > 0 ? 'a sinistra' : 'a destra';
+        const prima = pendenza(AX, AY);
+        const dopo = pendenza(r.x, r.y);
+        // La retta girata può essere verticale: lì un coefficiente angolare
+        // non c'è, e scrivere "m = verticale" direbbe una cosa falsa.
+        let coda;
+        if (dopo === 'verticale') coda = 'La retta rossa è verticale e non ha coefficiente angolare.';
+        else if (prima === 'verticale') coda = `Adesso la retta rossa ha m = ${dopo}.`;
+        else coda = `Da m = ${prima} a m = ${dopo}.`;
         return `Un quarto di giro ${verso}: il passo (${fmt(AX)}; ${fmt(AY)}) ` +
-          `è diventato (${fmt(r.x)}; ${fmt(r.y)}). ` +
-          `Da m = ${pendenza(AX, AY)} a m = ${pendenza(r.x, r.y)}.`;
+          `è diventato (${fmt(r.x)}; ${fmt(r.y)}). ${coda}`;
       }
       if (Math.abs(theta) < 0.02) {
         return 'Prendi la punta rossa e gira il passo attorno all\'origine.';
