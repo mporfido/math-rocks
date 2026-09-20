@@ -347,20 +347,28 @@ Attenzione a non confondere i due casi. Una retta **orizzontale** ha coefficient
 
 Una retta verticale non si può scrivere come $y = mx + q$, perché quel coefficiente angolare non esiste. Si riconosce in un altro modo: tutti i suoi punti hanno la stessa ascissa.
 
-Metti tre punti sulla retta verticale che passa per il punto $(3; 0)$.
+Trascina i due punti arancioni sulla retta verticale che passa per $(3; 0)$. Mettili dove vuoi lungo quella retta, purché non finiscano uno sopra l'altro.
 
 :::graph
 snap: 1
-verify: true
 xrange: "-5,6"
 yrange: "-5,6"
-points:
-  - target: "3,-2"
-  - target: "3,1"
-  - target: "3,4"
+boundpoints:
+  - {x: 3, y: 0, label: P}
+  - {x: ax, y: ay, label: A, drag: true, start: "-2,3"}
+  - {x: bx, y: by, label: B, drag: true, start: "1,-3"}
 :::
 
-Quei tre punti hanno ordinate diverse ma la stessa ascissa. L'equazione di quella retta è $x =$ [[3]].
+[Verifica]{check: ax == 3 and bx == 3 and ay != by}
+
+:::details.hint
+<summary>💡 Suggerimento</summary>
+
+La retta verticale che passa per $(3; 0)$ sale e scende sopra il $3$ dell'asse orizzontale, senza mai spostarsi di lato. I tuoi due punti devono stare su quella colonna: l'ordinata la scegli tu, l'ascissa no.
+
+:::
+
+Qualunque coppia di punti tu abbia scelto, le ordinate sono diverse ma l'ascissa è sempre la stessa. È l'ascissa a tenere insieme tutta la retta, e infatti la sua equazione è $x =$ [[3]].
 
 :::div.reveal
 La regola del prodotto vale per tutte le coppie di rette perpendicolari, tranne una: quella formata da una retta orizzontale e una verticale. Lì non c'è nessun prodotto da fare, perché uno dei due coefficienti angolari non esiste.
