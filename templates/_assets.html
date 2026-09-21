@@ -19,12 +19,13 @@
 {# Librerie esterne + config MathJax. Va nel <head> (blocco extra_css).
    `math`: se falso, MathJax non viene caricato (corsi senza formule). #}
 {% macro head_assets(math) -%}
-<!-- JSXGraph per grafici interattivi -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph@1.9.2/distrib/jsxgraph.css">
-<script src="https://cdn.jsdelivr.net/npm/jsxgraph@1.9.2/distrib/jsxgraphcore.min.js"></script>
+{# JSXGraph non si carica qui: lo carica <x-graph> al volo, solo nelle pagine
+   che hanno un grafico (vedi static/components/graph.js). #}
 
 {% if math %}
-<!-- MathJax per rendering formule matematiche (solo pagine con math: true) -->
+<!-- MathJax per rendering formule matematiche (solo pagine con math: true).
+     Versione esatta (mai `@3`): un aggiornamento del CDN non deve cambiare
+     i siti già pubblicati. -->
 <script>
   MathJax = {
     // Carica l'estensione `html` (\class{...}{...}), usata da <x-expr show-steps>
@@ -52,7 +53,7 @@
     }
   };
 </script>
-<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script>
 {% endif %}
 {%- endmacro %}
 

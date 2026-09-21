@@ -45,15 +45,24 @@
  * Eventi:
  *   goal-complete: quando il/i punto/i sono posizionati correttamente
  */
+// JSXGraph viene caricato al volo (lazy) solo nelle pagine che contengono
+// almeno un grafico, come p5 in p5.js: le altre pagine non scaricano la
+// libreria né contattano il CDN. JS e CSS vanno tenuti alla stessa versione.
+const JSXGRAPH_VERSION = '1.9.2';
+const JSXGRAPH_JS = `https://cdn.jsdelivr.net/npm/jsxgraph@${JSXGRAPH_VERSION}/distrib/jsxgraphcore.min.js`;
+const JSXGRAPH_CSS = `https://cdn.jsdelivr.net/npm/jsxgraph@${JSXGRAPH_VERSION}/distrib/jsxgraph.css`;
+
 class XGraph extends HTMLElement {
   connectedCallback() {
+    XGraph.loadJSXGraph().then(
+      () => this.init(),
+      () => { this.innerHTML = '<p class="graph-error">JSXGraph non disponibile.</p>'; }
+    );
+  }
+
+  init() {
     const [xmin, xmax] = (this.dataset.xrange || '-10,10').split(',').map(Number);
     const [ymin, ymax] = (this.dataset.yrange || '-7,7').split(',').map(Number);
-
-    if (typeof JXG === 'undefined') {
-      this.innerHTML = '<p class="graph-error">JSXGraph non disponibile.</p>';
-      return;
-    }
 
     const containerId = `jxg-${this.id || Math.random().toString(36).slice(2, 8)}`;
     const container = document.createElement('div');
@@ -146,6 +155,30 @@ class XGraph extends HTMLElement {
       // anche quelli ripristinati da storage — sono certamente disponibili.
       requestAnimationFrame(() => this.board.update());
     });
+  }
+
+  // Carica JSXGraph (script + foglio di stile) una sola volta per pagina; le
+  // chiamate concorrenti condividono la stessa promise.
+  static loadJSXGraph() {
+    if (typeof window.JXG !== 'undefined') return Promise.resolve();
+    if (XGraph._loadPromise) return XGraph._loadPromise;
+
+    const css = document.createElement('link');
+    css.rel = 'stylesheet';
+    css.href = JSXGRAPH_CSS;
+    document.head.appendChild(css);
+
+    XGraph._loadPromise = new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = JSXGRAPH_JS;
+      script.onload = () => resolve();
+      script.onerror = () => {
+        XGraph._loadPromise = null;
+        reject(new Error('JSXGraph load failed'));
+      };
+      document.head.appendChild(script);
+    });
+    return XGraph._loadPromise;
   }
 
   // Modello live dello step: l'upgrade dei custom element può non essere
@@ -675,5 +708,7 @@ class XGraph extends HTMLElement {
 function formatCoord(value) {
   return String(Math.round(value * 100) / 100).replace('.', ',');
 }
+
+XGraph._loadPromise = null;
 
 customElements.define('x-graph', XGraph);
