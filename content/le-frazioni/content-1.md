@@ -5,7 +5,7 @@
 ---
 
 > id: intro
-> title: Il Terreno della Famiglia Rossi
+> title: Misurare un'area con parti uguali
 
 # Il Campo Frazionato
 
@@ -48,7 +48,7 @@ Adesso ci serve solo una cosa: trovare l'unità giusta per misurare il campo dei
 ---
 
 > id: unita-misura
-> title: L'Unità di Misura
+> title: Un'unità di misura comune
 
 # Trovare l'Unità di Misura Comune
 
@@ -58,8 +58,8 @@ Immagina di usare la zona **E** come un "mattoncino" per coprire tutto il campo 
 
 :::div.highlight
 **Ragionamento guidato:**
-- Per coprire la zona **D** servono esattamente **2** mattoncini grandi come E.
-- Tracciando una griglia invisibile con quadratini grandi come E su tutto il campo…
+- Tracciamo sul campo una griglia invisibile.
+- Ogni quadratino della griglia è grande come la zona E.
 :::
 
 Muovi il cursore per far comparire quella griglia, una riga di mattoncini alla volta:
@@ -85,13 +85,13 @@ Esatto! Il campo si divide in **16 quadratini** uguali a E.
 
 Di conseguenza la zona E vale: $\frac{1}{16}$ del terreno totale.
 
-Ora possiamo misurare tutte le altre zone usando E come unità.
+Ogni zona del campo è fatta di un numero intero di mattoncini E. Per questo E funziona come unità: ora possiamo misurare tutte le altre zone.
 :::
 
 ---
 
 > id: scopri-frazioni
-> title: Scopriamo le Frazioni
+> title: Frazioni di area e figure equiestese
 
 # Scopriamo le Altre Frazioni
 
@@ -112,9 +112,14 @@ Quindi la zona A corrisponde alla frazione $\frac{${m}}{16}$.
 
 ## Domanda 5
 
-Confronta la **zona A** e la **zona B**. Quale affermazione è VERA?
+Ora fai lo stesso con la **zona B**, la striscia lunga a destra. Clicca tutti i suoi quadratini.
 
-[[A) La zona B è più grande perché è più lunga|B) La zona A e la zona B hanno superfici diverse|*C) A e B occupano la stessa superficie: sono fatte entrambe di 4 quadratini, cioè 4/16]]
+:::p5 goal sketch=campo-frazioni campo=rossi modo=conta zona=B width=520 height=420
+:::
+
+Confronta la **zona A** e la **zona B**. Quale affermazione è vera?
+
+[[A) La zona B è più grande di A|B) La zona A è più grande di B|*C) A e B hanno la stessa area]]
 
 :::div.reveal
 **Perfetto!**
@@ -131,7 +136,7 @@ Due figure come A e B, con **forme diverse** ma **stessa area**, hanno un nome: 
 ---
 
 > id: tabella
-> title: Completa la Tabella
+> title: Stessa zona, due frazioni
 
 # Completa la Tabella
 
@@ -181,7 +186,7 @@ Non è un caso che una stessa zona possa avere due nomi diversi: è una cosa imp
 ---
 
 > id: unione-zone
-> title: Unire due Zone
+> title: Somma di frazioni con lo stesso denominatore
 
 # Unire due Zone
 
@@ -210,7 +215,7 @@ C e D insieme occupano tanto terreno quanto la zona A (o la zona B). E raggruppa
 ---
 
 > id: valore-economico
-> title: Dal Terreno al Prezzo
+> title: Frazione di una quantità
 
 # Dal Terreno al Prezzo
 
@@ -231,7 +236,11 @@ $160.000 \div 16 =$ **[[10000]]** €
 
 Quanto vale allora la **zona F** (3 quadratini)? **[[30000]]** €
 
-E l'unione di **C e D** dello step precedente (4 quadratini, cioè $\frac{4}{16}$)? **[[40000]]** €
+C'è anche una strada più diretta. Il valore di una zona è uguale al valore totale moltiplicato per la frazione della zona. Per fare il calcolo, prima dividi per il denominatore. Poi moltiplichi per il numeratore.
+
+Usa questa regola per l'unione di **C e D** dello step precedente, che vale $\frac{4}{16}$ del campo:
+
+$160.000 \times \frac{4}{16} =$ **[[40000]]** €
 
 :::div.reveal
 **Riepilogo economico:**
@@ -244,7 +253,7 @@ E l'unione di **C e D** dello step precedente (4 quadratini, cioè $\frac{4}{16}
 | A o B | 4 | 4/16 = 1/4 | 40.000 € |
 | C + D uniti | 4 | 4/16 = 1/4 | 40.000 € |
 
-La regola, in breve: **valore della zona = valore totale × frazione della zona**. Per la zona F: $160.000 \times \frac{3}{16} = 30.000$ €.
+La regola, in breve: **valore della zona = valore totale × frazione della zona**. Vale anche per la zona F: $160.000 \times \frac{3}{16} = 30.000$ €.
 
 Ottimo lavoro! Sei pronto per la sfida finale.
 :::
@@ -252,7 +261,7 @@ Ottimo lavoro! Sei pronto per la sfida finale.
 ---
 
 > id: sfida-finale
-> title: La Famiglia Bianchi
+> title: Frazioni di area e di valore
 
 # Mettiti alla Prova!
 
@@ -319,7 +328,7 @@ Hai padroneggiato le frazioni come parti di area reale!
 ---
 
 > id: recap
-> title: "Recap: Definizioni e Regole"
+> title: Definizioni e regole
 
 # Recap: Definizioni e Regole
 
@@ -335,7 +344,7 @@ In una frazione come $\frac{3}{16}$, il **denominatore** (il numero in basso) di
 
 ## Regole
 
-**Regola 1 — Misurare con un'unità comune.** Per misurare ogni zona abbiamo usato come unità il mattoncino più [[select: grande|*piccolo|allungato]] (la zona E): l'intero campo vale 16 mattoncini, quindi E corrisponde a $\frac{1}{16}$.
+**Regola 1 — Misurare con un'unità comune.** Per misurare ogni zona abbiamo usato come unità la zona E. L'unità va bene perché ogni zona è fatta di un numero [[select: *intero|pari|grande]] di mattoncini E. L'intero campo vale 16 mattoncini, quindi E corrisponde a $\frac{1}{16}$.
 
 **Regola 2 — Conta l'area, non i lati.** Per confrontare due zone si conta il numero di [[select: lati|*quadratini|angoli]] che le compongono, non quanto sembrano lunghe.
 
