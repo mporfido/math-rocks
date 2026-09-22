@@ -1,8 +1,10 @@
 /**
  * Sketch p5.js riutilizzabile "frazioni-griglia-comune".
  *
- * Due (o più) pannelli della stessa dimensione, ridisegnati tutti con lo
- * STESSO numero di settori: è il denominatore comune visto sui pannelli.
+ * Due (o più) pannelli della stessa dimensione, con la loro zona attiva
+ * **ferma**: la superficie accesa non cambia mai, cambiano solo le linee che
+ * la suddividono. Lo slider sceglie in quanti settori è diviso ogni pannello:
+ * è il denominatore comune visto sui pannelli.
  *
  *   :::p5 sketch=frazioni-griglia-comune pannelli="DELTA 3/4, ZETA 2/3" height=320 bind=t
  *   :::
@@ -10,19 +12,20 @@
  * Il numero di settori arriva dallo slider (variabile `var`, default `t`)
  * oppure da un parametro fisso `t=12`, quando la griglia non si deve muovere.
  *
- * Se il numero di settori non è un multiplo del denominatore, i settori attivi
- * non vengono un numero intero: l'ultimo settore si accende solo a metà, in
- * arancione. È il segnale che quella griglia non va bene per quel pannello.
+ * Se il numero di settori non è un multiplo del denominatore, nessuna griglia
+ * cade sul bordo della zona attiva: il bordo taglia una colonna di settori a
+ * metà, e quei settori si accendono in arancione. È il segnale che con quel
+ * numero la zona attiva non si può contare in settori interi.
+ *
+ * Le frazioni vanno passate già ridotte ai minimi termini (3/4, non 18/24).
  */
 (function () {
   window.P5Sketches = window.P5Sketches || {};
   window.P5Sketches['frazioni-griglia-comune'] = function (p, ctx) {
-    const FRAME = 5, MARGIN = 12, GAP = 18, CAPTION = 30, FOOTER = 26;
+    const FRAME = 5, MARGIN = 12, GAP = 16, CAPTION = 42, FOOTER = 24;
     const BG = '#1a1c2c', LIGHT = '#cbd3e0', SHADOW = '#11131f';
-    const BLUE = '#41a6f6', BLUE_HI = '#7cc4ff', BLUE_LO = '#2a6cb0';
-    const DARK = '#333c57', DARK_HI = '#46506e', DARK_LO = '#262d44';
-    const ORANGE = '#ef7d57', ORANGE_HI = '#ffb380', ORANGE_LO = '#c25a3a';
-    const GREEN = '#a7f070';
+    const BLUE = '#41a6f6', DARK = '#333c57';
+    const ORANGE = '#ef7d57', GOLD = '#ffcd75', GREEN = '#a7f070';
 
     const VAR = ctx.params.var || 't';
     const FISSO = Number(ctx.params.t) || 0;
@@ -37,11 +40,26 @@
         return { nome, n, d };
       });
 
-    // Colonne della griglia: il divisore di t più vicino alla radice, così il
-    // pannello resta il più quadrato possibile (12 -> 4, 18 -> 6, 35 -> 7).
-    function colonne(t) {
-      for (let c = Math.ceil(Math.sqrt(t)); c <= t; c++) if (t % c === 0) return c;
-      return t;
+    // Colonne della griglia. Se esiste un numero di colonne multiplo di d (e
+    // divisore di t), il bordo della zona attiva cade esattamente su una linea:
+    // è il caso in cui la griglia "va bene". Fra le colonne possibili si sceglie
+    // quella che rende il pannello più quadrato.
+    function colonne(t, d) {
+      const divisori = [];
+      for (let c = 1; c <= t; c++) if (t % c === 0) divisori.push(c);
+      const buone = divisori.filter((c) => c % d === 0);
+      const scelta = (lista) => lista.reduce((best, c) =>
+        Math.abs(c - Math.sqrt(t)) < Math.abs(best - Math.sqrt(t)) ? c : best, lista[0]);
+      return buone.length ? { cols: scelta(buone), allineata: true }
+                          : { cols: scelta(divisori), allineata: false };
+    }
+
+    // Testo che si restringe finché non sta nella larghezza data.
+    function testoAdattato(txt, cx, y, maxW, dimMax) {
+      let dim = dimMax;
+      p.textSize(dim);
+      while (dim > 9 && p.textWidth(txt) > maxW) { dim -= 1; p.textSize(dim); }
+      p.text(txt, cx, y);
     }
 
     let lastHeight = 0;
@@ -51,13 +69,6 @@
       p.noSmooth();
       p.noLoop();
     };
-
-    function cell(x, y, w, h, base, hi, lo) {
-      p.noStroke();
-      p.fill(base); p.rect(x, y, w, h);
-      p.fill(hi); p.rect(x, y, w, 2); p.rect(x, y, 2, h);
-      p.fill(lo); p.rect(x, y + h - 2, w, 2); p.rect(x + w - 2, y, 2, h);
-    }
 
     function layout() {
       const k = panels.length;
@@ -71,7 +82,6 @@
     p.draw = () => {
       p.background(BG);
       const t = Math.max(1, Math.round(FISSO || ctx.model[VAR] || panels[0].d));
-      const cols = colonne(t), rows = t / cols;
       const { perRiga, lato, righe } = layout();
       const altoRiga = lato + CAPTION + GAP;
 
@@ -81,13 +91,12 @@
         ctx.setHeight(needed);
       }
 
-      let tutteIntere = true;
+      let tutteAllineate = true;
 
       panels.forEach((pan, i) => {
-        const attivi = (pan.n * t) / pan.d;          // quanti settori servirebbero
-        const pieni = Math.floor(attivi + 1e-9);
-        const resto = attivi - pieni;                 // 0 se la griglia va bene
-        if (resto > 1e-9) tutteIntere = false;
+        const { cols, allineata } = colonne(t, pan.d);
+        const rows = t / cols;
+        if (!allineata) tutteAllineate = false;
 
         const riga = Math.floor(i / perRiga), col = i % perRiga;
         const inRiga = Math.min(perRiga, panels.length - riga * perRiga);
@@ -95,49 +104,64 @@
         const px = (p.width - larghezzaRiga) / 2 + col * (lato + GAP);
         const py = MARGIN + riga * altoRiga;
 
+        // cornice
         p.noStroke();
         p.fill(SHADOW); p.rect(px + 4, py + 4, lato, lato);
         p.fill(LIGHT); p.rect(px, py, lato, lato);
 
-        const grid = lato - FRAME * 2;
-        const cw = grid / cols, ch = grid / rows;
-        for (let j = 0; j < t; j++) {
-          const r = Math.floor(j / cols), c = j % cols;
-          const x = px + FRAME + c * cw, y = py + FRAME + r * ch;
-          if (j < pieni) cell(x, y, cw, ch, BLUE, BLUE_HI, BLUE_LO);
-          else cell(x, y, cw, ch, DARK, DARK_HI, DARK_LO);
-        }
-        // il settore che resta acceso a metà: la griglia non torna
-        if (resto > 1e-9 && pieni < t) {
-          const r = Math.floor(pieni / cols), c = pieni % cols;
-          cell(px + FRAME + c * cw, py + FRAME + r * ch, cw * resto, ch,
-               ORANGE, ORANGE_HI, ORANGE_LO);
+        // la zona attiva: sempre la stessa porzione del pannello, qualunque
+        // sia il numero di settori scelto sullo slider
+        const gx = px + FRAME, gy = py + FRAME, g = lato - FRAME * 2;
+        const bordo = g * pan.n / pan.d;
+        p.fill(DARK); p.rect(gx, gy, g, g);
+        p.fill(BLUE); p.rect(gx, gy, bordo, g);
+
+        // la colonna tagliata in due dal bordo, quando la griglia non ci cade
+        const cw = g / cols, ch = g / rows;
+        if (!allineata) {
+          const cTagliata = Math.floor((bordo / cw) + 1e-9);
+          p.fill(ORANGE);
+          p.rect(gx + cTagliata * cw, gy, cw, g);
+          p.fill(BLUE);
+          p.rect(gx + cTagliata * cw, gy, bordo - cTagliata * cw, g);
         }
 
-        p.textFont('monospace'); p.textStyle(p.BOLD);
-        p.textAlign(p.CENTER, p.TOP); p.textSize(13);
+        // le suddivisioni: solo linee sopra al disegno
         p.fill(LIGHT);
-        p.text(pan.nome + '  ' + pan.n + '/' + pan.d, px + lato / 2, py + lato + 5);
-        if (resto > 1e-9) {
-          p.fill(ORANGE);
-          p.text('servirebbero ' + String(Math.round(attivi * 100) / 100).replace('.', ',') +
-                 ' settori', px + lato / 2, py + lato + 21);
+        for (let c = 1; c < cols; c++) p.rect(gx + c * cw - 1, gy, 2, g);
+        for (let r = 1; r < rows; r++) p.rect(gx, gy + r * ch - 1, g, 2);
+
+        // il bordo della zona attiva, evidenziato
+        p.fill(allineata ? GOLD : ORANGE);
+        p.rect(gx + bordo - 2, gy, 4, g);
+
+        // didascalie sotto al pannello
+        p.textFont('monospace'); p.textStyle(p.BOLD);
+        p.textAlign(p.CENTER, p.TOP);
+        p.fill(LIGHT);
+        testoAdattato(pan.nome + '  ' + pan.n + '/' + pan.d, px + lato / 2, py + lato + 6, lato, 14);
+        if (allineata) {
+          p.fill(GREEN);
+          testoAdattato((pan.n * t / pan.d) + ' settori accesi su ' + t,
+                        px + lato / 2, py + lato + 24, lato, 13);
         } else {
-          p.fill(BLUE_HI);
-          p.text(attivi + ' attivi su ' + t, px + lato / 2, py + lato + 21);
+          p.fill(ORANGE);
+          testoAdattato('il bordo taglia un settore', px + lato / 2, py + lato + 24, lato, 13);
         }
       });
 
       // riga di chiusura: la griglia comune, quando esiste
-      p.textAlign(p.CENTER, p.TOP); p.textSize(14);
-      const fy = MARGIN + righe * altoRiga - GAP + 6;
-      if (tutteIntere) {
+      p.textAlign(p.CENTER, p.TOP);
+      const fy = MARGIN + righe * altoRiga - GAP + 8;
+      if (tutteAllineate) {
         p.fill(GREEN);
-        p.text(panels.map((pan) => pan.n + '/' + pan.d + ' = ' +
-               (pan.n * t) / pan.d + '/' + t).join('   '), p.width / 2, fy);
+        testoAdattato(panels.map((pan) => pan.n + '/' + pan.d + ' = ' +
+                      (pan.n * t / pan.d) + '/' + t).join('   '),
+                      p.width / 2, fy, p.width - 2 * MARGIN, 15);
       } else {
         p.fill(ORANGE);
-        p.text('con ' + t + ' settori non ci stanno tutti e due', p.width / 2, fy);
+        testoAdattato(t + ' settori: non va bene per tutti e due',
+                      p.width / 2, fy, p.width - 2 * MARGIN, 15);
       }
     };
   };

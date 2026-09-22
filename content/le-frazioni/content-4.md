@@ -38,7 +38,9 @@ Settori per pannello: ${settori}{t|4|3,16,1}
 :::p5 sketch=frazioni-griglia-comune pannelli="DELTA 3/4, ZETA 2/3" height=340 bind=t
 :::
 
-Quando il numero non va bene, l'ultimo settore si accende solo a metà: vuol dire che quella griglia non riesce a rappresentare la frazione.
+Guarda bene mentre muovi lo slider: la **zona attiva non si sposta mai**, perché la superficie che produce energia è sempre quella. Cambiano soltanto le linee che la suddividono.
+
+Quando il numero di settori non va bene, il bordo della zona attiva cade **in mezzo** a un settore e lo taglia in due: quella griglia non riesce a contare la zona attiva in settori interi.
 
 Per DELTA, che vale $\frac{3}{4}$, vanno bene i numeri che sono multipli di [[4]].
 
