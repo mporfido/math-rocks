@@ -35,7 +35,7 @@ Per deciderlo non servono occhi buoni: serve dare a ogni frazione il suo **nome 
 
 # Settori più grandi, stessa superficie
 
-Nella lezione scorsa hai visto che i settori si possono **raggruppare**: il pannello non cambia, cambia solo il modo di contarlo.
+Nella lezione scorsa hai visto che i settori si possono **raggruppare**: il pannello non cambia, cambia solo il modo di contarlo. Sui numeri quel raggruppamento è una divisione, e l'operazione si chiama **semplificare** la frazione.
 
 Ecco il modello **MINI**: 8 settori in tutto, 6 attivi, cioè $\frac{6}{8}$. Muovi lo slider per raggruppare i settori.
 
@@ -50,9 +50,9 @@ Quanti gruppi ci sono in tutto? [[4]]
 
 Quanti di quei gruppi sono fatti di settori attivi? [[3]]
 
-Ora prova il raggruppamento a **3**: qualche gruppo diventa arancione. Che cosa è andato storto?
+Ora porta lo slider su **4**. I gruppi sono due, grandi uguali, ma uno dei due diventa arancione. Che cosa è andato storto?
 
-[[I gruppi sono di dimensioni diverse|*Un gruppo è mezzo acceso e mezzo spento, quindi non si può contare né fra gli attivi né fra gli spenti|I settori attivi sono troppo pochi]]
+[[I due gruppi hanno dimensioni diverse|*Un gruppo è mezzo acceso e mezzo spento, quindi non si può contare né fra gli attivi né fra gli spenti|I settori attivi sono troppo pochi]]
 
 :::div.reveal
 **Esatto.** Con i gruppi da 2 il pannello si legge come $\frac{3}{4}$: tre gruppi attivi su quattro. La superficie non è cambiata, è cambiata solo la taglia dei settori.
@@ -66,7 +66,9 @@ n0 -> n1 : diviso 2
 d0 -> d1 : diviso 2
 :::
 
-Il raggruppamento funziona solo se il numero scelto **divide sia il numeratore sia il denominatore**. Il 3 divide il 6 ma non l'8, e infatti un gruppo resta a metà.
+Il raggruppamento funziona solo se il numero scelto **divide sia il numeratore sia il denominatore**. Il 4 divide l'8, e infatti i due gruppi sono grandi uguali; ma non divide il 6, e allora i settori attivi non riempiono un numero intero di gruppi.
+
+Prova anche il raggruppamento a **3**: lì non torna nemmeno il totale, perché 8 settori non si dividono in gruppi da 3 e l'ultimo gruppo resta spaiato.
 :::
 
 ---
