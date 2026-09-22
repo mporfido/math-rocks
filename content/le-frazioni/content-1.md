@@ -52,7 +52,7 @@ Adesso ci serve solo una cosa: trovare l'unità giusta per misurare il campo dei
 
 # Trovare l'Unità di Misura Comune
 
-Guarda bene la foto dello step precedente: i pezzi sembrano tutti diversi e non ci sono metri scritti da nessuna parte. Eppure c'è un segreto — **il pezzo E è il più piccolo di tutti.**
+Guarda bene la foto dello step precedente. I pezzi sembrano tutti diversi e non ci sono metri scritti da nessuna parte. Per misurarli ci serve un'unità di misura. L'unità giusta è un pezzo che entra **un numero intero di volte in ogni zona**. La zona E sembra adatta: proviamo a usarla.
 
 Immagina di usare la zona **E** come un "mattoncino" per coprire tutto il campo quadrato.
 
@@ -191,6 +191,9 @@ Non è un caso che una stessa zona possa avere due nomi diversi: è una cosa imp
 # Unire due Zone
 
 I proprietari delle zone **C** e **D** decidono di **unire i loro terreni** in un unico appezzamento.
+
+:::p5 sketch=campo-frazioni campo=rossi width=520 height=420
+:::
 
 Contiamo i mattoncini, come abbiamo sempre fatto:
 
