@@ -1,0 +1,99 @@
+/* ============================================================
+   Ripieghi per i browser datati delle LIM
+   ============================================================
+   Le lavagne della scuola montano Chrome 81 (aprile 2020): `gap` vale nei
+   contenitori grid ma viene ignorato in quelli flex, e senza di esso bottoni,
+   voci di menu e righe di controlli si appiccicano fra loro.
+
+   Non si puo' distinguere il caso con @supports — per grid `gap` risulta
+   supportato lo stesso — quindi lib/compat.js lo misura all'avvio e, se manca,
+   mette `senza-flex-gap` sull'<html>. Solo allora valgono le regole qui sotto,
+   che rifanno le stesse spaziature con i margini. Su un browser aggiornato
+   questo foglio non tocca niente.
+
+   Le regole seguono una per una quelle con `gap` in style.css e components.css:
+   se cambi una spaziatura di la', cambiala anche qui.
+   ============================================================ */
+
+/* --- style.css --- */
+.senza-flex-gap .logo > * + * { margin-left: 0.5rem; margin-top: 0; }
+.senza-flex-gap .nav-links > * + * { margin-left: 1.5rem; margin-top: 0; }
+.senza-flex-gap .steps-nav > * + * { margin-top: 0.15rem; margin-left: 0; }
+.senza-flex-gap .lessons-list > * + * { margin-top: 1rem; margin-left: 0; }
+.senza-flex-gap .lesson-card > * + * { margin-left: 1.25rem; margin-top: 0; }
+.senza-flex-gap .lesson-body > * + * { margin-top: 0.35rem; margin-left: 0; }
+.senza-flex-gap .lesson-progress > * + * { margin-left: 0.6rem; margin-top: 0; }
+.senza-flex-gap .tool-progress > * + * { margin-left: 1rem; margin-top: 0; }
+.senza-flex-gap .tool-progress > * { margin-bottom: 1rem; }
+.senza-flex-gap .tool-dots > * + * { margin-left: 0.4rem; margin-top: 0; }
+.senza-flex-gap .tool-dots > * { margin-bottom: 0.4rem; }
+.senza-flex-gap .tool-nav > * + * { margin-left: 0.75rem; margin-top: 0; }
+.senza-flex-gap .tool-nav > * { margin-bottom: 0.75rem; }
+.senza-flex-gap .tool-builder-body > * + * { margin-top: 1rem; margin-left: 0; }
+.senza-flex-gap .tool-field > * + * { margin-top: 0.4rem; margin-left: 0; }
+.senza-flex-gap .tool-options > * + * { margin-left: 1rem; margin-top: 0; }
+.senza-flex-gap .tool-options > * { margin-bottom: 1rem; }
+.senza-flex-gap .tool-check > * + * { margin-left: 0.4rem; margin-top: 0; }
+.senza-flex-gap .tool-link-row > * + * { margin-left: 0.5rem; margin-top: 0; }
+.senza-flex-gap .tool-link-row > * { margin-bottom: 0.5rem; }
+.senza-flex-gap .mappa-area > * + * { margin-top: 0.15rem; margin-left: 0; }
+.senza-flex-gap .mappa-griglia > * + * { margin-top: 0.9rem; margin-left: 0; }
+.senza-flex-gap .mappa-cella > * + * { margin-top: 0.6rem; margin-left: 0; }
+.senza-flex-gap .mappa-card > * + * { margin-top: 0.25rem; margin-left: 0; }
+.senza-flex-gap .teorema-vicinato > * + * { margin-left: 2.5rem; margin-top: 0; }
+.senza-flex-gap .teorema-vicinato > * { margin-bottom: 2.5rem; }
+
+@media (max-width: 768px) {
+    .senza-flex-gap .step-navigation > * + * { margin-left: 0.75rem; margin-top: 0; }
+    .senza-flex-gap .step-navigation > * { margin-bottom: 0.75rem; }
+    .senza-flex-gap .lesson-card > * + * { margin-left: 1rem; margin-top: 0; }
+}
+
+@media (max-width: 380px) {
+    .senza-flex-gap .nav-links > * + * { margin-left: 1rem; margin-top: 0; }
+}
+
+/* --- components.css --- */
+.senza-flex-gap .blank-wrapper > * + * { margin-left: 8px; margin-top: 0; }
+.senza-flex-gap .blank-choices > * + * { margin-left: 8px; margin-top: 0; }
+.senza-flex-gap .blank-choices > * { margin-bottom: 8px; }
+.senza-flex-gap .blank-select-wrapper > * + * { margin-left: 8px; margin-top: 0; }
+.senza-flex-gap .check-wrapper > * + * { margin-left: 10px; margin-top: 0; }
+.senza-flex-gap .variable-control > * + * { margin-left: 12px; margin-top: 0; }
+.senza-flex-gap .expr-input-wrap > * + * { margin-left: 6px; margin-top: 0; }
+.senza-flex-gap .expr-input-prompt > * + * { margin-left: 4px; margin-top: 0; }
+.senza-flex-gap .expr-step-line > * + * { margin-left: 0.4em; margin-top: 0; }
+.senza-flex-gap .tbl-freccia > * + * { margin-left: 4px; margin-top: 0; }
+.senza-flex-gap .thm-dati > * + * { margin-left: 2rem; margin-top: 0; }
+.senza-flex-gap .thm-dati > * { margin-bottom: 0.5rem; }
+.senza-flex-gap .thm-colonna > * + * { margin-top: 1.25rem; margin-left: 0; }
+.senza-flex-gap .thm-riga > * + * { margin-left: 0.75rem; margin-top: 0; }
+.senza-flex-gap .thm-comandi > * + * { margin-top: 2px; margin-left: 0; }
+.senza-flex-gap .thm-cartellini > * + * { margin-left: 0.5rem; margin-top: 0; }
+.senza-flex-gap .thm-cartellini > * { margin-bottom: 0.5rem; }
+.senza-flex-gap .thm-azioni > * + * { margin-left: 0.6rem; margin-top: 0; }
+.senza-flex-gap .thm-azioni > * { margin-bottom: 0.6rem; }
+.senza-flex-gap .thm-attrezzi > * + * { margin-top: 1px; margin-left: 0; }
+.senza-flex-gap .smista-pool > * + * { margin-left: 0.5rem; margin-top: 0; }
+.senza-flex-gap .smista-pool > * { margin-bottom: 0.5rem; }
+.senza-flex-gap .smista-bins > * + * { margin-left: 0.75rem; margin-top: 0; }
+.senza-flex-gap .smista-bins > * { margin-bottom: 0.75rem; }
+.senza-flex-gap .smista-bin-label > * + * { margin-left: 0.45rem; margin-top: 0; }
+.senza-flex-gap .smista-bin-drop > * + * { margin-left: 0.4rem; margin-top: 0; }
+.senza-flex-gap .smista-bin-drop > * { margin-bottom: 0.4rem; }
+.senza-flex-gap .smista-actions > * + * { margin-left: 0.75rem; margin-top: 0; }
+.senza-flex-gap .smista-actions > * { margin-bottom: 0.75rem; }
+.senza-flex-gap .alg-testata > * + * { margin-left: 1rem; margin-top: 0; }
+.senza-flex-gap .alg-testata > * { margin-bottom: 1rem; }
+.senza-flex-gap .alg-comandi > * + * { margin-left: 0.4rem; margin-top: 0; }
+.senza-flex-gap .alg-digita > * + * { margin-left: 0.4rem; margin-top: 0; }
+.senza-flex-gap .alg-digita > * { margin-bottom: 0.4rem; }
+.senza-flex-gap .alg-gruppo-corpo > * + * { margin-left: 0.4rem; margin-top: 0; }
+.senza-flex-gap .alg-gruppo-corpo > * { margin-bottom: 0.4rem; }
+.senza-flex-gap .alg-modulo > * + * { margin-left: 0.4rem; margin-top: 0; }
+.senza-flex-gap .alg-modulo > * { margin-bottom: 0.4rem; }
+
+@media (max-width: 768px) {
+    .senza-flex-gap .variable-control > * + * { margin-top: 8px; margin-left: 0; }
+}
+

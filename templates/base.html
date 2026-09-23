@@ -6,8 +6,13 @@
     <title>{% block title %}{{ site_name }}{% endblock %}</title>
 
     <meta name="theme-color" content="{{ theme_color }}">
+
     <!-- Prefisso localStorage per i progressi: letto da progress.js -->
     <meta name="x-storage-prefix" content="{{ storage_prefix }}">
+
+    <!-- Ripieghi per i browser datati delle LIM (Chrome 81): va per primo e
+         sincrono, deve installarsi prima che parta qualunque altro script. -->
+    <script src="{{ url_for('static', filename='lib/compat.js') }}"></script>
 
     <!-- Font above-the-fold: preload dei pesi visibili subito (da site.yaml) -->
     {% for font in preload_fonts %}
@@ -19,6 +24,9 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='components.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename=theme_file) }}">
+    <!-- Ripieghi CSS per i browser datati: dopo gli altri, perche' correggono
+         le regole di style.css e components.css (vedi static/compat.css). -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='compat.css') }}">
 
     {% block extra_css %}{% endblock %}
 </head>
