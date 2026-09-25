@@ -12,7 +12,11 @@
  * Il numero di settori arriva dallo slider (variabile `var`, default `t`)
  * oppure da un parametro fisso `t=12`, quando la griglia non si deve muovere.
  *
- * Se il numero di settori non è un multiplo del denominatore, nessuna griglia
+ * La griglia è una sola, identica su tutti i pannelli: a parità di settori i
+ * pezzi devono avere la stessa forma, altrimenti confrontarli non vuol dire
+ * niente.
+ *
+ * Se il numero di settori non è un multiplo del denominatore, nessuna linea
  * cade sul bordo della zona attiva: il bordo taglia una colonna di settori a
  * metà, e quei settori si accendono in arancione. È il segnale che con quel
  * numero la zona attiva non si può contare in settori interi.
@@ -40,18 +44,29 @@
         return { nome, n, d };
       });
 
-    // Colonne della griglia. Se esiste un numero di colonne multiplo di d (e
-    // divisore di t), il bordo della zona attiva cade esattamente su una linea:
-    // è il caso in cui la griglia "va bene". Fra le colonne possibili si sceglie
-    // quella che rende il pannello più quadrato.
-    function colonne(t, d) {
-      const divisori = [];
-      for (let c = 1; c <= t; c++) if (t % c === 0) divisori.push(c);
-      const buone = divisori.filter((c) => c % d === 0);
-      const scelta = (lista) => lista.reduce((best, c) =>
-        Math.abs(c - Math.sqrt(t)) < Math.abs(best - Math.sqrt(t)) ? c : best, lista[0]);
-      return buone.length ? { cols: scelta(buone), allineata: true }
-                          : { cols: scelta(divisori), allineata: false };
+    function mcd(a, b) { return b ? mcd(b, a % b) : a; }
+
+    // La griglia è una sola, uguale per tutti i pannelli: i settori devono
+    // avere la stessa forma, altrimenti confrontarli non vuol dire niente.
+    // Fra i modi di dividere il pannello in t settori si sceglie quello in cui
+    // il bordo della zona attiva cade su una linea per tutti i pannelli che ce
+    // la possono fare, cioè quelli il cui denominatore divide t: le colonne
+    // devono essere un multiplo del minimo comune multiplo di quei denominatori.
+    function griglia(t) {
+      let comune = 1;
+      panels.forEach((pan) => {
+        if (t % pan.d === 0) comune = (comune / mcd(comune, pan.d)) * pan.d;
+      });
+      const buone = [];
+      for (let c = 1; c <= t; c++) if (t % c === 0 && c % comune === 0) buone.push(c);
+      // il pannello più quadrato possibile; a parità si preferiscono più
+      // colonne, perché il bordo della zona attiva è verticale e su colonne
+      // strette si legge meglio
+      const quadrato = Math.sqrt(t);
+      const scarto = (c) => Math.abs(Math.log(c / quadrato));
+      const cols = buone.reduce((best, c) =>
+        scarto(c) <= scarto(best) + 1e-9 ? c : best, buone[0]);
+      return { cols, rows: t / cols };
     }
 
     // Testo che si restringe finché non sta nella larghezza data.
@@ -91,11 +106,11 @@
         ctx.setHeight(needed);
       }
 
+      const { cols, rows } = griglia(t);
       let tutteAllineate = true;
 
       panels.forEach((pan, i) => {
-        const { cols, allineata } = colonne(t, pan.d);
-        const rows = t / cols;
+        const allineata = cols % pan.d === 0;
         if (!allineata) tutteAllineate = false;
 
         const riga = Math.floor(i / perRiga), col = i % perRiga;
