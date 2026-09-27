@@ -62,9 +62,9 @@ Le due distanze sono uguali. Il punto $(4; 5)$ va bene davvero.
 
 # Più in alto
 
-Adesso la barca si sposta sulla retta verticale $x = 6$. Il punto della figura parte da $(6; 6)$ e si può trascinare.
+Adesso la barca si sposta sulla retta verticale $x = 6$. Nella figura la barca parte da $(6; 6)$. Puoi trascinarla solo in su e in giù, lungo la retta tratteggiata.
 
-:::p5 sketch=parabola-luogo height=420 modo=cerca nomi=faro fx=0 fy=2 d=0 px=6 py=6 xmin=-7 xmax=7 ymin=-1 ymax=11
+:::p5 sketch=parabola-luogo height=420 modo=cerca nomi=faro fx=0 fy=2 d=0 verticale=6 py=6 xmin=-7 xmax=7 ymin=-1 ymax=11
 :::
 
 Su questa retta c'è una sola posizione buona. La sua ordinata è $y =$ [[10]].

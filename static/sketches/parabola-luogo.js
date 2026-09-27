@@ -55,6 +55,9 @@
    *   blocca        "si": P non si trascina (default no). Serve quando il testo
    *                 fa domande su QUEL punto
    *   n             in modo=cerca col flag `goal`, quanti punti trovare (default 5)
+   *   verticale     in modo=cerca, P si muove solo sulla retta x = verticale
+   *                 (default: libero). Serve quando il testo chiede UN punto su
+   *                 quella retta: senza, il piede inviterebbe a cercarne `n`
    *   xmin xmax     finestra orizzontale (default -6 6)
    *   ymin ymax     finestra verticale (default -1 7)
    */
@@ -79,12 +82,14 @@
     const MOSTRA_VERTICE = si(P.vertice, false);
     const BLOCCATO = P.blocca !== undefined && String(P.blocca) !== 'no';
     const N = Math.max(1, Math.round(num(P.n, 5)));
+    const VERTICALE = MODO === 'cerca' && Number.isFinite(Number(P.verticale))
+      ? Number(P.verticale) : null;
 
     // L'ordinata della parabola in x: la definizione PF = Pd risolta per y.
     const curvaY = (x) => ((x - F.x) ** 2 + F.y ** 2 - D ** 2) / (2 * (F.y - D));
     const V = { x: F.x, y: (F.y + D) / 2 };
 
-    const Pt = { x: num(P.px, 1), y: num(P.py, 4) };
+    const Pt = { x: VERTICALE ?? num(P.px, 1), y: num(P.py, 4) };
     if (MODO === 'scorri') Pt.y = curvaY(Pt.x);
 
     // Punti già trovati in modo=cerca, come chiavi "x;y".
@@ -330,7 +335,9 @@
 
     function footer() {
       let testo = '';
-      if (MODO === 'cerca' && !BLOCCATO) {
+      if (VERTICALE !== null && !BLOCCATO) {
+        testo = `Trascina ${FARO ? 'la barca' : 'il punto'} in su e in giù lungo la retta x = ${fmt(VERTICALE)}.`;
+      } else if (MODO === 'cerca' && !BLOCCATO) {
         if (fatto) testo = `Fatto: hai trovato ${trovati.size} punti.`;
         else testo = `Trascina il punto sulla griglia. Punti trovati: ${trovati.size} su ${N}.`;
       } else if (MODO === 'scorri' && !BLOCCATO) {
@@ -354,6 +361,11 @@
       p.background(CARTA);
       grigliaEAssi();
       if (MOSTRA_VERTICE) verticeEAsse();
+      if (VERTICALE !== null) {
+        p.stroke(INKSOFT);
+        p.strokeWeight(1.5);
+        tratteggio(X(VERTICALE), Y(YMIN), X(VERTICALE), Y(YMAX));
+      }
       if (MOSTRA_CURVA) curva();
       direttrice();
       segnati();
@@ -375,7 +387,7 @@
     function pMove() {
       if (!preso) return;
       if (MODO === 'cerca') {
-        const nx = p.constrain(Math.round(gX(p.mouseX)), Math.ceil(XMIN), Math.floor(XMAX));
+        const nx = VERTICALE ?? p.constrain(Math.round(gX(p.mouseX)), Math.ceil(XMIN), Math.floor(XMAX));
         const ny = p.constrain(Math.round(gY(p.mouseY)), Math.ceil(YMIN), Math.floor(YMAX));
         // Il punto non può stare sul faro: lì la "distanza dal faro" è zero.
         if (nx === F.x && ny === F.y) return;
