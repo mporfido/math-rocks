@@ -313,5 +313,4 @@ La parabola $y = ax^2$ ha il vertice nell'origine e l'asse coincide con l'asse $
 Il fuoco è $F\left(0; \dfrac{1}{4a}\right)$ e la direttrice è la retta $y = -\dfrac{1}{4a}$.
 :::
 
-Nella prossima lezione spostiamo il vertice fuori dall'origine.
 :::
