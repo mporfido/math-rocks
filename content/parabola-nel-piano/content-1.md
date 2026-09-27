@@ -138,23 +138,25 @@ Eleva al quadrato tutti e due i membri. La radice sparisce:
 
 $$x^2 + (y-2)^2 = y^2$$
 
-Sviluppa il quadrato $(y-2)^2$. Poi togli $y^2$ da tutti e due i membri. Rimane
+Adesso trasforma questa equazione sulla lavagna. Devi arrivare ad avere a sinistra solo la $y$. Per sviluppare il quadrato tocca $(y-2)^2$ e scegli «Svolgi il prodotto».
 
-$x^2 -$ [[4]]$\,y +$ [[4]] $= 0$.
-
-Adesso ricava la $y$. Nell'equazione $y = \dfrac{x^2}{k} + q$ il numero $k$ vale [[4]] e il numero $q$ vale [[1]].
+:::algebra isola="y"
+x^2 + (y-2)^2 = y^2
+:::
 
 :::details.hint
 <summary>💡 Suggerimento</summary>
 
-$(y-2)^2 = y^2 - 4y + 4$. Dopo aver tolto $y^2$ resta $x^2 - 4y + 4 = 0$. Porta $4y$ dall'altra parte e dividi tutto per 4.
+$(y-2)^2 = y^2 - 4y + 4$. Dopo lo sviluppo il termine $y^2$ compare in tutti e due i membri e si può cancellare. Poi porta $4y$ dall'altra parte e dividi tutto per 4.
 
 :::
 
 :::div.reveal
 L'equazione della parabola è
 
-$$y = \frac{x^2}{4} + 1$$
+$$y = \frac14 x^2 + 1$$
+
+Si può scrivere anche $y = \dfrac{x^2}{4} + 1$. Le due scritture sono la stessa equazione.
 
 Controlla con i punti che hai trovato. Per $x = 4$ viene $y = \frac{16}{4} + 1 = 5$. Per $x = 6$ viene $y = \frac{36}{4} + 1 = 10$. Sono proprio le posizioni della barca.
 
@@ -173,9 +175,11 @@ Adesso il fuoco è $F(0; 4)$. La direttrice è ancora l'asse $x$.
 :::p5 sketch=parabola-luogo height=380 modo=scorri fx=0 fy=4 d=0 px=4 xmin=-7 xmax=7 ymin=-1 ymax=8
 :::
 
-Rifai il conto dello step precedente. La definizione dà $\sqrt{x^2 + (y-4)^2} = y$. Dopo aver elevato al quadrato e semplificato, resta
+Rifai il conto dello step precedente. La definizione dà $\sqrt{x^2 + (y-4)^2} = y$. Elevando al quadrato si ottiene l'equazione qui sotto. Trasformala sulla lavagna fino a isolare la $y$.
 
-$x^2 -$ [[8]]$\,y +$ [[16]] $= 0$.
+:::algebra isola="y"
+x^2 + (y-4)^2 = y^2
+:::
 
 Il vertice della nuova parabola è $(0;$ [[2]]$)$.
 
@@ -199,7 +203,7 @@ Quale parabola è più aperta? [[*quella con il fuoco più lontano dalla direttr
 :::div.reveal
 La nuova equazione è
 
-$$y = \frac{x^2}{8} + 2$$
+$$y = \frac18 x^2 + 2 \qquad \text{cioè} \qquad y = \frac{x^2}{8} + 2$$
 
 Il vertice sta ancora a metà strada fra il fuoco e la direttrice. Il fuoco adesso è più lontano dalla direttrice. Il numero sotto $x^2$ è diventato più grande e la parabola si è aperta.
 :::
@@ -232,14 +236,22 @@ Per un punto $P(x; y)$ della parabola la distanza dalla direttrice è $y + p$. L
 
 $$\sqrt{x^2 + (y-p)^2} = y + p$$
 
-Eleva al quadrato e sviluppa i due quadrati. I termini $y^2$ e $p^2$ si cancellano. Rimane $x^2 =$ [[4]]$\,p\,y$.
+Elevando al quadrato si ottiene l'equazione qui sotto. Fai i conti sulla lavagna, come negli step precedenti. Questa volta però fermati prima. Devi arrivare ad avere a sinistra la $y$ con il suo coefficiente, e a destra un termine solo. La lavagna divide solo per numeri, e qui servirebbe dividere per una lettera.
+
+:::algebra forma="ax=b" incognita="y"
+x^2 + (y-p)^2 = (y+p)^2
+:::
+
+L'ultimo passaggio lo fai tu. Dividi i due membri per il coefficiente della $y$ e scrivi l'equazione della parabola. Per il quadrato scrivi `^2`. Se il denominatore ha più di un simbolo, mettilo fra parentesi.
+
+$y =$ [[x^2/(4p) || x^2/(4*p) || x^2/(4·p) || x^2 / (4p) || (x^2)/(4p) || x^2/4p || x²/(4p) || x² / (4p) || x²/4p || (1/(4p))x^2 || 1/(4p)x^2 || 1/(4p) x^2 || 1/(4p)*x^2 || 1/(4p)x² || 1/(4p) x² || x^2*1/(4p)]]
 
 Quando $p$ diventa più grande, la parabola diventa più [[*aperta|stretta]].
 
 :::details.hint
 <summary>💡 Suggerimento</summary>
 
-A sinistra hai $x^2 + y^2 - 2py + p^2$. A destra hai $y^2 + 2py + p^2$. Togli da tutti e due i membri quello che hanno in comune.
+Dopo gli sviluppi a sinistra hai $x^2 + y^2 - 2py + p^2$. A destra hai $y^2 + 2py + p^2$. Togli da tutti e due i membri quello che hanno in comune. Alla fine resta $4py = x^2$.
 
 :::
 
