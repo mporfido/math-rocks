@@ -25,6 +25,7 @@ sections:
     title: Geometria analitica
     courses:
       - punti-e-rette-nel-piano
+      - parabola-nel-piano
   - id: funzioni
     title: Funzioni
     courses:
