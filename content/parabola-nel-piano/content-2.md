@@ -66,10 +66,10 @@ $(x-3)^2 = x^2 - 6x + 9$. Dividi ogni termine per 8, poi togli 1 al termine senz
 
 Adesso fai lo stesso con $y = 2(x-1)^2 + 3$. Viene $y = 2x^2 +$ [[-4 || −4]]$\,x +$ [[5]].
 
-Nelle due forme uno dei coefficienti resta uguale. Quale? [[*a|b|c]]
+Guarda una parabola alla volta. Nella prima il numero davanti alla parentesi è $\frac18$. Nella seconda è $2$. Quando sviluppi il quadrato, questo numero diventa uno dei coefficienti. Quale? [[*a|b|c]]
 
 :::div.reveal
-Il coefficiente $a$ è lo stesso nelle due forme. Dice quanto è aperta la parabola e da che parte è rivolta.
+Il numero davanti alla parentesi diventa il coefficiente $a$, senza cambiare. Nella prima parabola vale $\frac18$ prima e dopo lo sviluppo. Nella seconda vale $2$ prima e dopo. Le due parabole hanno valori di $a$ diversi, ma ciascuna tiene il suo. Il coefficiente $a$ dice quanto è aperta la parabola e da che parte è rivolta.
 
 Il vertice invece sparisce dentro $b$ e $c$. Nella forma $y = ax^2 + bx + c$ non si legge più a colpo d'occhio. Nel prossimo step facciamo il percorso al contrario per ritrovarlo.
 :::
