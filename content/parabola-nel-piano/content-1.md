@@ -246,7 +246,7 @@ L'ultimo passaggio lo fai tu. Dividi i due membri per il coefficiente della $y$ 
 
 $y =$ [[x^2/(4p) || x^2/(4*p) || x^2/(4·p) || x^2 / (4p) || (x^2)/(4p) || x^2/4p || x²/(4p) || x² / (4p) || x²/4p || (1/(4p))x^2 || 1/(4p)x^2 || 1/(4p) x^2 || 1/(4p)*x^2 || 1/(4p)x² || 1/(4p) x² || x^2*1/(4p)]]
 
-Quando $p$ diventa più grande, la parabola diventa più [[*aperta|stretta]].
+Quando $p$ diventa più grande, la parabola diventa più [[select: *aperta|stretta]].
 
 :::details.hint
 <summary>💡 Suggerimento</summary>
@@ -295,7 +295,7 @@ La parabola $y = 3x^2$ ha il fuoco nel punto $F(0; p)$ con $p =$ [[1/12]].
 
 La parabola $y = \dfrac{x^2}{8}$ ha il fuoco in $(0;$ [[2]]$)$ e la direttrice $y =$ [[-2 || −2]].
 
-Adesso porta lo slider su $a = -1$. La parabola $y = -x^2$ è rivolta verso [[l'alto|*il basso]]. Il suo fuoco sta [[sopra|*sotto]] il vertice.
+Adesso porta lo slider su $a = -1$. La parabola $y = -x^2$ è rivolta verso [[select: l'alto|*il basso]]. Il suo fuoco sta [[select: sopra|*sotto]] il vertice.
 
 :::details.hint
 <summary>💡 Suggerimento</summary>

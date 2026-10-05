@@ -16,13 +16,13 @@ Nella figura c'è la parabola $y = x^2$. Trascina il vertice $V$. La parabola lo
 :::p5 sketch=parabola-traslata height=440 a=1 hx=0 hy=0 xmin=-6 xmax=6 ymin=-4 ymax=7
 :::
 
-Porta il vertice in $V(3; 0)$. La parabola si è spostata verso [[sinistra|*destra]]. Dentro la parentesi però compare il segno [[più|*meno]].
+Porta il vertice in $V(3; 0)$. La parabola si è spostata verso [[select: sinistra|*destra]]. Dentro la parentesi però compare il segno [[select: più|*meno]].
 
-Porta il vertice in $V(0; 2)$. La parabola si è spostata verso l'alto. Il numero dopo $x^2$ ha il segno [[*più|meno]].
+Porta il vertice in $V(0; 2)$. La parabola si è spostata verso l'alto. Il numero dopo $x^2$ ha il segno [[select: *più|meno]].
 
 Adesso fai il percorso al contrario. Dove sta il vertice della parabola $y = (x + 4)^2 - 1$? Porta $V$ nel punto giusto e premi il bottone.
 
-[Verifica]{check: h == -4 and k == -1}
+[Verifica]{check: h == -4 && k == -1}
 
 :::div.reveal
 Il vertice è $V(-4; -1)$. La parabola $y = x^2$ si è spostata di 4 quadretti a sinistra e di 1 quadretto in basso.
@@ -91,7 +91,7 @@ Nella figura il fuoco $F$ e la direttrice $d$ sono blu. Trascina il vertice e gu
 :::p5 sketch=parabola-traslata height=440 a=1/4 fuoco=si asse=si hx=0 hy=0 xmin=-6 xmax=6 ymin=-4 ymax=7
 :::
 
-Il fuoco resta sempre [[*1 quadretto sopra il vertice|nello stesso posto|sull'asse x]].
+Il fuoco resta sempre [[select: *1 quadretto sopra il vertice|nello stesso posto|sull'asse x]].
 
 Prendi la parabola con il vertice in $V(2; 3)$. Il fuoco è $F(2;$ [[4]]$)$ e la direttrice è la retta $y =$ [[2]]. L'asse della parabola è la retta $x =$ [[2]].
 
@@ -141,7 +141,7 @@ $(x-1)^2 = x^2 - 2x + 1$. Poi moltiplica ogni termine per 2 e somma 3 al termine
 
 Adesso guarda il caso generale $y = a\,(x - h)^2 + k$. Il quadrato si sviluppa allo stesso modo: $(x - h)^2 = x^2 - 2hx + h^2$. Poi si moltiplica tutto per $a$ e si aggiunge $k$.
 
-Il coefficiente di $x$ è $b =$ [[*−2ah|−2h|2ah]]. Il termine noto è $c =$ [[ah²|*ah² + k|h² + k]].
+Il coefficiente di $x$ è $b =$ [[select: *−2ah|−2h|2ah]]. Il termine noto è $c =$ [[select: ah²|*ah² + k|h² + k]].
 
 :::div.reveal
 L'equazione diventa $y = 2x^2 - 4x + 5$.
@@ -171,7 +171,7 @@ Il coefficiente davanti a $x^2$ cambia quando sposti il vertice? [[sì|*no]]
 
 Cerca la posizione del vertice che dà in blu l'equazione $y = x^2 - 6x + 5$. Poi premi il bottone.
 
-[Verifica]{check: h == 3 and k == -4}
+[Verifica]{check: h == 3 && k == -4}
 
 :::div.reveal
 Il vertice è $V(3; -4)$. Si può trovare anche senza figura.
@@ -223,7 +223,7 @@ $x_V = -\dfrac{-1}{2 \cdot \frac14} = \dfrac{1}{\frac12} = 2$. Poi sostituisci 2
 
 :::
 
-Adesso prendi $y = -\dfrac14 x^2 + x + 1$. Il vertice è ancora $V(2; 2)$, ma $a$ è negativo. Il fuoco sta [[sopra|*sotto]] il vertice, nel punto $F(2;$ [[1]]$)$.
+Adesso prendi $y = -\dfrac14 x^2 + x + 1$. Il vertice è ancora $V(2; 2)$, ma $a$ è negativo. Il fuoco sta [[select: sopra|*sotto]] il vertice, nel punto $F(2;$ [[1]]$)$.
 
 :::graph
 xrange: "-4,8"
@@ -262,7 +262,7 @@ Un'altra parabola ha il fuoco $F(-2; 2)$ e la direttrice $y = 4$. Il vertice sta
 :::p5 sketch=parabola-traslata height=440 a=-1/4 forma=nessuna fuoco=si hx=0 hy=0 xmin=-6 xmax=6 ymin=-4 ymax=7
 :::
 
-[Verifica]{check: h == -2 and k == 3}
+[Verifica]{check: h == -2 && k == 3}
 
 Il fuoco sta 1 quadretto sotto il vertice, quindi $\dfrac{1}{4a} = -1$. Il coefficiente è $a =$ [[-1/4 || −1/4 || -0,25 || −0,25 || -0.25]].
 
