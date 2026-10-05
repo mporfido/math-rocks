@@ -62,15 +62,22 @@ functions:
 Completa la tabella. Calcola i valori di $(x - 3)^2$ per le $x$ che mancano.
 
 :::table
-| $x$         | $-1$ | $0$ | $1$ | $2$ | $3$   | $4$   | $5$   | $6$ |
-| $x^2$       | 1    | 0   | 1   | 4   | 9     | 16    | 25    | 36  |
-| $(x - 3)^2$ | 16   | 9   | 4   | 1   | [[0]] | [[1]] | [[4]] | 9   |
+| $x$  | $x^2$ | $(x - 3)^2$ |
+| ---- | ----- | ----------- |
+| $-1$ | 1     | 16          |
+| $0$  | 0     | 9           |
+| $1$  | 1     | 4           |
+| $2$  | 4     | 1           |
+| $3$  | 9     | [[0]]       |
+| $4$  | 16    | [[1]]       |
+| $5$  | 25    | [[4]]       |
+| $6$  | 36    | 9           |
 :::
 
 La parabola grigia vale $0$ in $x = 0$. La parabola rossa vale $0$ in $x =$ [[3]].
 
 :::div.reveal
-Guarda la riga di $x^2$ e la riga di $(x - 3)^2$. I numeri sono gli stessi, ma nella riga di $(x - 3)^2$ arrivano 3 colonne più a destra.
+Guarda la colonna di $x^2$ e la colonna di $(x - 3)^2$. I numeri sono gli stessi, ma nella colonna di $(x - 3)^2$ arrivano 3 righe più in basso.
 
 La parabola rossa in $x = 3$ fa quello che la grigia faceva in $x = 0$. In $x = 4$ fa quello che la grigia faceva in $x = 1$. Per sapere quanto vale la parabola rossa in un punto, bisogna togliere 3 alla $x$ e poi fare il quadrato. Per questo nella parentesi c'è $x - 3$.
 
